@@ -1,0 +1,27 @@
+[package]
+name = "wordweave5"
+version = "0.1.0"
+edition = "2021"
+description = "Five-minute contextual English vocabulary practice for Windows"
+license = "MIT"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+fs2 = "0.4"
+
+[target.'cfg(windows)'.dependencies]
+eframe = { version = "=0.31.1", default-features = false, features = ["default_fonts", "glow"] }
+rfd = "=0.15.3"
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "json", "multipart", "rustls-tls"] }
+tts = "=0.26.1"
+cpal = "=0.15.3"
+hound = "=3.5.1"
+image = { version = "0.25", default-features = false, features = ["png"] }
+base64 = "0.22"
+keyring = { version = "3.6", default-features = false, features = ["windows-native"] }
+
+[profile.release]
+lto = "thin"
+strip = true
