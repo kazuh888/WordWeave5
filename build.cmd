@@ -4,10 +4,10 @@ cd /d "%~dp0"
 where cargo >nul 2>nul
 if errorlevel 1 goto missing
 echo Running Rust tests. First build downloads dependencies and can take time.
-cargo test --all-targets > build.log 2>&1
+cargo test --all-targets --locked > build.log 2>&1
 if errorlevel 1 goto failed
 echo Building release executable...
-cargo build --release >> build.log 2>&1
+cargo build --release --locked --bin wordweave5 >> build.log 2>&1
 if errorlevel 1 goto failed
 echo.
 echo Build succeeded: target\release\wordweave5.exe

@@ -1,9 +1,13 @@
 #![cfg_attr(target_os = "windows", windows_subsystem = "windows")]
 
-#[cfg(windows)] mod app;
-#[cfg(windows)] mod ai;
-#[cfg(windows)] mod ink;
-#[cfg(windows)] mod media;
+#[cfg(windows)]
+mod ai;
+#[cfg(windows)]
+mod app;
+#[cfg(windows)]
+mod ink;
+#[cfg(windows)]
+mod media;
 
 #[cfg(windows)]
 fn main() -> eframe::Result<()> {
@@ -14,11 +18,14 @@ fn main() -> eframe::Result<()> {
             .with_min_inner_size([820.0, 650.0]),
         ..Default::default()
     };
-    eframe::run_native("WordWeave 5", options, Box::new(|cc| Ok(Box::new(app::WordApp::new(cc)))))
+    eframe::run_native(
+        "WordWeave 5",
+        options,
+        Box::new(|cc| Ok(Box::new(app::WordApp::new(cc)))),
+    )
 }
 
 #[cfg(not(windows))]
 fn main() {
     eprintln!("WordWeave 5 is a Windows desktop application. Core tests: cargo test --lib");
 }
-

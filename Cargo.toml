@@ -1,9 +1,17 @@
 [package]
 name = "wordweave5"
-version = "0.1.0"
+version = "0.3.6"
+default-run = "wordweave5"
 edition = "2021"
 description = "Five-minute contextual English vocabulary practice for Windows"
 license = "MIT"
+
+# Cargo builds this offline fixture for integration tests on Windows and Unix.
+[[bin]]
+name = "wordweave-mock-codex"
+path = "tests/support/mock_codex.rs"
+test = false
+bench = false
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
@@ -14,13 +22,12 @@ fs2 = "0.4"
 [target.'cfg(windows)'.dependencies]
 eframe = { version = "=0.31.1", default-features = false, features = ["default_fonts", "glow"] }
 rfd = "=0.15.3"
-reqwest = { version = "0.12", default-features = false, features = ["blocking", "json", "multipart", "rustls-tls"] }
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "native-tls"] }
 tts = "=0.26.1"
 cpal = "=0.15.3"
 hound = "=3.5.1"
 image = { version = "0.25", default-features = false, features = ["png"] }
 base64 = "0.22"
-keyring = { version = "3.6", default-features = false, features = ["windows-native"] }
 
 [profile.release]
 lto = "thin"
