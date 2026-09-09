@@ -86,9 +86,16 @@ fn main() {
             "thread/start" => {
                 assert_eq!(v["params"]["sandbox"], "read-only");
                 assert_eq!(v["params"]["modelProvider"], "openai");
-                send(json!({"id":v["id"],"result":{
+                let mut result = json!({
                     "thread":{"id":"t"},"modelProvider":"openai","model":"test"
-                }}));
+                });
+                if mode == "reported_settings" {
+                    assert_eq!(v["params"]["model"], "requested-model");
+                    result["model"] = json!("returned-model");
+                    result["reasoningEffort"] = json!("high");
+                }
+                if mode == "null_effort" { result["reasoningEffort"] = Value::Null; }
+                send(json!({"id":v["id"],"result":result}));
             },
             "model/list" => send(json!({"id":v["id"],"result":{
                 "data":[{"model":"test","inputModalities":
@@ -96,6 +103,11 @@ fn main() {
                 "nextCursor":null
             }})),
             "turn/start" => {
+                if mode == "chat" {
+                    let expected: Value = serde_json::from_str(&fs::read_to_string("expected-input.json").unwrap()).unwrap();
+                    let actual: Value = serde_json::from_str(v["params"]["input"][0]["text"].as_str().unwrap()).unwrap();
+                    assert_eq!(actual, expected, "Chat context was not transmitted intact");
+                }
                 if mode == "cancel" {
                     fs::write("waiting", b"ready").unwrap();
                     // Keep the process alive even if stdin closes. The test must kill it.

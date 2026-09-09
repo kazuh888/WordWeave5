@@ -1,6 +1,6 @@
 [package]
 name = "wordweave5"
-version = "0.3.6"
+version = "0.3.8"
 default-run = "wordweave5"
 edition = "2021"
 description = "Five-minute contextual English vocabulary practice for Windows"

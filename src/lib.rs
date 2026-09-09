@@ -1,6 +1,9 @@
 pub mod codex;
+pub mod chat;
+pub mod execution;
 pub mod diagnostics;
 pub mod learning;
 pub mod model;
+pub mod material;
 pub mod scheduler;
 pub mod store;

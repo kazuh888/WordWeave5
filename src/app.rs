@@ -27,6 +27,7 @@ enum Page {
     Study,
     Deck,
     Words,
+    Chat,
     Stats,
     Settings,
 }
@@ -62,6 +63,8 @@ enum AiResult {
     Generated(Entry),
     Updated(Entry, bool),
     Connection(String),
+    Chat { id: String, question: String, reply: wordweave5::codex::Generated },
+    Material(wordweave5::material::Draft),
     Played,
 }
 struct Pending {
@@ -113,6 +116,12 @@ pub struct WordApp {
     replacement_phrase: String,
     replacement_meaning: String,
     replacement_conditions: String,
+    chat_selected: usize,
+    chat_search: String,
+    material_base: String,
+    material_target: String,
+    material_mode: wordweave5::material::Mode,
+    material_same_base: bool,
 }
 
 fn today() -> String {
@@ -229,6 +238,7 @@ impl WordApp {
             .and_then(|s| read_limited(&s.dir.join("generation-queue.json"), 2_000_000).ok())
             .and_then(|s| serde_json::from_str(&s).ok())
             .unwrap_or_default();
+        let chat_selected = progress.chats.len().saturating_sub(1);
         Self {
             storage,
             fatal,
@@ -272,6 +282,12 @@ impl WordApp {
             replacement_phrase: String::new(),
             replacement_meaning: String::new(),
             replacement_conditions: String::new(),
+            chat_selected,
+            chat_search: String::new(),
+            material_base: String::new(),
+            material_target: String::new(),
+            material_mode: wordweave5::material::Mode::New,
+            material_same_base: false,
         }
     }
     fn persist(&mut self) {
@@ -511,6 +527,30 @@ impl WordApp {
                                 }
                             },
                             Ok(AiResult::Connection(t)) => self.message = t,
+                            Ok(AiResult::Material(draft)) => {
+                                self.progress.material_draft = Some(draft);
+                                self.material_same_base = false;
+                                self.dirty = true;
+                                self.persist();
+                                self.message = "教材案を作成した。英語チャット画面の下で内容を確認・編集して登録してください。".into();
+                            }
+                            Ok(AiResult::Chat { id, question, reply }) => {
+                                if let Some(index) = self.progress.chats.iter().position(|c| c.id == id) {
+                                    let old = self.progress.chats[index].clone();
+                                    let committed = self.progress.chats[index].complete(question, reply.text, reply.execution)
+                                        .and_then(|_| self.progress.validate());
+                                    match committed {
+                                        Ok(()) => {
+                                            self.dirty = true;
+                                            self.persist();
+                                            self.message = "回答を会話履歴に保存した。続けて質問できる。".into();
+                                        }
+                                        Err(e) => { self.progress.chats[index] = old; self.message = e; }
+                                    }
+                                } else {
+                                    self.message = "回答の保存先の会話が見つかりません。".into();
+                                }
+                            }
                             Ok(AiResult::Generated(e)) => {
                                 if let Err(err) = self.import_deck(vec![e]) {
                                     self.batch_running = false;
@@ -1340,6 +1380,254 @@ impl WordApp {
         });
         self.message = "Codexで処理中…".into();
     }
+    fn launch_chat(&mut self) {
+        if self.pending.is_some() || self.session.is_some() || self.batch_running || self.fatal.is_some() { return; }
+        let Some(chat) = self.progress.chats.get(self.chat_selected) else { return; };
+        if chat.exchanges.len() >= wordweave5::chat::MAX_EXCHANGES {
+            self.message = "この会話は200往復に達した。引き継ぎメモをコピーして新しい会話を作成してください。".into();
+            return;
+        }
+        let context = match wordweave5::chat::prepare(chat) {
+            Ok(c) => c, Err(e) => { self.message = e; return; }
+        };
+        let id = chat.id.clone();
+        let question = chat.draft.trim().to_string();
+        let config = match ai::Config::from_settings(&self.progress.settings) {
+            Ok(c) => c, Err(e) => { self.message = e; return; }
+        };
+        // This also saves the draft before sending, so retries and restarts
+        // preserve it even when the child fails or the app is closed.
+        if !self.reserve_generation() { return; }
+        let cancel = config.cancel.clone();
+        let (tx, rx) = mpsc::channel();
+        std::thread::spawn(move || {
+            let result = config.chat(context.payload).map(|reply| AiResult::Chat { id, question, reply });
+            let _ = tx.send(result);
+        });
+        self.pending = Some(Pending { key: String::new(), rx, cancel: Some(cancel) });
+        self.message = "Codexに質問中…".into();
+    }
+    fn chat_page(&mut self, ui: &mut egui::Ui) {
+        ui.heading("英語チャット");
+        ui.label("英語の意味・文法・語感・社外メールの表現を質問できる。会話履歴はこのPCに保存する。");
+        let idle = self.pending.is_none() && !self.batch_running && self.session.is_none();
+        if self.session.is_some() { ui.label("チャットを送信するには、学習コースを終了してください。"); }
+        ui.add_enabled_ui(idle, |ui| {
+            ui.horizontal(|ui| {
+                if ui.add_enabled(self.progress.chats.len() < wordweave5::chat::MAX_CHATS,
+                    egui::Button::new("新しい会話")).clicked() {
+                    self.progress.chats.push(wordweave5::chat::Conversation::new());
+                    self.chat_selected = self.progress.chats.len() - 1;
+                    self.chat_search.clear();
+                    self.dirty = true;
+                }
+                egui::ComboBox::from_id_salt("chat-list")
+                    .selected_text(self.progress.chats.get(self.chat_selected).map(|c| c.title.as_str()).unwrap_or("会話を作成してください"))
+                    .show_ui(ui, |ui| {
+                        for (i, c) in self.progress.chats.iter().enumerate() {
+                            ui.selectable_value(&mut self.chat_selected, i, &c.title);
+                        }
+                    });
+            });
+        });
+        let Some(chat) = self.progress.chats.get_mut(self.chat_selected) else { return; };
+        let before_edit = chat.clone();
+        let mut changed = false;
+        ui.add_enabled_ui(idle, |ui| {
+            ui.horizontal(|ui| {
+                ui.label("会話名");
+                changed |= ui.add(egui::TextEdit::singleline(&mut chat.title).char_limit(100)).changed();
+            });
+            ui.collapsing("引き継ぎメモ（毎回送信・最大2,000文字）", |ui| {
+                ui.small("例：社外メール向け。丁寧だが堅すぎない表現を練習中。重要な前提や訂正を自分で記入できる。");
+                changed |= ui.add(egui::TextEdit::multiline(&mut chat.memo).desired_width(f32::INFINITY)
+                    .desired_rows(3).char_limit(2000)).changed();
+            });
+        });
+        ui.horizontal(|ui| {
+            ui.label("この会話の履歴を検索");
+            ui.text_edit_singleline(&mut self.chat_search);
+        });
+        egui::ScrollArea::vertical().id_salt("chat-history").max_height(360.0).show(ui, |ui| {
+            for (i, e) in chat.exchanges.iter_mut().enumerate() {
+                if !self.chat_search.is_empty() && !e.question.contains(&self.chat_search) && !e.answer.contains(&self.chat_search) { continue; }
+                ui.group(|ui| {
+                    ui.strong(format!("あなた（{}）", i + 1));
+                    ui.add(egui::Label::new(&e.question).selectable(true));
+                    ui.separator();
+                    ui.strong("Codex");
+                    ui.add(egui::Label::new(&e.answer).selectable(true));
+                    ui.small(format!("この回答の実行設定：{}", e.execution.label()));
+                    changed |= ui.add_enabled(idle, egui::Checkbox::new(&mut e.pinned, "次回も参照")).changed();
+                    changed |= ui.add_enabled(idle, egui::Checkbox::new(&mut e.for_material, "教材に反映するやり取り")).changed();
+                });
+            }
+        });
+        ui.separator();
+        ui.label("質問（最大4,000文字）");
+        changed |= ui.add_enabled(idle, egui::TextEdit::multiline(&mut chat.draft)
+            .desired_rows(4).desired_width(f32::INFINITY).char_limit(4000)).changed();
+        let context = wordweave5::chat::prepare(chat);
+        if let Ok(c) = &context {
+            ui.small(format!("次回送信：今回の質問・メモ・過去{}往復 / 履歴{}往復は送信対象外（保存済み）",
+                c.included, c.omitted));
+            if c.omitted > 0 { ui.label("古い話題を参照したい場合は、履歴で「次回も参照」を選ぶか、引き継ぎメモに記入してください。"); }
+            ui.collapsing("Codexへ送る内容を確認", |ui| {
+                let mut preview = c.preview();
+                ui.add(egui::TextEdit::multiline(&mut preview).desired_width(f32::INFINITY).desired_rows(8).interactive(false));
+            });
+        } else if !chat.draft.trim().is_empty() {
+            ui.colored_label(Color32::RED, context.as_ref().err().unwrap());
+        }
+        let full = chat.exchanges.len() >= wordweave5::chat::MAX_EXCHANGES;
+        if full { ui.label("200往復に達したため、新しい会話を作成してください。"); }
+        let send = ui.add_enabled(idle && !full && context.is_ok(), egui::Button::new("送信")).clicked();
+        ui.small("送信ごとにChatGPTの利用枠と、設定した1日の生成回数を使用する。会話ごとに参照範囲を分け、他の会話は自動送信しない。");
+        if changed {
+            if let Err(e) = self.progress.validate() {
+                self.progress.chats[self.chat_selected] = before_edit;
+                self.message = e;
+                return;
+            }
+            self.dirty = true;
+        }
+        if send { self.launch_chat(); }
+    }
+    fn launch_material(&mut self) {
+        if self.pending.is_some() || self.session.is_some() || self.batch_running || self.recorder.is_some()
+            || self.fatal.is_some() || self.progress.material_draft.is_some() { return; }
+        let Some(chat) = self.progress.chats.get(self.chat_selected) else { return; };
+        let baseline = if self.material_mode == wordweave5::material::Mode::New { None }
+            else { self.deck.iter().find(|e| e.id == self.material_target).cloned() };
+        let request = match wordweave5::material::Request::new(chat, &self.material_base, self.material_mode, baseline) {
+            Ok(r) => r, Err(e) => { self.message = e; return; }
+        };
+        let config = match ai::Config::from_settings(&self.progress.settings) {
+            Ok(c) => c, Err(e) => { self.message = e; return; }
+        };
+        if !self.reserve_generation() { return; }
+        let cancel = config.cancel.clone();
+        let (tx, rx) = mpsc::channel();
+        std::thread::spawn(move || { let _ = tx.send(config.material(request).map(AiResult::Material)); });
+        self.pending = Some(Pending { key:String::new(), rx, cancel:Some(cancel) });
+        self.message = "選択したチャットから教材案を作成中…".into();
+    }
+    fn material_panel(&mut self, ui: &mut egui::Ui) {
+        use wordweave5::material::Mode;
+        ui.separator();
+        ui.heading("チャットを教材に反映");
+        let idle = self.pending.is_none() && self.session.is_none() && !self.batch_running && self.recorder.is_none();
+        ui.small("上の履歴で反映するやり取りを選ぶ。選択した質問・回答と反映先の教材をCodexへ送り、登録前に確認する。");
+        if self.progress.material_draft.is_none() {
+            ui.add_enabled_ui(idle, |ui| {
+                ui.horizontal(|ui| {
+                    ui.label("対象の基本語・熟語");
+                    if ui.add(egui::TextEdit::singleline(&mut self.material_base).char_limit(100)).changed() {
+                        self.material_target.clear();
+                    }
+                });
+                ui.horizontal_wrapped(|ui| {
+                    for mode in [Mode::New, Mode::Append, Mode::Correct] {
+                        ui.selectable_value(&mut self.material_mode, mode, mode.label());
+                    }
+                });
+                let matches: Vec<_> = self.deck.iter().filter(|e| model::normalize(&e.base) == model::normalize(&self.material_base)).collect();
+                if self.material_mode != Mode::New {
+                    if matches.len() == 1 && self.material_target.is_empty() { self.material_target = matches[0].id.clone(); }
+                    egui::ComboBox::from_id_salt("material-target")
+                        .selected_text(matches.iter().find(|e| e.id == self.material_target)
+                            .map(|e| format!("{} / {}", e.base, e.meaning)).unwrap_or_else(|| "反映先の意味・用法を選択".into()))
+                        .show_ui(ui, |ui| {
+                            for e in &matches {
+                                ui.selectable_value(&mut self.material_target, e.id.clone(), format!("{} / {} / {} [{}]", e.base, e.meaning, e.context, e.id));
+                            }
+                        });
+                    if matches.is_empty() { ui.label("同じ基本語の教材がない。新規登録を選択するか、対象語を確認してください。"); }
+                } else if !matches.is_empty() {
+                    ui.label(format!("同じ基本語が{}件ある。既存教材に加える場合は追加・訂正を選択する。", matches.len()));
+                }
+                let selected = self.progress.chats.get(self.chat_selected)
+                    .map(|c| c.exchanges.iter().filter(|e| e.for_material).count()).unwrap_or(0);
+                ui.label(format!("教材化の対象：{selected}往復"));
+                if ui.add_enabled(selected > 0, egui::Button::new("教材案を作成")).clicked() { self.launch_material(); }
+            });
+            return;
+        }
+        let mut draft = self.progress.material_draft.clone().unwrap();
+        ui.strong(format!("{}：{}", draft.mode.label(), draft.candidate.base));
+        for notice in &draft.notices { ui.label(notice); }
+        let source = draft.source.clone();
+        if ui.button("元の会話を表示").clicked() {
+            self.open_material_source(&source);
+        }
+        let before = model::deck_text(&[draft.candidate.clone()]);
+        ui.add_enabled_ui(idle, |ui| edit_material(ui, &mut draft));
+        let changed = before != model::deck_text(&[draft.candidate.clone()]);
+        let ready = draft.ready(&self.deck, self.material_same_base);
+        ui.collapsing("登録される差分", |ui| {
+            let current = serde_json::to_value(&draft.candidate).unwrap();
+            let old = draft.baseline.as_ref().map(|e| serde_json::to_value(e).unwrap());
+            for (key, label) in material_fields() {
+                let new_value = &current[key];
+                let old_value = old.as_ref().map(|v| &v[key]);
+                if old_value == Some(new_value) { continue; }
+                ui.strong(label);
+                if let Some(value) = old_value { ui.label(format!("変更前：{}", material_value(value))); }
+                ui.label(format!("変更後：{}", material_value(new_value)));
+            }
+        });
+        if draft.mode == Mode::New && self.deck.iter().any(|e| model::normalize(&e.base) == model::normalize(&draft.candidate.base)) {
+            ui.add_enabled(idle, egui::Checkbox::new(&mut self.material_same_base, "同じ基本語の別用法として新規登録する"));
+        }
+        ui.label(if draft.resets_learning() { "基本の説明・問題・正解等が変わるため、この教材の復習状態は再学習に戻る。" }
+            else if draft.baseline.is_some() { "補足の例文・言い換えの変更であるため、既存の復習成績は維持する。" }
+            else { "新しい教材として登録する。" });
+        if let Err(e) = &ready { ui.colored_label(Color32::RED, e); }
+        let mut commit = false;
+        let mut discard = false;
+        ui.add_enabled_ui(idle, |ui| ui.horizontal(|ui| {
+            commit = ui.add_enabled(ready.is_ok(), egui::Button::new("内容を確認して教材に登録")).clicked();
+            discard = ui.button("教材案を破棄").clicked();
+        }));
+        if changed {
+            self.progress.material_draft = Some(draft.clone());
+            self.dirty = true;
+        }
+        if discard {
+            self.progress.material_draft = None;
+            self.dirty = true;
+            self.persist();
+        } else if commit {
+            if let Ok(entry) = ready {
+                let old_progress = self.progress.clone();
+                let old_deck = model::deck_text(&self.deck);
+                self.progress.material_sources.push(source);
+                self.progress.material_draft = None;
+                if let Err(e) = self.progress.validate() {
+                    self.progress = old_progress;
+                    self.message = e;
+                    return;
+                }
+                match self.import_deck(vec![entry]) {
+                    Ok(()) => self.message = "チャットから教材を登録した。元の会話への参照も保存した。".into(),
+                    Err(e) => {
+                        // If the deck write succeeded but progress save failed,
+                        // preserve matching source metadata for recovery/export.
+                        if model::deck_text(&self.deck) == old_deck { self.progress = old_progress; }
+                        self.message = e;
+                    }
+                }
+            }
+        }
+    }
+    fn open_material_source(&mut self, source: &wordweave5::material::Source) {
+        if let Some(index) = self.progress.chats.iter().position(|c| c.id == source.conversation_id) {
+            self.chat_selected = index;
+            self.chat_search.clear();
+            self.page = Page::Chat;
+            self.message = format!("元の会話を表示した。参照したやり取り番号：{}", source.exchange_indices.iter().map(|i| (i+1).to_string()).collect::<Vec<_>>().join(", "));
+        } else { self.message = "元の会話は現在の学習記録にありません。".into(); }
+    }
     fn words_page(&mut self, ui: &mut egui::Ui) {
         ui.heading("基本語から言い換え・例文を自動登録");
         ui.hyperlink_to("NGSL公式・出典", learning::NGSL_PAGE);
@@ -1444,6 +1732,16 @@ impl WordApp {
             self.card(ui, &e);
             ui.label(&e.question);
             ui.label(&e.explanation);
+            let sources: Vec<_> = self.progress.material_sources.iter().filter(|s| s.entry_id == e.id).cloned().collect();
+            if !sources.is_empty() {
+                ui.collapsing("教材の元になった会話", |ui| {
+                    for (i, source) in sources.iter().enumerate() {
+                        if ui.add_enabled(self.pending.is_none(), egui::Button::new(format!("{}：元の会話を開く（{}）", i+1, source.mode.label()))).clicked() {
+                            self.open_material_source(source);
+                        }
+                    }
+                });
+            }
             let idle = self.pending.is_none() && self.session.is_none() && !self.batch_running;
             ui.add_enabled_ui(idle,|ui|{
                 if ui.add_enabled(e.examples.len()+self.progress.settings.examples_per_word<=200,egui::Button::new("英文追加：新しい場面の例文を生成・登録")).clicked(){self.launch_content(1,Some(e.clone()));}
@@ -1976,6 +2274,7 @@ impl eframe::App for WordApp {
                         (Page::Study, "学習"),
                         (Page::Deck, "教材"),
                         (Page::Words, "語彙を追加"),
+                        (Page::Chat, "英語チャット"),
                         (Page::Stats, "記録"),
                         (Page::Settings, "設定"),
                     ] {
@@ -1987,6 +2286,13 @@ impl eframe::App for WordApp {
             });
         });
         egui::TopBottomPanel::bottom("status").show(ctx, |ui| {
+            let execution = wordweave5::execution::snapshot();
+            if let Some(settings) = execution.execution {
+                let phase = if execution.active { "今回の実行設定" } else { "前回Codexが返した実行設定" };
+                ui.small(format!("{phase}：{}", settings.label()));
+            } else {
+                ui.small(if execution.active { "Codexの実行設定を確認中…" } else { "モデル：未確認 / effort：未確認" });
+            }
             if !self.message.is_empty() {
                 ui.label(&self.message);
             }
@@ -2014,7 +2320,7 @@ impl eframe::App for WordApp {
                 if self.fatal.is_some()&&self.page!=Page::Settings {
                     ui.heading("学習を停止している");ui.label("設定画面で記録のエクスポート・復元を確認してください。元の保存ファイルは自動で初期化しない。");return;
                 }
-                match self.page{Page::Home=>self.home(ui),Page::Study=>self.study(ui),Page::Deck=>self.deck_page(ui),Page::Words=>self.words_page(ui),Page::Stats=>self.stats(ui),Page::Settings=>self.settings(ui,ctx)}
+                match self.page{Page::Home=>self.home(ui),Page::Study=>self.study(ui),Page::Deck=>self.deck_page(ui),Page::Words=>self.words_page(ui),Page::Chat=>{self.chat_page(ui);self.material_panel(ui);},Page::Stats=>self.stats(ui),Page::Settings=>self.settings(ui,ctx)}
             });
             });
         });
@@ -2035,6 +2341,91 @@ impl eframe::App for WordApp {
             self.persist();
         }
     }
+}
+
+fn material_fields() -> [(&'static str, &'static str); 15] {
+    [("meaning","基本語の意味"),("level","学習水準"),("business","社外メールの表現"),
+     ("elevated","格調の高い表現"),("register","語調"),("usage","用法・使用条件"),
+     ("context","場面"),("example","空欄問題"),("translation","完成英文の訳"),
+     ("answers","正解"),("question","用法の質問"),("explanation","質問の解説"),
+     ("tag","分類"),("replacements","言い換え"),("examples","完成例文")]
+}
+fn material_value(value: &serde_json::Value) -> String {
+    match value {
+        serde_json::Value::String(text) => text.clone(),
+        serde_json::Value::Array(items) => {
+            if items.is_empty() { "なし".into() }
+            else { items.iter().map(material_value).collect::<Vec<_>>().join("\n\n") }
+        }
+        serde_json::Value::Object(fields) => fields.iter().map(|(key, value)| {
+            let label = match key.as_str() { "english"=>"英文", "japanese"=>"訳", "note"=>"説明", "phrase"=>"語句", "meaning"=>"意味", "conditions"=>"使用条件", _=>key.as_str() };
+            format!("{label}：{}", material_value(value))
+        }).collect::<Vec<_>>().join("\n"),
+        _ => "なし".into(),
+    }
+}
+fn edit_material(ui: &mut egui::Ui, draft: &mut wordweave5::material::Draft) {
+    let append = draft.mode == wordweave5::material::Mode::Append;
+    let baseline_replacements = draft.baseline.as_ref().map(|e| e.replacements.len()).unwrap_or(0);
+    let baseline_examples = draft.baseline.as_ref().map(|e| e.examples.len()).unwrap_or(0);
+    let entry = &mut draft.candidate;
+    ui.collapsing("基本の説明・問題を確認／編集", |ui| {
+        if append { ui.small("追加モードでは既存の基本項目は変更しない。語感・文法の補足は追加例文の説明に記入する。"); }
+        ui.add_enabled_ui(!append, |ui| {
+            for (label, text) in [
+                ("基本語の意味", &mut entry.meaning), ("学習水準", &mut entry.level),
+                ("社外メールの表現", &mut entry.business), ("格調の高い表現", &mut entry.elevated),
+                ("語調", &mut entry.register), ("用法・使用条件", &mut entry.usage),
+                ("場面", &mut entry.context), ("空欄問題（___を1個）", &mut entry.example),
+                ("完成英文の訳", &mut entry.translation), ("用法の質問", &mut entry.question),
+                ("質問の解説", &mut entry.explanation), ("分類", &mut entry.tag),
+            ] {
+                ui.label(label);
+                ui.add(egui::TextEdit::multiline(text).desired_width(f32::INFINITY).desired_rows(2).char_limit(1000));
+            }
+            let mut answers = entry.answers.join("|");
+            ui.label("空欄の正解（別解は | で区切る）");
+            if ui.add(egui::TextEdit::singleline(&mut answers).desired_width(f32::INFINITY).char_limit(1000)).changed() {
+                entry.answers = answers.split('|').map(|s| s.trim().to_string()).collect();
+            }
+        });
+    });
+    ui.collapsing(format!("言い換えを確認／編集（{}件）", entry.replacements.len()), |ui| {
+        let mut remove = None;
+        for (i, r) in entry.replacements.iter_mut().enumerate() {
+            ui.push_id(("material-replacement", i), |ui| ui.group(|ui| {
+                ui.add_enabled_ui(!append || i >= baseline_replacements, |ui| {
+                    for (label, text) in [("語句",&mut r.phrase),("意味",&mut r.meaning),("使用条件・違い",&mut r.conditions)] {
+                        ui.label(label);
+                        ui.add(egui::TextEdit::multiline(text).desired_rows(2).desired_width(f32::INFINITY).char_limit(1000));
+                    }
+                    if ui.button("この言い換えを案から除く").clicked() { remove = Some(i); }
+                });
+            }));
+        }
+        if let Some(i) = remove { entry.replacements.remove(i); }
+        if ui.add_enabled(entry.replacements.len() < 30, egui::Button::new("言い換え欄を追加")).clicked() {
+            entry.replacements.push(model::Replacement { phrase:String::new(), meaning:String::new(), conditions:String::new() });
+        }
+    });
+    ui.collapsing(format!("完成例文を確認／編集（{}件）", entry.examples.len()), |ui| {
+        let mut remove = None;
+        for (i, e) in entry.examples.iter_mut().enumerate() {
+            ui.push_id(("material-example", i), |ui| ui.group(|ui| {
+                ui.add_enabled_ui(!append || i >= baseline_examples, |ui| {
+                    for (label, text) in [("英文",&mut e.english),("日本語訳",&mut e.japanese),("語感・文法・使い方の説明",&mut e.note)] {
+                        ui.label(label);
+                        ui.add(egui::TextEdit::multiline(text).desired_rows(2).desired_width(f32::INFINITY).char_limit(1000));
+                    }
+                    if ui.button("この例文を案から除く").clicked() { remove = Some(i); }
+                });
+            }));
+        }
+        if let Some(i) = remove { entry.examples.remove(i); }
+        if ui.add_enabled(entry.examples.len() < 200, egui::Button::new("例文欄を追加")).clicked() {
+            entry.examples.push(model::Example { english:String::new(), japanese:String::new(), note:String::new() });
+        }
+    });
 }
 
 fn read_limited(path: &std::path::Path, max: u64) -> Result<String, String> {

@@ -5,6 +5,9 @@
 | src/app.rs | egui画面・学習セッション・教材操作・生成キュー |
 | src/ai.rs | 出題・添削・教材/例文生成・翻訳・認識のプロンプトと応答検証、NGSLのHTTPS取得 |
 | src/codex.rs | ネイティブ実行ファイル解決、app-server起動、JSON行通信、認証、ターン完了・中断処理 |
+| src/execution.rs | Codexが返したモデル・effortの取得、生成中/前回の状態表示 |
+| src/chat.rs | 会話履歴・下書き・メモ、送信する直近履歴と指定した過去発言の選択 |
+| src/material.rs | 選択チャットからの教材化要求、追加/訂正の分離、重複除去、比較元の競合検査、会話参照 |
 | src/model.rs | 旧15列/新17列TSV、言い換え配列・例文配列、形式検査 |
 | src/learning.rs | NGSL・提供語CSVの解析、AI生成教材と問題の検証 |
 | src/store.rs | 保存・ロック・バックアップ・旧設定の移行 |
@@ -15,7 +18,19 @@
 
 ## Codexプロトコル
 
-`Command`でネイティブCodexを起動する。シェルやユーザー文字列を連結したコマンドは使用しない。npm版のcmdラッパーは実行せず、同梱のネイティブexeを探す。
+`Command`で指定された実行ファイルを起動する。既知のVolta shimでは同一フォルダーまたはPATHのvolta.exeを使い、run/codex/app-serverの3引数を渡す。他のcmd/bat用の制約付きCMD経路も残る（一般的なバッチ起動の問題が解消したとは扱わない）。ネイティブEXEはapp-serverの1引数で起動する。
+
+## 英語チャットと実行設定（0.3.7）
+
+0.3.8では各Exchangeに教材化用の選択フラグを追加する。通常のチャットの参照指定とは別である。material::Requestが選択した往復と対象のEntryだけを教材生成へ渡す。返却IDは使用せず、既存IDまたはホスト側の新規IDを割り当てる。material::Draftをprogress.jsonに保存し、画面で編集後に検証して既存のimport_deck経路で登録する。
+
+追加モードは基本項目をホスト側で元に戻し、既存の配列要素も上書きしない。訂正モードは全内容を比較・編集できる。登録前に比較元のTSV全体を照合するため、fingerprintに含まれない追加例文の競合も検出する。元の会話IDと選択した往復の添字をSourceに記録する。既存の復習判定はEntry::fingerprintに従う。
+
+会話の正本はWordWeaveのprogress.json内のchatsである。成功した質問/回答の組、回答時にCodexが返したモデルとeffort、引き継ぎメモ、次回参照フラグ、未送信/失敗時の下書きを保存する。既存の原子的保存・バックアップ・エクスポートに含める。旧版データにchatsがなければ空配列として読む。
+
+各質問では新しいephemeral threadを作る。Codexの永続thread IDには依存しない。質問・メモ・参照指定した過去発言を先に選び、残りの容量に直近の完了済み会話を新しい順から追加し、時系列順で送信する。JSON payloadは64,000 UTF-8 bytes以下。これはアプリ側の容量制限であり、モデルのトークン上限そのものではない。必須部分が上限を超えた場合は送信を止め、参照指定を勝手に落とさない。保存履歴の削除や自動要約はしない。検索は画面内の検索であり、検索結果が自動送信されるわけではない。
+
+thread/startの応答のmodelとreasoningEffortをExecutionに変換する。欠落/null/空文字を既定値で補わない。UI表示用の最新状態はメモリ内に持ち、RunのDropで処理中を解除する。接続確認はaccount/readまでなので、新しい実行設定は取得しない。チャットの完了結果には同じリクエストのExecutionを添えて返し、グローバルな最新値を回答履歴へ混入させない。turn/startではモデル・effortを上書きしない。
 
 1. `initialize` → 応答確認 → `initialized`
 2. `account/read` → `account.type == chatgpt` の場合だけ継続

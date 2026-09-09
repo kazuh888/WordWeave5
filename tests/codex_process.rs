@@ -13,6 +13,50 @@ use std::{
 use wordweave5::codex;
 
 #[test]
+fn generation_reports_server_settings_instead_of_requested_model() {
+    let f = Fixture::new("reported_settings");
+    let reply = codex::generate_with_settings(&f.exe, &f.dir, "requested-model", "test",
+        vec![json!({"type":"text","text":"test"})], None, Arc::new(AtomicBool::new(false))).unwrap();
+    assert_eq!(reply.execution.model.as_deref(), Some("returned-model"));
+    assert_eq!(reply.execution.effort.as_deref(), Some("high"));
+}
+
+#[test]
+fn missing_and_null_server_effort_stay_unknown() {
+    for mode in ["ok", "null_effort"] {
+        let f = Fixture::new(mode);
+        let reply = codex::generate_with_settings(&f.exe, &f.dir, "", "test",
+            vec![json!({"type":"text","text":"test"})], None, Arc::new(AtomicBool::new(false))).unwrap();
+        assert_eq!(reply.execution.model.as_deref(), Some("test"));
+        assert_eq!(reply.execution.effort, None);
+    }
+}
+
+#[test]
+fn chat_followup_transmits_saved_previous_exchange_after_reload() {
+    let f = Fixture::new("chat");
+    let mut conversation = wordweave5::chat::Conversation::new();
+    conversation.draft = "apologize forの用法は？".into();
+    for question in ["apologize forの用法は？", "社外メールでの別の例は？"] {
+        conversation.draft = question.into();
+        let context = wordweave5::chat::prepare(&conversation).unwrap();
+        if !conversation.exchanges.is_empty() {
+            assert_eq!(context.payload["conversation_history"][0]["user"], "apologize forの用法は？");
+            assert_eq!(context.payload["conversation_history"][0]["assistant"], "{\"answer\":\"ok\"}");
+        }
+        fs::write(f.dir.join("expected-input.json"), serde_json::to_vec(&context.payload).unwrap()).unwrap();
+        let reply = codex::generate_with_settings(&f.exe, &f.dir, "", "test",
+            vec![json!({"type":"text","text":context.payload.to_string()})], None,
+            Arc::new(AtomicBool::new(false))).unwrap();
+        conversation.complete(question.into(), reply.text, reply.execution).unwrap();
+        // Separate Codex processes and a disk-style round trip: continuity is
+        // provided by WordWeave's saved transcript, not implicit model memory.
+        conversation = serde_json::from_str(&serde_json::to_string(&conversation).unwrap()).unwrap();
+    }
+    assert_eq!(conversation.exchanges.len(), 2);
+}
+
+#[test]
 fn unauthenticated_account_is_distinct_from_transport_exit() {
     let f = Fixture::new("noauth");
     let e = f.run(Arc::new(AtomicBool::new(false))).unwrap_err();

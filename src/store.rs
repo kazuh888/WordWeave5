@@ -74,6 +74,12 @@ pub struct Progress {
     pub writing_logs: Vec<WritingLog>,
     #[serde(default)]
     pub japanese_drafts: BTreeMap<String, String>,
+    #[serde(default)]
+    pub chats: Vec<crate::chat::Conversation>,
+    #[serde(default)]
+    pub material_draft: Option<crate::material::Draft>,
+    #[serde(default)]
+    pub material_sources: Vec<crate::material::Source>,
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct WritingLog {
@@ -97,6 +103,9 @@ impl Default for Progress {
             deck_versions: BTreeMap::new(),
             writing_logs: Vec::new(),
             japanese_drafts: BTreeMap::new(),
+            chats: Vec::new(),
+            material_draft: None,
+            material_sources: Vec::new(),
         }
     }
 }
@@ -119,6 +128,22 @@ impl Progress {
         changed
     }
     pub fn validate(&self) -> Result<(), String> {
+        // An editable proposal may be incomplete; validate it only at commit.
+        if serde_json::to_vec(&self.material_draft).map_err(|e| e.to_string())?.len() > 4_000_000
+            || self.material_sources.len() > 10000 {
+            return Err("教材案または会話参照の保存上限を超えました。".into());
+        }
+        if self.chats.len() > crate::chat::MAX_CHATS {
+            return Err("保存できるチャットは50件までです。".into());
+        }
+        let mut chat_ids = BTreeSet::new();
+        for chat in &self.chats {
+            chat.validate()?;
+            if !chat_ids.insert(&chat.id) { return Err("会話IDが重複しています。".into()); }
+        }
+        if serde_json::to_vec(&self.chats).map_err(|e| e.to_string())?.len() > 20_000_000 {
+            return Err("チャットの合計が20MBを超えています。".into());
+        }
         if self.version != 1 {
             return Err("対応していないデータ形式です。".into());
         }
@@ -314,7 +339,12 @@ mod tests {
         assert_eq!(q.memories["x:recall"].reviews, 2);
         let mut old = serde_json::to_value(&p).unwrap();
         old.as_object_mut().unwrap().remove("writing_logs");
+        old.as_object_mut().unwrap().remove("chats");
+        old.as_object_mut().unwrap().remove("material_draft");
+        old.as_object_mut().unwrap().remove("material_sources");
         let migrated: Progress = serde_json::from_value(old.clone()).unwrap();
+        assert!(migrated.chats.is_empty());
+        assert!(migrated.material_draft.is_none() && migrated.material_sources.is_empty());
         let settings = old["settings"].as_object_mut().unwrap();
         for name in [
             "codex_path",
@@ -386,6 +416,35 @@ mod tests {
         s.save(&p).unwrap();
         assert_eq!(s.load().unwrap().settings.new_per_day, 1);
         drop(s);
+        fs::remove_dir_all(dir).unwrap();
+    }
+    #[test]
+    fn chat_history_draft_and_reported_settings_survive_storage_reopen() {
+        let dir = std::env::temp_dir().join(format!("wordweave-chat-{}-{}",
+            std::process::id(), chrono::Utc::now().timestamp_nanos_opt().unwrap()));
+        let s = Storage::at(dir.clone()).unwrap();
+        let mut p = Progress::default();
+        let mut chat = crate::chat::Conversation::new();
+        chat.memo = "社外メール用".into();
+        chat.draft = "最初の質問".into();
+        chat.complete("最初の質問".into(), "回答".into(), crate::execution::Execution {
+            model: Some("test-model".into()), effort: None, at: 123,
+        }).unwrap();
+        chat.exchanges[0].pinned = true;
+        chat.draft = "次の質問".into();
+        p.chats.push(chat);
+        s.save(&p).unwrap();
+        drop(s);
+        let reopened = Storage::at(dir.clone()).unwrap();
+        let restored = reopened.load().unwrap();
+        let chat = &restored.chats[0];
+        assert_eq!(chat.draft, "次の質問");
+        assert_eq!(chat.memo, "社外メール用");
+        assert!(chat.exchanges[0].pinned);
+        assert_eq!(chat.exchanges[0].execution.effort, None);
+        assert_eq!(chat.exchanges[0].execution.model.as_deref(), Some("test-model"));
+        assert_eq!(crate::chat::prepare(chat).unwrap().included, 1);
+        drop(reopened);
         fs::remove_dir_all(dir).unwrap();
     }
 }

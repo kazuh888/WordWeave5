@@ -433,6 +433,11 @@ impl Output {
         Ok(None)
     }
 }
+pub struct Generated {
+    pub text: String,
+    pub execution: crate::execution::Execution,
+}
+
 pub fn generate(
     exe: &Path,
     cwd: &Path,
@@ -442,6 +447,19 @@ pub fn generate(
     schema: Option<Value>,
     cancel: Arc<AtomicBool>,
 ) -> Result<String, String> {
+    generate_with_settings(exe, cwd, model, instructions, input, schema, cancel).map(|r| r.text)
+}
+
+pub fn generate_with_settings(
+    exe: &Path,
+    cwd: &Path,
+    model: &str,
+    instructions: &str,
+    input: Vec<Value>,
+    schema: Option<Value>,
+    cancel: Arc<AtomicBool>,
+) -> Result<Generated, String> {
+    let run = crate::execution::Run::begin();
     let mut s = Server::start(exe, cwd, cancel)?;
     s.initialize()?;
     let mut params = json!({"cwd":cwd,"approvalPolicy":"never","sandbox":"read-only","modelProvider":"openai","ephemeral":true,
@@ -451,6 +469,8 @@ pub fn generate(
         params["model"] = json!(model.trim());
     }
     let t = s.rpc(3, "thread/start", params)?;
+    let execution = crate::execution::Execution::from_response(&t);
+    run.observed(&execution);
     if t["modelProvider"] != "openai" {
         return Err("OpenAI以外のモデル提供元が選ばれたため停止しました。".into());
     }
@@ -513,14 +533,14 @@ pub fn generate(
     for v in early {
         if let Some(text) = output.event(&v, &thread, &turn)? {
             s.trace.note("result: 生成完了（本文非保存）");
-            return Ok(text);
+            return Ok(Generated { text, execution });
         }
     }
     loop {
         let v = s.receive()?;
         if let Some(text) = output.event(&v, &thread, &turn)? {
             s.trace.note("result: 生成完了（本文非保存）");
-            return Ok(text);
+            return Ok(Generated { text, execution });
         }
     }
 }
