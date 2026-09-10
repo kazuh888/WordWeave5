@@ -1,5 +1,6 @@
 pub mod codex;
 pub mod chat;
+pub mod chat_action;
 pub mod execution;
 pub mod diagnostics;
 pub mod learning;

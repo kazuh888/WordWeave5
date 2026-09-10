@@ -66,6 +66,11 @@ pub struct Progress {
     pub memories: BTreeMap<String, Memory>,
     pub reviews: Vec<Review>,
     pub suspended: BTreeSet<String>,
+    /// Recoverable deletion: hide from library and scheduling, retain all data.
+    #[serde(default)]
+    pub deleted_entries: BTreeSet<String>,
+    #[serde(default)]
+    pub chat_action: Option<(String, crate::chat_action::Action)>,
     pub ai_calls: BTreeMap<String, u32>,
     pub study_seconds: BTreeMap<String, u32>,
     #[serde(default)]
@@ -98,6 +103,8 @@ impl Default for Progress {
             memories: BTreeMap::new(),
             reviews: Vec::new(),
             suspended: BTreeSet::new(),
+            deleted_entries: BTreeSet::new(),
+            chat_action: None,
             ai_calls: BTreeMap::new(),
             study_seconds: BTreeMap::new(),
             deck_versions: BTreeMap::new(),
@@ -110,6 +117,18 @@ impl Default for Progress {
     }
 }
 impl Progress {
+    pub fn complete_chat(&mut self, id: &str, question: String, reply: crate::chat_action::ChatReply) -> Result<(), String> {
+        let mut next = self.clone();
+        let chat = next.chats.iter_mut().find(|c| c.id == id)
+            .ok_or("回答の保存先の会話が見つかりません。")?;
+        chat.complete(question, reply.answer, reply.execution)?;
+        chat.title = reply.title;
+        next.chat_action = reply.action.filter(|a| a.operation != crate::chat_action::Operation::Organize)
+            .map(|a| (id.to_owned(), a));
+        next.validate()?;
+        *self = next;
+        Ok(())
+    }
     pub fn reconcile_deck(&mut self, deck: &[crate::model::Entry]) -> usize {
         let mut changed = 0;
         for entry in deck {
@@ -140,6 +159,13 @@ impl Progress {
         for chat in &self.chats {
             chat.validate()?;
             if !chat_ids.insert(&chat.id) { return Err("会話IDが重複しています。".into()); }
+        }
+        if let Some((id, action)) = &self.chat_action {
+            if !chat_ids.contains(id) || action.base.chars().count() > 200
+                || action.base.chars().any(char::is_control)
+                || action.entry_id.as_ref().is_some_and(|s| s.len() > 1000) {
+                return Err("保存されたチャット操作が不正です。".into());
+            }
         }
         if serde_json::to_vec(&self.chats).map_err(|e| e.to_string())?.len() > 20_000_000 {
             return Err("チャットの合計が20MBを超えています。".into());
@@ -312,6 +338,24 @@ pub fn atomic_write(path: &Path, bytes: &[u8]) -> Result<(), String> {
 mod tests {
     use super::*;
     #[test]
+    fn invalid_chat_action_preserves_transcript_and_draft() {
+        let mut p = Progress::default();
+        let mut chat = crate::chat::Conversation::new();
+        chat.draft = "追加して".into();
+        let id = chat.id.clone();
+        p.chats.push(chat);
+        let before = serde_json::to_value(&p).unwrap();
+        let reply = crate::chat_action::ChatReply {
+            answer: "追加案を確認してください".into(), title: "追加".into(),
+            execution: Default::default(), action: Some(crate::chat_action::Action {
+                operation: crate::chat_action::Operation::Append, base: "make".into(),
+                entry_id: Some("x".repeat(1001)),
+            }),
+        };
+        assert!(p.complete_chat(&id, "追加して".into(), reply).is_err());
+        assert_eq!(serde_json::to_value(&p).unwrap(), before);
+    }
+    #[test]
     fn progress_roundtrip_and_observed_retention() {
         let mut p = Progress::default();
         p.record(
@@ -342,9 +386,12 @@ mod tests {
         old.as_object_mut().unwrap().remove("chats");
         old.as_object_mut().unwrap().remove("material_draft");
         old.as_object_mut().unwrap().remove("material_sources");
+        old.as_object_mut().unwrap().remove("deleted_entries");
+        old.as_object_mut().unwrap().remove("chat_action");
         let migrated: Progress = serde_json::from_value(old.clone()).unwrap();
         assert!(migrated.chats.is_empty());
         assert!(migrated.material_draft.is_none() && migrated.material_sources.is_empty());
+        assert!(migrated.deleted_entries.is_empty() && migrated.chat_action.is_none());
         let settings = old["settings"].as_object_mut().unwrap();
         for name in [
             "codex_path",

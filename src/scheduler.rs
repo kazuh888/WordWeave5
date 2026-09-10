@@ -131,7 +131,7 @@ pub fn make_queue(
                 continue;
             }
             let key = skill.key(&entry.id);
-            if progress.suspended.contains(&entry.id) {
+            if progress.suspended.contains(&entry.id) || progress.deleted_entries.contains(&entry.id) {
                 continue;
             }
             match progress.memories.get(&key) {
@@ -199,6 +199,22 @@ pub fn make_queue(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn recoverable_deletion_hides_tasks_and_preserves_learning() {
+        let deck = crate::model::parse_deck(crate::model::BUILTIN_DECK).unwrap();
+        let mut p = Progress::default();
+        let key = Skill::Recall.key(&deck[0].id);
+        p.record(key.clone(), Grade::Good, false, "keyboard", 100, "2026-09-05", 5, false);
+        let memory = serde_json::to_value(&p.memories).unwrap();
+        let reviews = serde_json::to_value(&p.reviews).unwrap();
+        p.deleted_entries.insert(deck[0].id.clone());
+        let mut p: Progress = serde_json::from_str(&serde_json::to_string(&p).unwrap()).unwrap();
+        assert!(make_queue(&deck[..1], &p, 1_000_000, "2026-09-09", 3).is_empty());
+        p.deleted_entries.remove(&deck[0].id);
+        assert!(!make_queue(&deck[..1], &p, 1_000_000, "2026-09-09", 3).is_empty());
+        assert_eq!(serde_json::to_value(&p.memories).unwrap(), memory);
+        assert_eq!(serde_json::to_value(&p.reviews).unwrap(), reviews);
+    }
     #[test]
     fn spacing_grows_and_lapse_returns_soon() {
         let mut m = Memory::default();
