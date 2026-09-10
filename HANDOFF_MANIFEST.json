@@ -1,0 +1,191 @@
+{
+  "source": "WordWeave5-0.3.8-source.zip",
+  "source_sha256": "95984aa73d73e8497d8ee5fd1f963a85e9f7d5275f507482b7fdee8e0487570a",
+  "note": "All original files are byte-identical. Only CODEX_START.md, HANDOFF.md, NEXT_STEPS.md and this manifest were added.",
+  "original_files": [
+    {
+      "path": "wordweave5/.gitignore",
+      "sha256": "2a4d48e0e2c9a7396f68721885a7eb43ca8c2ee01304cacae68d19a3694b0c2a"
+    },
+    {
+      "path": "wordweave5/ARCHITECTURE.md",
+      "sha256": "a26b78a1dd0b996257cd0eba7f1e43d181578ff3341eb4d1b6c715daee100e69"
+    },
+    {
+      "path": "wordweave5/Cargo.lock",
+      "sha256": "3491c3c41b8da74553b91c4dd4e912e523c872ab531a4c8463e8d53763cefdc5"
+    },
+    {
+      "path": "wordweave5/Cargo.toml",
+      "sha256": "360f415a9b2a472575ea8e002af3fe8870d79c877f235928e605f24190379968"
+    },
+    {
+      "path": "wordweave5/LICENSE",
+      "sha256": "250dfd760dc7a5068812d540701a53b139303e9e934b52e118a46be1f0c74d9a"
+    },
+    {
+      "path": "wordweave5/README.md",
+      "sha256": "8401cc3cfd155edf30a093aea07ff19f0b406585a53889fb548b245ffee76ee3"
+    },
+    {
+      "path": "wordweave5/RESEARCH.md",
+      "sha256": "713513b4b6ea4fd793c4707cb1d5c2394c3b6066b78fcf73db204f8cb9f7154b"
+    },
+    {
+      "path": "wordweave5/UPGRADE-0.2.md",
+      "sha256": "a5f1bd5d3a9d0d173ce6fe6cf67ae6837b7d39230030a012b2315f156119050d"
+    },
+    {
+      "path": "wordweave5/UPGRADE-0.3.1.md",
+      "sha256": "f78715a7ec789039cd05f52470dfb4318ce24486f571f6af88d9ee8eff205666"
+    },
+    {
+      "path": "wordweave5/UPGRADE-0.3.2.md",
+      "sha256": "a674f453a665a01c80f475fb4c8808ad2792dd5d13edae4a9fd5a1b2707bd5f7"
+    },
+    {
+      "path": "wordweave5/UPGRADE-0.3.3.md",
+      "sha256": "a7c6f7b08edf9f0853562fedd673a8cae8f7dc94c88746ba41db0d3addfeefcf"
+    },
+    {
+      "path": "wordweave5/UPGRADE-0.3.4.md",
+      "sha256": "d92f0d7650a3c4f878f95d866bc5bff6649cd7f871e9ab3cbe96dac7a82e9df5"
+    },
+    {
+      "path": "wordweave5/UPGRADE-0.3.5.md",
+      "sha256": "152fb533dabd4a627baba89151f26fd8d17bb91b5ae98b27a9020a4e83bed463"
+    },
+    {
+      "path": "wordweave5/UPGRADE-0.3.6.md",
+      "sha256": "7370ea34893929bebb915e62e22a134f3f512430d7482522b3d1630c5756bdc9"
+    },
+    {
+      "path": "wordweave5/UPGRADE-0.3.7.md",
+      "sha256": "647967982550721a13f37eade80debc9e1135667a78e702c114e6449e88e8355"
+    },
+    {
+      "path": "wordweave5/UPGRADE-0.3.8.md",
+      "sha256": "126196a77b02279c2996c4a420db8747c140455194717aa754e9ef31a8e1b209"
+    },
+    {
+      "path": "wordweave5/UPGRADE-0.3.md",
+      "sha256": "ce71d77227e2a83489f765b149d171b9f418217d3d4c1b3fd8cc54bc4e8e9873"
+    },
+    {
+      "path": "wordweave5/VALIDATION.md",
+      "sha256": "ddc1669297c37a8d317d5acd62107df90f6395cda26ff7e9de75bf877beddee4"
+    },
+    {
+      "path": "wordweave5/build.cmd",
+      "sha256": "43673c0e81129698e7ea12f1e16891d0e5fc92cb04de517753136f6abdef0fa1"
+    },
+    {
+      "path": "wordweave5/data/FORMAT.md",
+      "sha256": "00f39373eee9e0db6c1c8e03d45559c99a9027109eb4b9e1e80b0110c6f61f82"
+    },
+    {
+      "path": "wordweave5/data/NGSL-NOTICE.md",
+      "sha256": "d7795815c5e3b06bdf859da26a659477e716c0b21a3a463c924b195bf1f66916"
+    },
+    {
+      "path": "wordweave5/data/NGSL_12_stats.csv",
+      "sha256": "2098bab8955a120a9766c6282a51d7d578c6cb0a7d946600d2ffb73ba25a0b44"
+    },
+    {
+      "path": "wordweave5/data/SUP_lemmatized.csv",
+      "sha256": "7bb4c76cbe43ae87240be4ac7ada370b9e1a0d9d631d8c4430138646965d03f6"
+    },
+    {
+      "path": "wordweave5/data/core.tsv",
+      "sha256": "af7d2a44be6e4c0447cf47c7735366c57dc950c804546e01dadacaf867acf236"
+    },
+    {
+      "path": "wordweave5/data/ngsl-1.2.txt",
+      "sha256": "7c09f829de0b142fd90157fdb1103acbc40a7912dc251c015c613478463f1c78"
+    },
+    {
+      "path": "wordweave5/data/phrases.tsv",
+      "sha256": "1bd171b394b01177c20b2634dcfdba4b97f3603c89ef6b7bafd1d5547f1669d0"
+    },
+    {
+      "path": "wordweave5/run.cmd",
+      "sha256": "e2d6e9cc5f20c2d85eda237dd195e2487988e65c83f6c8ebd6de885a0feeec62"
+    },
+    {
+      "path": "wordweave5/src/ai.rs",
+      "sha256": "9bc73f0a63cf8bb4dce66a8895284f59c6d2cc6a7444fd9b9bbd1b549966b733"
+    },
+    {
+      "path": "wordweave5/src/app.rs",
+      "sha256": "b4e9e33b64addd30c1b908e2094f29d488b9b21ecd370bafb0f3c92a3cf43687"
+    },
+    {
+      "path": "wordweave5/src/chat.rs",
+      "sha256": "8309aa71985a836c75af0bf70fe82bf637082d949525c00037952bdda2b7d187"
+    },
+    {
+      "path": "wordweave5/src/codex.rs",
+      "sha256": "73f5adb4b67cf5c3ad56d23fb0486b827a51befd707c4d01c4cd3ec8806d31cf"
+    },
+    {
+      "path": "wordweave5/src/diagnostics.rs",
+      "sha256": "5a0fe7be3245efc59ef5e2da3c14684ee0da3c3342cd4a6e35155af0e4ecc727"
+    },
+    {
+      "path": "wordweave5/src/execution.rs",
+      "sha256": "235e45f18a855d867c6449fc4013abeee5396827f9aca3e9c034d670c21af66c"
+    },
+    {
+      "path": "wordweave5/src/ink.rs",
+      "sha256": "96357c3a388582fd225790caa37385491834ca5ca8c333c77bca2bf865ba9bda"
+    },
+    {
+      "path": "wordweave5/src/learning.rs",
+      "sha256": "6bf1d7aef631f6bd248fbfeef3a56c01d9b94f18318489acecca3576e6f49a03"
+    },
+    {
+      "path": "wordweave5/src/lib.rs",
+      "sha256": "d4bddc38efc7531428ef872a8c575759cb0a874577b23d6f8d96e55409af4780"
+    },
+    {
+      "path": "wordweave5/src/main.rs",
+      "sha256": "6fe80efdf3ffa5b4934ac7667d1a72e13b1d957e68bfb1e06e68eed53feb4d00"
+    },
+    {
+      "path": "wordweave5/src/material.rs",
+      "sha256": "ef36faa706d2c7dea980be7519fb9425c1097098e90781ac3ca859d10da30147"
+    },
+    {
+      "path": "wordweave5/src/media.rs",
+      "sha256": "08a5ca926cc1484c94d9b8a66bf7a73743c2cce19de2e5a81ecf7f7e030b549c"
+    },
+    {
+      "path": "wordweave5/src/model.rs",
+      "sha256": "984408aeaf0ef414e5e76c4fbd61bcc10317d703bbd63fb890562878b97c6504"
+    },
+    {
+      "path": "wordweave5/src/scheduler.rs",
+      "sha256": "8b0b9c20102121b7bf862ac200838de2f1ff7fe8c6411b76f72376259e9af4c8"
+    },
+    {
+      "path": "wordweave5/src/store.rs",
+      "sha256": "d52100cb5c0f660ca56b842c39280160334e9e93aa5d4fb04cdd904dcd3fc445"
+    },
+    {
+      "path": "wordweave5/tests/codex_process.rs",
+      "sha256": "3d67fb3049766ba24530978498a2b936572b2496f30a49d807cf184c1cda5812"
+    },
+    {
+      "path": "wordweave5/tests/support/mock_codex.rs",
+      "sha256": "4bc5ced9b35b43d4bf21bbead7c439bcb71156fbe250d02d9e90ffe6ec7aef99"
+    },
+    {
+      "path": "wordweave5/validation/core-tests.txt",
+      "sha256": "730c7c3dac7cfbe9fac2124e6997f365ded6761adceb553f6c4b16306b1e05b3"
+    },
+    {
+      "path": "wordweave5/validation/windows-check.txt",
+      "sha256": "b78893802690134f427983281b670cb78c27e5f464d7ede7b6509e181bf3bee5"
+    }
+  ]
+}
