@@ -13,6 +13,22 @@ use std::{
 use wordweave5::codex;
 
 #[test]
+fn structured_chat_action_reaches_transport_and_is_only_a_proposal() {
+    let f = Fixture::new("structured_chat");
+    let reply = codex::generate_with_settings(&f.exe, &f.dir, "", "test",
+        vec![json!({"type":"text","text":"apologize for を新規登録して"})],
+        Some(wordweave5::chat_action::schema()), Arc::new(AtomicBool::new(false))).unwrap();
+    let parsed = wordweave5::chat_action::parse(&reply.text, reply.execution).unwrap();
+    assert_eq!(parsed.title, "apologize for の登録");
+    assert_eq!(parsed.execution.model.as_deref(), Some("test"));
+    assert_eq!(parsed.execution.effort, None);
+    let action = parsed.action.unwrap();
+    assert_eq!(action.operation, wordweave5::chat_action::Operation::New);
+    assert_eq!(action.base, "apologize for");
+    assert!(!f.dir.join("progress.json").exists());
+}
+
+#[test]
 fn generation_reports_server_settings_instead_of_requested_model() {
     let f = Fixture::new("reported_settings");
     let reply = codex::generate_with_settings(&f.exe, &f.dir, "requested-model", "test",

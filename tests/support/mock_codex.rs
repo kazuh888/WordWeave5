@@ -48,7 +48,7 @@ fn main() {
         }
     }
     mark("作業ディレクトリ確認済み");
-    let mode = fs::read_to_string("mode.txt").expect("Run through cargo test; missing fixture mode");
+    let mode = fs::read_to_string("mode.txt").expect("Run through cargo test; missing fixture mode").trim().to_owned();
     mark("mode.txt読み取り済み");
     if mode == "early_exit" || mode == "bad_json" {
         // Wait for initialize, so this tests receive/EOF rather than a spawn race.
@@ -113,10 +113,16 @@ fn main() {
                     // Keep the process alive even if stdin closes. The test must kill it.
                     loop { std::thread::park(); }
                 }
+                let response = if mode == "structured_chat" {
+                    assert_eq!(v["params"]["outputSchema"], wordweave5::chat_action::schema());
+                    json!({"answer":"apologize for を新規登録する案を確認してください。",
+                        "title":"apologize for の登録", "action":{"operation":"new",
+                        "base":"apologize for", "entry_id":null}}).to_string()
+                } else { "{\"answer\":\"ok\"}".into() };
                 send(json!({"method":"item/completed","params":{
                     "threadId":"t","turnId":"u","item":{
                         "id":"a","type":"agentMessage","phase":"final_answer",
-                        "text":"{\"answer\":\"ok\"}"
+                        "text":response
                     }
                 }}));
                 send(json!({"method":"turn/completed","params":{
