@@ -5,6 +5,7 @@ use crate::{
 };
 use eframe::egui::{self, Color32, RichText};
 mod chat_ui;
+mod dashboard;
 use std::sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
@@ -127,6 +128,7 @@ pub struct WordApp {
     chat_context_open: bool,
     chat_trash_open: bool,
     chat_composer_height: f32,
+    about_open: bool,
 }
 
 fn today() -> String {
@@ -297,6 +299,7 @@ impl WordApp {
             chat_context_open: false,
             chat_trash_open: false,
             chat_composer_height: 165.0,
+            about_open: false,
         }
     }
     fn persist(&mut self) {
@@ -776,8 +779,8 @@ impl WordApp {
     }
     fn home(&mut self, ui: &mut egui::Ui) {
         ui.add_space(10.0);
-        ui.heading("5分で、使える表現を少しずつ。");
-        ui.label("基本語から、自然な社外メールと表現の違いを学ぶ。");
+        ui.heading("学習ダッシュボード");
+        ui.label("学習の開始・再開は「学習」タブから。");
         ui.add_space(15.0);
         let due = scheduler::make_queue(&self.deck, &self.progress, now(), &today(), 0).len();
         let new_today = self
@@ -792,7 +795,7 @@ impl WordApp {
             .get(&today())
             .copied()
             .unwrap_or(0);
-        ui.horizontal(|ui| {
+        ui.horizontal_wrapped(|ui| {
             ui.group(|ui| {
                 ui.label("今日の学習");
                 ui.heading(format!("{}分 {}秒", sec / 60, sec % 60));
@@ -806,32 +809,7 @@ impl WordApp {
                 ui.heading(format!("{new_today}項目"));
             });
         });
-        ui.add_space(18.0);
-        if self.session.is_some() {
-            if ui.button("学習の続きから").clicked() {
-                self.page = Page::Study;
-                if let Some(s) = self.session.as_mut() {
-                    s.paused = false;
-                }
-            }
-            if ui.button("現在のセッションを終了").clicked() {
-                self.finish();
-            }
-        } else {
-            let minutes = self.progress.settings.minutes;
-            if ui
-                .add_sized(
-                    [230.0, 50.0],
-                    egui::Button::new(format!("{minutes}分の学習を始める")),
-                )
-                .clicked()
-            {
-                self.start(minutes);
-            }
-            if ui.button("今日は2分だけ").clicked() {
-                self.start(2);
-            }
-        }
+        self.vocabulary_dashboard(ui);
         ui.add_space(15.0);
         ui.label(
             "期限を過ぎた復習は、今後のセッションに分けて出題する。休んでも学習記録は失われない。",
@@ -861,7 +839,7 @@ impl WordApp {
     }
     fn study(&mut self, ui: &mut egui::Ui) {
         let Some(task) = self.current.clone() else {
-            ui.label("ホームから学習を始めてください。");
+            self.study_start(ui);
             return;
         };
         let entry = self.deck[task.index].clone();
@@ -2208,6 +2186,9 @@ impl eframe::App for WordApp {
                             self.page = page;
                         }
                     }
+                    if ui.button("バージョン情報").clicked() {
+                        self.about_open = true;
+                    }
                 });
             });
         });
@@ -2255,6 +2236,7 @@ impl eframe::App for WordApp {
             });
         });
         self.confirmations(ctx);
+        self.version_dialog(ctx);
         ctx.request_repaint_after(Duration::from_millis(200));
     }
     fn on_exit(&mut self, _gl: Option<&eframe::glow::Context>) {
