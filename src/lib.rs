@@ -8,3 +8,8 @@ pub mod model;
 pub mod material;
 pub mod scheduler;
 pub mod store;
+pub mod assets;
+pub mod material_diff;
+pub mod run_journal;
+pub mod commit;
+pub mod backup;

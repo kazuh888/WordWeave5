@@ -13,6 +13,75 @@ use std::{
 use wordweave5::codex;
 
 #[test]
+fn durable_result_and_terminal_states_are_distinct() {
+    use wordweave5::run_journal::{self,Outcome};
+    for (mode,expected) in [("ok",Outcome::Completed),("failed",Outcome::Failed),("interrupted",Outcome::Interrupted),("lost_result",Outcome::Unknown)] {
+        let f=Fixture::new(mode);
+        let result=f.run(Arc::new(AtomicBool::new(false)));
+        let records=run_journal::list(&f.dir).unwrap();
+        assert_eq!(records.len(),1);
+        assert_eq!(records[0].outcome,expected);
+        assert_eq!(records[0].turn_id.as_deref(),Some("u"));
+        assert_eq!(records[0].response.as_deref(),result.as_ref().ok().map(String::as_str));
+    }
+}
+#[test]
+fn unknown_result_can_be_read_without_a_second_generation() {
+    let f=Fixture::new("lost_result");
+    assert!(f.run(Arc::new(AtomicBool::new(false))).is_err());
+    let id=wordweave5::run_journal::list(&f.dir).unwrap()[0].id.clone();
+    let result=codex::recover(&f.exe,&f.dir,&id,Arc::new(AtomicBool::new(false))).unwrap();
+    assert_eq!(result.response.as_deref(),Some("recovered"));
+    assert_eq!(f.requests().iter().filter(|m|*m=="turn/start").count(),1);
+    assert_eq!(result.execution.effort,None);
+}
+#[test]
+fn recovery_does_not_substitute_a_different_turn() {
+    let f=Fixture::new("lost_result");
+    assert!(f.run(Arc::new(AtomicBool::new(false))).is_err());
+    let id=wordweave5::run_journal::list(&f.dir).unwrap()[0].id.clone();
+    fs::write(f.dir.join("mode.txt"),"wrong_turn").unwrap();
+    assert!(codex::recover(&f.exe,&f.dir,&id,Arc::new(AtomicBool::new(false))).is_err());
+    assert_eq!(f.requests().iter().filter(|m|*m=="turn/start").count(),1);
+}
+
+#[test]
+fn missing_turn_id_stays_unknown_without_guessing_the_last_turn() {
+    let f=Fixture::new("lost_id");
+    assert!(f.run(Arc::new(AtomicBool::new(false))).is_err());
+    let record=wordweave5::run_journal::list(&f.dir).unwrap().remove(0);
+    assert_eq!(record.outcome,wordweave5::run_journal::Outcome::Unknown);
+    assert!(record.turn_id.is_none());
+    assert!(codex::recover(&f.exe,&f.dir,&record.id,Arc::new(AtomicBool::new(false))).is_err());
+    let requests=f.requests();
+    assert_eq!(requests.iter().filter(|m|*m=="turn/start").count(),1);
+    assert!(!requests.iter().any(|m|m=="thread/read"));
+}
+
+#[test]
+fn recovery_accepts_original_image_history_larger_than_generation_line_limit() {
+    let f=Fixture::new("large_lost_result");
+    let image=format!("data:image/png;base64,{}","A".repeat(5*1024*1024));
+    assert!(codex::generate(&f.exe,&f.dir,"","read image",vec![json!({"type":"image","url":image})],None,Arc::new(AtomicBool::new(false))).is_err());
+    let record=wordweave5::run_journal::list(&f.dir).unwrap().remove(0);
+    let recovered=codex::recover(&f.exe,&f.dir,&record.id,Arc::new(AtomicBool::new(false))).unwrap();
+    assert_eq!(recovered.response.as_deref(),Some("large recovered"));
+    assert_eq!(f.requests().iter().filter(|m|*m=="turn/start").count(),1);
+}
+
+#[test]
+fn image_input_requires_explicit_model_capability() {
+    for (mode, supported) in [("ok",false),("image",true)] {
+        let f=Fixture::new(mode);
+        let result=codex::generate(&f.exe,&f.dir,"","read image",
+            vec![json!({"type":"image","url":"data:image/png;base64,AAAA"})],None,
+            Arc::new(AtomicBool::new(false)));
+        assert_eq!(result.is_ok(),supported,"{mode}: {result:?}");
+        assert_eq!(f.requests().iter().any(|m|m=="turn/start"),supported);
+    }
+}
+
+#[test]
 fn structured_chat_action_reaches_transport_and_is_only_a_proposal() {
     let f = Fixture::new("structured_chat");
     let reply = codex::generate_with_settings(&f.exe, &f.dir, "", "test",
@@ -157,12 +226,17 @@ struct Fixture {
 }
 impl Fixture {
     fn new(mode: &str) -> Self {
+        Self::with_stamp(mode, chrono::Utc::now().timestamp_nanos_opt().unwrap())
+    }
+    fn with_stamp(mode:&str,stamp:i64)->Self {
+        static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
         let dir = std::env::temp_dir().join(format!(
-            "wordweave rpc 日本語-{}-{}",
+            "wordweave rpc 日本語-{}-{}-{}",
             std::process::id(),
-            chrono::Utc::now().timestamp_nanos_opt().unwrap()
+            stamp,
+            NEXT.fetch_add(1, Ordering::Relaxed)
         ));
-        fs::create_dir_all(&dir).unwrap();
+        fs::create_dir(&dir).unwrap();
         let exe = PathBuf::from(env!("CARGO_BIN_EXE_wordweave-mock-codex"));
         assert!(exe.is_file(), "Cargo did not build the mock executable: {}", exe.display());
         fs::write(dir.join("mode.txt"), mode).unwrap();
@@ -183,6 +257,13 @@ impl Fixture {
             cancel,
         )
     }
+}
+#[test]
+fn fixtures_remain_isolated_when_clock_values_are_identical() {
+    let a=Fixture::with_stamp("audio",123);
+    let b=Fixture::with_stamp("cancel",123);
+    assert_ne!(a.dir,b.dir);
+    assert_eq!(fs::read_to_string(a.dir.join("mode.txt")).unwrap(),"audio");
 }
 impl Drop for Fixture {
     fn drop(&mut self) {

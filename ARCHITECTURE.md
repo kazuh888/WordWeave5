@@ -1,4 +1,21 @@
-# WordWeave 5 0.3 実装構成
+# WordWeave 5 実装構成
+
+## 0.4.0 Windows Harness（2026-09-17）
+
+[採用理由と境界](docs/decisions/0001-windows-harness.md)、[操作仕様](UPGRADE-0.4.0.md)、[検証範囲](validation/harness-0.4.0.md) を参照する。以下の旧0.3系説明に対する変更点は次のとおりである。
+
+| 追加モジュール | 責務 |
+| --- | --- |
+| src/assets.rs / src/annotation.rs | 原本のハッシュ保存・読込検査／固定英文背景と筆跡・合成画像 |
+| src/run_journal.rs / src/app/run_history.rs | 実行意図・応答・結果不明を保持し、保存済み往復の結果だけ再取得 |
+| src/material_diff.rs / src/app/material_review.rs | 構造で整列した差分と、固定根拠・理由・引用の並置 |
+| src/commit.rs | 保存意図を先に保存する2ファイル更新・再起動時の回復・競合停止 |
+| src/backup.rs / src/app/backup_ui.rs | 教材・学習記録・原本の一式退避と復元前保護 |
+| src/app/chat_media.rs | 録音・認識・注釈・プレビュー・原音再生・保存失敗時の退避 |
+
+Codexスレッドは各生成で新規作成するが `ephemeral=false` とし、結果回収用のthread/turn IDを保存する。文脈の選択と再送はWordWeaveに残す。通常受信行は4MiB、原入力data URLを含む `thread/read` 専用経路は32MiBの上限付き読込とする。画像・音声ともサーバー返却の能力を確認する。診断トレースは本文を保存しないが、実行台帳は本文・指示を保存する。
+
+## 以下：0.3系の基礎構成・変更履歴
 
 | ファイル | 責務 |
 | --- | --- |

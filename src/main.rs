@@ -8,6 +8,8 @@ mod app;
 mod ink;
 #[cfg(windows)]
 mod media;
+#[cfg(windows)]
+mod annotation;
 
 #[cfg(windows)]
 fn main() -> eframe::Result<()> {

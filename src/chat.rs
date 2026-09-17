@@ -10,6 +10,29 @@ pub const MAX_EXCHANGES: usize = 200;
 pub const MAX_CHATS: usize = 50;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Attachment {
+    pub original: crate::assets::AssetRef,
+    pub image: Option<crate::assets::AssetRef>,
+    #[serde(default)]
+    pub background: Option<crate::assets::AssetRef>,
+    pub source_text: String,
+    pub transcript: Option<String>,
+}
+impl Attachment {
+    pub fn validate(&self) -> Result<(), String> {
+        use crate::assets::AssetKind;
+        self.original.validate()?;
+        if let Some(image) = &self.image { image.validate()?; if image.kind != AssetKind::ImagePng { return Err("添付画像の形式が不正です。".into()); } }
+        if let Some(image) = &self.background { image.validate()?; if image.kind != AssetKind::ImagePng { return Err("背景画像の形式が不正です。".into()); } }
+        if self.source_text.chars().count() > 4000 || self.transcript.as_ref().is_some_and(|s| s.chars().count() > 4000)
+            || (self.original.kind == AssetKind::InkJson && self.image.is_none()) {
+            return Err("添付の説明・画像が不正です。".into());
+        }
+        Ok(())
+    }
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Exchange {
     pub question: String,
     pub answer: String,
@@ -19,6 +42,8 @@ pub struct Exchange {
     pub pinned: bool,
     #[serde(default)]
     pub for_material: bool,
+    #[serde(default)]
+    pub attachments: Vec<Attachment>,
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Conversation {
@@ -31,16 +56,22 @@ pub struct Conversation {
     pub memo: String,
     pub draft: String,
     pub exchanges: Vec<Exchange>,
+    #[serde(default)]
+    pub draft_attachments: Vec<Attachment>,
 }
 impl Conversation {
     pub fn new() -> Self {
         Self {
             id: format!("{}-{}", std::process::id(), chrono::Utc::now().timestamp_nanos_opt().unwrap()),
             title: "新しい会話".into(), pinned: false, created_at: chrono::Utc::now().timestamp(),
-            memo: String::new(), draft: String::new(), exchanges: Vec::new(),
+            memo: String::new(), draft: String::new(), exchanges: Vec::new(), draft_attachments: Vec::new(),
         }
     }
     pub fn validate(&self) -> Result<(), String> {
+        for attachments in std::iter::once(&self.draft_attachments).chain(self.exchanges.iter().map(|e| &e.attachments)) {
+            if attachments.len() > 8 { return Err("一つの発言の添付は8件までです。".into()); }
+            for attachment in attachments { attachment.validate()?; }
+        }
         if self.id.is_empty() || self.title.chars().count() > 100
             || self.memo.chars().count() > 2000 || self.draft.chars().count() > 4000
             || self.exchanges.len() > MAX_EXCHANGES
@@ -62,8 +93,17 @@ impl Conversation {
         if self.exchanges.is_empty() && self.title == "新しい会話" {
             self.title = automatic_title(&question);
         }
-        self.exchanges.push(Exchange { question: question.clone(), answer, at: chrono::Utc::now().timestamp(), execution, pinned: false, for_material: false });
+        self.exchanges.push(Exchange { question: question.clone(), answer, at: chrono::Utc::now().timestamp(), execution, pinned: false, for_material: false,
+            attachments: self.draft_attachments.clone() });
+        self.draft_attachments.clear();
         if self.draft.trim() == question.trim() { self.draft.clear(); }
+        Ok(())
+    }
+    pub fn apply_recognition(&mut self, expected: &str, text: &str) -> Result<(), String> {
+        if self.draft != expected { return Err("入力欄が変更されたため、認識結果を自動反映しませんでした。結果を確認して貼り付けてください。".into()); }
+        let next = if expected.trim().is_empty() { text.to_owned() } else { format!("{expected}\n{text}") };
+        if text.trim().is_empty() || next.chars().count() > 4000 { return Err("認識結果が空、または入力上限を超えています。".into()); }
+        self.draft = next;
         Ok(())
     }
 }
@@ -170,9 +210,14 @@ fn prepare_selection(conversation: &Conversation, limit: usize, catalog: Option<
     let mut included: Vec<bool> = conversation.exchanges.iter().map(|e| e.pinned).collect();
     let payload_for = |selected: &[bool]| {
         let history: Vec<_> = conversation.exchanges.iter().zip(selected).filter(|(_, yes)| **yes)
-            .map(|(e, _)| json!({"user": e.question, "assistant": e.answer})).collect();
+            .map(|(e, _)| {
+                let mut item = json!({"user": e.question, "assistant": e.answer});
+                if !e.attachments.is_empty() { item["attachment_notes_not_original_media"] = json!(e.attachments.iter().map(|a| &a.source_text).collect::<Vec<_>>()); }
+                item
+            }).collect();
         let mut payload = json!({"conversation_history": history, "learner_memo": conversation.memo,
             "current_question": question, "omitted_exchanges": selected.iter().filter(|b| !**b).count()});
+        if !conversation.draft_attachments.is_empty() { payload["current_attachments"] = json!(conversation.draft_attachments); }
         if let Some(catalog) = catalog {
             payload.as_object_mut().unwrap().extend(catalog.as_object().unwrap().clone());
         }
@@ -252,9 +297,31 @@ fn relevance_terms(text: &str) -> BTreeSet<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn completed_chat_keeps_media_and_recognition_never_overwrites_new_draft() {
+        let mut c = Conversation::new();
+        c.draft = "丸で囲んだ部分を説明して".into();
+        c.draft_attachments.push(Attachment {
+            original: crate::assets::AssetRef { id: "a".repeat(64), kind: crate::assets::AssetKind::InkJson, bytes: 100 },
+            image: Some(crate::assets::AssetRef { id: "b".repeat(64), kind: crate::assets::AssetKind::ImagePng, bytes: 200 }),
+            background: None,
+            source_text: "Could you make it?".into(), transcript: None,
+        });
+        let captured = c.draft.clone();
+        c.complete(captured.clone(), "回答".into(), Execution::default()).unwrap();
+        assert_eq!(c.exchanges[0].attachments.len(), 1);
+        assert!(c.draft_attachments.is_empty());
+        c.draft = "新しい入力".into();
+        assert!(c.apply_recognition(&captured, "認識結果").is_err());
+        assert_eq!(c.draft, "新しい入力");
+        c.apply_recognition("新しい入力", "認識結果").unwrap();
+        assert_eq!(c.draft, "新しい入力\n認識結果");
+        let restored: Conversation = serde_json::from_value(serde_json::to_value(&c).unwrap()).unwrap();
+        assert_eq!(restored.exchanges[0].attachments[0].source_text, "Could you make it?");
+    }
     fn exchange(i: usize) -> Exchange {
         Exchange { question: format!("質問{i}"), answer: "説明".repeat(80), at: 0,
-            execution: Execution::default(), pinned: false, for_material: false }
+            execution: Execution::default(), pinned: false, for_material: false, attachments: Vec::new() }
     }
     #[test]
     fn context_preserves_order_and_pins_within_budget() {

@@ -97,12 +97,18 @@ impl WordApp {
             let id = chat.id.clone();
             ui.horizontal_wrapped(|ui| {
                 ui.heading(&chat.title);
+                if ui.button("音声・手書き入力").clicked() { self.chat_media_open = true; }
+                if ui.button("読み上げを停止").clicked() { self.speaker.stop(); }
                 if ui.button("文脈・送信内容").clicked() { self.chat_context_open = true; }
                 if ui.button(if self.progress.material_draft.is_some() { "教材案を確認" } else { "教材に反映" }).clicked() {
                     self.chat_material_open = true;
                 }
             });
             let mut send = false;
+            let mut speak = None;
+            let mut preview = None;
+            let mut play = None;
+            let mut annotate = None;
             let max_height = (ui.available_height() * 0.55).max(130.0);
             egui::TopBottomPanel::bottom("chat-composer").resizable(false)
                 .exact_height(self.chat_composer_height.clamp(130.0, max_height))
@@ -137,6 +143,7 @@ impl WordApp {
                         send = ui.add_enabled(idle && ready, egui::Button::new("送信 (Ctrl+Enter)")).clicked()
                             || (idle && ready && submit_key);
                         ui.small(format!("{} / 4,000文字", chat.draft.chars().count()));
+                        if !chat.draft_attachments.is_empty() { ui.small(format!("添付{}件（音声・手書き入力で確認）",chat.draft_attachments.len())); }
                         if !idle { ui.spinner(); ui.label("処理中"); }
                         if full { ui.label("会話上限：新しい会話を作成"); }
                     });
@@ -156,6 +163,14 @@ impl WordApp {
                     ui.push_id(index, |ui| {
                         bubble(ui, "あなた", &exchange.question, true);
                         bubble(ui, "Codex", &exchange.answer, false);
+                        ui.horizontal_wrapped(|ui| {
+                            if ui.button("回答を読み上げ").clicked() { speak=Some(exchange.answer.clone()); }
+                            if ui.button("英文に注釈を書く").clicked() { annotate=Some(exchange.answer.clone()); }
+                            for a in &exchange.attachments {
+                                if a.original.kind==wordweave5::assets::AssetKind::AudioWav && ui.add_enabled(idle,egui::Button::new("原録音を再生")).clicked() {play=Some(a.original.clone());}
+                                if let Some(image)=&a.image {if ui.button("注釈画像").clicked(){preview=Some(image.clone());}}
+                            }
+                        });
                         ui.small(exchange.execution.label());
                         ui.horizontal_wrapped(|ui| {
                             self.dirty |= ui.add_enabled(idle, egui::Checkbox::new(&mut exchange.pinned,
@@ -169,6 +184,14 @@ impl WordApp {
                 if self.pending.is_some() { ui.label("Codexが回答を準備している…"); }
             });
             if send { self.launch_chat(); }
+            if let Some(text)=speak {self.say(&text);}
+            if let Some(reference)=preview {self.preview_asset(&reference);}
+            if let Some(reference)=play {self.play_asset(&reference);}
+            if let Some(text)=annotate {
+                if self.annotation.frozen() {self.message="作成中の注釈がある。先に添付または破棄する。".into();}
+                else {self.annotation.text=text;}
+                self.chat_media_open=true;
+            }
         });
         self.chat_windows(ui.ctx(), idle);
     }
@@ -197,7 +220,7 @@ impl WordApp {
         let mut open = self.chat_material_open;
         egui::Window::new("教材の根拠と差分を確認")
             .open(&mut open)
-            .default_width(700.0)
+            .default_width(1100.0)
             .vscroll(true)
             .show(ctx, |ui| {
                 if self.progress.material_draft.is_none() {

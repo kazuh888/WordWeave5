@@ -84,6 +84,7 @@ fn main() {
                 "planType":"test"
             }}})),
             "thread/start" => {
+                assert_eq!(v["params"]["ephemeral"], false);
                 assert_eq!(v["params"]["sandbox"], "read-only");
                 assert_eq!(v["params"]["modelProvider"], "openai");
                 let mut result = json!({
@@ -97,12 +98,31 @@ fn main() {
                 if mode == "null_effort" { result["reasoningEffort"] = Value::Null; }
                 send(json!({"id":v["id"],"result":result}));
             },
+            "thread/read" => {
+                assert_eq!(v["params"]["threadId"], "t");
+                assert_eq!(v["params"]["includeTurns"], true);
+                if mode=="large_lost_result" {
+                    let input:Value=serde_json::from_slice(&fs::read("media-input.json").unwrap()).unwrap();
+                    send(json!({"id":v["id"],"result":{"thread":{"id":"t","turns":[{"id":"u","status":"completed","items":[{"id":"user","type":"userMessage","content":input},{"id":"answer","type":"agentMessage","text":"large recovered"}]}]}}}));
+                    continue;
+                }
+                send(json!({"id":v["id"],"result":{"thread":{"id":"t","turns":[{
+                    "id": if mode=="wrong_turn" {"other"} else {"u"}, "status":"completed",
+                    "items":[{"id":"a","type":"agentMessage","phase":"final_answer","text":"recovered"}]
+                }]}}}));
+            },
             "model/list" => send(json!({"id":v["id"],"result":{
                 "data":[{"model":"test","inputModalities":
-                    if mode == "audio" { vec!["text", "audio"] } else { vec!["text"] }}],
+                    if mode == "audio" { vec!["text", "audio"] } else if mode == "image" || mode=="large_lost_result" { vec!["text", "image"] } else { vec!["text"] }}],
                 "nextCursor":null
             }})),
             "turn/start" => {
+                if mode=="lost_id" { return; }
+                if mode=="lost_result" || mode=="large_lost_result" {
+                    if mode=="large_lost_result" {fs::write("media-input.json",serde_json::to_vec(&v["params"]["input"]).unwrap()).unwrap();}
+                    send(json!({"id":v["id"],"result":{"turn":{"id":"u"}}}));
+                    return;
+                }
                 if mode == "chat" {
                     let expected: Value = serde_json::from_str(&fs::read_to_string("expected-input.json").unwrap()).unwrap();
                     let actual: Value = serde_json::from_str(v["params"]["input"][0]["text"].as_str().unwrap()).unwrap();
@@ -127,7 +147,7 @@ fn main() {
                 }}));
                 send(json!({"method":"turn/completed","params":{
                     "threadId":"t","turn":{"id":"u",
-                        "status":if mode == "failed" { "failed" } else { "completed" },
+                        "status":if mode == "failed" { "failed" } else if mode=="interrupted" { "interrupted" } else { "completed" },
                         "error":null
                     }
                 }}));

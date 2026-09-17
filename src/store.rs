@@ -147,6 +147,8 @@ impl Progress {
         changed
     }
     pub fn validate(&self) -> Result<(), String> {
+        if let Some(draft)=&self.material_draft { draft.validate_evidence()?; }
+        for source in &self.material_sources { source.validate()?; }
         // An editable proposal may be incomplete; validate it only at commit.
         if serde_json::to_vec(&self.material_draft).map_err(|e| e.to_string())?.len() > 4_000_000
             || self.material_sources.len() > 10000 {
@@ -277,11 +279,12 @@ impl Storage {
         Ok(Self { dir, _lock: lock })
     }
     pub fn load(&self) -> Result<Progress, String> {
+        crate::commit::recover(&self.dir)?;
         let p = self.dir.join("progress.json");
         if !p.exists() {
             return Ok(Progress::default());
         }
-        if fs::metadata(&p).map_err(|e| e.to_string())?.len() > 100_000_000 {
+        if fs::metadata(&p).map_err(|e| e.to_string())?.len() > crate::commit::PROGRESS_LIMIT {
             return Err("学習記録が大きすぎます。".into());
         }
         let text = fs::read_to_string(p).map_err(|e| e.to_string())?;
@@ -291,7 +294,15 @@ impl Storage {
         Ok(progress)
     }
     pub fn save(&self, p: &Progress) -> Result<(), String> {
+        self.save_with_limit(p, crate::commit::PROGRESS_LIMIT)
+    }
+    fn save_with_limit(&self, p: &Progress, limit: u64) -> Result<(), String> {
+        if crate::commit::pending(&self.dir) { return Err("教材の保存途中です。ほかの記録を上書きせず再起動して復旧してください。".into()); }
         p.validate()?;
+        let bytes = serde_json::to_vec_pretty(p).map_err(|e| e.to_string())?;
+        if bytes.len() as u64 > limit {
+            return Err("学習記録が保存上限を超えています。元ファイルは変更していません。".into());
+        }
         let path = self.dir.join("progress.json");
         if path.exists() {
             let backup_dir = self.dir.join("backups");
@@ -305,10 +316,7 @@ impl Storage {
             }
             // Keep backups: user-controlled cleanup avoids destroying recovery points.
         }
-        atomic_write(
-            &path,
-            &serde_json::to_vec_pretty(p).map_err(|e| e.to_string())?,
-        )
+        atomic_write(&path, &bytes)
     }
 }
 
@@ -463,6 +471,37 @@ mod tests {
         s.save(&p).unwrap();
         assert_eq!(s.load().unwrap().settings.new_per_day, 1);
         drop(s);
+        fs::remove_dir_all(dir).unwrap();
+    }
+    #[test]
+    fn oversized_pretty_progress_is_rejected_before_backup_or_replacement() {
+        let dir = std::env::temp_dir().join(format!(
+            "wordweave-save-limit-{}-{}",
+            std::process::id(),
+            chrono::Utc::now().timestamp_nanos_opt().unwrap()
+        ));
+        let storage = Storage::at(dir.clone()).unwrap();
+        let original = Progress::default();
+        storage.save(&original).unwrap();
+        let original_bytes = fs::read(dir.join("progress.json")).unwrap();
+        let mut next = original.clone();
+        next.settings.topic = "日本語もバイト数で判定する".into();
+        let expected = serde_json::to_vec_pretty(&next).unwrap();
+        let exact_limit = expected.len() as u64;
+        assert!(serde_json::to_vec(&next).unwrap().len() < expected.len() - 1);
+
+        assert!(storage.save_with_limit(&next, exact_limit - 1).is_err());
+        assert_eq!(fs::read(dir.join("progress.json")).unwrap(), original_bytes);
+        assert!(!dir.join("backups").exists());
+
+        storage.save_with_limit(&next, exact_limit).unwrap();
+        assert_eq!(fs::read(dir.join("progress.json")).unwrap(), expected);
+        assert_eq!(storage.load().unwrap().settings.topic, next.settings.topic);
+        let backups: Vec<_> = fs::read_dir(dir.join("backups"))
+            .unwrap().map(|entry| entry.unwrap().path()).collect();
+        assert_eq!(backups.len(), 1);
+        assert_eq!(fs::read(&backups[0]).unwrap(), original_bytes);
+        drop(storage);
         fs::remove_dir_all(dir).unwrap();
     }
     #[test]
