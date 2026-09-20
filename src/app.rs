@@ -5,7 +5,19 @@ use crate::{
 };
 use eframe::egui::{self, Color32, RichText};
 mod chat_ui;
+mod activity;
+use activity::Activity;
+mod stats_ui;
+mod settings_ui;
 mod dashboard;
+mod ux;
+mod materials_ui;
+mod vocabulary_ui;
+mod session_end;
+#[cfg(test)]
+mod ux_flow_tests;
+#[cfg(test)]
+mod layout_tests;
 mod chat_media;
 mod material_review;
 mod run_history;
@@ -13,8 +25,11 @@ mod backup_ui;
 mod conversation_trash;
 mod audio_controls;
 mod control_settings;
+mod study_ui;
 #[cfg(test)]
 mod harness_tests;
+#[cfg(test)]
+mod study_tests;
 use std::sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
@@ -60,6 +75,7 @@ impl Input {
     }
 }
 struct Session {
+    review_start: usize,
     queue: VecDeque<Task>,
     elapsed: Duration,
     budget: Duration,
@@ -84,6 +100,7 @@ enum AiResult {
     ChatRecognized { id: String, expected: String, asset_id: String, text: String },
 }
 struct Pending {
+    kind: Activity,
     key: String,
     rx: Receiver<Result<AiResult, String>>,
     cancel: Option<Arc<AtomicBool>>,
@@ -96,8 +113,11 @@ pub struct WordApp {
     deck: Vec<Entry>,
     page: Page,
     session: Option<Session>,
+    session_summary: Option<session_end::SessionSummary>,
+    study_end_confirm: bool,
     current: Option<Task>,
     answer: String,
+    study_focus_pending: bool,
     revealed: bool,
     matched: Option<bool>,
     hints: usize,
@@ -111,6 +131,7 @@ pub struct WordApp {
     recording_cancel_confirm: bool,
     wav: Option<Vec<u8>>,
     pending: Option<Pending>,
+    connection_check: Option<(String, bool)>,
     effort_catalog: Option<(String, Vec<wordweave5::effort::ModelEffort>)>,
     diagnostic_export: Option<String>,
     feedback: String,
@@ -226,7 +247,13 @@ impl WordApp {
         style
             .text_styles
             .insert(egui::TextStyle::Button, egui::FontId::proportional(16.0));
-        style.visuals.selection.bg_fill = Color32::from_rgb(33, 113, 117);
+        style.visuals.selection.bg_fill = ux::ACCENT;
+        style.visuals.selection.stroke.color = Color32::WHITE;
+        style.visuals.panel_fill = Color32::from_rgb(247, 250, 253);
+        style.visuals.window_fill = Color32::WHITE;
+        style.visuals.override_text_color = Some(ux::INK);
+        style.visuals.widgets.hovered.bg_stroke = egui::Stroke::new(1.0_f32, ux::ACCENT);
+        style.visuals.widgets.active.bg_stroke = egui::Stroke::new(2.0_f32, ux::ACCENT);
         ctx.set_style(style);
         let mut fatal = None;
         let storage = match storage {
@@ -296,8 +323,11 @@ impl WordApp {
             deck,
             page: Page::Home,
             session: None,
+            session_summary: None,
+            study_end_confirm: false,
             current: None,
             answer: String::new(),
+            study_focus_pending: true,
             revealed: false,
             matched: None,
             hints: 0,
@@ -311,6 +341,7 @@ impl WordApp {
             recording_cancel_confirm: false,
             wav: None,
             pending: None,
+            connection_check: None,
             effort_catalog: None,
             diagnostic_export: None,
             feedback: String::new(),
@@ -383,6 +414,7 @@ impl WordApp {
     }
     fn reset_answer(&mut self) {
         self.answer.clear();
+        self.study_focus_pending = true;
         self.revealed = false;
         self.matched = None;
         self.hints = 0;
@@ -401,15 +433,26 @@ impl WordApp {
             .map(|t| t.key(&self.deck))
             .unwrap_or_default()
     }
-    fn start(&mut self, minutes: u32) {
-        self.message.clear();
+    fn study_queue(&self, minutes: u32) -> VecDeque<Task> {
         let max_new = if minutes <= 2 {
-            1
+            self.progress.settings.new_per_day.min(1)
         } else {
             self.progress.settings.new_per_day
         };
-        let queue = scheduler::make_queue(&self.deck, &self.progress, now(), &today(), max_new);
+        scheduler::make_queue(&self.deck, &self.progress, now(), &today(), max_new)
+    }
+    fn start(&mut self, minutes: u32) {
+        if self.fatal.is_some() || self.pending.is_some() || self.recorder.is_some() || self.batch_running { return; }
+        if self.session.is_some() {
+            self.page = Page::Study;
+            return;
+        }
+        self.session_summary = None;
+        self.study_end_confirm = false;
+        self.message.clear();
+        let queue = self.study_queue(minutes);
         self.session = Some(Session {
+            review_start: self.progress.reviews.len(),
             queue,
             elapsed: Duration::ZERO,
             budget: Duration::from_secs(minutes as u64 * 60),
@@ -425,7 +468,7 @@ impl WordApp {
         self.reset_answer();
         let timed_out = self.session.as_ref().is_some_and(|s| s.elapsed >= s.budget);
         if timed_out {
-            self.finish();
+            self.finish_session(session_end::EndReason::Time);
             return;
         }
         let stamp = now();
@@ -452,7 +495,7 @@ impl WordApp {
             }
         }
         if self.current.is_none() {
-            self.finish();
+            self.finish_session(session_end::EndReason::NoTasks);
         }
     }
     fn credit_time(&mut self) {
@@ -467,19 +510,25 @@ impl WordApp {
         }
     }
     fn finish(&mut self) {
+        self.finish_session(session_end::EndReason::Manual);
+    }
+    fn finish_session(&mut self, reason: session_end::EndReason) {
+        if self.session.is_none() || self.pending.is_some() || self.recorder.is_some() { return; }
         self.credit_time();
+        self.persist();
+        if self.fatal.is_some() { return; }
         if let Some(s) = self.session.take() {
+            self.session_summary = Some(session_end::SessionSummary::collect(&s, &self.progress, &self.deck, reason));
             self.message = format!(
-                "今日はここまで。{}項目に回答、学習時間は{}分{}秒。",
+                "今日はここまで。{}項目に回答、学習時間は{}。",
                 s.completed,
-                s.elapsed.as_secs() / 60,
-                s.elapsed.as_secs() % 60
+                ux::duration(s.elapsed.as_secs())
             );
         }
         self.current = None;
         self.stop_speech();
-        self.page = Page::Home;
-        self.persist();
+        self.study_end_confirm = false;
+        self.page = Page::Study;
     }
     fn grade(&mut self, grade: Grade) {
         let Some(task) = self.current.clone() else {
@@ -526,6 +575,7 @@ impl WordApp {
         self.last_frame = Instant::now();
         if self.fatal.is_none()
             && self.page == Page::Study
+            && !self.study_end_confirm
             && self.pending.is_none()
             && ctx.input(|i| i.focused)
         {
@@ -590,6 +640,7 @@ impl WordApp {
                             Ok(AiResult::Exercise(e)) => {
                                 self.exercise = Some(e);
                                 self.answer.clear();
+                                self.study_focus_pending = true;
                                 self.ink.clear();
                                 self.wav = None;
                                 self.feedback.clear();
@@ -614,7 +665,10 @@ impl WordApp {
                                     self.message = e;
                                 }
                             },
-                            Ok(AiResult::Connection(t)) => self.message = t,
+                            Ok(AiResult::Connection(t)) => {
+                                if let Some((_, success)) = self.connection_check.as_mut() { *success = true; }
+                                self.message = t;
+                            }
                             Ok(AiResult::ModelChoices { path, models }) => {
                                 if path == self.progress.settings.codex_path.trim() {
                                     self.message = format!("Codexから{}件のモデル候補を取得した。モデルを選びeffortを指定できる。", models.len());
@@ -687,7 +741,7 @@ impl WordApp {
                     self.pending = None;
                     self.batch_running = false;
                     self.fetch_then_generate = false;
-                    self.message = "処理が終了しましたが結果を取得できませんでした。".into();
+                    self.message = "処理が終了したが結果を取得できなかった。入力は保持している。Codexの処理は実行記録から状態と再取得可否を確認してから再試行する。".into();
                 }
                 Err(TryRecvError::Empty) => {}
             }
@@ -777,6 +831,7 @@ impl WordApp {
         });
         self.pending = Some(Pending {
             key,
+            kind: Activity::Study,
             rx,
             cancel: Some(cancel),
         });
@@ -830,20 +885,11 @@ impl WordApp {
             entry.level,
             entry.tag
         ));
-        egui::Grid::new("entry-details")
-            .num_columns(2)
-            .spacing([24.0, 10.0])
-            .show(ui, |ui| {
-                ui.label("社外メール");
-                ui.label(shown(&entry.business));
-                ui.end_row();
-                ui.label("格調・文体");
-                ui.label(shown(&entry.elevated));
-                ui.end_row();
-                ui.label("語調・意味");
-                ui.label(&entry.register);
-                ui.end_row();
-            });
+        for (label, value) in [("社外メール", shown(&entry.business)),
+            ("格調・文体", shown(&entry.elevated)), ("語調・意味", &entry.register)] {
+            ui.label(RichText::new(label).small().color(ux::MUTED));
+            ui.add(egui::Label::new(value).wrap());
+        }
         ui.add_space(7.0);
         ui.label(&entry.usage);
         ui.separator();
@@ -884,68 +930,12 @@ impl WordApp {
         }
     }
     fn home(&mut self, ui: &mut egui::Ui) {
-        ui.add_space(10.0);
-        ui.heading("学習ダッシュボード");
-        ui.label("学習の開始・再開は「学習」タブから。");
-        ui.add_space(15.0);
-        let due = scheduler::make_queue(&self.deck, &self.progress, now(), &today(), 0).len();
-        let new_today = self
-            .progress
-            .reviews
-            .iter()
-            .filter(|r| r.date == today() && r.first)
-            .count();
-        let sec = self
-            .progress
-            .study_seconds
-            .get(&today())
-            .copied()
-            .unwrap_or(0);
-        ui.horizontal_wrapped(|ui| {
-            ui.group(|ui| {
-                ui.label("今日の学習");
-                ui.heading(format!("{}分 {}秒", sec / 60, sec % 60));
-            });
-            ui.group(|ui| {
-                ui.label("今回の復習候補");
-                ui.heading(format!("{due}項目"));
-            });
-            ui.group(|ui| {
-                ui.label("今日の新規回答");
-                ui.heading(format!("{new_today}項目"));
-            });
-        });
-        self.vocabulary_dashboard(ui);
-        ui.add_space(15.0);
-        ui.label(
-            "期限を過ぎた復習は、今後のセッションに分けて出題する。休んでも学習記録は失われない。",
-        );
-        ui.label("新しいカードは、例を確認してから別の問題を挟んで思い出す。ヒントや直後の再現は、独力の正解と区別する。");
-        ui.add_space(10.0);
-        let base_count = self
-            .deck
-            .iter()
-            .filter(|e| learning::kind(e) == "単語")
-            .map(|e| e.base.as_str())
-            .collect::<std::collections::BTreeSet<_>>()
-            .len();
-        ui.small(format!("教材 {}項目 / 基本語 {}語。中高水準から選んだ独自教材であり、全教科書の網羅リストではない。",self.deck.len(),base_count));
-        ui.small(format!(
-            "熟語 {}項目 / 構文 {}項目。設定の対象分野から選んで練習できる。",
-            self.deck
-                .iter()
-                .filter(|e| learning::kind(e) == "熟語")
-                .count(),
-            self.deck
-                .iter()
-                .filter(|e| learning::kind(e) == "構文")
-                .count()
-        ));
-        ui.small("既定の出題は「語句・綴り」「使い分け」。聞き取り・作文は設定から追加できる。");
+        self.home_dashboard(ui);
     }
     fn study(&mut self, ui: &mut egui::Ui) {
         let Some(task) = self.current.clone() else {
-            self.study_start(ui);
+            if self.session_summary.is_some() { self.session_result(ui); }
+            else { self.study_start(ui); }
             return;
         };
         let entry = self.deck[task.index].clone();
@@ -954,10 +944,11 @@ impl WordApp {
             .as_ref()
             .map(|s| (s.elapsed.as_secs(), s.budget.as_secs(), s.paused))
             .unwrap_or((0, 300, false));
-        ui.horizontal(|ui| {
-            ui.heading(task.skill.label());
+        ui.horizontal_wrapped(|ui| {
+            ui.label(RichText::new(task.skill.label()).size(24.0).strong().color(ux::INK));
             let remaining = budget.saturating_sub(elapsed);
-            ui.label(format!("残り {}:{:02}", remaining / 60, remaining % 60));
+            ui.label(format!("残り {}:{:02}  /  今回の回答 {}回", remaining / 60, remaining % 60,
+                self.session.as_ref().map_or(0, |s| s.completed)));
             if ui
                 .button(if paused { "再開" } else { "一時停止" })
                 .clicked()
@@ -973,18 +964,28 @@ impl WordApp {
                 )
                 .clicked()
             {
-                self.finish();
+                if !self.answer.trim().is_empty() || !self.ink.empty() || self.wav.is_some() || self.revealed {
+                    self.study_end_confirm = true;
+                } else { self.finish(); }
             }
         });
         if self.current.is_none() {
             return;
         }
+        if self.study_end_confirm {
+            self.request_study_end(ui);
+            return;
+        }
         ui.add(
             egui::ProgressBar::new((elapsed as f32 / budget.max(1) as f32).min(1.0))
-                .show_percentage(),
+                .text(format!("学習時間 {} / 目安 {}", ux::duration(elapsed), ux::duration(budget))),
         );
-        if paused {
+        if self.session.as_ref().is_some_and(|s| s.paused) {
             ui.label("休憩中。再開するまで学習時間は増えない。");
+            if self.recorder.is_some() {
+                ui.label("学習の一時停止と録音の一時停止は別である。録音は以下から操作できる。");
+                self.recording_controls(ui, "録音を終了");
+            }
             return;
         }
         if elapsed >= budget {
@@ -1010,7 +1011,7 @@ impl WordApp {
             }
             return;
         }
-        match task.skill {
+        ux::panel(ui, true, |ui| match task.skill {
             Skill::Recall => {
                 if entry.accepts(&entry.base) {
                     ui.heading(format!("{} · 場面に合う表現を思い出す", entry.meaning));
@@ -1070,15 +1071,20 @@ impl WordApp {
                 }
                 ui.small("意味の一致・文法・自然さと、対象表現を使えたかを分けて確認する。");
             }
-        }
+        });
+        ui.add_space(12.0);
         if !self.revealed {
-            ui.horizontal(|ui| {
+            let previous_input = self.input;
+            ui.horizontal_wrapped(|ui| {
                 ui.add_enabled_ui(self.recorder.is_none() && self.pending.is_none(), |ui| {
                     ui.selectable_value(&mut self.input, Input::Keyboard, "キーボード");
                     ui.selectable_value(&mut self.input, Input::Pen, "手書き");
                     ui.selectable_value(&mut self.input, Input::Voice, "音声");
                 });
             });
+            if previous_input != self.input && self.input == Input::Keyboard {
+                self.study_focus_pending = true;
+            }
             ui.add_enabled_ui(self.pending.is_none(), |ui| {
                 if self.input == Input::Pen {
                     self.ink.ui(ui);
@@ -1121,6 +1127,7 @@ impl WordApp {
                                     });
                                     self.pending = Some(Pending {
                                         key,
+                                        kind: Activity::Playback,
                                         rx,
                                         cancel: None,
                                     });
@@ -1129,16 +1136,7 @@ impl WordApp {
                         });
                     }
                 }
-                ui.add(
-                    egui::TextEdit::multiline(&mut self.answer)
-                        .desired_rows(if matches!(task.skill, Skill::Usage | Skill::Sentence) {
-                            3
-                        } else {
-                            2
-                        })
-                        .desired_width(f32::INFINITY)
-                        .hint_text("回答 / 認識結果の修正欄"),
-                );
+                let check_with_key = self.study_answer_input(ui, task.skill);
                 ui.horizontal_wrapped(|ui| {
                     if matches!(task.skill, Skill::Recall | Skill::Listening)
                         && ui.button("文字のヒント").clicked()
@@ -1163,118 +1161,20 @@ impl WordApp {
                         {
                             self.launch_ai(2);
                         }
-                        if ui.button("回答を照合 / わからないので確認").clicked() {
-                            self.attempted = !self.answer.trim().is_empty()
-                                || (self.input == Input::Pen && !self.ink.empty())
-                                || (self.input == Input::Voice && self.wav.is_some());
-                            self.matched = if matches!(task.skill, Skill::Recall | Skill::Listening)
-                                && !self.answer.trim().is_empty()
-                            {
-                                Some(entry.accepts(&self.answer))
-                            } else {
-                                None
-                            };
-                            self.revealed = true;
+                        let can_answer = !self.answer.trim().is_empty()
+                            || (self.input == Input::Pen && !self.ink.empty())
+                            || (self.input == Input::Voice && self.wav.is_some());
+                        if ux::primary(ui, "回答を確認", can_answer).clicked()
+                            || (check_with_key && !self.answer.trim().is_empty())
+                            || ui.add(egui::Button::new("わからないので答えを見る").wrap()).clicked()
+                        {
+                            self.check_study_answer(&entry, task.skill);
                         }
                     });
                 });
             });
         } else {
-            match self.matched {
-                Some(true) => {
-                    ui.colored_label(
-                        Color32::from_rgb(25, 115, 70),
-                        "登録されている解答と一致した。",
-                    );
-                }
-                Some(false) => {
-                    ui.colored_label(
-                        Color32::from_rgb(155, 92, 25),
-                        "登録例とは異なる。別解の可能性を含め、意味・文法・場面を確認する。",
-                    );
-                }
-                None => {
-                    ui.label("自分の回答と、以下の解説を照合する。");
-                }
-            }
-            if !self.answer.is_empty() {
-                ui.label(format!("自分の回答：{}", self.answer));
-            }
-            if self.input == Input::Pen {
-                ui.add_enabled_ui(false, |ui| self.ink.ui(ui));
-            }
-            if let Some(problem) = &self.exercise {
-                ui.label(format!("模範例：{}", problem.reference));
-                ui.small("模範例は一例。ほかの自然な英文も正解になり得る。");
-            } else {
-                self.card(ui, &entry);
-            }
-            if matches!(task.skill, Skill::Usage | Skill::Sentence) {
-                ui.separator();
-                ui.label(&entry.explanation);
-            }
-            if !self.feedback.is_empty() {
-                ui.group(|ui| {
-                    ui.label("AIの参考コメント（学習成績は自動変更しない）");
-                    ui.label(&self.feedback);
-                });
-            }
-            if ui
-                .add_enabled(
-                    self.pending.is_none() && !self.answer.trim().is_empty(),
-                    egui::Button::new("AIに使い方を確認する（Codexへ送信）"),
-                )
-                .clicked()
-            {
-                self.launch_ai(0);
-            }
-            if task.skill == Skill::Sentence && self.pending.is_none() && !self.feedback.is_empty()
-            {
-                if ui
-                    .button("添削を踏まえて書き直す（ヒントありとして評価）")
-                    .clicked()
-                {
-                    self.revealed = false;
-                    self.feedback.clear();
-                    self.matched = None;
-                    self.revision = true;
-                    self.hints = self.hints.max(1);
-                }
-            }
-            ui.separator();
-            ui.small("結果を記録：音声・手書きの認識ミスは記憶の失敗として扱わず、自分の元の回答で評価する。");
-            ui.add_enabled_ui(self.pending.is_none(), |ui| {
-                ui.horizontal_wrapped(|ui| {
-                    if ui.button("思い出せなかった").clicked() {
-                        self.grade(Grade::Again);
-                    }
-                    if ui
-                        .add_enabled(self.attempted, egui::Button::new("曖昧 / ヒントあり"))
-                        .clicked()
-                    {
-                        self.grade(Grade::Hard);
-                    }
-                    if ui
-                        .add_enabled(
-                            self.attempted && self.hints == 0,
-                            egui::Button::new("自力でできた"),
-                        )
-                        .clicked()
-                    {
-                        self.grade(Grade::Good);
-                    }
-                    if ui
-                        .add_enabled(
-                            self.attempted && self.hints == 0,
-                            egui::Button::new("すぐ正確にできた"),
-                        )
-                        .clicked()
-                    {
-                        self.grade(Grade::Easy);
-                    }
-                });
-            });
-            ui.small("学習直後45秒未満の再現は、復習間隔を控えめに設定する。");
+            self.study_feedback(ui, &entry, task.skill);
         }
         if self.pending.is_some() {
             ui.horizontal(|ui| {
@@ -1396,6 +1296,7 @@ impl WordApp {
         });
         self.pending = Some(Pending {
             key: String::new(),
+            kind: Activity::Generate,
             rx,
             cancel: Some(cancel),
         });
@@ -1416,6 +1317,7 @@ impl WordApp {
         if self.pending.is_some() || self.session.is_some() || self.fatal.is_some() {
             return;
         }
+        if action == 0 { self.connection_check = Some((self.progress.settings.codex_path.trim().to_string(), false)); }
         let config = match ai::Config::from_settings(&self.progress.settings) {
             Ok(c) => c,
             Err(e) => {
@@ -1460,6 +1362,7 @@ impl WordApp {
         self.pending = Some(Pending {
             key: String::new(),
             rx,
+            kind: if action == 0 { Activity::Connection } else { Activity::Generate },
             cancel: Some(cancel),
         });
         self.message = "Codexで処理中…".into();
@@ -1496,7 +1399,7 @@ impl WordApp {
             let result = config.chat(context.payload, images).map(|reply| AiResult::Chat { id, question, reply });
             let _ = tx.send(result);
         });
-        self.pending = Some(Pending { key: String::new(), rx, cancel: Some(cancel) });
+        self.pending = Some(Pending { key: String::new(), rx, cancel: Some(cancel), kind: Activity::Chat });
         self.message = "Codexに質問中…".into();
     }
     fn launch_material(&mut self) {
@@ -1518,7 +1421,7 @@ impl WordApp {
         let cancel = config.cancel.clone();
         let (tx, rx) = mpsc::channel();
         std::thread::spawn(move || { let _ = tx.send(config.material(request, images).map(AiResult::Material)); });
-        self.pending = Some(Pending { key:String::new(), rx, cancel:Some(cancel) });
+        self.pending = Some(Pending { key:String::new(), rx, cancel:Some(cancel), kind: Activity::Material });
         self.message = "選択したチャットから教材案を作成中…".into();
     }
     fn material_panel(&mut self, ui: &mut egui::Ui) {
@@ -1632,521 +1535,6 @@ impl WordApp {
             self.page = Page::Chat;
             self.message = format!("元の会話を表示した。参照したやり取り番号：{}", source.exchange_indices.iter().map(|i| (i+1).to_string()).collect::<Vec<_>>().join(", "));
         } else { self.message = "元の会話は現在の学習記録にありません。".into(); }
-    }
-    fn words_page(&mut self, ui: &mut egui::Ui) {
-        ui.heading("基本語から言い換え・例文を自動登録");
-        ui.hyperlink_to("NGSL公式・出典", learning::NGSL_PAGE);
-        ui.small("NGSL 1.2 / Browne, Culligan & Phillips / CC BY-SA 4.0。公式の頻度順リストと補足語を同梱。教材解説と例文はCodexが生成する。");
-        ui.label(format!(
-            "候補{}語 / 未処理{}語 / 本日の生成試行{}回",
-            self.words.len(),
-            self.batch_queue.len(),
-            self.progress.ai_calls.get(&today()).copied().unwrap_or(0)
-        ));
-        let idle = self.session.is_none()
-            && self.pending.is_none()
-            && self.recorder.is_none()
-            && !self.batch_running;
-        if !idle {
-            ui.label(
-                "学習・通信の終了後に追加操作ができる。自動生成は画面下のボタンで中断できる。",
-            );
-        }
-        ui.add_enabled_ui(idle,|ui|{
-            ui.add(egui::Slider::new(&mut self.progress.settings.batch_words,1..=3000).logarithmic(true).text("1回に追加する語数"));
-            ui.add(egui::Slider::new(&mut self.progress.settings.examples_per_word,3..=12).text("1語あたりの例文数"));
-            ui.small("生成は1語ずつ保存する。生成済みの語は除外し、途中で止まった語は再開時に処理する。1日の上限は設定で変更できる。");
-            ui.horizontal_wrapped(|ui|{
-                if ui.button("NGSLから自動生成・登録").clicked(){
-                    self.begin_batch(learning::parse_words(learning::BUNDLED_NGSL).unwrap_or_default());
-                }
-                if ui.button("公式NGSLを再取得して自動登録").clicked(){
-                    self.fetch_then_generate=true;let(tx,rx)=mpsc::channel();
-                    std::thread::spawn(move||{let _=tx.send(ai::download_words().map(AiResult::Words));});
-                    self.pending=Some(Pending{key:String::new(),rx,cancel:None});self.message="NGSL公式CSVを取得中…".into();
-                }
-                if ui.add_enabled(!self.batch_queue.is_empty(),egui::Button::new("未処理の語から再開")).clicked(){self.batch_running=true;}
-            });
-            ui.separator();ui.label("提供する基本語・熟語（1行に1項目）");
-            ui.add(egui::TextEdit::multiline(&mut self.provided_words).desired_rows(4).desired_width(f32::INFINITY));
-            if ui.button("入力した語から自動生成・登録").clicked(){
-                let text=self.provided_words.clone();
-                match learning::parse_words(&text).and_then(|words|{self.cache_words(&text)?;Ok(words)}){Ok(words)=>self.begin_batch(words),Err(e)=>self.message=e}
-            }
-            if ui.button("CSV・TXTの語から自動生成・登録").clicked(){
-                if let Some(path)=rfd::FileDialog::new().add_filter("語彙",&["csv","tsv","txt"]).pick_file(){
-                    match read_limited(&path,2_000_000).and_then(|text|{let words=learning::parse_words(&text)?;self.cache_words(&text)?;Ok(words)}){Ok(words)=>self.begin_batch(words),Err(e)=>self.message=e}
-                }
-            }
-            ui.small("UTF-8のCSV・TSV・TXT。先頭列が語、または順位・語の順。Lemma/Word/Headword列にも対応。");
-            ui.separator();ui.add(egui::TextEdit::singleline(&mut self.word_search).hint_text("候補を検索"));
-            let query=self.word_search.to_lowercase();
-            let visible:Vec<String>=self.words.iter().filter(|w|w.contains(&query)).take(100).cloned().collect();
-            egui::ScrollArea::vertical().id_salt("word-candidates").max_height(180.0).show(ui,|ui|{
-                for word in visible {if ui.selectable_label(self.selected_word==word,&word).clicked(){self.selected_word=word;}}
-            });
-            if ui.add_enabled(!self.selected_word.is_empty(),egui::Button::new("選択した語を生成・登録")).clicked(){self.begin_batch(vec![self.selected_word.clone()]);}
-            ui.small("AI生成の教材は形式検査後に自動保存される。内容は教材画面で確認・編集できる。");
-        });
-        if self.pending.is_some() {
-            ui.spinner();
-        }
-    }
-    fn deck_page(&mut self, ui: &mut egui::Ui) {
-        ui.heading("教材を調べる");
-        ui.add(
-            egui::TextEdit::singleline(&mut self.search)
-                .hint_text("基本語・表現・日本語で検索")
-                .desired_width(450.0),
-        );
-        let q = self.search.to_lowercase();
-        let matches: Vec<usize> = self
-            .deck
-            .iter()
-            .enumerate()
-            .filter(|(_, e)| {
-                if self.progress.deleted_entries.contains(&e.id) { return false; }
-                format!(
-                    "{} {} {} {} {}",
-                    e.base, e.meaning, e.business, e.elevated, e.usage
-                )
-                .to_lowercase()
-                .contains(&q)
-            })
-            .map(|(i, _)| i)
-            .collect();
-        ui.label(format!("{}項目", matches.len()));
-        egui::ScrollArea::vertical()
-            .id_salt("deck-list")
-            .max_height(180.0)
-            .show(ui, |ui| {
-                for &index in &matches {
-                    let e = &self.deck[index];
-                    if ui
-                        .selectable_label(
-                            self.selected == index,
-                            format!("{}   {}   [{}]", e.base, e.meaning, e.tag),
-                        )
-                        .clicked()
-                    {
-                        self.selected = index;
-                    }
-                }
-            });
-        if let Some(e) = self.deck.get(self.selected).filter(|e| !self.progress.deleted_entries.contains(&e.id)).cloned() {
-            ui.separator();
-            self.card(ui, &e);
-            ui.label(&e.question);
-            ui.label(&e.explanation);
-            let sources: Vec<_> = self.progress.material_sources.iter().filter(|s| s.entry_id == e.id).cloned().collect();
-            if !sources.is_empty() {
-                ui.collapsing("教材の元になった会話", |ui| {
-                    for (i, source) in sources.iter().enumerate() {
-                        if ui.add_enabled(self.pending.is_none(), egui::Button::new(format!("{}：元の会話を開く（{}）", i+1, source.mode.label()))).clicked() {
-                            self.open_material_source(source);
-                        }
-                    }
-                });
-            }
-            let idle = self.pending.is_none() && self.session.is_none() && !self.batch_running;
-            ui.add_enabled_ui(idle,|ui|{
-                if ui.add_enabled(e.examples.len()+self.progress.settings.examples_per_word<=200,egui::Button::new("英文追加：新しい場面の例文を生成・登録")).clicked(){self.launch_content(1,Some(e.clone()));}
-                ui.collapsing("日本文を登録して英文を生成",|ui|{
-                    let draft=self.progress.japanese_drafts.entry(e.id.clone()).or_default();
-                    if ui.add(egui::TextEdit::multiline(draft).desired_rows(3).desired_width(f32::INFINITY)).changed(){self.dirty=true;}
-                    if ui.button("日本文を登録し、英文を生成・登録").clicked(){self.persist();self.launch_content(2,Some(e.clone()));}
-                    ui.small("日本語原文を先に保存する。生成失敗時も原文は残り、再試行できる。");
-                });
-                ui.collapsing("言い換えを手動登録",|ui|{
-                    ui.label("置き換えの語句");ui.text_edit_singleline(&mut self.replacement_phrase);
-                    ui.label("日本語の意味");ui.text_edit_singleline(&mut self.replacement_meaning);
-                    ui.label("使える条件・意味の違い");ui.text_edit_multiline(&mut self.replacement_conditions);
-                    if ui.button("言い換えを追加").clicked(){let mut changed=e.clone();changed.replacements.push(model::Replacement{phrase:self.replacement_phrase.trim().into(),meaning:self.replacement_meaning.trim().into(),conditions:self.replacement_conditions.trim().into()});
-                        match self.import_deck(vec![changed]){Ok(())=>{self.replacement_phrase.clear();self.replacement_meaning.clear();self.replacement_conditions.clear();},Err(err)=>self.message=err}
-                    }
-                });
-                ui.collapsing("教材を編集",|ui|{
-                    if ui.button("この教材を編集欄へ読み込む").clicked(){self.draft_text=model::deck_text(&[e.clone()]);}
-                    if !self.draft_text.is_empty(){
-                        ui.add(egui::TextEdit::multiline(&mut self.draft_text).desired_rows(7).desired_width(f32::INFINITY));
-                        ui.small("TSV。末尾2列は言い換えと例文のJSON配列。設定からファイルへの書き出し・取り込みもできる。");
-                        if ui.button("編集内容を保存").clicked(){match model::parse_deck(&self.draft_text){Ok(items)=>self.pending_import=Some(items),Err(err)=>self.message=err}}
-                    }
-                });
-            });
-            let mut suspended = self.progress.suspended.contains(&e.id);
-            if ui
-                .checkbox(&mut suspended, "この項目を学習対象から外す（記録は保持）")
-                .changed()
-            {
-                if suspended {
-                    self.progress.suspended.insert(e.id.clone());
-                } else {
-                    self.progress.suspended.remove(&e.id);
-                }
-                self.dirty = true;
-                self.persist();
-            }
-        }
-    }
-    fn stats(&mut self, ui: &mut egui::Ui) {
-        ui.heading("覚えた感覚と、後日の再現を分けて見る");
-        ui.label(format!("記録した回答：{}回", self.progress.reviews.len()));
-        egui::Grid::new("retention").striped(true).show(ui, |ui| {
-            ui.strong("前回学習からの間隔");
-            ui.strong("ヒントなしの自己評価・照合結果");
-            ui.end_row();
-            for days in [7.0, 30.0] {
-                ui.label(format!("{days:.0}日以上"));
-                ui.label(match self.progress.observed_retention(days) {
-                    Some((ok, total)) => {
-                        format!("{ok}/{total}回 ({:.0}%)", 100.0 * ok as f64 / total as f64)
-                    }
-                    None => "まだ記録がない".into(),
-                });
-                ui.end_row();
-            }
-        });
-        ui.small("これは通常の復習記録であり、無作為抽出した能力テストではない。自己評価も含む。7日以上には30日以上も含まれる。");
-        ui.separator();
-        egui::Grid::new("by-skill").striped(true).show(ui, |ui| {
-            ui.strong("練習の種類");
-            ui.strong("回答回数");
-            ui.strong("復習を始めた項目");
-            ui.end_row();
-            for skill in Skill::ALL {
-                let suffix = format!(":{}", skill.code());
-                ui.label(skill.label());
-                ui.label(
-                    self.progress
-                        .reviews
-                        .iter()
-                        .filter(|r| r.key.ends_with(&suffix))
-                        .count()
-                        .to_string(),
-                );
-                ui.label(
-                    self.progress
-                        .memories
-                        .keys()
-                        .filter(|k| k.ends_with(&suffix))
-                        .count()
-                        .to_string(),
-                );
-                ui.end_row();
-            }
-        });
-        ui.separator();
-        ui.label("直近7日の学習時間");
-        for day in (0..7).rev() {
-            let date = (chrono::Local::now().date_naive() - chrono::Duration::days(day))
-                .format("%Y-%m-%d")
-                .to_string();
-            let sec = self.progress.study_seconds.get(&date).copied().unwrap_or(0);
-            ui.horizontal(|ui| {
-                ui.label(&date);
-                ui.add(
-                    egui::ProgressBar::new((sec as f32 / 300.0).min(1.0))
-                        .desired_width(300.0)
-                        .text(format!("{}分{}秒", sec / 60, sec % 60)),
-                );
-            });
-        }
-        ui.small("休んだ日は0分として表示する。連続記録が途切れても、習得履歴をリセットしない。");
-        ui.separator();
-        ui.label("入力方法別の回答記録");
-        for (method, label) in [
-            ("keyboard", "キーボード"),
-            ("pen", "手書き"),
-            ("voice", "音声"),
-        ] {
-            let records: Vec<_> = self
-                .progress
-                .reviews
-                .iter()
-                .filter(|r| r.method == method)
-                .collect();
-            let independent = records
-                .iter()
-                .filter(|r| !r.assisted && matches!(r.grade, Grade::Good | Grade::Easy))
-                .count();
-            ui.label(format!(
-                "{label}：{}回 / ヒントなしでできた {}回",
-                records.len(),
-                independent
-            ));
-        }
-        ui.small("方式ごとに問題や難しさが異なるため、この差だけで入力方法の効果は判定できない。");
-        ui.separator();
-        ui.heading("日本語出題の添削履歴（最新20件）");
-        for log in self.progress.writing_logs.iter().rev().take(20) {
-            ui.collapsing(
-                format!(
-                    "{} / {} / {}",
-                    log.at,
-                    log.problem.target,
-                    if log.revision {
-                        "書き直し"
-                    } else {
-                        "初回回答"
-                    }
-                ),
-                |ui| {
-                    ui.label(&log.problem.japanese);
-                    ui.label(format!("回答：{}", log.answer));
-                    ui.label(&log.feedback);
-                },
-            );
-        }
-    }
-    fn settings(&mut self, ui: &mut egui::Ui, ctx: &egui::Context) {
-        ui.heading("学習と入力の設定");
-        let before = serde_json::to_string(&self.progress.settings).unwrap_or_default();
-        ui.add(
-            egui::Slider::new(&mut self.progress.settings.minutes, 1..=30).text("通常コース（分）"),
-        );
-        ui.add(
-            egui::Slider::new(&mut self.progress.settings.new_per_day, 0..=20)
-                .text("新規項目の1日上限"),
-        );
-        ui.small("1日5分では3項目を初期値とする。復習候補が6項目を超える日は新規を出さない。");
-        ui.horizontal_wrapped(|ui| {
-            for skill in Skill::ALL {
-                let mut enabled = self.progress.settings.skills.contains(&skill);
-                if ui.checkbox(&mut enabled, skill.label()).changed() {
-                    if enabled {
-                        self.progress.settings.skills.push(skill);
-                    } else {
-                        self.progress.settings.skills.retain(|s| *s != skill);
-                    }
-                }
-            }
-        });
-        if self.progress.settings.skills.is_empty() {
-            self.progress.settings.skills.push(Skill::Recall);
-        }
-        let mut tags: Vec<String> = self
-            .deck
-            .iter()
-            .map(|e| e.tag.clone())
-            .collect::<std::collections::BTreeSet<_>>()
-            .into_iter()
-            .collect();
-        tags.insert(0, "すべて".into());
-        egui::ComboBox::from_id_salt("topic")
-            .selected_text(&self.progress.settings.topic)
-            .show_ui(ui, |ui| {
-                for tag in tags {
-                    ui.selectable_value(&mut self.progress.settings.topic, tag.clone(), tag);
-                }
-            });
-        ui.small("出題の設定は次のセッションから反映する。");
-        if ui
-            .add(
-                egui::Slider::new(&mut self.progress.settings.font_scale, 0.8..=1.6)
-                    .text("画面の拡大率"),
-            )
-            .changed()
-        {
-            ctx.set_zoom_factor(self.progress.settings.font_scale);
-        }
-        ui.separator();
-        ui.heading("音声");
-        let current_voice = self
-            .speaker
-            .voices
-            .iter()
-            .find(|v| v.0 == self.progress.settings.voice_id)
-            .map(|v| v.1.clone())
-            .unwrap_or_else(|| "英語の音声を自動選択".into());
-        egui::ComboBox::from_id_salt("voice")
-            .width(440.0)
-            .selected_text(current_voice)
-            .show_ui(ui, |ui| {
-                ui.selectable_value(
-                    &mut self.progress.settings.voice_id,
-                    String::new(),
-                    "英語の音声を自動選択",
-                );
-                for (id, name) in &self.speaker.voices {
-                    ui.selectable_value(&mut self.progress.settings.voice_id, id.clone(), name);
-                }
-            });
-        let mut rate = self.speech_rate();
-        if ui.add(egui::Slider::new(&mut rate, 0.5..=4.0).step_by(0.1).text("読み上げ速度（倍）")).changed() {
-            if let Err(error) = self.change_speech_rate(rate) { self.message = error; }
-        }
-        if ui.button("音声を確認する").clicked() {
-            self.say("We appreciate your assistance.");
-        }
-        ui.small(
-            "読み上げはWindowsの音声合成。マイクはWindowsで設定した既定の入力デバイスを使う。",
-        );
-        ui.separator();
-        ui.heading("AI接続：codex app-server");
-        ui.label(
-            "Codex CLIをインストールし、ターミナルで codex login を実行してChatGPTでログインする。",
-        );
-        ui.label(
-            "APIキーは使用しない。生成はChatGPT契約の利用枠を使用する。上限到達時は停止する。",
-        );
-        ui.horizontal(|ui| {
-            ui.label("実行ファイル");
-            ui.text_edit_singleline(&mut self.progress.settings.codex_path);
-            if ui.button("Codex実行ファイルを選択").clicked() {
-                if let Some(p) = rfd::FileDialog::new()
-                    .add_filter("Codex", &["exe", "cmd", "bat"])
-                    .pick_file()
-                {
-                    self.progress.settings.codex_path = p.to_string_lossy().into();
-                }
-            }
-        });
-        ui.small("実行ファイル欄をcodexにすると、起動時PATH → システムPATH → ユーザーPATH → npmの順に探索する。特定のCLIを使う場合はファイルを選択する。引数は入力しない。");
-        ui.horizontal(|ui| {
-            ui.label("モデル（空欄はCodexの既定値）");
-            ui.text_edit_singleline(&mut self.progress.settings.codex_model);
-        });
-        self.effort_settings(ui);
-        if ui
-            .add_enabled(
-                self.pending.is_none(),
-                egui::Button::new("接続・ChatGPT認証を確認"),
-            )
-            .clicked()
-        {
-            self.launch_content(0, None);
-        }
-        ui.add(
-            egui::Slider::new(&mut self.progress.settings.ai_daily_limit, 0..=1000)
-                .text("生成・添削の1日上限（試行回数）"),
-        );
-        ui.add(
-            egui::Slider::new(&mut self.progress.settings.examples_per_word, 3..=12)
-                .text("1回に生成する例文数"),
-        );
-        ui.small("手書き認識は画像対応モデルが必要。録音の自動文字起こしには音声入力対応モデルが必要。非対応時も録音・再生は利用できる。");
-        ui.collapsing("Codex診断情報（コピー・保存・ChatGPTで相談）", |ui| {
-            ui.label("接続確認または生成の直近1回を記録する。原文・認証情報は保存せず、stderrは分類のみ。未分類の原因を特定できない場合がある。");
-            ui.label("未ログインなら、同じWindowsユーザーのCMDで codex login --device-auth を実行し、認証完了後に codex login status で確認する。");
-            let mut report = wordweave5::diagnostics::report();
-            egui::ScrollArea::vertical().id_salt("codex_diagnostics").max_height(240.0).show(ui, |ui| {
-                ui.add(egui::TextEdit::multiline(&mut report).desired_width(f32::INFINITY).interactive(false));
-            });
-            ui.small("共有前に表示内容を確認すること。コピーとブラウザー起動は別操作で、自動送信しない。");
-            ui.horizontal_wrapped(|ui| {
-                if ui.button("確認した診断情報をコピー").clicked() {
-                    ui.ctx().copy_text(report.clone());
-                }
-                if ui.button("診断情報を保存").clicked() {
-                    if let Some(path) = rfd::FileDialog::new().set_file_name("wordweave-codex-diagnostics.txt").save_file() {
-                        self.message = store::atomic_write(&path, report.as_bytes())
-                            .map(|_| "診断情報を保存した。".into()).unwrap_or_else(|e| e);
-                    }
-                }
-                ui.hyperlink_to("ChatGPTを開く（手動貼り付け）", "https://chatgpt.com/");
-            });
-        });
-        self.persistent_diagnostics_ui(ui);
-        ui.separator();
-        ui.heading("教材・バックアップ");
-        let idle = self.session.is_none() && self.pending.is_none() && self.recorder.is_none();
-        ui.horizontal_wrapped(|ui| {
-            if ui.button("教材をTSVに書き出す").clicked() {
-                if let Some(path) = rfd::FileDialog::new()
-                    .set_file_name("wordweave-deck.tsv")
-                    .add_filter("TSV", &["tsv"])
-                    .save_file()
-                {
-                    self.message =
-                        store::atomic_write(&path, model::deck_text(&self.deck).as_bytes())
-                            .map(|_| "教材を書き出した。編集後は取り込みで反映できる。".into())
-                            .unwrap_or_else(|e| e);
-                }
-            }
-            if ui
-                .add_enabled(
-                    idle && self.fatal.is_none(),
-                    egui::Button::new("教材TSVを取り込む"),
-                )
-                .clicked()
-            {
-                if let Some(path) = rfd::FileDialog::new()
-                    .add_filter("TSV", &["tsv"])
-                    .pick_file()
-                {
-                    match read_limited(&path, 64_000_000).and_then(|t| model::parse_deck(&t)) {
-                        Ok(d) => self.pending_import = Some(d),
-                        Err(e) => self.message = e,
-                    }
-                }
-            }
-        });
-        ui.small("同じIDは更新、新しいIDは追加。内容を変更した項目の復習状態は再学習から始める。学習中の取り込みはできない。");
-        ui.horizontal_wrapped(|ui| {
-            if ui.button("学習記録をエクスポート").clicked() {
-                self.credit_time();
-                if let Some(path) = rfd::FileDialog::new()
-                    .set_file_name("wordweave-progress.json")
-                    .add_filter("JSON", &["json"])
-                    .save_file()
-                {
-                    let result = serde_json::to_vec_pretty(&self.progress)
-                        .map_err(|e| e.to_string())
-                        .and_then(|bytes| store::atomic_write(&path, &bytes));
-                    self.message = result
-                        .map(|_| "学習記録を書き出した。このJSONに教材TSV・録音・筆跡原本は含まれない。媒体付きバックアップも使用してください。".into())
-                        .unwrap_or_else(|e| e);
-                }
-            }
-            if ui
-                .add_enabled(
-                    idle && self.storage.is_some(),
-                    egui::Button::new("学習記録を復元"),
-                )
-                .clicked()
-            {
-                if let Some(path) = rfd::FileDialog::new()
-                    .add_filter("JSON", &["json"])
-                    .pick_file()
-                {
-                    match read_limited(&path, 100_000_000)
-                        .and_then(|t| {
-                            serde_json::from_str::<Progress>(&t).map_err(|e| e.to_string())
-                        })
-                        .and_then(|p| {
-                            p.validate()?;
-                            Ok(p)
-                        }) {
-                        Ok(p) => self.pending_restore = Some(p),
-                        Err(e) => self.message = e,
-                    }
-                }
-            }
-        });
-        if let Some(storage) = &self.storage {
-            ui.small(format!("保存先：{}", storage.dir.display()));
-        }
-        ui.small("日ごとのバックアップは保存先のbackupsフォルダーに残る。復元前の記録も別ファイルに退避する。");
-        self.backup_controls(ui, idle);
-        ui.separator();
-        ui.collapsing("学習方式と限界",|ui|{
-            ui.label("間隔学習・想起練習・段階的ヒントを採用。復習間隔は透明な独自の計算規則であり、FSRSでも『科学的に最速と証明された方式』でもない。");
-            ui.label("正解率・入力方式別の記録を確認しながら、学習量を調整する。自己評価を含むため、数値は能力の厳密な測定ではない。");
-            ui.label("詳細な研究根拠・教材の選定基準は同梱のRESEARCH.mdを参照。");
-        });
-        if before != serde_json::to_string(&self.progress.settings).unwrap_or_default() {
-            self.dirty = true;
-        }
-        if ui
-            .add_enabled(self.fatal.is_none(), egui::Button::new("設定を保存"))
-            .clicked()
-        {
-            self.persist();
-            if self.fatal.is_none() {
-                self.message = "設定を保存した。".into();
-            }
-        }
     }
     fn import_deck(&mut self, items: Vec<Entry>) -> Result<(), String> {
         if self.session.is_some() || self.pending.is_some() || self.recorder.is_some() {
@@ -2277,7 +1665,7 @@ impl WordApp {
                 ui.label(
                     RichText::new("WordWeave 5")
                         .strong()
-                        .color(Color32::from_rgb(24, 103, 106))
+                        .color(ux::ACCENT)
                         .size(24.0),
                 );
                 let enabled = self.pending.is_none()
@@ -2317,22 +1705,31 @@ impl WordApp {
                 ui.small(if execution.active { "Codexの実行設定を確認中…" } else { "モデル：未確認 / effort：未確認" });
             }
             if !self.message.is_empty() {
-                ui.label(&self.message);
+                egui::ScrollArea::vertical().id_salt("status-message")
+                    .max_height(54.0).show(ui, |ui| { ui.add(egui::Label::new(&self.message).wrap()); });
             }
             if !self.font_notice.is_empty() {
                 ui.colored_label(Color32::RED, &self.font_notice);
             }
             if let Some(error) = &self.fatal {
-                ui.colored_label(Color32::from_rgb(165, 45, 30), error);
+                egui::ScrollArea::vertical().id_salt("status-error")
+                    .max_height(70.0).show(ui, |ui| { ui.colored_label(Color32::from_rgb(165, 45, 30), error); });
             }
             if self.pending.is_some() || self.batch_running {
-                if ui.button("生成・通信を中断").clicked() {
+                ui.small(self.activity_label());
+                let cancellable = self.pending.as_ref().is_some_and(|p| p.cancel.is_some());
+                if (cancellable || self.batch_running) && ui.button("生成・通信の中断を要求").clicked() {
                     self.batch_running = false;
                     self.fetch_then_generate = false;
                     if let Some(c) = self.pending.as_ref().and_then(|p| p.cancel.as_ref()) {
                         c.store(true, Ordering::Relaxed);
                     }
                     self.message = "中断中… 登録済み教材と未処理の語は保持する。".into();
+                }
+                if self.fetch_then_generate && !cancellable
+                    && ui.button("取得後の自動生成を取り消す").clicked() {
+                    self.fetch_then_generate = false;
+                    self.message = "語彙一覧の取得は続ける。取得後の自動生成は取り消した。".into();
                 }
             }
             ui.small("ローカル学習 / AI生成はCodexのChatGPT認証を使用");

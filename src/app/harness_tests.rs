@@ -130,7 +130,7 @@ fn conversation_trash_does_not_apply_when_saving_fails_or_media_is_unsaved() {
     std::fs::remove_dir_all(root).unwrap();
 }
 
-fn fixture() -> (egui::Context, WordApp, PathBuf) {
+pub(super) fn fixture() -> (egui::Context, WordApp, PathBuf) {
     static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
     let sequence = NEXT.fetch_add(1, Ordering::Relaxed);
     let root = std::env::temp_dir().join(format!(
@@ -148,7 +148,7 @@ fn fixture() -> (egui::Context, WordApp, PathBuf) {
     (ctx, app, root)
 }
 
-fn frame(ctx: &egui::Context, app: &mut WordApp, close: bool) -> egui::FullOutput {
+pub(super) fn frame(ctx: &egui::Context, app: &mut WordApp, close: bool) -> egui::FullOutput {
     let mut input = egui::RawInput {
         screen_rect: Some(egui::Rect::from_min_size(
             egui::Pos2::ZERO,
@@ -167,7 +167,7 @@ fn frame(ctx: &egui::Context, app: &mut WordApp, close: bool) -> egui::FullOutpu
     ctx.run(input, |ctx| app.update_ui(ctx))
 }
 
-fn shape_text(shape: &egui::epaint::Shape, text: &mut String) {
+pub(super) fn shape_text(shape: &egui::epaint::Shape, text: &mut String) {
     match shape {
         egui::epaint::Shape::Text(t) => {
             text.push_str(&t.galley.text());

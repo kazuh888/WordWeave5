@@ -62,6 +62,7 @@ impl WordApp {
         };
         let (tx, rx) = mpsc::channel();
         self.pending = Some(Pending {
+            kind: Activity::Recovery,
             key: self.key(),
             rx,
             cancel: Some(config.cancel.clone()),
