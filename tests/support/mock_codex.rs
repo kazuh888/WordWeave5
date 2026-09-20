@@ -84,6 +84,7 @@ fn main() {
                 "planType":"test"
             }}})),
             "thread/start" => {
+                fs::write("thread-start.json", serde_json::to_vec(&v["params"]).unwrap()).unwrap();
                 assert_eq!(v["params"]["ephemeral"], false);
                 assert_eq!(v["params"]["sandbox"], "read-only");
                 assert_eq!(v["params"]["modelProvider"], "openai");
@@ -96,6 +97,8 @@ fn main() {
                     result["reasoningEffort"] = json!("high");
                 }
                 if mode == "null_effort" { result["reasoningEffort"] = Value::Null; }
+                if mode == "effort" { result["reasoningEffort"] = json!("low"); }
+                if mode == "effort_rerouted" { result["model"] = json!("other"); }
                 send(json!({"id":v["id"],"result":result}));
             },
             "thread/read" => {
@@ -110,6 +113,28 @@ fn main() {
                     "id": if mode=="wrong_turn" {"other"} else {"u"}, "status":"completed",
                     "items":[{"id":"a","type":"agentMessage","phase":"final_answer","text":"recovered"}]
                 }]}}}));
+            },
+            "model/list" if mode.starts_with("effort") => {
+                if mode == "effort_unavailable" {
+                    send(json!({"id":v["id"],"error":{"code":-1,"message":"unavailable"}}));
+                } else if mode == "effort_cycle" {
+                    send(json!({"id":v["id"],"result":{"data":[],"nextCursor":"repeat"}}));
+                } else if mode == "effort_missing" {
+                    send(json!({"id":v["id"],"result":{"data":[{"model":"test"}],"nextCursor":null}}));
+                } else if v["params"]["cursor"].is_null() {
+                    send(json!({"id":v["id"],"result":{"data":[{
+                        "model":"other","displayName":"Other model","isDefault":true,
+                        "supportedReasoningEfforts":[{"reasoningEffort":"low","description":"less"}],
+                        "defaultReasoningEffort":"low"
+                    }],"nextCursor":"page-two"}}));
+                } else {
+                    assert_eq!(v["params"]["cursor"], "page-two");
+                    send(json!({"id":v["id"],"result":{"data":[{
+                        "model":"test","displayName":"Test model",
+                        "supportedReasoningEfforts":[{"reasoningEffort":"high","description":"more"},{"reasoningEffort":"future-effort","description":"dynamic"}],
+                        "defaultReasoningEffort":"high"
+                    },{"model":"no-capabilities"}],"nextCursor":null}}));
+                }
             },
             "model/list" => send(json!({"id":v["id"],"result":{
                 "data":[{"model":"test","inputModalities":

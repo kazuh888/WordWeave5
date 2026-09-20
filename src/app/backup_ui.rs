@@ -46,7 +46,7 @@ impl WordApp {
                         self.progress = progress;
                         self.dirty = false;
                         self.fatal = None;
-                        self.chat_selected = 0;
+                        self.reset_chat_view_after_restore();
                         self.message = "媒体を含む教材・学習記録を復元した。".into();
                     }
                     Err(e) => {

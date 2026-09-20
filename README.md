@@ -1,8 +1,8 @@
 # WordWeave 5 — 使い分ける英語
 
-**0.4.0 Windows Harness。** 音声・筆跡を保持するチャット、根拠チャット付き左右比較、生成結果の再取得、媒体付きバックアップを追加した。[操作と更新手順](UPGRADE-0.4.0.md)を参照する。
+**0.5.1 Windows版。** システムPATHとユーザーPATHからのCodex・Volta探索を補完した。[0.5.1の更新手順](UPGRADE-0.5.1.md)を参照する。0.5.0の音声操作・会話ごみ箱・effort指定・診断ログの[操作手順](UPGRADE-0.5.0.md)も引き続き有効である。
 
-現ソースの検証範囲は [Harness検証記録](validation/harness-0.4.0.md)、旧版の履歴は [VALIDATION.md](VALIDATION.md) に分けている。モック試験の成功をマイク・ペン実機や実ChatGPT接続の成功として扱わない。
+現ソースの検証範囲は [0.5.1検証記録](validation/path-search-0.5.1.md)、旧版の履歴は [VALIDATION.md](VALIDATION.md) に分けている。モック試験の成功をマイク・ペン実機や実ChatGPT接続の成功として扱わない。0.4.0の媒体・教材比較・実行記録は維持する。
 
 ## ビルド・起動
 
@@ -20,7 +20,7 @@ cargo build --release --locked --bin wordweave5
 
 ## AI接続
 
-Codex CLIを導入し、PowerShellで `codex login` を実行してChatGPTでログインする。アプリの「設定」→「接続・ChatGPT認証を確認」で確認する。実行ファイルの初期値は `codex`。自動検出できない場合は `codex.exe` を選択する。
+Codex CLIを導入し、PowerShellで `codex login` を実行してChatGPTでログインする。アプリの「設定」→「接続・ChatGPT認証を確認」で確認する。実行ファイル欄が `codex` のときは、起動時PATH→保存システムPATH→保存ユーザーPATH→npmの順に探索する。ユーザーはWordWeaveを実行するアカウントである。明示したパスが消えても別版へ自動代替しない。設定欄を `codex` に変更して自動検出するか、使用する `codex.exe` / `codex.cmd` を選択する。探索は版の互換性や0.153.4であることを保証しない。
 
 アプリはAPIキー認証を拒否し、APIへのフォールバックを行わない。ChatGPT契約の利用枠は消費する。1日の生成試行上限は初期値10回、設定可能範囲0〜1,000回である。利用枠が尽きた場合は処理を停止する。
 

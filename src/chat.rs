@@ -8,6 +8,7 @@ use std::collections::BTreeSet;
 pub const CONTEXT_BYTES: usize = 64_000;
 pub const MAX_EXCHANGES: usize = 200;
 pub const MAX_CHATS: usize = 50;
+pub const MAX_TRASH_CHATS: usize = 500;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Attachment {
@@ -48,6 +49,9 @@ pub struct Exchange {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Conversation {
     pub id: String,
+    /// Recoverable removal from active conversations; originals and evidence stay intact.
+    #[serde(default)]
+    pub deleted_at: Option<i64>,
     pub title: String,
     #[serde(default)]
     pub pinned: bool,
@@ -63,6 +67,7 @@ impl Conversation {
     pub fn new() -> Self {
         Self {
             id: format!("{}-{}", std::process::id(), chrono::Utc::now().timestamp_nanos_opt().unwrap()),
+            deleted_at: None,
             title: "新しい会話".into(), pinned: false, created_at: chrono::Utc::now().timestamp(),
             memo: String::new(), draft: String::new(), exchanges: Vec::new(), draft_attachments: Vec::new(),
         }
@@ -85,6 +90,7 @@ impl Conversation {
     // Only a completed answer is committed. Failed attempts keep the draft and
     // are never included in the next context as successful assistant replies.
     pub fn complete(&mut self, question: String, answer: String, execution: Execution) -> Result<(), String> {
+        if self.deleted_at.is_some() { return Err("ごみ箱の会話には回答を追加できません。復元してください。".into()); }
         if self.exchanges.len() >= MAX_EXCHANGES { return Err("この会話は200往復に達しました。新しい会話を作成してください。".into()); }
         if question.trim().is_empty() || question.chars().count() > 4000
             || answer.trim().is_empty() || answer.chars().count() > 16000 {
@@ -100,6 +106,7 @@ impl Conversation {
         Ok(())
     }
     pub fn apply_recognition(&mut self, expected: &str, text: &str) -> Result<(), String> {
+        if self.deleted_at.is_some() { return Err("ごみ箱の会話は編集できません。復元してください。".into()); }
         if self.draft != expected { return Err("入力欄が変更されたため、認識結果を自動反映しませんでした。結果を確認して貼り付けてください。".into()); }
         let next = if expected.trim().is_empty() { text.to_owned() } else { format!("{expected}\n{text}") };
         if text.trim().is_empty() || next.chars().count() > 4000 { return Err("認識結果が空、または入力上限を超えています。".into()); }
@@ -110,7 +117,7 @@ impl Conversation {
 
 /// Display order only: never reorder stored conversations or invalidate an active index.
 pub fn ordered_indices(chats: &[Conversation]) -> Vec<usize> {
-    let mut indices: Vec<_> = (0..chats.len()).collect();
+    let mut indices: Vec<_> = (0..chats.len()).filter(|&i| chats[i].deleted_at.is_none()).collect();
     indices.sort_by_key(|&i| {
         let c = &chats[i];
         (std::cmp::Reverse(c.pinned), std::cmp::Reverse(c.exchanges.last().map_or(c.created_at, |e| e.at)))
@@ -204,6 +211,7 @@ pub fn prepare_with_catalog(conversation: &Conversation, entries: &[Entry], dele
 }
 
 fn prepare_selection(conversation: &Conversation, limit: usize, catalog: Option<&Value>) -> Result<Context, String> {
+    if conversation.deleted_at.is_some() { return Err("ごみ箱の会話は送信できません。先に復元してください。".into()); }
     conversation.validate()?;
     let question = conversation.draft.trim();
     if question.is_empty() { return Err("英語についての質問を入力してください。".into()); }

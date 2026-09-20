@@ -1,5 +1,25 @@
 # Windows Harness タスク
 
+## PATH補完0.5.1（2026-09-20）
+
+- [x] 保存システム・実行ユーザーPATHを補完し、CodexとVoltaで共有する。明示パス欠損時は停止する。
+- [x] 修正前の再現失敗とオフラインコンパイルを確認する。
+- [x] Windows全167件テスト、releaseビルド、起動時PATHが空の状態での保存PATH探索、独立レビュー。[記録](../validation/path-search-0.5.1.md)。
+
+## 操作制御0.5.0（2026-09-20）
+
+仕様: [操作制御](../docs/design/interaction-controls.md)。以下は新規変更の検証であり、下の0.4.0合格とは別である。
+
+- [x] diagnostics: 永続・容量制限・秘密非保存・保存失敗の分離、書き込み中断を試験。
+- [x] effort: model/list、設定保存、生成時指定、返却値表示をモック通信試験。
+- [x] chat-trash: ごみ箱移動・復元・原本と根拠保持・保存失敗・復元後readonlyを試験。添付名を変更。
+- [x] recording-controls: 一時停止時間を除外、キャンセル確認と既存録音保護を実装。純粋ロジックと保存失敗を試験。
+- [x] speech-controls: ±5秒、pause/resume/stop、0.5〜4倍と位置表示を統合。境界判定・Windows無音API試験。
+- [x] Windows全159件テスト・releaseビルド成功、差分レビューと更新手順。[検証記録](../validation/controls-0.5.0.md)。
+- [ ] 実機確認: マイク、TTSの速度/音質、CLI0.153.4実生成のeffort反映。
+
+## 0.4.0までの履歴
+
 - [x] 基準検証：変更前のWindows全テスト76件成功。現行版の証拠とは分ける。
 - [x] media-assets：原本保存・検証・バックアップ。新規モジュールと一時フォルダー試験。
 - [x] run-journal：生成前保存、応答保存、結果不明・exact turn再読込。再生成せず応答を回収して保存する。

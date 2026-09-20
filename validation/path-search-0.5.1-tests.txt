@@ -1,0 +1,416 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.24
+   Compiling windows-link v0.2.1
+   Compiling windows_x86_64_msvc v0.52.6
+   Compiling stable_deref_trait v1.2.1
+   Compiling smallvec v1.16.0
+   Compiling pin-project-lite v0.2.17
+   Compiling once_cell v1.21.4
+   Compiling cfg-if v1.0.4
+   Compiling autocfg v1.5.1
+   Compiling writeable v0.6.4
+   Compiling litemap v0.8.3
+   Compiling khronos_api v3.1.0
+   Compiling bitflags v2.13.1
+   Compiling bytes v1.12.1
+   Compiling icu_normalizer_data v2.3.0
+   Compiling utf8_iter v1.0.4
+   Compiling icu_properties_data v2.3.0
+   Compiling cfg_aliases v0.2.2
+   Compiling windows-sys v0.61.2
+   Compiling futures-core v0.3.34
+   Compiling percent-encoding v2.3.2
+   Compiling log v0.4.34
+   Compiling xml-rs v0.8.29
+   Compiling itoa v1.0.18
+   Compiling simd-adler32 v0.3.10
+   Compiling tracing-core v0.1.36
+   Compiling crc32fast v1.5.1
+   Compiling adler2 v2.0.1
+   Compiling parking_lot_core v0.9.12
+   Compiling zerocopy v0.8.56
+   Compiling futures-sink v0.3.34
+   Compiling version_check v0.9.5
+   Compiling form_urlencoded v1.2.2
+   Compiling scopeguard v1.2.0
+   Compiling windows-targets v0.52.6
+   Compiling num-traits v0.2.19
+   Compiling http v1.5.0
+   Compiling windows_x86_64_msvc v0.53.1
+   Compiling ttf-parser v0.25.1
+   Compiling serde_core v1.0.229
+   Compiling tracing v0.1.44
+   Compiling memchr v2.8.3
+   Compiling lock_api v0.4.14
+   Compiling gl_generator v0.14.0
+   Compiling windows-result v0.1.2
+   Compiling ahash v0.8.12
+   Compiling windows-sys v0.52.0
+   Compiling miniz_oxide v0.9.1
+   Compiling httparse v1.10.1
+   Compiling raw-window-handle v0.6.2
+   Compiling slab v0.4.12
+   Compiling futures-io v0.3.34
+   Compiling ab_glyph_rasterizer v0.1.10
+   Compiling futures-task v0.3.34
+   Compiling parking_lot v0.12.5
+   Compiling futures-util v0.3.34
+   Compiling fdeflate v0.3.7
+   Compiling http-body v1.1.0
+   Compiling flate2 v1.1.10
+   Compiling miniz_oxide v0.8.9
+   Compiling winit v0.30.13
+   Compiling glutin_wgl_sys v0.6.1
+   Compiling syn v3.0.5
+   Compiling syn v2.0.119
+   Compiling glutin_egl_sys v0.7.1
+   Compiling tower-service v0.3.3
+   Compiling nohash-hasher v0.2.0
+   Compiling pxfm v0.1.30
+   Compiling serde v1.0.229
+   Compiling try-lock v0.2.5
+   Compiling libc v0.2.189
+   Compiling native-tls v0.2.18
+   Compiling epaint_default_fonts v0.31.1
+   Compiling profiling v1.0.18
+   Compiling png v0.18.1
+   Compiling want v0.3.1
+   Compiling windows-targets v0.53.5
+   Compiling memoffset v0.9.1
+   Compiling owned_ttf_parser v0.25.1
+   Compiling futures-channel v0.3.34
+   Compiling glutin v0.32.3
+   Compiling synstructure v0.13.2
+   Compiling socket2 v0.6.5
+   Compiling mio v1.2.3
+   Compiling ab_glyph v0.2.32
+   Compiling schannel v0.1.29
+   Compiling smol_str v0.2.2
+   Compiling unicode-segmentation v1.13.3
+   Compiling tokio v1.53.1
+   Compiling moxcms v0.8.1
+   Compiling error-code v3.4.0
+   Compiling atomic-waker v1.1.2
+   Compiling cursor-icon v1.2.0
+   Compiling byteorder-lite v0.1.0
+   Compiling dpi v0.1.2
+   Compiling winapi v0.3.9
+   Compiling clipboard-win v5.4.1
+   Compiling windows-sys v0.60.2
+   Compiling glutin-winit v0.5.0
+   Compiling sync_wrapper v1.0.2
+   Compiling libloading v0.8.9
+   Compiling base64 v0.22.1
+   Compiling zmij v1.0.23
+   Compiling thiserror v1.0.69
+   Compiling zerovec-derive v0.11.6
+   Compiling displaydoc v0.2.7
+   Compiling bytemuck_derive v1.12.0
+   Compiling serde_derive v1.0.229
+   Compiling tower-layer v0.3.3
+   Compiling ipnet v2.12.1
+   Compiling http-body-util v0.1.5
+   Compiling windows-core v0.54.0
+   Compiling windows-sys v0.59.0
+   Compiling dyn-clone v1.0.20
+   Compiling tts v0.26.1
+   Compiling cpal v0.15.3
+   Compiling zerofrom-derive v0.1.7
+   Compiling yoke-derive v0.8.2
+   Compiling windows-implement v0.56.0
+   Compiling windows-interface v0.56.0
+   Compiling dyn-clonable-impl v0.9.2
+   Compiling thiserror-impl v1.0.69
+   Compiling serde_json v1.0.151
+   Compiling rfd v0.15.3
+   Compiling hyper v1.11.1
+   Compiling tokio-native-tls v0.3.1
+   Compiling tower v0.5.3
+   Compiling web-time v1.1.0
+   Compiling zeroize v1.9.0
+   Compiling hyper-util v0.1.20
+   Compiling glow v0.16.0
+   Compiling ryu v1.0.23
+   Compiling litrs v1.0.0
+   Compiling bytemuck v1.25.2
+   Compiling rustls-pki-types v1.15.1
+   Compiling windows v0.54.0
+   Compiling emath v0.31.1
+   Compiling image v0.25.10
+   Compiling dyn-clonable v0.9.2
+   Compiling oxilangtag v0.1.6
+   Compiling windows-core v0.56.0
+   Compiling lazy_static v1.5.0
+   Compiling dasp_sample v0.11.0
+   Compiling ecolor v0.31.1
+   Compiling document-features v0.2.12
+   Compiling static_assertions v1.1.0
+   Compiling zerofrom v0.1.8
+   Compiling epaint v0.31.1
+   Compiling hyper-tls v0.6.0
+   Compiling fs2 v0.4.3
+   Compiling hound v3.5.1
+   Compiling yoke v0.8.3
+   Compiling zerovec v0.11.8
+   Compiling zerotrie v0.2.5
+   Compiling arboard v3.6.1
+   Compiling windows v0.56.0
+   Compiling serde_urlencoded v0.7.1
+   Compiling chrono v0.4.45
+   Compiling egui v0.31.1
+   Compiling tinystr v0.8.4
+   Compiling potential_utf v0.1.6
+   Compiling icu_collections v2.3.0
+   Compiling icu_locale_core v2.3.0
+   Compiling icu_provider v2.3.1
+   Compiling egui_glow v0.31.1
+   Compiling icu_properties v2.3.0
+   Compiling icu_normalizer v2.3.0
+   Compiling idna_adapter v1.2.2
+   Compiling idna v1.1.0
+   Compiling url v2.5.8
+   Compiling webbrowser v1.2.4
+   Compiling tower-http v0.6.11
+   Compiling egui-winit v0.31.1
+   Compiling reqwest v0.12.28
+   Compiling eframe v0.31.1
+   Compiling wordweave5 v0.5.1 (F:\Kazuhiro\GitHub\WordWeave5)
+warning: method `finish` is never used
+   --> src\media.rs:183:12
+    |
+ 60 | impl Recorder {
+    | ------------- method in this implementation
+...
+183 |     pub fn finish(self) -> Result<Vec<u8>, String> {
+    |            ^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: method `say` is never used
+   --> src\media\speech.rs:160:12
+    |
+137 | impl Speaker {
+    | ------------ method in this implementation
+...
+160 |     pub fn say(&mut self, text: &str, voice_id: &str, slow: bool) -> Result<(), String> {
+    |            ^^^
+
+warning: `wordweave5` (bin "wordweave5" test) generated 1 warning (1 duplicate)
+warning: `wordweave5` (bin "wordweave5") generated 2 warnings
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1m 37s
+     Running unittests src\lib.rs (target\debug\deps\wordweave5-ad0087f361040ca3.exe)
+
+running 104 tests
+test chat::tests::display_order_is_pins_then_latest_output_with_stable_ties ... ok
+test chat::tests::legacy_chats_load_without_pin_or_creation_time ... ok
+test chat::tests::oversized_pins_are_not_silently_dropped ... ok
+test chat::tests::new_conversation_has_no_other_chats_context ... ok
+test backup::tests::memory_snapshot_rejects_invalid_or_oversized_progress ... ok
+test chat::tests::completed_chat_keeps_media_and_recognition_never_overwrites_new_draft ... ok
+test chat::tests::failed_reply_keeps_draft_and_success_survives_reload ... ok
+test chat::tests::titles_normalize_whitespace_and_keep_custom_titles ... ok
+test chat_action::tests::ordinary_answer_has_no_action_and_preserves_server_execution ... ok
+test chat_action::tests::parses_each_proposed_operation_without_applying_it ... ok
+test codex::search_path::tests::empty_and_relative_entries_do_not_search_the_working_directory ... ok
+test codex::search_path::tests::absent_registry_path_is_a_nonfatal_missing_source ... ok
+test codex::search_path::tests::machine_path_is_available_without_process_path ... ok
+test chat_action::tests::rejects_malformed_unknown_and_inconsistent_actions ... ok
+test codex::search_path::tests::process_then_machine_then_user_preserves_order_and_removes_duplicates ... ok
+test chat_action::tests::rejects_empty_answer_invalid_title_and_unknown_fields ... ok
+test codex::search_path::tests::user_path_is_available_without_process_path ... ok
+test codex::search_path::tests::windows_duplicates_are_case_insensitive ... ok
+test codex::tests::batch_quoting_keeps_spaces_and_normalizes_verbatim_path ... ok
+test chat::tests::context_preserves_order_and_pins_within_budget ... ok
+test codex::tests::batch_quoting_rejects_shell_expansion ... ok
+test codex::tests::commentary_without_a_final_answer_is_not_a_completed_response ... ok
+test chat::tests::older_relevant_turn_is_recalled_alongside_recent_turns ... ok
+test codex::tests::failed_turn_does_not_register_partial_output ... ok
+test codex::tests::final_only_and_other_turns_ignored ... ok
+test codex::tests::messages_without_phase_preserve_received_order_not_id_sort_order ... ok
+test codex::tests::paid_and_missing_auth_are_rejected ... ok
+test chat::tests::budget_covers_escaped_unicode_and_does_not_split_pairs ... ok
+test assets::tests::references_cannot_escape_asset_directory ... ok
+test assets::tests::rejects_wrong_format_and_oversize_without_creating_originals ... ok
+test assets::tests::missing_original_aborts_export_before_publishing_backup ... ok
+test diagnostics::tests::captured_stderr_has_categories_but_no_raw_text ... ok
+test chat::tests::catalog_is_bounded_relevant_and_excludes_deleted_entries ... ok
+test codex::tests::missing_explicit_executable_does_not_fall_back_to_path ... ok
+test commit::tests::foreign_changes_are_preserved_and_block_further_saves ... ok
+test codex::tests::missing_volta_reports_discovery_failure ... ok
+test codex::tests::unrelated_wrapper_does_not_use_volta_from_path ... ok
+test codex::tests::volta_is_found_outside_the_shim_directory ... ok
+test codex::tests::volta_uses_supplemented_machine_or_user_path ... ok
+test codex::tests::sibling_volta_precedes_path ... ok
+test diagnostics::tests::ring_is_bounded ... ok
+test diagnostics::tests::stderr_never_returns_secrets ... ok
+test diagnostics::tests::strict_filename_ownership_does_not_accept_near_matches ... ok
+test effort::tests::effort_tokens_remain_compatible_with_settings_validation ... ok
+test effort::tests::malformed_advertised_effort_is_rejected_before_it_can_be_selected ... ok
+test execution::tests::missing_or_null_effort_is_not_inferred_from_model ... ok
+test execution::tests::reported_settings_are_preserved ... ok
+test learning::tests::csv_quotes_ranks_duplicates_and_html ... ok
+test learning::tests::exercise_target_is_bound_to_card ... ok
+test learning::tests::extra_deck_has_valid_unique_ids ... ok
+test learning::tests::generated_id_cannot_replace_another_card ... ok
+test learning::tests::official_ngsl_files_and_bundle_are_consistent ... ok
+test material::tests::append_deduplicates_and_does_not_overwrite_existing_explanations_or_grades ... ok
+test material::tests::append_reason_is_remapped_to_merged_example_and_dropped_changes_have_no_reason ... ok
+test material::tests::correction_resets_changed_core_and_append_rejects_manual_core_edits ... ok
+test material::tests::incomplete_review_draft_and_source_survive_save_without_committing_to_deck ... ok
+test material::tests::manual_edit_disables_ai_reasons_without_destroying_original_evidence ... ok
+test material::tests::new_entry_requires_explicit_same_base_choice_and_cannot_be_committed_twice ... ok
+test material::tests::only_selected_exchanges_are_used_and_missing_selection_is_rejected ... ok
+test material::tests::response_rejects_out_of_selection_fabricated_and_invalid_path_reasons ... ok
+test material::tests::snapshots_are_fixed_and_legacy_sources_remain_readable ... ok
+test material::tests::stale_supplemental_changes_block_commit_even_if_fingerprint_is_unchanged ... ok
+test material_diff::tests::array_reordering_is_not_reported_as_deleted_content ... ok
+test material_diff::tests::unicode_differences_preserve_both_originals_and_multiple_changes ... ok
+test model::tests::broken_import_is_rejected ... ok
+test model::tests::builtin_has_valid_unique_entries ... ok
+test model::tests::extended_deck_roundtrips_without_resetting_core_learning ... ok
+test model::tests::normalization_is_not_semantic_guessing ... ok
+test commit::tests::oversized_intent_is_rejected_before_publishing_pending ... ok
+test backup::tests::refuses_backup_inside_original_assets_before_creating_anything ... ok
+test scheduler::tests::assistance_never_gets_easy_interval ... ok
+test scheduler::tests::clock_going_back_does_not_produce_probability_above_one ... ok
+test scheduler::tests::failed_word_gets_diminishing_cues ... ok
+test assets::tests::rejects_changed_size_and_content_instead_of_overwriting ... ok
+test diagnostics::tests::empty_log_and_io_failures_are_explicit_and_do_not_panic ... ok
+test scheduler::tests::skills_do_not_share_memory ... ok
+test scheduler::tests::new_tasks_are_limited_and_siblings_separated ... ok
+test scheduler::tests::spacing_grows_and_lapse_returns_soon ... ok
+test store::tests::arbitrary_json_is_not_a_valid_progress_backup ... ok
+test scheduler::tests::recoverable_deletion_hides_tasks_and_preserves_learning ... ok
+test store::tests::edited_content_resets_only_that_word ... ok
+test store::tests::invalid_chat_action_preserves_transcript_and_draft ... ok
+test commit::tests::recovery_checks_each_next_file_before_changing_either ... ok
+test store::tests::progress_roundtrip_and_observed_retention ... ok
+test commit::tests::finishes_half_written_commit_and_keeps_recovery_point ... ok
+test assets::tests::exports_manifest_and_originals_without_overwriting_existing_destination ... ok
+test store::tests::corrupt_progress_is_never_overwritten_by_load ... ok
+test diagnostics::tests::persistent_events_survive_restart_with_correlation_and_timing ... ok
+test store::tests::chat_history_draft_and_reported_settings_survive_storage_reopen ... ok
+test diagnostics::tests::junction_in_log_path_is_rejected_without_touching_its_target ... ok
+test commit::tests::exact_serialized_intent_limit_can_be_recovered ... ok
+test diagnostics::tests::export_rejects_truncated_nonfinal_lines_and_complete_invalid_records ... ok
+test assets::tests::preserves_original_bytes_and_deduplicates_identical_content ... ok
+test run_journal::tests::corrupt_record_does_not_hide_other_recoverable_results ... ok
+test diagnostics::tests::interrupted_last_write_does_not_hide_completed_or_future_events ... ok
+test diagnostics::tests::export_rejects_injected_text_and_never_returns_raw_file_contents ... ok
+test run_journal::tests::stopped_run_is_unknown_and_media_bytes_are_not_duplicated ... ok
+test diagnostics::tests::retention_removes_only_old_owned_files ... ok
+test backup::tests::rejects_unrestorable_sizes_before_creating_destination ... ok
+test store::tests::oversized_pretty_progress_is_rejected_before_backup_or_replacement ... ok
+test store::tests::writes_replace_and_another_instance_cannot_lock ... ok
+test backup::tests::restore_preserves_current_unsaved_draft_in_separate_recovery_file ... ok
+test diagnostics::tests::rotation_is_bounded_and_does_not_touch_unowned_files ... ok
+test backup::tests::backup_restores_detached_originals_and_rejects_corruption ... ok
+
+test result: ok. 104 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.51s
+
+     Running unittests tests\support\mock_codex.rs (target\debug\deps\wordweave_mock_codex-a938f3e5fb9f82b5.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src\main.rs (target\debug\deps\wordweave5-9329c2583dc8405f.exe)
+
+running 27 tests
+test app::audio_controls::tests::speech_start_is_rejected_while_recording ... ok
+test app::chat_ui::input_tests::only_focused_ctrl_enter_submits ... ok
+test app::chat_ui::input_tests::ime_confirmation_does_not_submit ... ok
+test media::controls_tests::no_audio_is_not_reported_as_a_successful_recovered_recording ... ok
+test media::controls_tests::playback_speed_rejects_non_finite_and_out_of_range_values ... ok
+test media::controls_tests::paused_recording_has_no_samples_or_elapsed_gap ... ok
+test media::controls_tests::recording_cap_counts_frames_and_survives_pause_resume ... ok
+test media::controls_tests::seeking_clamps_to_the_audio_bounds ... ok
+test media::speech::tests::unloaded_player_is_safe_without_a_voice_or_audio_device ... ok
+test media::controls_tests::device_failure_preserves_all_captured_samples_and_returns_a_warning ... ok
+test app::dashboard::tests::vocabulary_counts_unique_bases_and_answered_not_mastered ... ok
+test app::chat_ui::input_tests::plain_enter_inserts_newline_but_ime_confirmation_does_not ... ok
+test annotation::tests::invalid_or_overflowing_source_is_not_silently_clipped ... ok
+test app::harness_tests::effort_choices_are_only_from_the_current_cli_and_model ... ok
+test app::harness_tests::speech_rate_preserves_legacy_settings_and_rejects_invalid_changes ... ok
+test app::harness_tests::fatal_close_keeps_recovery_controls_visible_without_changing_learning_data ... ok
+test app::harness_tests::material_comparison_draws_without_modifying_the_proposal_or_progress ... ok
+test app::harness_tests::conversation_trash_does_not_apply_when_saving_fails_or_media_is_unsaved ... ok
+test media::speech::tests::windows_playback_controls_initialize_without_playing_audio ... ok
+test app::harness_tests::conversation_trash_roundtrip_preserves_drafts_and_learning_data ... ok
+test app::harness_tests::restoring_trash_blocks_retry_attachment_without_losing_audio ... ok
+test app::harness_tests::restoring_trash_closes_editors_and_selects_an_active_conversation ... ok
+test app::harness_tests::json_restore_preserves_the_latest_unsaved_chat_draft ... ok
+test annotation::tests::fixed_background_and_ink_survive_as_distinct_files ... ok
+test app::harness_tests::unfrozen_annotation_text_survives_fatal_close_and_failed_export ... ok
+test app::harness_tests::frozen_background_without_strokes_blocks_close_until_exported ... ok
+test app::harness_tests::media_export_clears_only_the_successfully_saved_buffer ... ok
+
+test result: ok. 27 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.26s
+
+     Running tests\chat_trash.rs (target\debug\deps\chat_trash-810ddc61bb32e504.exe)
+
+running 2 tests
+test trash_is_hidden_and_cannot_be_sent_but_keeps_the_draft ... ok
+test trash_does_not_use_the_fifty_active_conversation_slots ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\codex_process.rs (target\debug\deps\codex_process-10af95d7d777a791.exe)
+
+running 31 tests
+test fixtures_remain_isolated_when_clock_values_are_identical ... ok
+test effort_catalog_requires_chatgpt_authentication ... ok
+test early_exit_reports_stage_and_code_without_stderr_secrets ... ok
+test malformed_stdout_is_distinct_from_authentication_failure ... ok
+test effort_catalog_preserves_server_choices_and_missing_values_across_pages ... ok
+test cancellation_terminates_and_reaps_a_waiting_process ... ok
+test audio_is_rejected_before_turn_when_model_does_not_support_it ... ok
+test effort_not_supported_by_requested_model_stops_before_thread_or_turn ... ok
+test generation_reports_server_settings_instead_of_requested_model ... ok
+test audio_can_reach_a_capable_mock_model ... ok
+test paid_account_is_rejected_before_turn ... ok
+test effort_default_omits_override_and_does_not_depend_on_catalog ... ok
+test fragmented_json_and_early_completion_are_handled ... ok
+test effort_rechecks_actual_model_after_server_rerouting ... ok
+test windows_volta_from_path_preserves_piped_rpc_with_separate_directories ... ok
+test effort_default_model_uses_returned_model_not_catalog_default_and_keeps_unknown_execution ... ok
+test effort_is_sent_as_thread_override_but_actual_execution_uses_server_value ... ok
+test missing_turn_id_stays_unknown_without_guessing_the_last_turn ... ok
+test partial_result_on_failed_turn_is_rejected ... ok
+test unauthenticated_account_is_distinct_from_transport_exit ... ok
+test codex_diagnostics_correlate_phases_without_retaining_content_or_paths ... ok
+test recovery_does_not_substitute_a_different_turn ... ok
+test effort_missing_capabilities_or_failed_lookup_stops_before_generation ... ok
+test image_input_requires_explicit_model_capability ... ok
+test chat_followup_transmits_saved_previous_exchange_after_reload ... ok
+test unknown_result_can_be_read_without_a_second_generation ... ok
+test structured_chat_action_reaches_transport_and_is_only_a_proposal ... ok
+test missing_and_null_server_effort_stay_unknown ... ok
+test windows_volta_shim_preserves_piped_rpc_with_unicode_and_spaces ... ok
+test recovery_accepts_original_image_history_larger_than_generation_line_limit ... ok
+test durable_result_and_terminal_states_are_distinct ... ok
+
+test result: ok. 31 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.40s
+
+     Running tests\control_settings.rs (target\debug\deps\control_settings-9e1e4b381919b0da.exe)
+
+running 2 tests
+test old_settings_keep_slow_speech_and_new_defaults_are_explicit ... ok
+test invalid_playback_rates_and_effort_text_are_rejected_before_save ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\diagnostics.rs (target\debug\deps\diagnostics-bf68c7c7b0967fa1.exe)
+
+running 1 test
+test diagnostic_api_keeps_operation_identity_and_reports_failures_without_panicking ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running unittests examples\codex_path_probe.rs (target\debug\examples\codex_path_probe-2bd100b8cace97f5.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

@@ -58,6 +58,7 @@ pub struct Request {
 }
 impl Request {
     pub fn new(chat: &Conversation, base: &str, mode: Mode, baseline: Option<Entry>) -> Result<Self, String> {
+        if chat.deleted_at.is_some() { return Err("ごみ箱の会話は教材化できません。先に復元してください。".into()); }
         let base = base.trim();
         if base.is_empty() || base.len() > 200 { return Err("対象の基本語・熟語を入力してください（200バイト以内）。".into()); }
         if (mode == Mode::New) != baseline.is_none() { return Err("既存教材の反映先を選択してください。".into()); }

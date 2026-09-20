@@ -13,6 +13,106 @@ use std::{
 use wordweave5::codex;
 
 #[test]
+fn codex_diagnostics_correlate_phases_without_retaining_content_or_paths() {
+    use wordweave5::diagnostics;
+    let f = Fixture::new("effort");
+    diagnostics::initialize(&f.dir.join("logs"));
+    codex::generate_with_effort(&f.exe, &f.dir, "test", "high", "SECRET instructions",
+        vec![json!({"type":"text","text":"SECRET prompt"})], None,
+        Arc::new(AtomicBool::new(false))).unwrap();
+    let denied = Fixture::new("paid");
+    assert!(codex::check(&denied.exe, &denied.dir, Arc::new(AtomicBool::new(false))).is_err());
+    let report = diagnostics::export().unwrap();
+    assert!(!report.contains("SECRET") && !report.contains(f.dir.to_str().unwrap()));
+    let events: Vec<serde_json::Value> = report.lines().map(|line| serde_json::from_str(line).unwrap()).collect();
+    // Parallel mock tests can log in this process too. Select a completed run
+    // that queried capabilities instead of depending on the order of log lines.
+    let finished = events.iter().find(|event| event["stage"] == "generate" && event["event"] == "completed"
+        && events.iter().any(|phase| phase["run_id"] == event["run_id"]
+            && phase["stage"] == "model_list" && phase["event"] == "completed"))
+        .expect("completed generation must be recorded");
+    for stage in ["connect", "initialize", "authenticate", "model_list", "thread_start", "turn_start"] {
+        assert!(events.iter().any(|event| event["run_id"] == finished["run_id"]
+            && event["entry_point"] == "codex" && event["stage"] == stage
+            && event["event"] == "completed"), "missing correlated {stage}");
+    }
+    assert!(events.iter().any(|event| event["stage"] == "authenticate" && event["error"] == "authentication"));
+    // Disable this test-process-only sink before its temporary directory is removed.
+    diagnostics::initialize(&f.dir.join("mode.txt"));
+}
+
+#[test]
+fn effort_catalog_preserves_server_choices_and_missing_values_across_pages() {
+    let f = Fixture::new("effort");
+    let models = codex::list_model_efforts(&f.exe, &f.dir, Arc::new(AtomicBool::new(false))).unwrap();
+    assert_eq!(models.len(), 3);
+    assert_eq!(models[1].model, "test");
+    assert_eq!(models[1].display_name, "Test model");
+    assert_eq!(models[1].supported_efforts.as_ref().unwrap()[1].effort, "future-effort");
+    assert_eq!(models[1].default_effort.as_deref(), Some("high"));
+    assert_eq!(models[2].supported_efforts, None);
+    assert_eq!(models[2].default_effort, None);
+    assert!(!f.requests().iter().any(|m| m == "thread/start" || m == "turn/start"));
+}
+
+#[test]
+fn effort_is_sent_as_thread_override_but_actual_execution_uses_server_value() {
+    let f = Fixture::new("effort");
+    let reply = f.run_effort("test", "high").unwrap();
+    assert_eq!(reply.execution.effort.as_deref(), Some("low"));
+    let params: serde_json::Value = serde_json::from_slice(&fs::read(f.dir.join("thread-start.json")).unwrap()).unwrap();
+    assert_eq!(params["config"]["model_reasoning_effort"], "high");
+    assert!(!f.dir.join("config.toml").exists());
+}
+
+#[test]
+fn effort_default_omits_override_and_does_not_depend_on_catalog() {
+    let f = Fixture::new("effort_unavailable");
+    f.run_effort("", "").unwrap();
+    let params: serde_json::Value = serde_json::from_slice(&fs::read(f.dir.join("thread-start.json")).unwrap()).unwrap();
+    assert!(params["config"].get("model_reasoning_effort").is_none());
+    assert!(!f.requests().iter().any(|m| m == "model/list"));
+}
+
+#[test]
+fn effort_not_supported_by_requested_model_stops_before_thread_or_turn() {
+    let f = Fixture::new("effort");
+    assert!(f.run_effort("other", "high").is_err());
+    assert!(!f.requests().iter().any(|m| m == "thread/start" || m == "turn/start"));
+}
+
+#[test]
+fn effort_rechecks_actual_model_after_server_rerouting() {
+    let f = Fixture::new("effort_rerouted");
+    assert!(f.run_effort("test", "high").is_err());
+    assert!(f.requests().iter().any(|m| m == "thread/start"));
+    assert!(!f.requests().iter().any(|m| m == "turn/start"));
+}
+
+#[test]
+fn effort_missing_capabilities_or_failed_lookup_stops_before_generation() {
+    for mode in ["effort_missing", "effort_unavailable", "effort_cycle"] {
+        let f = Fixture::new(mode);
+        assert!(f.run_effort("test", "high").is_err(), "{mode}");
+        assert!(!f.requests().iter().any(|m| m == "turn/start"), "{mode}");
+    }
+}
+
+#[test]
+fn effort_default_model_uses_returned_model_not_catalog_default_and_keeps_unknown_execution() {
+    let f = Fixture::new("effort_unknown_execution");
+    let reply = f.run_effort("", "high").unwrap();
+    assert_eq!(reply.execution.model.as_deref(), Some("test"));
+    assert_eq!(reply.execution.effort, None);
+}
+
+#[test]
+fn effort_catalog_requires_chatgpt_authentication() {
+    let f = Fixture::new("paid");
+    assert!(codex::list_model_efforts(&f.exe, &f.dir, Arc::new(AtomicBool::new(false))).is_err());
+}
+
+#[test]
 fn durable_result_and_terminal_states_are_distinct() {
     use wordweave5::run_journal::{self,Outcome};
     for (mode,expected) in [("ok",Outcome::Completed),("failed",Outcome::Failed),("interrupted",Outcome::Interrupted),("lost_result",Outcome::Unknown)] {
@@ -225,6 +325,10 @@ struct Fixture {
     exe: PathBuf,
 }
 impl Fixture {
+    fn run_effort(&self, model: &str, effort: &str) -> Result<codex::Generated, String> {
+        codex::generate_with_effort(&self.exe, &self.dir, model, effort, "test",
+            vec![json!({"type":"text","text":"fixture"})], None, Arc::new(AtomicBool::new(false)))
+    }
     fn new(mode: &str) -> Self {
         Self::with_stamp(mode, chrono::Utc::now().timestamp_nanos_opt().unwrap())
     }

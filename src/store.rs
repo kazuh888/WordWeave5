@@ -15,6 +15,7 @@ use std::{
 pub struct Settings {
     pub codex_path: String,
     pub codex_model: String,
+    pub codex_effort: String,
     pub examples_per_word: usize,
     pub batch_words: usize,
     pub minutes: u32,
@@ -25,12 +26,15 @@ pub struct Settings {
     pub ai_daily_limit: u32,
     pub voice_id: String,
     pub slow_speech: bool,
+    /// None preserves the old normal/slow selection until the user changes speed.
+    pub speech_rate: Option<f64>,
 }
 impl Default for Settings {
     fn default() -> Self {
         Self {
             codex_path: "codex".into(),
             codex_model: String::new(),
+            codex_effort: String::new(),
             examples_per_word: 6,
             batch_words: 5,
             minutes: 5,
@@ -41,6 +45,7 @@ impl Default for Settings {
             ai_daily_limit: 10,
             voice_id: String::new(),
             slow_speech: false,
+            speech_rate: None,
         }
     }
 }
@@ -117,6 +122,22 @@ impl Default for Progress {
     }
 }
 impl Progress {
+    /// Mutates only the deletion marker. Callers persist a clone before publishing it.
+    pub fn set_chat_deleted(&mut self, id: &str, deleted: bool) -> Result<(), String> {
+        let index = self.chats.iter().position(|c| c.id == id).ok_or("会話が見つかりません。")?;
+        if self.chats[index].deleted_at.is_some() == deleted { return Ok(()); }
+        if deleted && (self.chat_action.as_ref().is_some_and(|(chat_id, _)| chat_id == id)
+            || self.material_draft.as_ref().is_some_and(|draft| draft.source.conversation_id == id)) {
+            return Err("この会話の教材操作・教材案を確定または取り消してから削除してください。".into());
+        }
+        let previous = self.chats[index].deleted_at;
+        self.chats[index].deleted_at = deleted.then(|| chrono::Utc::now().timestamp());
+        if let Err(error) = self.validate() {
+            self.chats[index].deleted_at = previous;
+            return Err(error);
+        }
+        Ok(())
+    }
     pub fn complete_chat(&mut self, id: &str, question: String, reply: crate::chat_action::ChatReply) -> Result<(), String> {
         let mut next = self.clone();
         let chat = next.chats.iter_mut().find(|c| c.id == id)
@@ -147,6 +168,11 @@ impl Progress {
         changed
     }
     pub fn validate(&self) -> Result<(), String> {
+        if self.settings.speech_rate.is_some_and(|rate| !rate.is_finite() || !(0.5..=4.0).contains(&rate))
+            || self.settings.codex_effort.len() > 64
+            || !self.settings.codex_effort.bytes().all(|c| c.is_ascii_alphanumeric() || c == b'-' || c == b'_') {
+            return Err("読み上げ速度またはeffortの設定値が不正です。".into());
+        }
         if let Some(draft)=&self.material_draft { draft.validate_evidence()?; }
         for source in &self.material_sources { source.validate()?; }
         // An editable proposal may be incomplete; validate it only at commit.
@@ -154,8 +180,11 @@ impl Progress {
             || self.material_sources.len() > 10000 {
             return Err("教材案または会話参照の保存上限を超えました。".into());
         }
-        if self.chats.len() > crate::chat::MAX_CHATS {
-            return Err("保存できるチャットは50件までです。".into());
+        if self.chats.iter().filter(|c| c.deleted_at.is_none()).count() > crate::chat::MAX_CHATS {
+            return Err("通常のチャットは50件までです。不要な会話をごみ箱へ移動してください。".into());
+        }
+        if self.chats.iter().filter(|c| c.deleted_at.is_some()).count() > crate::chat::MAX_TRASH_CHATS {
+            return Err("チャットごみ箱は500件までです。原本保護のため自動削除せず、この操作を停止しました。".into());
         }
         let mut chat_ids = BTreeSet::new();
         for chat in &self.chats {

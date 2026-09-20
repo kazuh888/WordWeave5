@@ -1,5 +1,20 @@
 # WordWeave5 開発引き継ぎ
 
+## 2026-09-20：0.5.1 PATH補完
+
+`src/codex/search_path.rs`で起動時・システム・実行ユーザーのPATHを補完し、Codex探索とVolta本体探索・子PATHへ共通利用する。明示パス欠損時の自動代替はしない。`examples/codex_path_probe.rs`はCodexを起動せず探索だけを確認する。[操作](UPGRADE-0.5.1.md)、[検証](validation/path-search-0.5.1.md)。
+
+## 2026-09-20：0.5.0 操作制御
+
+- 読み上げの±5秒・pause/resume/stop・0.5〜4倍、録音pause/resume/cancel、会話ごみ箱、effort候補取得・指定、型付き永続診断を追加した。[操作手順](UPGRADE-0.5.0.md)、[設計](docs/design/interaction-controls.md)、[現在の検証](validation/controls-0.5.0.md) を入口とする。
+- `src/app/audio_controls.rs`、`control_settings.rs`、`conversation_trash.rs`へUI操作を分離。音声はWinRTの非同期合成とMediaPlayer、録音は収録サンプル数で時間管理する。
+- ごみ箱・復元は保存成功後に反映。削除会話への送信・教材化・添付を拒否し、復元後の古い編集ウィンドウを閉じる。保存失敗時は未確定音声を保持する。
+- effortはmodel/listのモデル別候補。空欄は省略し、生成時に再検査する。実行値は返却値のみ。CLI設定・ChatGPT認証・Volta起動を維持する。
+- 新しい診断ログは本文・媒体・パス・認証情報を含まない。以前からの実行台帳は本文を含むが、媒体本体は省略する。診断出力に台帳を混ぜない。
+- 依存の版更新なし。既存windows 0.56.0を直接利用するためCargo.tomlの機能公開とCargo.lockの本体依存だけを追加した。Android・完全削除は対象外。
+
+以下は旧版の履歴であり、0.5.0の合格証拠ではない。
+
 ## 2026-09-17：0.4.0 Harness への更新
 
 以下は0.3.8移行時点の履歴である。現在の入口は [UPGRADE-0.4.0.md](UPGRADE-0.4.0.md)、[設計判断](docs/decisions/0001-windows-harness.md)、[今回の検証](validation/harness-0.4.0.md)、[残作業](tasks/todo.md) とする。

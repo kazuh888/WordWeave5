@@ -51,6 +51,7 @@ impl WordApp {
             .iter_mut()
             .find(|c| c.id == id)
             .ok_or("保存先の会話がありません。")?;
+        if chat.deleted_at.is_some() { return Err("ごみ箱の会話には添付できない。先に復元するか、原録音を退避してください。".into()); }
         chat.draft_attachments.push(attachment);
         self.storage
             .as_ref()
@@ -62,6 +63,7 @@ impl WordApp {
         Ok(())
     }
     pub(super) fn save_chat_recording(&mut self, id: &str, wav: Vec<u8>) {
+        let operation = DiagnosticOperation::begin(DiagnosticEntry::Storage);
         let result = (|| {
             let original = self.asset_store()?.put(AssetKind::AudioWav, &wav)?;
             self.add_chat_attachment(
@@ -77,10 +79,12 @@ impl WordApp {
         })();
         self.message = match result {
             Ok(()) => {
+                operation.event(DiagnosticStage::Save, DiagnosticEvent::Attached);
                 self.unsaved_chat_audio = None;
                 "原録音を保存した。「文字起こし」で認識し、確認・訂正して送信できる。".into()
             }
             Err(error) => {
+                operation.fail(DiagnosticStage::Save, DiagnosticError::Io);
                 self.unsaved_chat_audio = Some((id.into(), wav));
                 format!("録音の保存に失敗した。アプリを閉じず、音声入力画面で再保存またはWAV退避を選んでください：{error}")
             }
@@ -259,10 +263,9 @@ impl WordApp {
     }
     pub(super) fn chat_media_windows(&mut self, ctx: &egui::Context, idle: bool) {
         let can_edit =
-            idle && self.fatal.is_none() && self.progress.chats.get(self.chat_selected).is_some();
+            idle && self.fatal.is_none() && self.progress.chats.get(self.chat_selected).is_some_and(|c| c.deleted_at.is_none());
         let mut open = self.chat_media_open;
         let mut record = false;
-        let mut stop = false;
         let mut recognize = None;
         let mut play = None;
         let mut preview = None;
@@ -276,9 +279,8 @@ impl WordApp {
             if self.fatal.is_some() { ui.colored_label(Color32::RED,"保存障害のため通常の入力・添付登録は停止中。未保存の録音・筆跡は、この画面から別ファイルへ退避できる。"); }
             ui.heading("音声入力");
             ui.label("録音はPCに保存する。文字起こしを選ぶと原音をCodexに送る。認識結果を確認してからチャット送信する。");
-            if let Some(r)=&self.recorder {
-                ui.label(format!("録音中 {:.0}秒 / 30秒",r.started.elapsed().as_secs_f32()));
-                stop=ui.button("録音を止めて保存").clicked();
+            if self.recorder.is_some() {
+                self.recording_controls(ui, "録音を終了して保存");
             } else {record=ui.add_enabled(can_edit && self.unsaved_chat_audio.is_none(),egui::Button::new("録音を開始（最大30秒）")).clicked();}
             if self.unsaved_chat_audio.is_some() {
                 ui.colored_label(Color32::RED,"未保存の録音がある。閉じると失われるため、再保存またはWAV退避する。");
@@ -306,7 +308,9 @@ impl WordApp {
                             if ui.button("送信画像を確認").clicked(){preview=Some(image.clone());}
                             if ui.add_enabled(can_edit,egui::Button::new("画像の文字を入力欄へ認識")).clicked(){recognize=Some((chat.id.clone(),image.clone(),a.original.id.clone()));}
                         }
-                        if ui.add_enabled(can_edit,egui::Button::new("入力欄から外す（原本保持）")).clicked(){detach=Some((chat.id.clone(),i));}
+                        if ui.add_enabled(can_edit,egui::Button::new("添付を外す"))
+                            .on_hover_text("このメッセージへの添付を解除する。保存済みの録音・筆跡と、入力欄へ反映済みの文章は削除しない。")
+                            .clicked(){detach=Some((chat.id.clone(),i));}
                     });
                     if let Some(t)=&a.transcript {ui.collapsing("元の認識結果（訂正前）",|ui|{ui.label(t);});}
                 });}
@@ -395,6 +399,7 @@ impl WordApp {
             }
         }
         if let Some((id, index)) = detach {
+            let operation = DiagnosticOperation::begin(DiagnosticEntry::Chat);
             let mut next = self.progress.clone();
             if let Some(chat) = next.chats.iter_mut().find(|c| c.id == id) {
                 chat.draft_attachments.remove(index);
@@ -406,16 +411,22 @@ impl WordApp {
                 .and_then(|s| s.save(&next));
             match result {
                 Ok(()) => {
+                    operation.event(DiagnosticStage::Save, DiagnosticEvent::Detached);
                     self.progress = next;
                     self.dirty = false;
-                    self.message = "入力欄から外した。原本ファイルは保持している。".into();
+                    self.message = "このメッセージへの添付を解除した。保存済みの録音・筆跡は削除していない。".into();
                 }
-                Err(e) => self.message = e,
+                Err(e) => { operation.fail(DiagnosticStage::Save, DiagnosticError::Io); self.message = e; }
             }
         }
         if record {
+            if !self.stop_speech() { return; }
+            self.recording_cancel_confirm = false;
+            let operation = DiagnosticOperation::begin(DiagnosticEntry::Recording);
             match Recorder::start() {
                 Ok(r) => {
+                    operation.event(DiagnosticStage::Record, DiagnosticEvent::Started);
+                    self.recording_operation = Some(operation);
                     self.chat_recording_id = self
                         .progress
                         .chats
@@ -423,11 +434,8 @@ impl WordApp {
                         .map(|c| c.id.clone());
                     self.recorder = Some(r);
                 }
-                Err(e) => self.message = e,
+                Err(e) => { operation.fail(DiagnosticStage::Record, DiagnosticError::Unavailable); self.message = e; }
             }
-        }
-        if stop {
-            self.stop_recording();
         }
         if let Some((id, reference, original_id)) = recognize {
             self.recognize_chat(id, reference, original_id);

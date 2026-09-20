@@ -1,5 +1,13 @@
 # Codexへの移行：最初に読む資料
 
+## 2026-09-20 PATH補完
+
+現在の開発版は **0.5.1**。[更新手順](UPGRADE-0.5.1.md)と[最新の検証記録](validation/path-search-0.5.1.md)を先に読む。以下の0.5.0以前は履歴である。
+
+## 2026-09-20 更新
+
+現在の開発版は **0.5.0**。操作は [UPGRADE-0.5.0.md](UPGRADE-0.5.0.md)、現在の合否と残作業は [0.5.0検証記録](validation/controls-0.5.0.md)、[tasks/todo.md](tasks/todo.md) を読む。下の版は履歴である。通常のsandbox初期化が失敗する環境では承認付き実行を使用し、承認の利用上限とアプリの不具合を混同しない。
+
 ## 2026-09-17 更新
 
 現在の開発版は **0.4.0** である。[UPGRADE-0.4.0.md](UPGRADE-0.4.0.md)、[Harness検証記録](validation/harness-0.4.0.md)、[tasks/todo.md](tasks/todo.md) を先に読むこと。以下の0.3.8移行文とHANDOFF_MANIFEST.jsonは当時の履歴であり、現在のソースや合格の証拠ではない。既存のローカル変更を保持し、未完了の検証から続ける。AIはChatGPT認証のapp-serverのみとする方針は継続する。

@@ -2,6 +2,7 @@ pub mod codex;
 pub mod chat;
 pub mod chat_action;
 pub mod execution;
+pub mod effort;
 pub mod diagnostics;
 pub mod learning;
 pub mod model;

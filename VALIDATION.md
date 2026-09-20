@@ -1,4 +1,12 @@
-# 現行版 0.4.0 の検証状況
+# 現行版 0.5.1 の検証状況
+
+現在の結果は [PATH探索検証](validation/path-search-0.5.1.md) を参照する。
+
+# 0.5.0 の検証状況（履歴）
+
+現在の検証結果は [validation/controls-0.5.0.md](validation/controls-0.5.0.md) を参照する。以下の0.4.0成功を今回の合格証拠にしない。
+
+# 0.4.0 の検証状況（履歴）
 
 2026-09-17のWindows上のコマンド、実測結果、ログ、未検証事項は [validation/harness-0.4.0.md](validation/harness-0.4.0.md) に記録する。以下は配布当時の履歴であり、最新ソースの合否として引用しない。
 

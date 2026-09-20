@@ -1,0 +1,17 @@
+[
+  {
+    "Check": "Process PATH empty; saved PATH discovery",
+    "Exit": 0,
+    "Result": "C:\\Users\\安井　一広\\AppData\\Local\\Programs\\OpenAI\\Codex\\bin\\codex.exe"
+  },
+  {
+    "Check": "Explicit path",
+    "Exit": 0,
+    "Result": "\\\\?\\C:\\Users\\安井　一広\\.codex\\packages\\standalone\\releases\\0.135.0-x86_64-pc-windows-msvc\\bin\\codex.exe"
+  },
+  {
+    "Check": "Explicit path",
+    "Exit": 0,
+    "Result": "\\\\?\\F:\\Tools\\Volta\\bin\\codex.cmd"
+  }
+]

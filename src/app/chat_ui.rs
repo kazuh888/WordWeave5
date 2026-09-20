@@ -17,17 +17,12 @@ impl WordApp {
                 ui.heading("英語チャット");
                 if ui
                     .add_enabled(
-                        idle && self.progress.chats.len() < wordweave5::chat::MAX_CHATS,
+                        idle && self.progress.chats.iter().filter(|c| c.deleted_at.is_none()).count() < wordweave5::chat::MAX_CHATS,
                         egui::Button::new("＋ 新しい会話"),
                     )
                     .clicked()
                 {
-                    self.progress
-                        .chats
-                        .push(wordweave5::chat::Conversation::new());
-                    self.chat_selected = self.progress.chats.len() - 1;
-                    self.dirty = true;
-                    self.persist();
+                    if let Err(error) = self.create_conversation() { self.message = error; }
                 }
                 ui.small("ピン留め優先・最新の回答順");
                 ui.separator();
@@ -84,21 +79,26 @@ impl WordApp {
                 if ui.button("削除済みの教材").clicked() {
                     self.chat_trash_open = true;
                 }
+                if ui.button("チャットのごみ箱").clicked() {
+                    self.conversation_trash_open = true;
+                }
                 ui.small("境界をドラッグして幅を変更");
                 ui.allocate_space(egui::vec2(ui.available_width(), 0.0));
             });
         egui::CentralPanel::default().show_inside(ui, |ui| {
-            let Some(chat) = self.progress.chats.get(self.chat_selected) else {
+            let Some(chat) = self.progress.chats.get(self.chat_selected).filter(|c| c.deleted_at.is_none()) else {
                 ui.heading("英語について話してみよう");
                 ui.label("左の「＋ 新しい会話」から始める。");
                 ui.label("例：apologize for の使い方を教えて。");
                 return;
             };
             let id = chat.id.clone();
+            let title = chat.title.clone();
             ui.horizontal_wrapped(|ui| {
-                ui.heading(&chat.title);
+                ui.heading(&title);
+                if ui.add_enabled(idle, egui::Button::new("会話を削除…")).clicked() { self.pending_chat_delete = Some(id.clone()); }
                 if ui.button("音声・手書き入力").clicked() { self.chat_media_open = true; }
-                if ui.button("読み上げを停止").clicked() { self.speaker.stop(); }
+                if ui.button("読み上げを停止").clicked() { self.stop_speech(); }
                 if ui.button("文脈・送信内容").clicked() { self.chat_context_open = true; }
                 if ui.button(if self.progress.material_draft.is_some() { "教材案を確認" } else { "教材に反映" }).clicked() {
                     self.chat_material_open = true;
@@ -164,7 +164,7 @@ impl WordApp {
                         bubble(ui, "あなた", &exchange.question, true);
                         bubble(ui, "Codex", &exchange.answer, false);
                         ui.horizontal_wrapped(|ui| {
-                            if ui.button("回答を読み上げ").clicked() { speak=Some(exchange.answer.clone()); }
+                            if ui.add_enabled(self.recorder.is_none(), egui::Button::new("回答を読み上げ")).clicked() { speak=Some(exchange.answer.clone()); }
                             if ui.button("英文に注釈を書く").clicked() { annotate=Some(exchange.answer.clone()); }
                             for a in &exchange.attachments {
                                 if a.original.kind==wordweave5::assets::AssetKind::AudioWav && ui.add_enabled(idle,egui::Button::new("原録音を再生")).clicked() {play=Some(a.original.clone());}
@@ -200,7 +200,7 @@ impl WordApp {
         let mut open = self.chat_context_open;
         egui::Window::new("文脈と送信内容").open(&mut open).default_width(640.0)
             .vscroll(true).show(ctx, |ui| {
-            let Some(chat) = self.progress.chats.get_mut(self.chat_selected) else { return; };
+            let Some(chat) = self.progress.chats.get_mut(self.chat_selected).filter(|c| c.deleted_at.is_none()) else { return; };
             ui.label("引き継ぎメモ：学習目的・重要な訂正（毎回送信）");
             self.dirty |= ui.add_enabled(idle, egui::TextEdit::multiline(&mut chat.memo)
                 .desired_width(f32::INFINITY).char_limit(2000)).changed();
@@ -225,7 +225,7 @@ impl WordApp {
             .show(ctx, |ui| {
                 if self.progress.material_draft.is_none() {
                     ui.label("教材に使う往復だけを選び、対象語と反映方法を確認する。");
-                    if let Some(chat) = self.progress.chats.get_mut(self.chat_selected) {
+                    if let Some(chat) = self.progress.chats.get_mut(self.chat_selected).filter(|c| c.deleted_at.is_none()) {
                         for (i, e) in chat.exchanges.iter_mut().enumerate() {
                             self.dirty |= ui
                                 .add_enabled(

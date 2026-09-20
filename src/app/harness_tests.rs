@@ -1,5 +1,135 @@
 use super::*;
 
+#[test]
+fn restoring_trash_blocks_retry_attachment_without_losing_audio() {
+    let (_, mut app, root) = fixture();
+    let id = app.progress.chats[0].id.clone();
+    app.progress.chats[0].deleted_at = Some(123);
+    app.progress.chats.push(wordweave5::chat::Conversation::new());
+    app.chat_selected = 1;
+    let mut wav = Vec::new();
+    let mut writer = hound::WavWriter::new(std::io::Cursor::new(&mut wav), hound::WavSpec {
+        channels: 1, sample_rate: 16_000, bits_per_sample: 16, sample_format: hound::SampleFormat::Int,
+    }).unwrap();
+    for _ in 0..1600 { writer.write_sample(0_i16).unwrap(); }
+    writer.finalize().unwrap();
+    let before = serde_json::to_value(&app.progress).unwrap();
+    app.save_chat_recording(&id, wav.clone());
+    assert_eq!(serde_json::to_value(&app.progress).unwrap(), before);
+    assert_eq!(app.unsaved_chat_audio, Some((id, wav)));
+    drop(app);
+    std::fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
+fn restoring_trash_closes_editors_and_selects_an_active_conversation() {
+    let (ctx, mut app, root) = fixture();
+    let mut restored = app.progress.clone();
+    restored.chats[0].deleted_at = Some(123);
+    restored.chats[0].memo = "keep deleted context".into();
+    restored.chats.push(wordweave5::chat::Conversation::new());
+    app.chat_context_open = true;
+    app.chat_material_open = true;
+    app.chat_media_open = true;
+    app.restore(restored).unwrap();
+    assert!(!app.chat_context_open && !app.chat_material_open && !app.chat_media_open);
+    assert_eq!(app.chat_selected, 1);
+    // Even a stale window flag must not expose a deleted conversation's editor.
+    app.chat_selected = 0;
+    app.chat_context_open = true;
+    app.page = Page::Chat;
+    frame(&ctx, &mut app, false);
+    let output = frame(&ctx, &mut app, false);
+    let mut text = String::new();
+    for shape in output.shapes { shape_text(&shape.shape, &mut text); }
+    assert!(!text.contains("引き継ぎメモ：学習目的"), "{text}");
+    assert_eq!(app.progress.chats[0].memo, "keep deleted context");
+    drop(app);
+    std::fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
+fn speech_rate_preserves_legacy_settings_and_rejects_invalid_changes() {
+    let (_, mut app, root) = fixture();
+    app.progress.settings.slow_speech = true;
+    assert_eq!(app.speech_rate(), 0.8);
+    app.change_speech_rate(2.5).unwrap();
+    assert_eq!(app.speech_rate(), 2.5);
+    assert!(app.change_speech_rate(4.1).is_err());
+    assert_eq!(app.speech_rate(), 2.5);
+    let original = vec![1, 2, 3];
+    app.wav = Some(original.clone());
+    app.cancel_recording();
+    assert_eq!(app.wav, Some(original));
+    drop(app);
+    std::fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
+fn effort_choices_are_only_from_the_current_cli_and_model() {
+    let (_, mut app, root) = fixture();
+    app.progress.settings.codex_model = "server-model".into();
+    app.progress.settings.codex_effort = "server-effort".into();
+    assert!(app.effort_choices().is_none());
+    app.effort_catalog = Some((app.progress.settings.codex_path.clone(), vec![wordweave5::effort::ModelEffort {
+        model: "server-model".into(), display_name: "Server model".into(),
+        supported_efforts: Some(vec![wordweave5::effort::EffortOption { effort: "server-effort".into(), description: "From server".into() }]),
+        default_effort: None,
+    }]));
+    assert_eq!(app.effort_choices().unwrap().supported_efforts.as_ref().unwrap()[0].effort, "server-effort");
+    app.progress.settings.codex_model = "another-model".into();
+    assert!(app.effort_choices().is_none());
+    app.progress.settings.codex_model = "server-model".into();
+    app.progress.settings.codex_path = "another-cli.exe".into();
+    assert!(app.effort_choices().is_none());
+    assert_eq!(app.progress.settings.codex_effort, "server-effort");
+    drop(app);
+    std::fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
+fn conversation_trash_roundtrip_preserves_drafts_and_learning_data() {
+    let (ctx, mut app, root) = fixture();
+    let id = app.progress.chats[0].id.clone();
+    app.progress.chats[0].draft = "unsent text".into();
+    app.progress.chats[0].memo = "learning context".into();
+    app.progress.study_seconds.insert("2026-09-19".into(), 45);
+    let before = serde_json::to_value(&app.progress).unwrap();
+    app.set_conversation_deleted(&id, true).unwrap();
+    assert!(wordweave5::chat::ordered_indices(&app.progress.chats).is_empty());
+    assert_eq!(app.progress.chats[0].draft, "unsent text");
+    app.viewed_trash_id = Some(id.clone());
+    app.page = Page::Chat;
+    frame(&ctx, &mut app, false);
+    let output = frame(&ctx, &mut app, false);
+    let mut text = String::new();
+    for shape in output.shapes { shape_text(&shape.shape, &mut text); }
+    assert!(text.contains("読み取り専用"), "{text}");
+    app.set_conversation_deleted(&id, false).unwrap();
+    assert_eq!(serde_json::to_value(&app.progress).unwrap(), before);
+    assert_eq!(serde_json::to_value(app.storage.as_ref().unwrap().load().unwrap()).unwrap(), before);
+    drop(app);
+    std::fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
+fn conversation_trash_does_not_apply_when_saving_fails_or_media_is_unsaved() {
+    let (_, mut app, root) = fixture();
+    let id = app.progress.chats[0].id.clone();
+    app.annotation.text = "keep this annotation draft".into();
+    let before = serde_json::to_value(&app.progress).unwrap();
+    assert!(app.set_conversation_deleted(&id, true).is_err());
+    assert_eq!(serde_json::to_value(&app.progress).unwrap(), before);
+    app.annotation.text.clear();
+    let path = app.storage.as_ref().unwrap().dir.join("progress.json");
+    std::fs::rename(&path, path.with_extension("saved")).unwrap();
+    std::fs::create_dir(&path).unwrap();
+    assert!(app.set_conversation_deleted(&id, true).is_err());
+    assert_eq!(serde_json::to_value(&app.progress).unwrap(), before);
+    drop(app);
+    std::fs::remove_dir_all(root).unwrap();
+}
+
 fn fixture() -> (egui::Context, WordApp, PathBuf) {
     static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
     let sequence = NEXT.fetch_add(1, Ordering::Relaxed);

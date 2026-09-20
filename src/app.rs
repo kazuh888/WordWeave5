@@ -10,6 +10,9 @@ mod chat_media;
 mod material_review;
 mod run_history;
 mod backup_ui;
+mod conversation_trash;
+mod audio_controls;
+mod control_settings;
 #[cfg(test)]
 mod harness_tests;
 use std::sync::{
@@ -23,6 +26,8 @@ use std::{
     time::{Duration, Instant},
 };
 use wordweave5::learning::{self, Exercise};
+use wordweave5::diagnostics::{Operation as DiagnosticOperation, EntryPoint as DiagnosticEntry,
+    Stage as DiagnosticStage, Event as DiagnosticEvent, ErrorClass as DiagnosticError};
 use wordweave5::{
     model::{self, Entry, Skill},
     scheduler::{self, Grade, Task},
@@ -71,6 +76,7 @@ enum AiResult {
     Generated(Entry),
     Updated(Entry, bool),
     Connection(String),
+    ModelChoices { path: String, models: Vec<wordweave5::effort::ModelEffort> },
     Chat { id: String, question: String, reply: wordweave5::chat_action::ChatReply },
     Material(wordweave5::material::Draft),
     Played,
@@ -98,9 +104,15 @@ pub struct WordApp {
     input: Input,
     ink: Ink,
     speaker: Speaker,
+    speech_visible: bool,
+    speech_operation: Option<DiagnosticOperation>,
     recorder: Option<Recorder>,
+    recording_operation: Option<DiagnosticOperation>,
+    recording_cancel_confirm: bool,
     wav: Option<Vec<u8>>,
     pending: Option<Pending>,
+    effort_catalog: Option<(String, Vec<wordweave5::effort::ModelEffort>)>,
+    diagnostic_export: Option<String>,
     feedback: String,
     message: String,
     search: String,
@@ -135,6 +147,9 @@ pub struct WordApp {
     chat_material_open: bool,
     chat_context_open: bool,
     chat_trash_open: bool,
+    conversation_trash_open: bool,
+    pending_chat_delete: Option<String>,
+    viewed_trash_id: Option<String>,
     chat_composer_height: f32,
     about_open: bool,
     chat_media_open: bool,
@@ -166,7 +181,13 @@ fn shown(s: &str) -> &str {
 
 impl WordApp {
     pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
-        Self::new_with_storage(&cc.egui_ctx, Storage::open())
+        let storage = Storage::open();
+        if let Ok(storage) = &storage { wordweave5::diagnostics::initialize(&storage.dir.join("diagnostics")); }
+        let operation = DiagnosticOperation::begin(DiagnosticEntry::Application);
+        let app = Self::new_with_storage(&cc.egui_ctx, storage);
+        if app.fatal.is_some() { operation.fail(DiagnosticStage::Startup, DiagnosticError::Io); }
+        else { operation.event(DiagnosticStage::Startup, DiagnosticEvent::Completed); }
+        app
     }
     fn new_with_storage(ctx: &egui::Context, storage: Result<Storage, String>) -> Self {
         let mut font_notice = String::new();
@@ -283,9 +304,15 @@ impl WordApp {
             input: Input::Keyboard,
             ink: Ink::default(),
             speaker: Speaker::new(),
+            speech_visible: false,
+            speech_operation: None,
             recorder: None,
+            recording_operation: None,
+            recording_cancel_confirm: false,
             wav: None,
             pending: None,
+            effort_catalog: None,
+            diagnostic_export: None,
             feedback: String::new(),
             message: String::new(),
             search: String::new(),
@@ -320,6 +347,9 @@ impl WordApp {
             chat_material_open: false,
             chat_context_open: false,
             chat_trash_open: false,
+            conversation_trash_open: false,
+            pending_chat_delete: None,
+            viewed_trash_id: None,
             chat_composer_height: 165.0,
             about_open: false,
             chat_media_open: false,
@@ -340,9 +370,12 @@ impl WordApp {
             return;
         }
         if let Some(storage) = &self.storage {
+            let operation = DiagnosticOperation::begin(DiagnosticEntry::Storage);
             if let Err(e) = storage.save(&self.progress) {
+                operation.fail(DiagnosticStage::Save, DiagnosticError::Io);
                 self.fatal=Some(format!("保存に失敗しました。これ以上の学習記録は変更しません。アプリを閉じる前に、設定画面から現在の記録をエクスポートしてください。原因: {e}"));
             } else {
+                operation.event(DiagnosticStage::Save, DiagnosticEvent::Completed);
                 self.dirty = false;
                 self.last_save = Instant::now();
             }
@@ -360,7 +393,7 @@ impl WordApp {
         self.card_start = Instant::now();
         self.exercise = None;
         self.revision = false;
-        self.speaker.stop();
+        self.stop_speech();
     }
     fn key(&self) -> String {
         self.current
@@ -444,7 +477,7 @@ impl WordApp {
             );
         }
         self.current = None;
-        self.speaker.stop();
+        self.stop_speech();
         self.page = Page::Home;
         self.persist();
     }
@@ -505,7 +538,7 @@ impl WordApp {
         if self
             .recorder
             .as_ref()
-            .is_some_and(|r| r.started.elapsed() >= Duration::from_secs(30))
+            .is_some_and(|r| r.elapsed() >= Duration::from_secs(30) || r.error().is_some())
         {
             self.stop_recording();
         }
@@ -582,6 +615,12 @@ impl WordApp {
                                 }
                             },
                             Ok(AiResult::Connection(t)) => self.message = t,
+                            Ok(AiResult::ModelChoices { path, models }) => {
+                                if path == self.progress.settings.codex_path.trim() {
+                                    self.message = format!("Codexから{}件のモデル候補を取得した。モデルを選びeffortを指定できる。", models.len());
+                                    self.effort_catalog = Some((path, models));
+                                } else { self.message = "実行ファイルの設定が変わったため、候補を再取得してください。".into(); }
+                            }
                             Ok(AiResult::Recovered(record)) => {
                                 self.message = format!("{}。本文は実行記録で確認できる。教材・会話には自動反映していない。",record.outcome.label());
                                 self.refresh_runs();
@@ -744,27 +783,43 @@ impl WordApp {
         self.message = "AIに送信中…（待ち時間は学習タイマーに含めない）".into();
     }
     fn stop_recording(&mut self) {
+        self.recording_cancel_confirm = false;
         if let Some(r) = self.recorder.take() {
-            match r.finish() {
-                Ok(w) => {
-                    if let Some(id) = self.chat_recording_id.take() {
-                        self.save_chat_recording(&id, w);
-                        return;
+            let operation = self.recording_operation.take();
+            match r.finish_with_warning() {
+                Ok(captured) => {
+                    if let Some(operation) = &operation {
+                        if captured.warning.is_some() { operation.fail(DiagnosticStage::Record, DiagnosticError::Unavailable); }
+                        else { operation.event(DiagnosticStage::Record, DiagnosticEvent::Completed); }
                     }
-                    self.wav = Some(w);
-                    self.message = "録音した（次の問題に進むまでメモリ内で保持）。".into();
+                    if let Some(id) = self.chat_recording_id.take() {
+                        self.save_chat_recording(&id, captured.wav);
+                    } else {
+                        self.wav = Some(captured.wav);
+                        self.message = "録音した（次の問題に進むまでメモリ内で保持）。".into();
+                    }
+                    if let Some(warning) = captured.warning { self.message.push_str(&format!("\n録音障害が発生したため取得できた音声だけを保持した：{warning}")); }
                 }
-                Err(e) => { self.chat_recording_id = None; self.message = e; }
+                Err(e) => {
+                    if let Some(operation) = operation { operation.fail(DiagnosticStage::Record, DiagnosticError::Unavailable); }
+                    self.chat_recording_id = None; self.message = e;
+                }
             }
         }
     }
     fn say(&mut self, text: &str) {
-        if let Err(e) = self.speaker.say(
+        if let Err(error) = self.check_speech_start() { self.message = error; return; }
+        let operation = DiagnosticOperation::begin(DiagnosticEntry::Playback);
+        if let Err(e) = self.speaker.say_at_rate(
             text,
             &self.progress.settings.voice_id,
-            self.progress.settings.slow_speech,
+            self.speech_rate(),
         ) {
+            operation.fail(DiagnosticStage::Synthesize, DiagnosticError::Unavailable);
             self.message = e;
+        } else {
+            if let Some(previous) = self.speech_operation.replace(operation) { previous.event(DiagnosticStage::Play, DiagnosticEvent::Stopped); }
+            self.speech_visible = true;
         }
     }
     fn card(&mut self, ui: &mut egui::Ui, entry: &Entry) {
@@ -1029,25 +1084,21 @@ impl WordApp {
                     self.ink.ui(ui);
                 }
                 if self.input == Input::Voice {
-                    if let Some(r) = self.recorder.as_ref() {
-                        ui.label(format!(
-                            "録音中 {}秒 / 最大30秒",
-                            r.started.elapsed().as_secs()
-                        ));
-                        ui.add(egui::ProgressBar::new(r.level()).text("入力音量"));
-                        if ui.button("録音を止める").clicked() {
-                            self.stop_recording();
-                        }
+                    if self.recorder.is_some() {
+                        self.recording_controls(ui, "録音を終了");
                     } else {
                         ui.horizontal(|ui| {
                             if ui.button("録音する（英語）").clicked() {
-                                self.speaker.stop();
+                                if !self.stop_speech() { return; }
+                                let operation = DiagnosticOperation::begin(DiagnosticEntry::Recording);
                                 match Recorder::start() {
                                     Ok(r) => {
-                                        self.wav = None;
+                                        operation.event(DiagnosticStage::Record, DiagnosticEvent::Started);
+                                        self.recording_operation = Some(operation);
+                                        self.recording_cancel_confirm = false;
                                         self.recorder = Some(r);
                                     }
-                                    Err(e) => self.message = e,
+                                    Err(e) => { operation.fail(DiagnosticStage::Record, DiagnosticError::Unavailable); self.message = e; }
                                 }
                             }
                             if ui
@@ -1572,6 +1623,11 @@ impl WordApp {
     }
     fn open_material_source(&mut self, source: &wordweave5::material::Source) {
         if let Some(index) = self.progress.chats.iter().position(|c| c.id == source.conversation_id) {
+            if self.progress.chats[index].deleted_at.is_some() {
+                self.viewed_trash_id = Some(source.conversation_id.clone());
+                self.message = "根拠の会話はごみ箱にある。読み取り専用で表示する。".into();
+                return;
+            }
             self.chat_selected = index;
             self.page = Page::Chat;
             self.message = format!("元の会話を表示した。参照したやり取り番号：{}", source.exchange_indices.iter().map(|i| (i+1).to_string()).collect::<Vec<_>>().join(", "));
@@ -1916,10 +1972,10 @@ impl WordApp {
                     ui.selectable_value(&mut self.progress.settings.voice_id, id.clone(), name);
                 }
             });
-        ui.checkbox(
-            &mut self.progress.settings.slow_speech,
-            "少しゆっくり読み上げる",
-        );
+        let mut rate = self.speech_rate();
+        if ui.add(egui::Slider::new(&mut rate, 0.5..=4.0).step_by(0.1).text("読み上げ速度（倍）")).changed() {
+            if let Err(error) = self.change_speech_rate(rate) { self.message = error; }
+        }
         if ui.button("音声を確認する").clicked() {
             self.say("We appreciate your assistance.");
         }
@@ -1946,11 +2002,12 @@ impl WordApp {
                 }
             }
         });
-        ui.small("既定値codexでPATHとnpmのインストール先を探索する。コマンドの引数は入力しない。");
+        ui.small("実行ファイル欄をcodexにすると、起動時PATH → システムPATH → ユーザーPATH → npmの順に探索する。特定のCLIを使う場合はファイルを選択する。引数は入力しない。");
         ui.horizontal(|ui| {
             ui.label("モデル（空欄はCodexの既定値）");
             ui.text_edit_singleline(&mut self.progress.settings.codex_model);
         });
+        self.effort_settings(ui);
         if ui
             .add_enabled(
                 self.pending.is_none(),
@@ -1990,6 +2047,7 @@ impl WordApp {
                 ui.hyperlink_to("ChatGPTを開く（手動貼り付け）", "https://chatgpt.com/");
             });
         });
+        self.persistent_diagnostics_ui(ui);
         ui.separator();
         ui.heading("教材・バックアップ");
         let idle = self.session.is_none() && self.pending.is_none() && self.recorder.is_none();
@@ -2142,6 +2200,7 @@ impl WordApp {
         progress.reconcile_deck(&self.deck);
         storage.save(&progress)?;
         self.progress = progress;
+        self.reset_chat_view_after_restore();
         self.fatal = None;
         self.dirty = false;
         self.message =
@@ -2278,6 +2337,7 @@ impl WordApp {
             }
             ui.small("ローカル学習 / AI生成はCodexのChatGPT認証を使用");
         });
+        self.speech_controls(ctx);
         egui::CentralPanel::default().show(ctx,|ui|{
             ui.add_enabled_ui(!confirming,|ui|{
             if self.page == Page::Chat && self.fatal.is_none() {
@@ -2296,6 +2356,8 @@ impl WordApp {
         self.version_dialog(ctx);
         self.run_history(ctx);
         self.backup_confirmation(ctx);
+        self.conversation_trash_windows(ctx);
+        self.recording_cancel_dialog(ctx);
         let media_idle = self.pending.is_none() && self.recorder.is_none()
             && self.session.is_none() && !self.batch_running && !confirming;
         self.chat_media_windows(ctx, media_idle);
@@ -2315,7 +2377,7 @@ impl eframe::App for WordApp {
             }
         }
         if self.chat_recording_id.is_some() { self.stop_recording(); } else { self.recorder = None; }
-        self.speaker.stop();
+        self.stop_speech();
         self.credit_time();
         if self.dirty {
             self.persist();

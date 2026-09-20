@@ -1,6 +1,6 @@
 [package]
 name = "wordweave5"
-version = "0.4.0"
+version = "0.5.1"
 default-run = "wordweave5"
 edition = "2021"
 description = "Five-minute contextual English vocabulary practice for Windows"
@@ -24,6 +24,7 @@ eframe = { version = "=0.31.1", default-features = false, features = ["default_f
 rfd = "=0.15.3"
 reqwest = { version = "0.12", default-features = false, features = ["blocking", "native-tls"] }
 tts = "=0.26.1"
+windows = { version = "=0.56.0", features = ["Foundation", "Foundation_Collections", "Media_Core", "Media_Playback", "Media_SpeechSynthesis", "Storage_Streams", "Win32_System_Registry"] }
 cpal = "=0.15.3"
 hound = "=3.5.1"
 image = { version = "0.25", default-features = false, features = ["png"] }
