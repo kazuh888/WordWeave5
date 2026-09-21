@@ -1,0 +1,24 @@
+{
+  "snapshot_utc": "2026-09-21T02:27:29.967Z",
+  "scope": "Parent task log cumulative counters, including part of this audit; child coverage unknown; not account quota or billing",
+  "task_id": "01a08550-055c-7aa1-9834-905e4a7ce148",
+  "token_events": 1017,
+  "compactions": 12,
+  "spawn_agent_calls_including_attempts": 64,
+  "total_token_usage": {
+    "input_tokens": 123964939,
+    "cached_input_tokens": 113717376,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 409057,
+    "reasoning_output_tokens": 103298,
+    "total_tokens": 124373996
+  },
+  "last_token_usage": {
+    "input_tokens": 217144,
+    "cached_input_tokens": 210048,
+    "output_tokens": 1110,
+    "reasoning_output_tokens": 971,
+    "total_tokens": 218254
+  },
+  "post_change_savings": null
+}

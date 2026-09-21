@@ -1,0 +1,4 @@
+interface:
+  display_name: "WordWeave scoped change"
+  short_description: "Plan and verify bounded WordWeave5 changes"
+  default_prompt: "Use $wordweave-change to implement this bounded WordWeave5 change."
