@@ -14,6 +14,18 @@ use wordweave5::codex;
 
 #[test]
 fn codex_diagnostics_correlate_phases_without_retaining_content_or_paths() {
+    const CHILD: &str = "WORDWEAVE_DIAGNOSTICS_TEST_CHILD";
+    // The sink is process-global. Parallel runs can connect before it is
+    // initialized and leave partial runs in the export, so isolate this test.
+    if std::env::var_os(CHILD).is_none() {
+        let output = std::process::Command::new(std::env::current_exe().unwrap())
+            .args(["--exact", "codex_diagnostics_correlate_phases_without_retaining_content_or_paths", "--nocapture"])
+            .env(CHILD, "1")
+            .output().unwrap();
+        assert!(output.status.success(), "isolated diagnostics test failed: {:?}\nstdout: {}\nstderr: {}",
+            output.status.code(), String::from_utf8_lossy(&output.stdout), String::from_utf8_lossy(&output.stderr));
+        return;
+    }
     use wordweave5::diagnostics;
     let f = Fixture::new("effort");
     diagnostics::initialize(&f.dir.join("logs"));
@@ -25,8 +37,7 @@ fn codex_diagnostics_correlate_phases_without_retaining_content_or_paths() {
     let report = diagnostics::export().unwrap();
     assert!(!report.contains("SECRET") && !report.contains(f.dir.to_str().unwrap()));
     let events: Vec<serde_json::Value> = report.lines().map(|line| serde_json::from_str(line).unwrap()).collect();
-    // Parallel mock tests can log in this process too. Select a completed run
-    // that queried capabilities instead of depending on the order of log lines.
+    // Select the completed generation that queried capabilities.
     let finished = events.iter().find(|event| event["stage"] == "generate" && event["event"] == "completed"
         && events.iter().any(|phase| phase["run_id"] == event["run_id"]
             && phase["stage"] == "model_list" && phase["event"] == "completed"))

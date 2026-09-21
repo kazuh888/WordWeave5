@@ -1,22 +1,45 @@
-name: Rust
+name: Windows Rust CI
 
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-rust-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
+    name: Windows tests and release build
+    runs-on: windows-latest
+    timeout-minutes: 40
 
     steps:
     - uses: actions/checkout@v4
-    - name: Build
-      run: cargo build --verbose
-    - name: Run tests
-      run: cargo test --verbose
+      with:
+        persist-credentials: false
+    - name: Install stable Rust
+      run: |
+        rustup toolchain install stable --profile minimal
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        rustup default stable
+    - name: Cache Cargo dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+        key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}
+    - name: Run all tests (mock Codex; no credentials)
+      run: cargo test --all-targets --locked
+    - name: Build Windows release
+      run: cargo build --release --locked --bin wordweave5
