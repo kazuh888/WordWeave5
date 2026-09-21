@@ -1,0 +1,346 @@
+{
+  "version": "0.6.0",
+  "validation_date": "2026-09-21",
+  "host": "x86_64-pc-windows-msvc",
+  "rustc": "1.98.1 (48a229cea 2026-09-01)",
+  "cargo": "1.98.1 (797e8a9bc 2026-08-05)",
+  "base_commit": "4a7a6627e934ad11aa01ebaf02a0fd94068d28c2",
+  "branch": "codex/ux-completion",
+  "committed": false,
+  "commands": [
+    {
+      "command": "cargo test --all-targets --locked",
+      "exit_code": 0,
+      "passed": 198,
+      "failed": 0,
+      "groups": {
+        "library": 104,
+        "gui_and_media": 58,
+        "chat_trash": 2,
+        "codex_process_mock": 31,
+        "control_settings": 2,
+        "diagnostics": 1
+      }
+    },
+    {
+      "command": "cargo build --release --locked --bin wordweave5",
+      "exit_code": 0,
+      "warnings": 2
+    },
+    {
+      "command": "cargo clippy --all-targets --locked --message-format short",
+      "exit_code": 0,
+      "warnings_remaining": true
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0
+    }
+  ],
+  "review": {
+    "run_id": "ux-20260921-ed488651",
+    "receipt": "validation/ux-0.6.0-review.json",
+    "receipt_is_before_remediation": true,
+    "applied": [
+      {
+        "finding": 1,
+        "files": [
+          "src/app.rs",
+          "src/app/session_end.rs",
+          "src/app/dashboard.rs",
+          "src/app/ux_flow_tests.rs"
+        ],
+        "reason": "Use the same study_queue(minutes) in start, candidate preview and continuation eligibility.",
+        "red_test_log": "validation/ux-0.6.0-continuation-red.log",
+        "green_test": "app::ux_flow_tests::short_default_course_disables_empty_continuation_and_keeps_the_result",
+        "post_fix_review": "correctness reviewer inspected only the fix: resolved, no new findings; final 198-test run passed"
+      }
+    ],
+    "unresolved_code_findings": 0
+  },
+  "manual_acceptance": "Pending: native UI at min size/all zooms, real IME, microphone/pen/TTS, live Codex, preserved-user-data upgrade/restart/backup restore. See UPGRADE-0.6.0.md.",
+  "sources": [
+    {
+      "path": "Cargo.lock",
+      "sha256": "f1ac98eb5cafed09d3b02625407c2aaf3487d2d6dec58b9a9e79b3c6beda82c2"
+    },
+    {
+      "path": "Cargo.toml",
+      "sha256": "e7d24d920d13e2031eed1487bf8e152a4e0eeb4e691f96357c290ddbe9640727"
+    },
+    {
+      "path": "data/core.tsv",
+      "sha256": "af7d2a44be6e4c0447cf47c7735366c57dc950c804546e01dadacaf867acf236"
+    },
+    {
+      "path": "data/FORMAT.md",
+      "sha256": "00f39373eee9e0db6c1c8e03d45559c99a9027109eb4b9e1e80b0110c6f61f82"
+    },
+    {
+      "path": "data/NGSL_12_stats.csv",
+      "sha256": "2098bab8955a120a9766c6282a51d7d578c6cb0a7d946600d2ffb73ba25a0b44"
+    },
+    {
+      "path": "data/ngsl-1.2.txt",
+      "sha256": "7c09f829de0b142fd90157fdb1103acbc40a7912dc251c015c613478463f1c78"
+    },
+    {
+      "path": "data/NGSL-NOTICE.md",
+      "sha256": "d7795815c5e3b06bdf859da26a659477e716c0b21a3a463c924b195bf1f66916"
+    },
+    {
+      "path": "data/phrases.tsv",
+      "sha256": "1bd171b394b01177c20b2634dcfdba4b97f3603c89ef6b7bafd1d5547f1669d0"
+    },
+    {
+      "path": "data/SUP_lemmatized.csv",
+      "sha256": "7bb4c76cbe43ae87240be4ac7ada370b9e1a0d9d631d8c4430138646965d03f6"
+    },
+    {
+      "path": "examples/codex_path_probe.rs",
+      "sha256": "cecaa998ecd3a7bec5ff29c3c70fc92add54b1540da648c370e901c40dedec5e"
+    },
+    {
+      "path": "src/ai.rs",
+      "sha256": "b37294e2ec6cab8d064d03db223c94435994a542ee5867e50c9d723780d9a01c"
+    },
+    {
+      "path": "src/annotation.rs",
+      "sha256": "82210df7c947e0fc0027b07bdbb4178bba0f773322d23c361f3123637449b821"
+    },
+    {
+      "path": "src/app.rs",
+      "sha256": "91ae2b472c782fffff22348a42829e9e51198bf1aef34e78b3a70cbfaf94969d"
+    },
+    {
+      "path": "src/app/activity.rs",
+      "sha256": "a4b71e48a54c0d810cea3430c5bc6a55e263c4aee3dcd2fe7a2de7fd8b92afd0"
+    },
+    {
+      "path": "src/app/audio_controls.rs",
+      "sha256": "97f40d0c323f548c3e8bc4d70ce6565fa746b295ab5a9b3238a01c8e577de291"
+    },
+    {
+      "path": "src/app/backup_ui.rs",
+      "sha256": "21e1986fae0f19289cccc2502512c7b1f7b8a2972dd7f29e7e71e3a61990e7c1"
+    },
+    {
+      "path": "src/app/chat_media.rs",
+      "sha256": "df4fb08a7cbdeca73a920a993f2e3bac915c6ec017a685667e7bb21fcc6cf77e"
+    },
+    {
+      "path": "src/app/chat_ui.rs",
+      "sha256": "5b5ac97cf8edef208d4bd4f4ca3ec06fbc0d59fcd999b43653009e45a20f05d0"
+    },
+    {
+      "path": "src/app/control_settings.rs",
+      "sha256": "ed060c182ea6298551cefed99b8cfb23694724ccfb353b4dc23140e0fe2a1e8c"
+    },
+    {
+      "path": "src/app/conversation_trash.rs",
+      "sha256": "eccfb91005147ff30e5d185eacc04a4aa61ade410724b3f102986d55b6a889ac"
+    },
+    {
+      "path": "src/app/dashboard.rs",
+      "sha256": "5c68e56de8e8d7ced6451b0d39ab7e254facc7432b0c4352172a390ce331bd99"
+    },
+    {
+      "path": "src/app/harness_tests.rs",
+      "sha256": "0aadcd4ea4bfbb9b8968066ef82cefd553fe05fc82d646dad92743ff1c4be754"
+    },
+    {
+      "path": "src/app/layout_tests.rs",
+      "sha256": "2ebbad94cb5d6d4d070a4940c9599824ab3c88578684da9d34f334bda2b0ac08"
+    },
+    {
+      "path": "src/app/material_review.rs",
+      "sha256": "63be17049a39123d7d41284641db25a3ad04ced717b614c423d48ce6de98c812"
+    },
+    {
+      "path": "src/app/materials_ui.rs",
+      "sha256": "9b0d588ff7549877af1a50b0ada675ef39d4ac939df4cfd0ea761e27f482ef85"
+    },
+    {
+      "path": "src/app/run_history.rs",
+      "sha256": "f0c62472e4b5d54201c077db4388378fcb1ba055bc7559d5d4a6be4a68529aaa"
+    },
+    {
+      "path": "src/app/session_end.rs",
+      "sha256": "09ceb71bd1199fb70220035a48172717e69bab3327b220a29335cd9bfbf4eaf4"
+    },
+    {
+      "path": "src/app/settings_ui.rs",
+      "sha256": "6cfdeaccd9b9c0970ac53a6446d9d6a23235616da1c03741f09f9600b57a79cf"
+    },
+    {
+      "path": "src/app/stats_ui.rs",
+      "sha256": "458983513e8c045682ed7d51e5ace9ef701a056cd29f174ce6ee1116d12d48ae"
+    },
+    {
+      "path": "src/app/study_tests.rs",
+      "sha256": "4937c1ed0841e84c313cf2d74185ac712b916123f3b426c85ffeb5c6be5c5a83"
+    },
+    {
+      "path": "src/app/study_ui.rs",
+      "sha256": "42fe81a2746a4f95a9335481ec3252b448fd84740abff8d9b1919105b29bc289"
+    },
+    {
+      "path": "src/app/ux_flow_tests.rs",
+      "sha256": "4ddcae911661b0caaacf06a0579317490bfc2d048979e8afda3bd1ce660df4a1"
+    },
+    {
+      "path": "src/app/ux.rs",
+      "sha256": "01124f83f5bdd00ebb50065700c15bd190e5f1485ce98668697fcfa056edbcf9"
+    },
+    {
+      "path": "src/app/vocabulary_ui.rs",
+      "sha256": "f33076988b82e5e519d5502152fd4c0b191d1fd4a1db43e9361154bbdb1f9b74"
+    },
+    {
+      "path": "src/assets.rs",
+      "sha256": "c472d0ccbb7c1509ee5f219d6f7a52902234d4b326bd09c80499f6a356495898"
+    },
+    {
+      "path": "src/backup.rs",
+      "sha256": "193d347a4d1a8c97612d4f283bfdd0f78492aafe1dda3ee31e3bd694392e0f16"
+    },
+    {
+      "path": "src/chat_action.rs",
+      "sha256": "94b88e296f6acaf2ad26ed5611f484dc48b42ef1aa5527a40ab865197463d04f"
+    },
+    {
+      "path": "src/chat.rs",
+      "sha256": "e3551a2e44b3cf3c98e82462c94888f581a7ca5bdb7db11f46d520cf9d5a95a9"
+    },
+    {
+      "path": "src/codex.rs",
+      "sha256": "cc1e7873dcc3a9498363d2efc247029bb5cc0f71aa92960a9a8fd89777d0e73b"
+    },
+    {
+      "path": "src/codex/search_path.rs",
+      "sha256": "16c55d967efd5f6df4ef2017731177815e3e48a909da786e9734af5f7e155a85"
+    },
+    {
+      "path": "src/commit.rs",
+      "sha256": "de2dccb46f5e9c34e5d1f2014e79fa06d8576afaa012827014e8e8284f894245"
+    },
+    {
+      "path": "src/diagnostics.rs",
+      "sha256": "524684d45f240b2d54af210707c47e53246b6032bdfa9e64c7fba23c581babf4"
+    },
+    {
+      "path": "src/effort.rs",
+      "sha256": "778559e79dd3e18adddd225cce8c6f95e0959a44a6e743ff6c48595f29ef1e43"
+    },
+    {
+      "path": "src/execution.rs",
+      "sha256": "235e45f18a855d867c6449fc4013abeee5396827f9aca3e9c034d670c21af66c"
+    },
+    {
+      "path": "src/ink.rs",
+      "sha256": "96357c3a388582fd225790caa37385491834ca5ca8c333c77bca2bf865ba9bda"
+    },
+    {
+      "path": "src/learning.rs",
+      "sha256": "6bf1d7aef631f6bd248fbfeef3a56c01d9b94f18318489acecca3576e6f49a03"
+    },
+    {
+      "path": "src/lib.rs",
+      "sha256": "a070074b4f40ff7745cf316a4862f445b48acc7d22a946d531c84ea58a4e2fdc"
+    },
+    {
+      "path": "src/main.rs",
+      "sha256": "a76083e237427f96fdc74a8be54fbf92e8361161f8dc2d5d465beee6dce034e7"
+    },
+    {
+      "path": "src/material_diff.rs",
+      "sha256": "2435356eae06d237e2a910d42a5ad5c33161fd023451d042989a2f19f3226644"
+    },
+    {
+      "path": "src/material.rs",
+      "sha256": "9ca9b0749f6518a39c5ebfb01a516c369624aa04f5e979bfd28f51aa7cbaf8de"
+    },
+    {
+      "path": "src/media.rs",
+      "sha256": "8585149f7abf9ceacc480daf2147b263c35c52840d2df1c75a08010b8455d4b9"
+    },
+    {
+      "path": "src/media/speech.rs",
+      "sha256": "9e7d0dacab6537f1d351da2cf2db7579b266d613c39a214eb24b6832c56e323c"
+    },
+    {
+      "path": "src/model.rs",
+      "sha256": "984408aeaf0ef414e5e76c4fbd61bcc10317d703bbd63fb890562878b97c6504"
+    },
+    {
+      "path": "src/run_journal.rs",
+      "sha256": "8712c254a2f94b44ee88fe6d024904b71517c8e9e9aa459c56db2210a76a06f3"
+    },
+    {
+      "path": "src/scheduler.rs",
+      "sha256": "f4d10334491a931ed32b50bf5f647ee457027c514f7341df3246b514f29eee7f"
+    },
+    {
+      "path": "src/store.rs",
+      "sha256": "bfb977ca8c1c4bdf95b87c122f30bee8f248fd0bea85aad8cff12b96b1faf29b"
+    },
+    {
+      "path": "tests/chat_trash.rs",
+      "sha256": "538d8818dcd903c0e1421eeb520a81e950d816da01f56390121e8ae1fc5877c9"
+    },
+    {
+      "path": "tests/codex_process.rs",
+      "sha256": "e2525f76bbf4378e6bef7a09a5361fae8dd4c2934928a503e14d3099911a5049"
+    },
+    {
+      "path": "tests/control_settings.rs",
+      "sha256": "bf862736fe66e57bfd558f2f852c3333c757bd6b8cb4670ee106339f3ee7e015"
+    },
+    {
+      "path": "tests/diagnostics.rs",
+      "sha256": "71ffeb6d0729d50cb5b1d0412f5055f34f83ff3e317750dbb104d1eff0561488"
+    },
+    {
+      "path": "tests/support/mock_codex.rs",
+      "sha256": "b7fd8bd92b5e4108c82d12cd8c6da4533f29b69ce00fc5ca9e8e5fbcb27cb311"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "target/release/wordweave5.exe",
+      "sha256": "7615506f1d84a95fff22db17033ec2aa07672964c0d484e7908ce1294e19df2e",
+      "bytes": 10326016,
+      "last_write_utc": "2026-09-20T17:09:43.6994012Z"
+    },
+    {
+      "path": "validation/ux-0.6.0-tests.log",
+      "sha256": "365d26df66f160f013ecf0eb50a817ff96626c3709a6b2834de19522b407f727",
+      "bytes": 24787,
+      "last_write_utc": "2026-09-20T17:08:19.2600487Z"
+    },
+    {
+      "path": "validation/ux-0.6.0-build.log",
+      "sha256": "b509ce44e3b8e2fd997c0d8b44fddd201d79a3f01fe5618b7826786419abb6b1",
+      "bytes": 6526,
+      "last_write_utc": "2026-09-20T17:09:44.3162098Z"
+    },
+    {
+      "path": "validation/ux-0.6.0-clippy.log",
+      "sha256": "d916b9b1c785998108a655cfa0c8c272e7b63b9cbb9e22e9de2b5483cea25009",
+      "bytes": 9922,
+      "last_write_utc": "2026-09-20T17:10:16.1743712Z"
+    },
+    {
+      "path": "validation/ux-0.6.0-continuation-red.log",
+      "sha256": "b1b444968c2aa212b3cab6ec3a5de478f0bf2ce1adda479adbdc2442dde48af8",
+      "bytes": 7227,
+      "last_write_utc": "2026-09-20T16:54:15.1494007Z"
+    },
+    {
+      "path": "validation/ux-0.6.0-review.json",
+      "sha256": "56a7b4132e4c51eb74182ecb165e86ebf8bb72af925c755222d1195b6809aa04",
+      "bytes": 19060,
+      "last_write_utc": "2026-09-20T17:07:46.5700586Z"
+    }
+  ]
+}

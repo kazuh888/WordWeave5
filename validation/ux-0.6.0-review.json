@@ -1,0 +1,266 @@
+{
+  "status": "complete",
+  "verdict": "Ready with fixes",
+  "scope": {
+    "base": "4a7a6627e934ad11aa01ebaf02a0fd94068d28c2",
+    "branch": "codex/ux-completion",
+    "head_sha": "4a7a6627e934ad11aa01ebaf02a0fd94068d28c2",
+    "pr_url": null,
+    "files_changed": 21
+  },
+  "intent": "Implement approved existing-feature UX completion for Windows Rust/egui WordWeave5: clear study input/check/explicit self-grade, start/resume dashboard, actual session result and finish/continue, materials/add vocabulary hierarchy, chat activity/main action, honest records and grouped settings. Shared responsive blue controls, minimum 820x650 and 80–160% text scale. Preserve data/AI/scheduling/media invariants; no image-only expansion. Source version 0.6.0 with unchanged dependencies. Review only; real-device acceptance remains pending.",
+  "intent_confidence": "explicit",
+  "reviewers": [
+    "correctness",
+    "testing",
+    "maintainability",
+    "reliability",
+    "adversarial"
+  ],
+  "findings": [
+    {
+      "#": 1,
+      "autofix_class": "gated_auto",
+      "confidence": 100,
+      "evidence": [
+        "src/app/session_end.rs:72 -- let can_continue = !scheduler::make_queue(&self.deck, &self.progress, now(), &today(), self.progress.settings.new_per_day).is_empty();",
+        "src/app/session_end.rs:75 -- if ux::primary(ui, \"もう少し学習する\", can_continue).clicked() { self.start(self.progress.settings.minutes); }",
+        "src/app.rs:445-450 -- let max_new = if minutes <= 2 { self.progress.settings.new_per_day.min(1) } else { self.progress.settings.new_per_day }; let queue = scheduler::make_queue(&self.deck, &self.progress, now(), &today(), max_new);",
+        "src/scheduler.rs:169 -- max_new.saturating_sub(new_today)",
+        "src/app.rs:442 -- self.session_summary = None;",
+        "src/app/dashboard.rs:80 -- let queue = scheduler::make_queue(&self.deck, &self.progress, now(), &today(), self.progress.settings.new_per_day);",
+        "Post-review regression evidence: validation/ux-0.6.0-continuation-red.log records cargo test --locked --bin wordweave5 short_default_course_disables_empty_continuation_and_keeps_the_result failing at src/app/ux_flow_tests.rs:215: after continuation on a 1-minute course, result answers became 0 instead of remaining 1. Runtime source stayed at the reviewed working tree; the test was added after full.diff. The test's [1, 2] loop stopped at the first failing iteration."
+      ],
+      "file": "src/app/session_end.rs",
+      "first_evidence": "src/app/session_end.rs:72 -- let can_continue = !scheduler::make_queue(&self.deck, &self.progress, now(), &today(), self.progress.settings.new_per_day).is_empty();",
+      "independent_reviewers": [
+        "correctness"
+      ],
+      "line": 72,
+      "owner": "downstream-resolver",
+      "pre_existing": false,
+      "requires_verification": true,
+      "reviewers": [
+        "correctness"
+      ],
+      "severity": "P2",
+      "suggested_fix": "Share start()'s minute-dependent max_new calculation with continuation eligibility and study-start candidate preview. With minutes=2, new_per_day=3, one first answer today and no due reviews, continuation currently stays enabled but immediately replaces the previous summary with an empty NoTasks result. Add a regression asserting continuation is disabled and the summary preserved; retain existing scheduler semantics.",
+      "title": "Use the actual course allowance for continuation eligibility",
+      "why_it_matters": "With the configured course set to 1 or 2 minutes, new_per_day above 1, one first answer already recorded today, and no due reviews, the result screen enables continuation even though start() cannot create a question. Clicking it replaces the useful prior result with an empty NoTasks result and leaves the same enabled button. The result-screen and start-screen preview queries use the full daily setting; start() applies min(new_per_day, 1), from which make_queue subtracts today's first answers.",
+      "validation_status": "confirmed",
+      "validation_reason": "With a configured 1–2-minute course, new_per_day greater than 1, one first answer today, remaining eligible new material and no due reviews, newly added src/app/session_end.rs:72–75 enables continuation using the full daily allowance while src/app.rs:442–495 clears the summary and starts an empty queue because src/scheduler.rs:169 subtracts that answer from the short-course allowance of 1; the inspected UI regression at src/app/ux_flow_tests.rs:200–216 and validation/ux-0.6.0-continuation-red.log establish reachability at 1 minute by showing the result count fall from 1 to 0 after the button click, with 2 minutes following the same inspected branch."
+    }
+  ],
+  "actionable_findings": [
+    {
+      "#": 1,
+      "autofix_class": "gated_auto",
+      "confidence": 100,
+      "evidence": [
+        "src/app/session_end.rs:72 -- let can_continue = !scheduler::make_queue(&self.deck, &self.progress, now(), &today(), self.progress.settings.new_per_day).is_empty();",
+        "src/app/session_end.rs:75 -- if ux::primary(ui, \"もう少し学習する\", can_continue).clicked() { self.start(self.progress.settings.minutes); }",
+        "src/app.rs:445-450 -- let max_new = if minutes <= 2 { self.progress.settings.new_per_day.min(1) } else { self.progress.settings.new_per_day }; let queue = scheduler::make_queue(&self.deck, &self.progress, now(), &today(), max_new);",
+        "src/scheduler.rs:169 -- max_new.saturating_sub(new_today)",
+        "src/app.rs:442 -- self.session_summary = None;",
+        "src/app/dashboard.rs:80 -- let queue = scheduler::make_queue(&self.deck, &self.progress, now(), &today(), self.progress.settings.new_per_day);",
+        "Post-review regression evidence: validation/ux-0.6.0-continuation-red.log records cargo test --locked --bin wordweave5 short_default_course_disables_empty_continuation_and_keeps_the_result failing at src/app/ux_flow_tests.rs:215: after continuation on a 1-minute course, result answers became 0 instead of remaining 1. Runtime source stayed at the reviewed working tree; the test was added after full.diff. The test's [1, 2] loop stopped at the first failing iteration."
+      ],
+      "file": "src/app/session_end.rs",
+      "first_evidence": "src/app/session_end.rs:72 -- let can_continue = !scheduler::make_queue(&self.deck, &self.progress, now(), &today(), self.progress.settings.new_per_day).is_empty();",
+      "independent_reviewers": [
+        "correctness"
+      ],
+      "line": 72,
+      "owner": "downstream-resolver",
+      "pre_existing": false,
+      "requires_verification": true,
+      "reviewers": [
+        "correctness"
+      ],
+      "severity": "P2",
+      "suggested_fix": "Share start()'s minute-dependent max_new calculation with continuation eligibility and study-start candidate preview. With minutes=2, new_per_day=3, one first answer today and no due reviews, continuation currently stays enabled but immediately replaces the previous summary with an empty NoTasks result. Add a regression asserting continuation is disabled and the summary preserved; retain existing scheduler semantics.",
+      "title": "Use the actual course allowance for continuation eligibility",
+      "why_it_matters": "With the configured course set to 1 or 2 minutes, new_per_day above 1, one first answer already recorded today, and no due reviews, the result screen enables continuation even though start() cannot create a question. Clicking it replaces the useful prior result with an empty NoTasks result and leaves the same enabled button. The result-screen and start-screen preview queries use the full daily setting; start() applies min(new_per_day, 1), from which make_queue subtracts today's first answers.",
+      "validation_status": "confirmed",
+      "validation_reason": "With a configured 1–2-minute course, new_per_day greater than 1, one first answer today, remaining eligible new material and no due reviews, newly added src/app/session_end.rs:72–75 enables continuation using the full daily allowance while src/app.rs:442–495 clears the summary and starts an empty queue because src/scheduler.rs:169 subtracts that answer from the short-course allowance of 1; the inspected UI regression at src/app/ux_flow_tests.rs:200–216 and validation/ux-0.6.0-continuation-red.log establish reachability at 1 minute by showing the result count fall from 1 to 0 after the button click, with 2 minutes following the same inspected branch."
+    }
+  ],
+  "triage_groups": [],
+  "pre_existing_findings": [],
+  "requirements_completeness": {
+    "plan_path": "F:/Kazuhiro/GitHub/WordWeave5/docs/design/ux-completion.md",
+    "plan_source": "explicit",
+    "requirements": [
+      {
+        "id": "R1",
+        "requirement": "Study start→input→check→explicit grade→next→summary→finish/continue is usable.",
+        "status": "partially addressed",
+        "evidence": "src/app/study_ui.rs, src/app/session_end.rs, src/app/ux_flow_tests.rs",
+        "note": "The full study flow is implemented; finding #1 remains in short-course continuation."
+      },
+      {
+        "id": "R2",
+        "requirement": "IME commit does not submit; multiline Enter/Ctrl+Enter distinction remains. No unselected Enter becomes Good.",
+        "status": "met",
+        "evidence": "src/app/study_ui.rs, src/app/study_tests.rs, src/app/chat_ui.rs",
+        "note": "Explicit grading and IME-aware key handling have synthetic event coverage; native Windows IME acceptance remains separate."
+      },
+      {
+        "id": "R3",
+        "requirement": "Resume keeps current answer/session; time budget ends after explicit grade without truncating inputs.",
+        "status": "met",
+        "evidence": "src/app.rs, src/app/ux_flow_tests.rs",
+        "note": "Resume preserves the active session and answer; the time boundary is applied after grading."
+      },
+      {
+        "id": "R4",
+        "requirement": "Summary/records use real study_seconds and answer experience, never infer mastery or confirmed AI settings.",
+        "status": "met",
+        "evidence": "src/app/session_end.rs, src/app/stats_ui.rs, src/app/activity.rs",
+        "note": "Time and answer statistics use recorded values; labels distinguish self-assessment and server-confirmed settings."
+      },
+      {
+        "id": "R5",
+        "requirement": "Continue preserves due times, daily-new limits, assisted grades; save failure preserves recoverable state.",
+        "status": "partially addressed",
+        "evidence": "src/app.rs, src/app/session_end.rs, src/app/ux_flow_tests.rs",
+        "note": "Scheduling and failure guards remain; continuation eligibility must use the same short-course allowance as start() (#1)."
+      },
+      {
+        "id": "R6",
+        "requirement": "Materials/chat/settings functions and media backups/trash/recovery remain available; no unapproved teaching changes.",
+        "status": "met",
+        "evidence": "src/app/materials_ui.rs, src/app/chat_ui.rs, src/app/settings_ui.rs",
+        "note": "Existing operations remain reachable in the changed code; physical/live connection and preserved-data acceptance are not proven by this review."
+      },
+      {
+        "id": "R7",
+        "requirement": "Minimum 820x650 with 80–160% text zoom; headless tests do not establish visual/physical acceptance.",
+        "status": "partially addressed",
+        "evidence": "src/app/ux.rs, src/app/layout_tests.rs, src/app/chat_ui.rs",
+        "note": "Responsive controls and headless boundary tests are present; native visual usability at minimum size and all supported zoom settings remains unverified."
+      },
+      {
+        "id": "R8",
+        "requirement": "Current all-target tests/release build, manual hardware/live Codex acceptance recorded separately.",
+        "status": "partially addressed",
+        "evidence": "validation/ux-0.6.0-tests.log, validation/ux-0.6.0-build.log, docs/design/ux-completion.md",
+        "note": "The frozen source passed 197 tests and the release build. The later reproducer for #1 is RED; rerun verification after its fix. Manual hardware/live Codex acceptance remains pending."
+      }
+    ],
+    "implementation_units": [
+      {
+        "id": "U1",
+        "unit": "Study input and evaluation",
+        "status": "met",
+        "note": "Corresponding implementation appears in the reviewed diff."
+      },
+      {
+        "id": "U2",
+        "unit": "Home dashboard/start/resume",
+        "status": "met",
+        "note": "Corresponding implementation appears in the reviewed diff."
+      },
+      {
+        "id": "U3",
+        "unit": "Session end/result/continue",
+        "status": "partially addressed",
+        "note": "Result and continuation are implemented; fix #1 before closure."
+      },
+      {
+        "id": "U4",
+        "unit": "Materials and vocabulary addition",
+        "status": "met",
+        "note": "Corresponding implementation appears in the reviewed diff."
+      },
+      {
+        "id": "U5",
+        "unit": "Chat main/auxiliary actions and activity",
+        "status": "met",
+        "note": "Corresponding implementation appears in the reviewed diff."
+      },
+      {
+        "id": "U6",
+        "unit": "Records and grouped settings",
+        "status": "met",
+        "note": "Corresponding implementation appears in the reviewed diff."
+      },
+      {
+        "id": "U7",
+        "unit": "Shared UI/responsiveness and verification",
+        "status": "partially addressed",
+        "note": "Shared UI and automated checks are implemented; native acceptance remains pending."
+      }
+    ],
+    "note": "No implementation unit was omitted. Partial status distinguishes the confirmed continuation defect and outstanding acceptance evidence from an unimplemented feature. This review does not declare UX development complete."
+  },
+  "learnings": [],
+  "agent_native_gaps": [],
+  "deployment_notes": [],
+  "residual_risks": [
+    "Native Windows IME ordering, microphone/pen/TTS behavior, live Codex and preserved-user-data acceptance remain manual gates. Headless event and layout tests verify deterministic application behavior, not physical/native behavior or perceived usability at 820x650 and 160% zoom."
+  ],
+  "testing_gaps": [
+    "Exercise paused-study recording stop/resume/end and subsequent answer saving on a real microphone (src/app.rs:982-986); this is part of the explicit physical-device acceptance contract."
+  ],
+  "coverage": {
+    "depth": "full",
+    "reviewer_results": {
+      "completed": 5,
+      "failed": 0,
+      "timed_out": 0
+    },
+    "suppressed_by_confidence": {},
+    "first_evidence_backfilled": 0,
+    "missing_first_evidence_demoted": 0,
+    "mode_aware_demotions": 0,
+    "settlement_suppressed": 0,
+    "semantic_duplicates": 0,
+    "malformed_findings": 0,
+    "malformed_returns": 0,
+    "validator": {
+      "selected": 1,
+      "confirmed": 1,
+      "rejected": 0,
+      "unresolved": 0,
+      "malformed": 0,
+      "failed": 0,
+      "shortcut_skipped": 0,
+      "protected_subject_reclassifications": 0,
+      "outcome": "verdicts",
+      "reason": "One deterministic batch returned a valid verdict within the bound. Finding #1 is confirmed by inspected code and a failing UI reproducer; it is not a protected-subject claim.",
+      "verdicts_path": "F:/TempCodex/wordweave-ux-review-ed488651fd904539bbe0542497cbf373/validator-verdicts.json"
+    },
+    "peer_outcome": "in-process-fallback",
+    "peer_coverage": "Cross-provider review was not run because the project is restricted to Codex/ChatGPT-auth AI use. An in-process adversarial reviewer was used; this does not provide cross-provider independence.",
+    "standards": {
+      "criteria": [],
+      "fallback_named": false,
+      "not_run_reason": "No CE configured standards/criteria were found; explicit plan and repository constraints were supplied to all reviewers."
+    },
+    "compound_packs": {
+      "roots": [],
+      "errors": [],
+      "warnings": []
+    },
+    "notes": [
+      "All five selected reviewers returned; no reviewer return or finding was malformed.",
+      "Cross-provider review was not run because the project is restricted to Codex/ChatGPT-auth AI use. An in-process adversarial reviewer was used; this does not provide cross-provider independence.",
+      "No scoped CE standards or packs were configured; the explicit repository plan and user constraints supplied the contract.",
+      "The reliability reviewer reused the earlier edge-test worker context because of concurrency limits; its review responsibility was persistence/state source, not its own authored tests.",
+      "The earlier testing note that final all-target verification was missing is obsolete: dispatch reported 197 passing tests and a successful release build for the frozen source. It is not retained as a risk.",
+      "Physical Windows IME, microphone, pen, TTS, native minimum-window usability, live Codex and preserved-user-data acceptance remain explicitly unverified; passing synthetic egui tests do not prove them.",
+      "The review snapshot includes application sources, new modules, the approved plan, and version changes. Release documents and generated validation logs were outside that snapshot and remain root-owned checks.",
+      "Suppressed-by-confidence count: 0. Missing-quote demotions: 0. first_evidence_backfilled: 0. Mode-aware demotions: 0. Preference/settlement rejections: 0. Semantic duplicates: 0.",
+      "One low-priority test-absence note concerning pending/recorder finish guards was not retained: reviewer evidence also showed the UI disables that path and did not establish a material uncovered failure. No source defect was inferred from that absence alone.",
+      "During synthesis the root added only a regression test after the review snapshot and obtained a failing reproduction for finding #1; runtime application source stayed unchanged. The added failure is corroborative evidence, not a validator verdict.",
+      "Clippy succeeded with warnings; root will address small newly introduced warnings, not broadly rewrite existing code.",
+      "No dedicated agent-close API exists. Every launched reviewer is collected to terminal state; no peer background job was launched.",
+      "No fixes were applied by this report-only review. No commit, push, external-provider send or actual user-data access occurred in the review leaves.",
+      "The accepted plan defines native acceptance as distinct from automated tests; final completion remains withheld pending that evidence."
+    ]
+  },
+  "verdict_reason": "Fix the confirmed short-course continuation defect (#1), then rerun affected tests and final all-target/release verification. The code-review verdict is Ready with fixes; native IME/media/live Codex, minimum-window usability and preserved-data acceptance are still required before declaring the approved UX completion contract satisfied.",
+  "artifact_path": "F:/TempCodex/wordweave-ux-review-ed488651fd904539bbe0542497cbf373",
+  "run_id": "ux-20260921-ed488651"
+}

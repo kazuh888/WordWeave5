@@ -131,6 +131,7 @@ impl WordApp {
                     let _ = tx.send(media::playback(bytes, dir).map(|_| AiResult::Played));
                 });
                 self.pending = Some(Pending {
+                    kind: Activity::Playback,
                     key: String::new(),
                     rx,
                     cancel: None,
@@ -180,6 +181,7 @@ impl WordApp {
             let _ = tx.send(result);
         });
         self.pending = Some(Pending {
+            kind: Activity::Recognition,
             key: String::new(),
             rx,
             cancel: Some(cancel),

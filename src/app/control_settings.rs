@@ -15,7 +15,7 @@ impl WordApp {
         let catalog = self.effort_catalog.as_ref().filter(|(path, _)| path == self.progress.settings.codex_path.trim())
             .map(|(_, models)| models.clone());
         if let Some(models) = catalog {
-            egui::ComboBox::from_id_salt("advertised-models").selected_text("取得済みモデルから選択").show_ui(ui, |ui| {
+            egui::ComboBox::from_id_salt("advertised-models").width(ui.available_width().min(440.0)).truncate().selected_text("取得済みモデルから選択").show_ui(ui, |ui| {
                 ui.selectable_value(&mut self.progress.settings.codex_model, String::new(), "Codexの既定モデル");
                 for model in models {
                     ui.selectable_value(&mut self.progress.settings.codex_model, model.model.clone(),
@@ -28,7 +28,7 @@ impl WordApp {
         let selected = if self.progress.settings.codex_effort.is_empty() { "Codexの既定値（指定しない）".to_string() }
             else { self.progress.settings.codex_effort.clone() };
         ui.label("effort（推論強度）");
-        egui::ComboBox::from_id_salt("codex-effort").selected_text(selected).show_ui(ui, |ui| {
+        egui::ComboBox::from_id_salt("codex-effort").width(ui.available_width().min(440.0)).truncate().selected_text(selected).show_ui(ui, |ui| {
             ui.selectable_value(&mut self.progress.settings.codex_effort, String::new(), "Codexの既定値（指定しない）");
             if let Some(choices) = choices {
                 for choice in choices {
@@ -65,7 +65,7 @@ impl WordApp {
                 .map(|models| AiResult::ModelChoices { path, models });
             let _ = tx.send(result);
         });
-        self.pending = Some(Pending { key: self.key(), rx, cancel: Some(cancel) });
+        self.pending = Some(Pending { key: self.key(), rx, cancel: Some(cancel), kind: Activity::Models });
         self.message = "ChatGPT認証を確認し、Codexからモデル・effort候補を取得中…".into();
     }
 
