@@ -1,35 +1,48 @@
+use crate::app::controls::UiControls as _;
 use crate::{
     ai,
     ink::Ink,
     media::{self, Recorder, Speaker},
 };
 use eframe::egui::{self, Color32, RichText};
-mod chat_ui;
 mod activity;
+mod chat_ui;
 use activity::Activity;
-mod stats_ui;
-mod settings_ui;
-mod dashboard;
-mod ux;
-mod materials_ui;
-mod vocabulary_ui;
-mod session_end;
-#[cfg(test)]
-mod ux_flow_tests;
-#[cfg(test)]
-mod layout_tests;
-mod chat_media;
-mod material_review;
-mod run_history;
-mod backup_ui;
-mod conversation_trash;
 mod audio_controls;
+mod backup_ui;
+mod chat_media;
+mod chrome;
 mod control_settings;
-mod study_ui;
+pub(crate) mod controls;
+mod conversation_trash;
+mod dashboard;
 #[cfg(test)]
 mod harness_tests;
+mod home_art;
+#[cfg(test)]
+mod home_render_tests;
+#[cfg(test)]
+mod home_tests;
+mod home_view;
+#[cfg(test)]
+mod layout_tests;
+mod material_review;
+mod materials_ui;
+mod notifications;
+mod playback_panel;
+mod run_history;
+mod session_end;
+mod settings_ui;
+mod stats_ui;
 #[cfg(test)]
 mod study_tests;
+mod study_ui;
+mod ux;
+#[cfg(test)]
+mod ux_flow_tests;
+#[cfg(debug_assertions)]
+pub(crate) mod visual_check;
+mod vocabulary_ui;
 use std::sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
@@ -40,9 +53,11 @@ use std::{
     sync::mpsc::{self, Receiver, TryRecvError},
     time::{Duration, Instant},
 };
+use wordweave5::diagnostics::{
+    EntryPoint as DiagnosticEntry, ErrorClass as DiagnosticError, Event as DiagnosticEvent,
+    Operation as DiagnosticOperation, Stage as DiagnosticStage,
+};
 use wordweave5::learning::{self, Exercise};
-use wordweave5::diagnostics::{Operation as DiagnosticOperation, EntryPoint as DiagnosticEntry,
-    Stage as DiagnosticStage, Event as DiagnosticEvent, ErrorClass as DiagnosticError};
 use wordweave5::{
     model::{self, Entry, Skill},
     scheduler::{self, Grade, Task},
@@ -92,18 +107,66 @@ enum AiResult {
     Generated(Entry),
     Updated(Entry, bool),
     Connection(String),
-    ModelChoices { path: String, models: Vec<wordweave5::effort::ModelEffort> },
-    Chat { id: String, question: String, reply: wordweave5::chat_action::ChatReply },
+    ModelChoices {
+        path: String,
+        models: Vec<wordweave5::effort::ModelEffort>,
+    },
+    Chat {
+        id: String,
+        question: String,
+        reply: wordweave5::chat_action::ChatReply,
+    },
     Material(wordweave5::material::Draft),
     Played,
     Recovered(wordweave5::run_journal::RunRecord),
-    ChatRecognized { id: String, expected: String, asset_id: String, text: String },
+    ChatRecognized {
+        id: String,
+        expected: String,
+        asset_id: String,
+        text: String,
+    },
 }
 struct Pending {
     kind: Activity,
     key: String,
     rx: Receiver<Result<AiResult, String>>,
     cancel: Option<Arc<AtomicBool>>,
+}
+
+struct ChatFileConsent {
+    chat_id: String,
+    question: String,
+    attachment_ids: Vec<String>,
+    attachment_names: Vec<Option<String>>,
+    labels: Vec<String>,
+    text_names: Vec<String>,
+}
+struct ChatDropProposal {
+    chat_id: String,
+    files: Vec<std::path::PathBuf>,
+    unsupported: usize,
+}
+impl ChatFileConsent {
+    fn matches(&self, chat: &wordweave5::chat::Conversation) -> bool {
+        chat.deleted_at.is_none()
+            && chat.id == self.chat_id
+            && chat.draft.trim() == self.question
+            && chat.draft_attachments.iter().map(|a| a.original.id.as_str()).collect::<Vec<_>>()
+                == self.attachment_ids.iter().map(String::as_str).collect::<Vec<_>>()
+            && chat.draft_attachments.iter().map(|a| a.file_name.as_ref()).collect::<Vec<_>>()
+                == self.attachment_names.iter().map(Option::as_ref).collect::<Vec<_>>()
+    }
+}
+
+fn add_chat_text_files(payload: &mut serde_json::Value, texts: &[(String, String)]) -> Result<(), String> {
+    if texts.is_empty() { return Ok(()); }
+    payload["current_text_files"] = serde_json::json!(texts.iter()
+        .map(|(name, content)| serde_json::json!({"name": name, "content": content}))
+        .collect::<Vec<_>>());
+    if serde_json::to_vec(payload).map_or(true, |payload| payload.len() > wordweave5::chat::CONTEXT_BYTES) {
+        return Err("添付テキストと会話の文脈が送信上限を超えました。添付または文脈の選択を減らしてください。".into());
+    }
+    Ok(())
 }
 
 pub struct WordApp {
@@ -125,6 +188,7 @@ pub struct WordApp {
     ink: Ink,
     speaker: Speaker,
     speech_visible: bool,
+    speech_selected: Option<audio_controls::SpeechButton>,
     speech_operation: Option<DiagnosticOperation>,
     recorder: Option<Recorder>,
     recording_operation: Option<DiagnosticOperation>,
@@ -136,6 +200,11 @@ pub struct WordApp {
     diagnostic_export: Option<String>,
     feedback: String,
     message: String,
+    notification_open: bool,
+    last_notification_message: String,
+    notification_error: String,
+    codex_path_guidance: bool,
+    codex_path_focus_pending: bool,
     search: String,
     selected: usize,
     last_frame: Instant,
@@ -154,6 +223,7 @@ pub struct WordApp {
     draft_text: String,
     batch_queue: VecDeque<String>,
     batch_running: bool,
+    saved_generated_words: Vec<String>,
     fetch_then_generate: bool,
     provided_words: String,
     replacement_phrase: String,
@@ -170,18 +240,26 @@ pub struct WordApp {
     chat_trash_open: bool,
     conversation_trash_open: bool,
     pending_chat_delete: Option<String>,
+    pending_chat_rename: Option<(String, String)>,
     viewed_trash_id: Option<String>,
     chat_composer_height: f32,
     about_open: bool,
     chat_media_open: bool,
+    chat_media_table_height: f32,
+    chat_media_focus_ink: bool,
+    exit_media_requested: bool,
+    exit_media_scroll_to_warning: bool,
+    pending_chat_file_send: Option<ChatFileConsent>,
+    pending_chat_drop: Option<ChatDropProposal>,
     chat_recording_id: Option<String>,
     annotation: crate::annotation::Annotation,
     media_preview: Option<(String, egui::TextureHandle)>,
     preview_pixels: Option<(String, egui::ColorImage)>,
+    file_preview: Option<(String, String, bool)>,
     run_history_open: bool,
     run_records: Vec<wordweave5::run_journal::RunRecord>,
     backup_restore: Option<wordweave5::backup::Prepared>,
-    unsaved_chat_audio: Option<(String,Vec<u8>)>,
+    unsaved_chat_audio: Option<(String, Vec<u8>)>,
     discard_audio_confirm: bool,
     discard_annotation_confirm: bool,
 }
@@ -203,11 +281,16 @@ fn shown(s: &str) -> &str {
 impl WordApp {
     pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
         let storage = Storage::open();
-        if let Ok(storage) = &storage { wordweave5::diagnostics::initialize(&storage.dir.join("diagnostics")); }
+        if let Ok(storage) = &storage {
+            wordweave5::diagnostics::initialize(&storage.dir.join("diagnostics"));
+        }
         let operation = DiagnosticOperation::begin(DiagnosticEntry::Application);
         let app = Self::new_with_storage(&cc.egui_ctx, storage);
-        if app.fatal.is_some() { operation.fail(DiagnosticStage::Startup, DiagnosticError::Io); }
-        else { operation.event(DiagnosticStage::Startup, DiagnosticEvent::Completed); }
+        if app.fatal.is_some() {
+            operation.fail(DiagnosticStage::Startup, DiagnosticError::Io);
+        } else {
+            operation.event(DiagnosticStage::Startup, DiagnosticEvent::Completed);
+        }
         app
     }
     fn new_with_storage(ctx: &egui::Context, storage: Result<Storage, String>) -> Self {
@@ -216,6 +299,7 @@ impl WordApp {
         let windows = std::env::var_os("WINDIR")
             .map(PathBuf::from)
             .unwrap_or_else(|| PathBuf::from("C:\\Windows"));
+        ctx.options_mut(|options| options.zoom_with_keyboard = false);
         let candidates = ["meiryo.ttc", "YuGothR.ttc", "msgothic.ttc"];
         if let Some(bytes) = candidates
             .iter()
@@ -231,22 +315,60 @@ impl WordApp {
                     .or_default()
                     .push("japanese".into());
             }
-            ctx.set_fonts(fonts);
         } else {
             font_notice =
                 "日本語フォントが見つかりません。Windowsの日本語フォントを追加してください。"
                     .into();
         }
+        let mut home_body = fonts.families[&egui::FontFamily::Proportional].clone();
+        if let Ok(bytes) = std::fs::read(windows.join("Fonts").join("YuGothM.ttc")) {
+            fonts
+                .font_data
+                .insert("home_body".into(), egui::FontData::from_owned(bytes).into());
+            home_body.insert(0, "home_body".into());
+        }
+        fonts
+            .families
+            .insert(egui::FontFamily::Name("home_body".into()), home_body);
+        let mut heading = fonts.families[&egui::FontFamily::Proportional].clone();
+        if let Ok(bytes) = std::fs::read(windows.join("Fonts").join("YuGothB.ttc")) {
+            fonts
+                .font_data
+                .insert("heading".into(), egui::FontData::from_owned(bytes).into());
+            heading.insert(0, "heading".into());
+        }
+        fonts
+            .families
+            .insert(egui::FontFamily::Name("heading".into()), heading);
+        let mut status_font = fonts.families[&egui::FontFamily::Proportional].clone();
+        if let Ok(bytes) = std::fs::read(windows.join("Fonts").join("YuGothR.ttc")) {
+            fonts.font_data.insert(
+                "status_regular".into(),
+                egui::FontData::from_owned(bytes).into(),
+            );
+            status_font.insert(0, "status_regular".into());
+        }
+        fonts
+            .families
+            .insert(egui::FontFamily::Name("status_regular".into()), status_font);
+        ctx.set_fonts(fonts);
         ctx.set_visuals(egui::Visuals::light());
         let mut style = (*ctx.style()).clone();
         style.spacing.item_spacing = egui::vec2(10.0, 10.0);
         style.spacing.button_padding = egui::vec2(14.0, 9.0);
         style
             .text_styles
-            .insert(egui::TextStyle::Body, egui::FontId::proportional(17.0));
+            .insert(egui::TextStyle::Body, home_art::home_font(19.0));
         style
             .text_styles
-            .insert(egui::TextStyle::Button, egui::FontId::proportional(16.0));
+            .insert(egui::TextStyle::Small, home_art::home_font(16.0));
+        style
+            .text_styles
+            .insert(egui::TextStyle::Button, home_art::home_font(18.0));
+        style.text_styles.insert(
+            egui::TextStyle::Heading,
+            egui::FontId::new(24.0, egui::FontFamily::Name("heading".into())),
+        );
         style.visuals.selection.bg_fill = ux::ACCENT;
         style.visuals.selection.stroke.color = Color32::WHITE;
         style.visuals.panel_fill = Color32::from_rgb(247, 250, 253);
@@ -303,7 +425,9 @@ impl WordApp {
                 }
             }
         }
-        ctx.set_zoom_factor(progress.settings.font_scale);
+        // Each launch starts at the user-requested standard display size.
+        progress.settings.font_scale = 0.8;
+        ctx.set_zoom_factor(0.8);
         progress.reconcile_deck(&deck);
         let words = storage
             .as_ref()
@@ -315,7 +439,17 @@ impl WordApp {
             .and_then(|s| read_limited(&s.dir.join("generation-queue.json"), 2_000_000).ok())
             .and_then(|s| serde_json::from_str(&s).ok())
             .unwrap_or_default();
-        let chat_selected = wordweave5::chat::ordered_indices(&progress.chats).first().copied().unwrap_or(0);
+        let chat_selected = wordweave5::chat::ordered_indices(&progress.chats)
+            .first()
+            .copied()
+            .unwrap_or(0);
+        let mut speaker = Speaker::new();
+        if let Err(error) = speaker
+            .set_volume(progress.settings.speech_volume)
+            .and_then(|_| speaker.set_repeat(progress.settings.speech_repeat))
+        {
+            fatal = Some(error);
+        }
         Self {
             storage,
             fatal,
@@ -333,8 +467,9 @@ impl WordApp {
             hints: 0,
             input: Input::Keyboard,
             ink: Ink::default(),
-            speaker: Speaker::new(),
+            speaker,
             speech_visible: false,
+            speech_selected: None,
             speech_operation: None,
             recorder: None,
             recording_operation: None,
@@ -346,6 +481,11 @@ impl WordApp {
             diagnostic_export: None,
             feedback: String::new(),
             message: String::new(),
+            notification_open: false,
+            last_notification_message: String::new(),
+            notification_error: String::new(),
+            codex_path_guidance: false,
+            codex_path_focus_pending: false,
             search: String::new(),
             selected: 0,
             last_frame: Instant::now(),
@@ -364,6 +504,7 @@ impl WordApp {
             draft_text: String::new(),
             batch_queue,
             batch_running: false,
+            saved_generated_words: Vec::new(),
             fetch_then_generate: false,
             provided_words: String::new(),
             replacement_phrase: String::new(),
@@ -380,14 +521,22 @@ impl WordApp {
             chat_trash_open: false,
             conversation_trash_open: false,
             pending_chat_delete: None,
+            pending_chat_rename: None,
             viewed_trash_id: None,
             chat_composer_height: 165.0,
             about_open: false,
             chat_media_open: false,
+            chat_media_table_height: 210.0,
+            chat_media_focus_ink: false,
+            exit_media_requested: false,
+            exit_media_scroll_to_warning: false,
+            pending_chat_file_send: None,
+            pending_chat_drop: None,
             chat_recording_id: None,
             annotation: Default::default(),
             media_preview: None,
             preview_pixels: None,
+            file_preview: None,
             run_history_open: false,
             run_records: Vec::new(),
             backup_restore: None,
@@ -442,7 +591,13 @@ impl WordApp {
         scheduler::make_queue(&self.deck, &self.progress, now(), &today(), max_new)
     }
     fn start(&mut self, minutes: u32) {
-        if self.fatal.is_some() || self.pending.is_some() || self.recorder.is_some() || self.batch_running { return; }
+        if self.fatal.is_some()
+            || self.pending.is_some()
+            || self.recorder.is_some()
+            || self.batch_running
+        {
+            return;
+        }
         if self.session.is_some() {
             self.page = Page::Study;
             return;
@@ -513,17 +668,29 @@ impl WordApp {
         self.finish_session(session_end::EndReason::Manual);
     }
     fn finish_session(&mut self, reason: session_end::EndReason) {
-        if self.session.is_none() || self.pending.is_some() || self.recorder.is_some() { return; }
+        if self.session.is_none() || self.pending.is_some() || self.recorder.is_some() {
+            return;
+        }
         self.credit_time();
         self.persist();
-        if self.fatal.is_some() { return; }
+        if self.fatal.is_some() {
+            return;
+        }
         if let Some(s) = self.session.take() {
-            self.session_summary = Some(session_end::SessionSummary::collect(&s, &self.progress, &self.deck, reason));
+            self.session_summary = Some(session_end::SessionSummary::collect(
+                &s,
+                &self.progress,
+                &self.deck,
+                reason,
+            ));
             self.message = format!(
                 "今日はここまで。{}項目に回答、学習時間は{}。",
                 s.completed,
                 ux::duration(s.elapsed.as_secs())
             );
+            // The completion screen already presents this result; keep the
+            // notification accessible without opening a duplicate popup.
+            self.last_notification_message = self.message.clone();
         }
         self.current = None;
         self.stop_speech();
@@ -603,7 +770,7 @@ impl WordApp {
             match result {
                 Ok(r) => {
                     let pending = self.pending.take().unwrap();
-                    if pending.key == self.key() {
+                    if matches!(pending.kind, Activity::Connection) || pending.key == self.key() {
                         self.message.clear();
                         match r {
                             Ok(AiResult::Text(t)) => {
@@ -612,14 +779,28 @@ impl WordApp {
                                     "認識結果を確認し、誤認識があれば直してから回答してください。"
                                         .into();
                             }
-                            Ok(AiResult::ChatRecognized { id, expected, asset_id, text }) => {
-                                if let Some(chat) = self.progress.chats.iter_mut().find(|c| c.id == id) {
-                                    if let Some(a) = chat.draft_attachments.iter_mut().find(|a| a.original.id == asset_id) { a.transcript = Some(text.clone()); }
+                            Ok(AiResult::ChatRecognized {
+                                id,
+                                expected,
+                                asset_id,
+                                text,
+                            }) => {
+                                if let Some(chat) =
+                                    self.progress.chats.iter_mut().find(|c| c.id == id)
+                                {
+                                    if let Some(a) = chat
+                                        .draft_attachments
+                                        .iter_mut()
+                                        .find(|a| a.original.id == asset_id)
+                                    {
+                                        a.transcript = Some(text.clone());
+                                    }
                                     self.message = match chat.apply_recognition(&expected, &text) {
                                         Ok(()) => "認識結果を入力欄に追加した。確認・訂正してから送信する。原録音も保存している。".into(),
                                         Err(e) => format!("{e}\n認識結果：{text}"),
                                     };
-                                    self.dirty = true; self.persist();
+                                    self.dirty = true;
+                                    self.persist();
                                 }
                             }
                             Ok(AiResult::Feedback(t)) => {
@@ -666,43 +847,60 @@ impl WordApp {
                                 }
                             },
                             Ok(AiResult::Connection(t)) => {
-                                if let Some((_, success)) = self.connection_check.as_mut() { *success = true; }
+                                if let Some((_, success)) = self.connection_check.as_mut() {
+                                    *success = true;
+                                }
                                 self.message = t;
                             }
                             Ok(AiResult::ModelChoices { path, models }) => {
                                 if path == self.progress.settings.codex_path.trim() {
                                     self.message = format!("Codexから{}件のモデル候補を取得した。モデルを選びeffortを指定できる。", models.len());
                                     self.effort_catalog = Some((path, models));
-                                } else { self.message = "実行ファイルの設定が変わったため、候補を再取得してください。".into(); }
+                                } else {
+                                    self.message = "実行ファイルの設定が変わったため、候補を再取得してください。".into();
+                                }
                             }
                             Ok(AiResult::Recovered(record)) => {
                                 self.message = format!("{}。本文は実行記録で確認できる。教材・会話には自動反映していない。",record.outcome.label());
                                 self.refresh_runs();
-                            },
+                            }
                             Ok(AiResult::Material(draft)) => {
                                 self.chat_material_open = true;
                                 self.progress.material_draft = Some(draft);
                                 self.material_same_base = false;
                                 self.dirty = true;
                                 self.persist();
-                                if self.fatal.is_none() { self.message = "教材案を作成した。「教材案を確認」で差分を確認・編集して登録してください。".into(); }
+                                if self.fatal.is_none() {
+                                    self.message = "教材案を作成した。「教材案を確認」で差分を確認・編集して登録してください。".into();
+                                }
                             }
-                            Ok(AiResult::Chat { id, question, reply }) => {
-                                    match self.progress.complete_chat(&id, question, reply) {
-                                        Ok(()) => {
-                                            self.chat_target.clear();
-                                            self.dirty = true;
-                                            self.persist();
-                                            if self.fatal.is_none() { self.message = "回答を会話履歴に保存した。続けて質問できる。".into(); }
-                                        }
-                                        Err(e) => { self.message = e; }
+                            Ok(AiResult::Chat {
+                                id,
+                                question,
+                                reply,
+                            }) => match self.progress.complete_chat(&id, question, reply) {
+                                Ok(()) => {
+                                    self.chat_target.clear();
+                                    self.dirty = true;
+                                    self.persist();
+                                    if self.fatal.is_none() {
+                                        self.message =
+                                            "回答を会話履歴に保存した。続けて質問できる。".into();
                                     }
-                            }
+                                }
+                                Err(e) => {
+                                    self.message = e;
+                                }
+                            },
                             Ok(AiResult::Generated(e)) => {
+                                let saved_word = e.base.clone();
                                 if let Err(err) = self.import_deck(vec![e]) {
                                     self.batch_running = false;
                                     self.message = err;
                                 } else {
+                                    if !self.saved_generated_words.contains(&saved_word) {
+                                        self.saved_generated_words.push(saved_word);
+                                    }
                                     self.batch_queue.pop_front();
                                     if let Err(err) = self.save_queue() {
                                         self.batch_running = false;
@@ -732,6 +930,7 @@ impl WordApp {
                             Err(e) => {
                                 self.batch_running = false;
                                 self.fetch_then_generate = false;
+                                self.notification_error = e.clone();
                                 self.message = e;
                             }
                         }
@@ -742,6 +941,7 @@ impl WordApp {
                     self.batch_running = false;
                     self.fetch_then_generate = false;
                     self.message = "処理が終了したが結果を取得できなかった。入力は保持している。Codexの処理は実行記録から状態と再取得可否を確認してから再試行する。".into();
+                    self.notification_error = self.message.clone();
                 }
                 Err(TryRecvError::Empty) => {}
             }
@@ -844,8 +1044,11 @@ impl WordApp {
             match r.finish_with_warning() {
                 Ok(captured) => {
                     if let Some(operation) = &operation {
-                        if captured.warning.is_some() { operation.fail(DiagnosticStage::Record, DiagnosticError::Unavailable); }
-                        else { operation.event(DiagnosticStage::Record, DiagnosticEvent::Completed); }
+                        if captured.warning.is_some() {
+                            operation.fail(DiagnosticStage::Record, DiagnosticError::Unavailable);
+                        } else {
+                            operation.event(DiagnosticStage::Record, DiagnosticEvent::Completed);
+                        }
                     }
                     if let Some(id) = self.chat_recording_id.take() {
                         self.save_chat_recording(&id, captured.wav);
@@ -853,28 +1056,40 @@ impl WordApp {
                         self.wav = Some(captured.wav);
                         self.message = "録音した（次の問題に進むまでメモリ内で保持）。".into();
                     }
-                    if let Some(warning) = captured.warning { self.message.push_str(&format!("\n録音障害が発生したため取得できた音声だけを保持した：{warning}")); }
+                    if let Some(warning) = captured.warning {
+                        self.message.push_str(&format!(
+                            "\n録音障害が発生したため取得できた音声だけを保持した：{warning}"
+                        ));
+                    }
                 }
                 Err(e) => {
-                    if let Some(operation) = operation { operation.fail(DiagnosticStage::Record, DiagnosticError::Unavailable); }
-                    self.chat_recording_id = None; self.message = e;
+                    if let Some(operation) = operation {
+                        operation.fail(DiagnosticStage::Record, DiagnosticError::Unavailable);
+                    }
+                    self.chat_recording_id = None;
+                    self.message = e;
                 }
             }
         }
     }
     fn say(&mut self, text: &str) {
-        if let Err(error) = self.check_speech_start() { self.message = error; return; }
+        if let Err(error) = self.check_speech_start() {
+            self.message = error;
+            return;
+        }
         let operation = DiagnosticOperation::begin(DiagnosticEntry::Playback);
-        if let Err(e) = self.speaker.say_at_rate(
-            text,
-            &self.progress.settings.voice_id,
-            self.speech_rate(),
-        ) {
+        if let Err(e) =
+            self.speaker
+                .say_at_rate(text, &self.progress.settings.voice_id, self.speech_rate())
+        {
             operation.fail(DiagnosticStage::Synthesize, DiagnosticError::Unavailable);
             self.message = e;
         } else {
-            if let Some(previous) = self.speech_operation.replace(operation) { previous.event(DiagnosticStage::Play, DiagnosticEvent::Stopped); }
+            if let Some(previous) = self.speech_operation.replace(operation) {
+                previous.event(DiagnosticStage::Play, DiagnosticEvent::Stopped);
+            }
             self.speech_visible = true;
+            self.speech_selected = None;
         }
     }
     fn card(&mut self, ui: &mut egui::Ui, entry: &Entry) {
@@ -885,8 +1100,11 @@ impl WordApp {
             entry.level,
             entry.tag
         ));
-        for (label, value) in [("社外メール", shown(&entry.business)),
-            ("格調・文体", shown(&entry.elevated)), ("語調・意味", &entry.register)] {
+        for (label, value) in [
+            ("社外メール", shown(&entry.business)),
+            ("格調・文体", shown(&entry.elevated)),
+            ("語調・意味", &entry.register),
+        ] {
             ui.label(RichText::new(label).small().color(ux::MUTED));
             ui.add(egui::Label::new(value).wrap());
         }
@@ -896,7 +1114,7 @@ impl WordApp {
         ui.label(RichText::new(entry.completed()).size(22.0));
         ui.label(&entry.translation);
         if !entry.replacements.is_empty() {
-            ui.collapsing("言い換えと使える条件", |ui| {
+            ui.ww_collapsing("言い換えと使える条件", |ui| {
                 for r in &entry.replacements {
                     ui.strong(&r.phrase);
                     ui.label(&r.meaning);
@@ -906,7 +1124,7 @@ impl WordApp {
             });
         }
         if !entry.examples.is_empty() {
-            ui.collapsing(
+            ui.ww_collapsing(
                 format!("語感を掴む例文（{}件）", entry.examples.len()),
                 |ui| {
                     for (i, x) in entry.examples.iter().enumerate() {
@@ -914,7 +1132,7 @@ impl WordApp {
                         ui.label(&x.japanese);
                         ui.label(&x.note);
                         if ui
-                            .small_button(format!("例文{}を読み上げ", i + 1))
+                            .ww_small_button(format!("例文{}を読み上げ", i + 1))
                             .clicked()
                         {
                             self.say(&x.english);
@@ -925,7 +1143,7 @@ impl WordApp {
             );
         }
 
-        if ui.button("例文を聞く").clicked() {
+        if ui.ww_button("例文を聞く").clicked() {
             self.say(&entry.completed());
         }
     }
@@ -933,9 +1151,39 @@ impl WordApp {
         self.home_dashboard(ui);
     }
     fn study(&mut self, ui: &mut egui::Ui) {
+        if self.current.is_none() {
+            self.study_content(ui);
+            return;
+        }
+        ui.scope(|ui| {
+            ui.spacing_mut().item_spacing = egui::vec2(16.0, 12.0);
+            ui.spacing_mut().button_padding = egui::vec2(16.0, 12.0);
+            for (style, size) in [
+                (egui::TextStyle::Body, 19.0),
+                (egui::TextStyle::Small, 16.0),
+                (egui::TextStyle::Button, 18.0),
+            ] {
+                ui.style_mut()
+                    .text_styles
+                    .insert(style, home_art::home_font(size));
+            }
+            ui.style_mut().text_styles.insert(
+                egui::TextStyle::Heading,
+                egui::FontId::new(30.0, egui::FontFamily::Name("heading".into())),
+            );
+            ui.style_mut().visuals.override_text_color = Some(home_art::INK);
+            egui::Frame::new()
+                .inner_margin(16)
+                .show(ui, |ui| self.study_content(ui));
+        });
+    }
+    fn study_content(&mut self, ui: &mut egui::Ui) {
         let Some(task) = self.current.clone() else {
-            if self.session_summary.is_some() { self.session_result(ui); }
-            else { self.study_start(ui); }
+            if self.session_summary.is_some() {
+                self.session_result(ui);
+            } else {
+                self.study_start(ui);
+            }
             return;
         };
         let entry = self.deck[task.index].clone();
@@ -944,30 +1192,43 @@ impl WordApp {
             .as_ref()
             .map(|s| (s.elapsed.as_secs(), s.budget.as_secs(), s.paused))
             .unwrap_or((0, 300, false));
-        ui.horizontal_wrapped(|ui| {
-            ui.label(RichText::new(task.skill.label()).size(24.0).strong().color(ux::INK));
-            let remaining = budget.saturating_sub(elapsed);
-            ui.label(format!("残り {}:{:02}  /  今回の回答 {}回", remaining / 60, remaining % 60,
-                self.session.as_ref().map_or(0, |s| s.completed)));
-            if ui
-                .button(if paused { "再開" } else { "一時停止" })
-                .clicked()
-            {
-                if let Some(s) = self.session.as_mut() {
-                    s.paused = !paused;
+        ux::panel(ui, false, |ui| {
+            ui.horizontal_wrapped(|ui| {
+                home_art::badge(ui, home_art::Icon::Book, home_art::BLUE, 48.0);
+                home_art::title(ui, task.skill.label(), 26.0);
+                let remaining = budget.saturating_sub(elapsed);
+                ui.label(format!(
+                    "残り {}:{:02}  /  今回の回答 {}回",
+                    remaining / 60,
+                    remaining % 60,
+                    self.session.as_ref().map_or(0, |s| s.completed)
+                ));
+                if ui
+                    .ww_button(if paused { "再開" } else { "一時停止" })
+                    .clicked()
+                {
+                    if let Some(s) = self.session.as_mut() {
+                        s.paused = !paused;
+                    }
                 }
-            }
-            if ui
-                .add_enabled(
-                    self.pending.is_none() && self.recorder.is_none(),
-                    egui::Button::new("ここで終える"),
-                )
-                .clicked()
-            {
-                if !self.answer.trim().is_empty() || !self.ink.empty() || self.wav.is_some() || self.revealed {
-                    self.study_end_confirm = true;
-                } else { self.finish(); }
-            }
+                if ui
+                    .add_enabled(
+                        self.pending.is_none() && self.recorder.is_none(),
+                        crate::app::controls::Button::new("ここで終える"),
+                    )
+                    .clicked()
+                {
+                    if !self.answer.trim().is_empty()
+                        || !self.ink.empty()
+                        || self.wav.is_some()
+                        || self.revealed
+                    {
+                        self.study_end_confirm = true;
+                    } else {
+                        self.finish();
+                    }
+                }
+            });
         });
         if self.current.is_none() {
             return;
@@ -976,9 +1237,15 @@ impl WordApp {
             self.request_study_end(ui);
             return;
         }
+        ui.label(format!(
+            "学習時間 {} / 目安 {}",
+            ux::duration(elapsed),
+            ux::duration(budget)
+        ));
         ui.add(
             egui::ProgressBar::new((elapsed as f32 / budget.max(1) as f32).min(1.0))
-                .text(format!("学習時間 {} / 目安 {}", ux::duration(elapsed), ux::duration(budget))),
+                .desired_height(10.0)
+                .fill(home_art::BLUE),
         );
         if self.session.as_ref().is_some_and(|s| s.paused) {
             ui.label("休憩中。再開するまで学習時間は増えない。");
@@ -994,12 +1261,15 @@ impl WordApp {
                 "目標時間に到達。この問題を終えたら終了する。",
             );
         }
-        ui.separator();
+        ui.add_space(12.0);
         if task.introduce {
-            ui.label("はじめての項目：意味と使用条件を確認する。");
-            self.card(ui, &entry);
+            ux::panel(ui, true, |ui| {
+                ui.heading("はじめての項目");
+                ui.label("意味と使用条件を確認しましょう。");
+                self.card(ui, &entry);
+            });
             ui.add_space(12.0);
-            if ui.button("確認した・別の問題のあとで思い出す").clicked() {
+            if ui.ww_button("確認した・別の問題のあとで思い出す").clicked() {
                 if let Some(s) = self.session.as_mut() {
                     s.introduced.insert(task.key(&self.deck), Instant::now());
                     let mut retry = task;
@@ -1035,7 +1305,7 @@ impl WordApp {
                 if ui
                     .add_enabled(
                         self.recorder.is_none(),
-                        egui::Button::new("語句を聞く / もう一度"),
+                        crate::app::controls::Button::new("語句を聞く / もう一度"),
                     )
                     .clicked()
                 {
@@ -1062,7 +1332,9 @@ impl WordApp {
                                 && self.wav.is_none()
                                 && self.pending.is_none()
                                 && self.recorder.is_none(),
-                            egui::Button::new("新しい日本語の問題を生成（Codexへ送信）"),
+                            crate::app::controls::Button::new(
+                                "新しい日本語の問題を生成（Codexへ送信）",
+                            ),
                         )
                         .clicked()
                     {
@@ -1074,107 +1346,139 @@ impl WordApp {
         });
         ui.add_space(12.0);
         if !self.revealed {
-            let previous_input = self.input;
-            ui.horizontal_wrapped(|ui| {
-                ui.add_enabled_ui(self.recorder.is_none() && self.pending.is_none(), |ui| {
-                    ui.selectable_value(&mut self.input, Input::Keyboard, "キーボード");
-                    ui.selectable_value(&mut self.input, Input::Pen, "手書き");
-                    ui.selectable_value(&mut self.input, Input::Voice, "音声");
+            ux::panel(ui, false, |ui| {
+                let previous_input = self.input;
+                ui.horizontal_wrapped(|ui| {
+                    ui.add_enabled_ui(self.recorder.is_none() && self.pending.is_none(), |ui| {
+                        ui.ww_selectable_value(&mut self.input, Input::Keyboard, "キーボード入力");
+                        ui.ww_selectable_value(&mut self.input, Input::Pen, "手書き入力");
+                        ui.ww_selectable_value(&mut self.input, Input::Voice, "音声入力");
+                    });
                 });
-            });
-            if previous_input != self.input && self.input == Input::Keyboard {
-                self.study_focus_pending = true;
-            }
-            ui.add_enabled_ui(self.pending.is_none(), |ui| {
-                if self.input == Input::Pen {
-                    self.ink.ui(ui);
+                if previous_input != self.input && self.input == Input::Keyboard {
+                    self.study_focus_pending = true;
                 }
-                if self.input == Input::Voice {
-                    if self.recorder.is_some() {
-                        self.recording_controls(ui, "録音を終了");
-                    } else {
-                        ui.horizontal(|ui| {
-                            if ui.button("録音する（英語）").clicked() {
-                                if !self.stop_speech() { return; }
-                                let operation = DiagnosticOperation::begin(DiagnosticEntry::Recording);
-                                match Recorder::start() {
-                                    Ok(r) => {
-                                        operation.event(DiagnosticStage::Record, DiagnosticEvent::Started);
-                                        self.recording_operation = Some(operation);
-                                        self.recording_cancel_confirm = false;
-                                        self.recorder = Some(r);
+                ui.add_enabled_ui(self.pending.is_none(), |ui| {
+                    if self.input == Input::Pen {
+                        self.ink.ui(ui);
+                    }
+                    if self.input == Input::Voice {
+                        if self.recorder.is_some() {
+                            self.recording_controls(ui, "録音を終了");
+                        } else {
+                            ui.horizontal(|ui| {
+                                if ui.ww_button("録音する（英語）").clicked() {
+                                    if !self.stop_speech() {
+                                        return;
                                     }
-                                    Err(e) => { operation.fail(DiagnosticStage::Record, DiagnosticError::Unavailable); self.message = e; }
+                                    let operation =
+                                        DiagnosticOperation::begin(DiagnosticEntry::Recording);
+                                    match Recorder::start() {
+                                        Ok(r) => {
+                                            operation.event(
+                                                DiagnosticStage::Record,
+                                                DiagnosticEvent::Started,
+                                            );
+                                            self.recording_operation = Some(operation);
+                                            self.recording_cancel_confirm = false;
+                                            self.recorder = Some(r);
+                                        }
+                                        Err(e) => {
+                                            operation.fail(
+                                                DiagnosticStage::Record,
+                                                DiagnosticError::Unavailable,
+                                            );
+                                            self.message = e;
+                                        }
+                                    }
                                 }
-                            }
-                            if ui
-                                .add_enabled(
-                                    self.wav.is_some(),
-                                    egui::Button::new("自分の声を聞く"),
-                                )
-                                .clicked()
-                            {
-                                if let (Some(wav), Some(storage)) =
-                                    (self.wav.clone(), self.storage.as_ref())
+                                if ui
+                                    .add_enabled(
+                                        self.wav.is_some(),
+                                        crate::app::controls::Button::new("自分の声を聞く"),
+                                    )
+                                    .clicked()
                                 {
-                                    let dir = storage.dir.clone();
-                                    let (tx, rx) = mpsc::channel();
-                                    let key = self.key();
-                                    std::thread::spawn(move || {
-                                        let _ = tx.send(
-                                            media::playback(wav, dir).map(|_| AiResult::Played),
-                                        );
-                                    });
-                                    self.pending = Some(Pending {
-                                        key,
-                                        kind: Activity::Playback,
-                                        rx,
-                                        cancel: None,
-                                    });
+                                    if let (Some(wav), Some(storage)) =
+                                        (self.wav.clone(), self.storage.as_ref())
+                                    {
+                                        let dir = storage.dir.clone();
+                                        let (tx, rx) = mpsc::channel();
+                                        let key = self.key();
+                                        std::thread::spawn(move || {
+                                            let _ = tx.send(
+                                                media::playback(wav, dir).map(|_| AiResult::Played),
+                                            );
+                                        });
+                                        self.pending = Some(Pending {
+                                            key,
+                                            kind: Activity::Playback,
+                                            rx,
+                                            cancel: None,
+                                        });
+                                    }
                                 }
+                            });
+                        }
+                    }
+                    let check_with_key = self.study_answer_input(ui, task.skill);
+                    egui::Frame::new()
+                        .fill(Color32::from_rgb(255, 251, 240))
+                        .corner_radius(8)
+                        .inner_margin(12)
+                        .show(ui, |ui| {
+                            ui.horizontal_wrapped(|ui| {
+                                if matches!(task.skill, Skill::Recall | Skill::Listening)
+                                    && ui.ww_button("文字のヒント").clicked()
+                                {
+                                    self.hints =
+                                        (self.hints + 1).min(entry.answer().chars().count());
+                                }
+                                if self.hints > 0
+                                    && matches!(task.skill, Skill::Recall | Skill::Listening)
+                                {
+                                    ui.label(format!("ヒント：{}", entry.hint(self.hints)));
+                                }
+                            });
+                        });
+                    ui.add_enabled_ui(self.recorder.is_none(), |ui| {
+                        ui.horizontal_wrapped(|ui| {
+                            if self.input == Input::Pen
+                                && ui
+                                    .ww_button("手書き英語をAIで文字起こし（Codexへ送信）")
+                                    .clicked()
+                            {
+                                self.launch_ai(1);
+                            }
+                            if self.input == Input::Voice
+                                && ui
+                                    .ww_button("録音をAIで文字起こし（Codexへ送信）")
+                                    .clicked()
+                            {
+                                self.launch_ai(2);
+                            }
+                            let can_answer = !self.answer.trim().is_empty()
+                                || (self.input == Input::Pen && !self.ink.empty())
+                                || (self.input == Input::Voice && self.wav.is_some());
+                            if ux::primary(ui, "回答を確認", can_answer).clicked()
+                                || (check_with_key && !self.answer.trim().is_empty())
+                                || ui
+                                    .add(
+                                        crate::app::controls::Button::new(
+                                            "わからないので答えを見る",
+                                        )
+                                        .wrap(),
+                                    )
+                                    .clicked()
+                            {
+                                self.check_study_answer(&entry, task.skill);
                             }
                         });
-                    }
-                }
-                let check_with_key = self.study_answer_input(ui, task.skill);
-                ui.horizontal_wrapped(|ui| {
-                    if matches!(task.skill, Skill::Recall | Skill::Listening)
-                        && ui.button("文字のヒント").clicked()
-                    {
-                        self.hints = (self.hints + 1).min(entry.answer().chars().count());
-                    }
-                    if self.hints > 0 && matches!(task.skill, Skill::Recall | Skill::Listening) {
-                        ui.label(format!("ヒント：{}", entry.hint(self.hints)));
-                    }
-                });
-                ui.add_enabled_ui(self.recorder.is_none(), |ui| {
-                    ui.horizontal_wrapped(|ui| {
-                        if self.input == Input::Pen
-                            && ui
-                                .button("手書き英語をAIで文字起こし（Codexへ送信）")
-                                .clicked()
-                        {
-                            self.launch_ai(1);
-                        }
-                        if self.input == Input::Voice
-                            && ui.button("録音をAIで文字起こし（Codexへ送信）").clicked()
-                        {
-                            self.launch_ai(2);
-                        }
-                        let can_answer = !self.answer.trim().is_empty()
-                            || (self.input == Input::Pen && !self.ink.empty())
-                            || (self.input == Input::Voice && self.wav.is_some());
-                        if ux::primary(ui, "回答を確認", can_answer).clicked()
-                            || (check_with_key && !self.answer.trim().is_empty())
-                            || ui.add(egui::Button::new("わからないので答えを見る").wrap()).clicked()
-                        {
-                            self.check_study_answer(&entry, task.skill);
-                        }
                     });
                 });
             });
         } else {
-            self.study_feedback(ui, &entry, task.skill);
+            ux::panel(ui, false, |ui| self.study_feedback(ui, &entry, task.skill));
         }
         if self.pending.is_some() {
             ui.horizontal(|ui| {
@@ -1314,10 +1618,17 @@ impl WordApp {
         self.fatal.is_none()
     }
     fn launch_content(&mut self, action: u8, entry: Option<Entry>) {
-        if self.pending.is_some() || self.session.is_some() || self.fatal.is_some() {
+        if self.pending.is_some()
+            || self.recorder.is_some()
+            || (action != 0 && self.session.is_some())
+            || self.fatal.is_some()
+        {
             return;
         }
-        if action == 0 { self.connection_check = Some((self.progress.settings.codex_path.trim().to_string(), false)); }
+        if action == 0 {
+            self.connection_check =
+                Some((self.progress.settings.codex_path.trim().to_string(), false));
+        }
         let config = match ai::Config::from_settings(&self.progress.settings) {
             Ok(c) => c,
             Err(e) => {
@@ -1362,73 +1673,197 @@ impl WordApp {
         self.pending = Some(Pending {
             key: String::new(),
             rx,
-            kind: if action == 0 { Activity::Connection } else { Activity::Generate },
+            kind: if action == 0 {
+                Activity::Connection
+            } else {
+                Activity::Generate
+            },
             cancel: Some(cancel),
         });
         self.message = "Codexで処理中…".into();
     }
     fn launch_chat(&mut self) {
+        self.launch_chat_with_file_consent(false);
+    }
+    fn launch_chat_with_file_consent(&mut self, consented: bool) {
         if self.progress.chat_action.is_some() {
-            self.message = "確認中の教材操作を確定またはキャンセルしてから送信してください。".into();
+            self.message =
+                "確認中の教材操作を確定またはキャンセルしてから送信してください。".into();
             return;
         }
-        if self.pending.is_some() || self.session.is_some() || self.batch_running || self.fatal.is_some() { return; }
-        let Some(chat) = self.progress.chats.get(self.chat_selected) else { return; };
+        if self.pending.is_some()
+            || self.session.is_some()
+            || self.batch_running
+            || self.fatal.is_some()
+        {
+            return;
+        }
+        let Some(chat) = self.progress.chats.get(self.chat_selected) else {
+            return;
+        };
         if chat.exchanges.len() >= wordweave5::chat::MAX_EXCHANGES {
-            self.message = "この会話は200往復に達した。引き継ぎメモをコピーして新しい会話を作成してください。".into();
+            self.message =
+                "この会話は200往復に達した。引き継ぎメモをコピーして新しい会話を作成してください。"
+                    .into();
             return;
         }
-        let context = match wordweave5::chat::prepare_with_catalog(chat, &self.deck, &self.progress.deleted_entries) {
-            Ok(c) => c, Err(e) => { self.message = e; return; }
+        let mut context = match wordweave5::chat::prepare_with_catalog(
+            chat,
+            &self.deck,
+            &self.progress.deleted_entries,
+        ) {
+            Ok(c) => c,
+            Err(e) => {
+                self.message = e;
+                return;
+            }
         };
         let id = chat.id.clone();
         let question = chat.draft.trim().to_string();
         let attachments = chat.draft_attachments.clone();
         let images = match self.attachment_images(&attachments) {
-            Ok(images) => images, Err(error) => { self.message = error; return; }
+            Ok(images) => images,
+            Err(error) => {
+                self.message = error;
+                return;
+            }
         };
+        let texts = match self.attachment_texts(&attachments) {
+            Ok(texts) => texts,
+            Err(error) => { self.message = error; return; }
+        };
+        if !texts.is_empty() && !consented {
+            let labels = attachments.iter().map(|attachment| {
+                let kind = if attachment.image.is_some() { "画像" }
+                    else if attachment.original.kind == wordweave5::assets::AssetKind::AudioWav { "音声" }
+                    else { "ファイル" };
+                format!("{kind}：{}", attachment.file_name.as_deref().unwrap_or(&attachment.source_text))
+            }).collect();
+            self.pending_chat_file_send = Some(ChatFileConsent {
+                chat_id: id,
+                question,
+                attachment_ids: attachments.iter().map(|a| a.original.id.clone()).collect(),
+                attachment_names: attachments.iter().map(|a| a.file_name.clone()).collect(),
+                labels,
+                text_names: texts.iter().map(|(name, _)| name.clone()).collect(),
+            });
+            return;
+        }
+        if let Err(error) = add_chat_text_files(&mut context.payload, &texts) {
+            self.message = error;
+            return;
+        }
         let config = match ai::Config::from_settings(&self.progress.settings) {
-            Ok(c) => c, Err(e) => { self.message = e; return; }
+            Ok(c) => c,
+            Err(e) => {
+                self.message = e;
+                return;
+            }
         };
         // This also saves the draft before sending, so retries and restarts
         // preserve it even when the child fails or the app is closed.
-        if !self.reserve_generation() { return; }
+        if !self.reserve_generation() {
+            return;
+        }
         let cancel = config.cancel.clone();
         let (tx, rx) = mpsc::channel();
         std::thread::spawn(move || {
-            let result = config.chat(context.payload, images).map(|reply| AiResult::Chat { id, question, reply });
+            let result = config
+                .chat(context.payload, images)
+                .map(|reply| AiResult::Chat {
+                    id,
+                    question,
+                    reply,
+                });
             let _ = tx.send(result);
         });
-        self.pending = Some(Pending { key: String::new(), rx, cancel: Some(cancel), kind: Activity::Chat });
+        self.pending = Some(Pending {
+            key: String::new(),
+            rx,
+            cancel: Some(cancel),
+            kind: Activity::Chat,
+        });
         self.message = "Codexに質問中…".into();
     }
     fn launch_material(&mut self) {
-        if self.pending.is_some() || self.session.is_some() || self.batch_running || self.recorder.is_some()
-            || self.fatal.is_some() || self.progress.material_draft.is_some() { return; }
-        let Some(chat) = self.progress.chats.get(self.chat_selected) else { return; };
-        let baseline = if self.material_mode == wordweave5::material::Mode::New { None }
-            else { self.deck.iter().find(|e| e.id == self.material_target
-                && !self.progress.deleted_entries.contains(&e.id)).cloned() };
-        let request = match wordweave5::material::Request::new(chat, &self.material_base, self.material_mode, baseline) {
-            Ok(r) => r, Err(e) => { self.message = e; return; }
+        if self.pending.is_some()
+            || self.session.is_some()
+            || self.batch_running
+            || self.recorder.is_some()
+            || self.fatal.is_some()
+            || self.progress.material_draft.is_some()
+        {
+            return;
+        }
+        let Some(chat) = self.progress.chats.get(self.chat_selected) else {
+            return;
+        };
+        let baseline = if self.material_mode == wordweave5::material::Mode::New {
+            None
+        } else {
+            self.deck
+                .iter()
+                .find(|e| {
+                    e.id == self.material_target && !self.progress.deleted_entries.contains(&e.id)
+                })
+                .cloned()
+        };
+        let request = match wordweave5::material::Request::new(
+            chat,
+            &self.material_base,
+            self.material_mode,
+            baseline,
+        ) {
+            Ok(r) => r,
+            Err(e) => {
+                self.message = e;
+                return;
+            }
         };
         let config = match ai::Config::from_settings(&self.progress.settings) {
-            Ok(c) => c, Err(e) => { self.message = e; return; }
+            Ok(c) => c,
+            Err(e) => {
+                self.message = e;
+                return;
+            }
         };
-        let attachments: Vec<_> = request.source.snapshots.iter().flat_map(|s| s.exchange.attachments.clone()).collect();
-        let images = match self.attachment_images(&attachments) { Ok(images) => images, Err(error) => { self.message = error; return; } };
-        if !self.reserve_generation() { return; }
+        let attachments: Vec<_> = request
+            .source
+            .snapshots
+            .iter()
+            .flat_map(|s| s.exchange.attachments.clone())
+            .collect();
+        let images = match self.attachment_images(&attachments) {
+            Ok(images) => images,
+            Err(error) => {
+                self.message = error;
+                return;
+            }
+        };
+        if !self.reserve_generation() {
+            return;
+        }
         let cancel = config.cancel.clone();
         let (tx, rx) = mpsc::channel();
-        std::thread::spawn(move || { let _ = tx.send(config.material(request, images).map(AiResult::Material)); });
-        self.pending = Some(Pending { key:String::new(), rx, cancel:Some(cancel), kind: Activity::Material });
+        std::thread::spawn(move || {
+            let _ = tx.send(config.material(request, images).map(AiResult::Material));
+        });
+        self.pending = Some(Pending {
+            key: String::new(),
+            rx,
+            cancel: Some(cancel),
+            kind: Activity::Material,
+        });
         self.message = "選択したチャットから教材案を作成中…".into();
     }
     fn material_panel(&mut self, ui: &mut egui::Ui) {
         use wordweave5::material::Mode;
         ui.separator();
         ui.heading("チャットを教材に反映");
-        let idle = self.pending.is_none() && self.session.is_none() && !self.batch_running && self.recorder.is_none();
+        let idle = self.pending.is_none()
+            && self.session.is_none()
+            && !self.batch_running
+            && self.recorder.is_none();
         ui.small("上の履歴で反映するやり取りを選ぶ。選択した質問・回答と反映先の教材をCodexへ送り、登録前に確認する。");
         if self.progress.material_draft.is_none() {
             ui.add_enabled_ui(idle, |ui| {
@@ -1440,7 +1875,7 @@ impl WordApp {
                 });
                 ui.horizontal_wrapped(|ui| {
                     for mode in [Mode::New, Mode::Append, Mode::Correct] {
-                        ui.selectable_value(&mut self.material_mode, mode, mode.label());
+                        ui.ww_selectable_value(&mut self.material_mode, mode, mode.label());
                     }
                 });
                 let matches: Vec<_> = self.deck.iter().filter(|e| !self.progress.deleted_entries.contains(&e.id)
@@ -1452,7 +1887,7 @@ impl WordApp {
                             .map(|e| format!("{} / {}", e.base, e.meaning)).unwrap_or_else(|| "反映先の意味・用法を選択".into()))
                         .show_ui(ui, |ui| {
                             for e in &matches {
-                                ui.selectable_value(&mut self.material_target, e.id.clone(), format!("{} / {} / {} [{}]", e.base, e.meaning, e.context, e.id));
+                                ui.ww_selectable_value(&mut self.material_target, e.id.clone(), format!("{} / {} / {} [{}]", e.base, e.meaning, e.context, e.id));
                             }
                         });
                     if matches.is_empty() { ui.label("同じ基本語の教材がない。新規登録を選択するか、対象語を確認してください。"); }
@@ -1462,37 +1897,71 @@ impl WordApp {
                 let selected = self.progress.chats.get(self.chat_selected)
                     .map(|c| c.exchanges.iter().filter(|e| e.for_material).count()).unwrap_or(0);
                 ui.label(format!("教材化の対象：{selected}往復"));
-                if ui.add_enabled(selected > 0, egui::Button::new("教材案を作成")).clicked() { self.launch_material(); }
+                if ui.add_enabled(selected > 0, crate::app::controls::Button::new("教材案を作成")).clicked() { self.launch_material(); }
             });
             return;
         }
         let mut draft = self.progress.material_draft.clone().unwrap();
         ui.strong(format!("{}：{}", draft.mode.label(), draft.candidate.base));
-        for notice in &draft.notices { ui.label(notice); }
+        for notice in &draft.notices {
+            ui.label(notice);
+        }
         let source = draft.source.clone();
-        if ui.button("元の会話を表示").clicked() {
+        if ui.ww_button("元の会話を表示").clicked() {
             self.open_material_source(&source);
         }
         let before = model::deck_text(&[draft.candidate.clone()]);
-        ui.collapsing("教材案を編集", |ui| { ui.add_enabled_ui(idle, |ui| edit_material(ui, &mut draft)); });
+        ui.ww_collapsing("教材案を編集", |ui| {
+            ui.add_enabled_ui(idle, |ui| edit_material(ui, &mut draft));
+        });
         let changed = before != model::deck_text(&[draft.candidate.clone()]);
-        let ready = if draft.baseline.as_ref().is_some_and(|e| self.progress.deleted_entries.contains(&e.id)) {
+        let ready = if draft
+            .baseline
+            .as_ref()
+            .is_some_and(|e| self.progress.deleted_entries.contains(&e.id))
+        {
             Err("対象教材は削除済みである。復元してから登録する。".into())
-        } else { draft.ready(&self.deck, self.material_same_base) };
+        } else {
+            draft.ready(&self.deck, self.material_same_base)
+        };
         self.material_comparison(ui, &draft);
-        if draft.mode == Mode::New && self.deck.iter().any(|e| model::normalize(&e.base) == model::normalize(&draft.candidate.base)) {
-            ui.add_enabled(idle, egui::Checkbox::new(&mut self.material_same_base, "同じ基本語の別用法として新規登録する"));
+        if draft.mode == Mode::New
+            && self
+                .deck
+                .iter()
+                .any(|e| model::normalize(&e.base) == model::normalize(&draft.candidate.base))
+        {
+            ui.add_enabled(
+                idle,
+                egui::Checkbox::new(
+                    &mut self.material_same_base,
+                    "同じ基本語の別用法として新規登録する",
+                ),
+            );
         }
-        ui.label(if draft.resets_learning() { "基本の説明・問題・正解等が変わるため、この教材の復習状態は再学習に戻る。" }
-            else if draft.baseline.is_some() { "補足の例文・言い換えの変更であるため、既存の復習成績は維持する。" }
-            else { "新しい教材として登録する。" });
-        if let Err(e) = &ready { ui.colored_label(Color32::RED, e); }
+        ui.label(if draft.resets_learning() {
+            "基本の説明・問題・正解等が変わるため、この教材の復習状態は再学習に戻る。"
+        } else if draft.baseline.is_some() {
+            "補足の例文・言い換えの変更であるため、既存の復習成績は維持する。"
+        } else {
+            "新しい教材として登録する。"
+        });
+        if let Err(e) = &ready {
+            ui.colored_label(Color32::RED, e);
+        }
         let mut commit = false;
         let mut discard = false;
-        ui.add_enabled_ui(idle, |ui| ui.horizontal(|ui| {
-            commit = ui.add_enabled(ready.is_ok(), egui::Button::new("内容を確認して教材に登録")).clicked();
-            discard = ui.button("教材案を破棄").clicked();
-        }));
+        ui.add_enabled_ui(idle, |ui| {
+            ui.horizontal(|ui| {
+                commit = ui
+                    .add_enabled(
+                        ready.is_ok(),
+                        crate::app::controls::Button::new("内容を確認して教材に登録"),
+                    )
+                    .clicked();
+                discard = ui.ww_button("教材案を破棄").clicked();
+            })
+        });
         if changed {
             self.progress.material_draft = Some(draft.clone());
             self.dirty = true;
@@ -1513,11 +1982,16 @@ impl WordApp {
                     return;
                 }
                 match self.import_deck(vec![entry]) {
-                    Ok(()) => self.message = "チャットから教材を登録した。元の会話への参照も保存した。".into(),
+                    Ok(()) => {
+                        self.message =
+                            "チャットから教材を登録した。元の会話への参照も保存した。".into()
+                    }
                     Err(e) => {
                         // If the deck write succeeded but progress save failed,
                         // preserve matching source metadata for recovery/export.
-                        if model::deck_text(&self.deck) == old_deck { self.progress = old_progress; }
+                        if model::deck_text(&self.deck) == old_deck {
+                            self.progress = old_progress;
+                        }
                         self.message = e;
                     }
                 }
@@ -1525,7 +1999,12 @@ impl WordApp {
         }
     }
     fn open_material_source(&mut self, source: &wordweave5::material::Source) {
-        if let Some(index) = self.progress.chats.iter().position(|c| c.id == source.conversation_id) {
+        if let Some(index) = self
+            .progress
+            .chats
+            .iter()
+            .position(|c| c.id == source.conversation_id)
+        {
             if self.progress.chats[index].deleted_at.is_some() {
                 self.viewed_trash_id = Some(source.conversation_id.clone());
                 self.message = "根拠の会話はごみ箱にある。読み取り専用で表示する。".into();
@@ -1533,8 +2012,18 @@ impl WordApp {
             }
             self.chat_selected = index;
             self.page = Page::Chat;
-            self.message = format!("元の会話を表示した。参照したやり取り番号：{}", source.exchange_indices.iter().map(|i| (i+1).to_string()).collect::<Vec<_>>().join(", "));
-        } else { self.message = "元の会話は現在の学習記録にありません。".into(); }
+            self.message = format!(
+                "元の会話を表示した。参照したやり取り番号：{}",
+                source
+                    .exchange_indices
+                    .iter()
+                    .map(|i| (i + 1).to_string())
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            );
+        } else {
+            self.message = "元の会話は現在の学習記録にありません。".into();
+        }
     }
     fn import_deck(&mut self, items: Vec<Entry>) -> Result<(), String> {
         if self.session.is_some() || self.pending.is_some() || self.recorder.is_some() {
@@ -1554,7 +2043,11 @@ impl WordApp {
         let mut next = self.progress.clone();
         let changed = next.reconcile_deck(&merged);
         if let Err(e) = wordweave5::commit::save(&storage.dir, &text, &next) {
-            if wordweave5::commit::pending(&storage.dir) { self.fatal = Some(format!("教材保存が途中で停止した。再起動時に復旧する。原因：{e}")); }
+            if wordweave5::commit::pending(&storage.dir) {
+                self.fatal = Some(format!(
+                    "教材保存が途中で停止した。再起動時に復旧する。原因：{e}"
+                ));
+            }
             return Err(e);
         }
         self.progress = next;
@@ -1568,7 +2061,7 @@ impl WordApp {
             return Err("学習・録音・通信を終了してから復元してください。".into());
         }
         let storage = self.storage.as_ref().ok_or("保存先がありません。")?;
-        wordweave5::backup::verify_references(&storage.dir,&progress)?;
+        wordweave5::backup::verify_references(&storage.dir, &progress)?;
         wordweave5::backup::preserve_current_progress(storage, &self.progress)?;
         let current = storage.dir.join("progress.json");
         if current.exists() {
@@ -1614,11 +2107,12 @@ impl WordApp {
                 .collapsible(false)
                 .resizable(false)
                 .show(ctx, |ui| {
+                    ux::dialog_body(ui);
                     ui.label(format!("追加：{added}項目 / 内容の変更：{updated}項目"));
                     ui.label("問題・解答・用法を変更した項目は再学習に戻す。追加例文・言い換えだけの変更では成績を保持する。以前の教材は退避する。");
                     ui.horizontal(|ui| {
-                        apply = ui.button("取り込む").clicked();
-                        cancel = ui.button("キャンセル").clicked();
+                        apply = ui.ww_button("取り込む").clicked();
+                        cancel = ui.ww_button("キャンセル").clicked();
                     });
                 });
             if apply {
@@ -1633,8 +2127,9 @@ impl WordApp {
         if self.pending_restore.is_some() {
             let (mut apply, mut cancel) = (false, false);
             egui::Window::new("学習記録の復元を確認").collapsible(false).resizable(false).show(ctx,|ui|{
+                ux::dialog_body(ui);
                 ui.label("現在の記録を退避し、選択した記録に戻す。現在の教材と内容が異なる項目は再学習にする。");
-                ui.horizontal(|ui|{apply=ui.button("復元する").clicked();cancel=ui.button("キャンセル").clicked();});
+                ui.horizontal(|ui|{apply=ui.ww_button("復元する").clicked();cancel=ui.ww_button("キャンセル").clicked();});
             });
             if apply {
                 let p = self.pending_restore.take().unwrap();
@@ -1650,95 +2145,41 @@ impl WordApp {
 
 impl WordApp {
     fn update_ui(&mut self, ctx: &egui::Context) {
-        if ctx.input(|i|i.viewport().close_requested()) {
-            if self.chat_recording_id.is_some() {self.stop_recording();}
-            if self.unsaved_chat_audio.is_some() || self.annotation.frozen() || !self.annotation.text.is_empty() {
+        if ctx.input(|i| i.viewport().close_requested()) {
+            if self.chat_recording_id.is_some() {
+                self.stop_recording();
+            }
+            if self.unsaved_chat_audio.is_some()
+                || self.annotation.frozen()
+                || !self.annotation.text.is_empty()
+            {
                 ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
-                self.page=Page::Chat;self.chat_media_open=true;
-                self.message="未保存の録音、または未添付の原文・筆跡・固定背景がある。保存・添付・退避または明示的に破棄してから閉じてください。".into();
+                self.page = Page::Chat;
+                self.chat_media_open = true;
+                self.exit_media_requested = true;
+                self.exit_media_scroll_to_warning = true;
+                self.message="終了前に未保存の録音・手書き注釈を確認してください。".into();
             }
         }
         self.tick(ctx);
-        let confirming = self.pending_import.is_some() || self.pending_restore.is_some() || self.backup_restore.is_some();
-        egui::TopBottomPanel::top("navigation").show(ctx, |ui| {
-            ui.horizontal_wrapped(|ui| {
-                ui.label(
-                    RichText::new("WordWeave 5")
-                        .strong()
-                        .color(ux::ACCENT)
-                        .size(24.0),
-                );
-                let enabled = self.pending.is_none()
-                    && self.recorder.is_none()
-                    && !self.batch_running
-                    && !confirming;
-                ui.add_enabled_ui(enabled, |ui| {
-                    for (page, title) in [
-                        (Page::Home, "ホーム"),
-                        (Page::Study, "学習"),
-                        (Page::Deck, "教材"),
-                        (Page::Words, "語彙を追加"),
-                        (Page::Chat, "英語チャット"),
-                        (Page::Stats, "記録"),
-                        (Page::Settings, "設定"),
-                    ] {
-                        if ui.selectable_label(self.page == page, title).clicked() {
-                            self.page = page;
-                        }
-                    }
-                    if ui.button("バージョン情報").clicked() {
-                        self.about_open = true;
-                    }
-                    if ui.button("実行記録").clicked() {
-                        self.run_history_open = true;
-                        self.refresh_runs();
-                    }
-                });
-            });
-        });
+        let confirming = self.pending_import.is_some()
+            || self.pending_restore.is_some()
+            || self.backup_restore.is_some();
+        self.handle_zoom_input(ctx);
+        self.navigation_chrome(ctx, confirming);
+        self.operation_notice(ctx);
         egui::TopBottomPanel::bottom("status").show(ctx, |ui| {
-            let execution = wordweave5::execution::snapshot();
-            if let Some(settings) = execution.execution {
-                let phase = if execution.active { "今回の実行設定" } else { "前回Codexが返した実行設定" };
-                ui.small(format!("{phase}：{}", settings.label()));
-            } else {
-                ui.small(if execution.active { "Codexの実行設定を確認中…" } else { "モデル：未確認 / effort：未確認" });
-            }
-            if !self.message.is_empty() {
-                egui::ScrollArea::vertical().id_salt("status-message")
-                    .max_height(54.0).show(ui, |ui| { ui.add(egui::Label::new(&self.message).wrap()); });
-            }
-            if !self.font_notice.is_empty() {
-                ui.colored_label(Color32::RED, &self.font_notice);
-            }
-            if let Some(error) = &self.fatal {
-                egui::ScrollArea::vertical().id_salt("status-error")
-                    .max_height(70.0).show(ui, |ui| { ui.colored_label(Color32::from_rgb(165, 45, 30), error); });
-            }
-            if self.pending.is_some() || self.batch_running {
-                ui.small(self.activity_label());
-                let cancellable = self.pending.as_ref().is_some_and(|p| p.cancel.is_some());
-                if (cancellable || self.batch_running) && ui.button("生成・通信の中断を要求").clicked() {
-                    self.batch_running = false;
-                    self.fetch_then_generate = false;
-                    if let Some(c) = self.pending.as_ref().and_then(|p| p.cancel.as_ref()) {
-                        c.store(true, Ordering::Relaxed);
-                    }
-                    self.message = "中断中… 登録済み教材と未処理の語は保持する。".into();
-                }
-                if self.fetch_then_generate && !cancellable
-                    && ui.button("取得後の自動生成を取り消す").clicked() {
-                    self.fetch_then_generate = false;
-                    self.message = "語彙一覧の取得は続ける。取得後の自動生成は取り消した。".into();
-                }
-            }
-            ui.small("ローカル学習 / AI生成はCodexのChatGPT認証を使用");
+            self.status_summary(ui);
         });
         self.speech_controls(ctx);
         egui::CentralPanel::default().show(ctx,|ui|{
             ui.add_enabled_ui(!confirming,|ui|{
             if self.page == Page::Chat && self.fatal.is_none() {
                 self.chat_page(ui);
+                return;
+            }
+            if self.page == Page::Deck && self.fatal.is_none() {
+                self.deck_page(ui);
                 return;
             }
             egui::ScrollArea::vertical().id_salt(format!("page-{}",self.page as u8)).show(ui,|ui|{
@@ -1750,15 +2191,21 @@ impl WordApp {
             });
         });
         self.confirmations(ctx);
+        self.notification_window(ctx);
         self.version_dialog(ctx);
         self.run_history(ctx);
         self.backup_confirmation(ctx);
         self.conversation_trash_windows(ctx);
         self.recording_cancel_dialog(ctx);
-        let media_idle = self.pending.is_none() && self.recorder.is_none()
-            && self.session.is_none() && !self.batch_running && !confirming;
+        let media_idle = self.pending.is_none()
+            && self.recorder.is_none()
+            && self.session.is_none()
+            && !self.batch_running
+            && !confirming;
         self.chat_media_windows(ctx, media_idle);
+        self.chat_file_send_confirmation(ctx);
         self.media_preview_window(ctx);
+        self.file_preview_window(ctx);
         ctx.request_repaint_after(Duration::from_millis(200));
     }
 }
@@ -1773,7 +2220,11 @@ impl eframe::App for WordApp {
                 let _ = p.rx.recv_timeout(Duration::from_secs(2));
             }
         }
-        if self.chat_recording_id.is_some() { self.stop_recording(); } else { self.recorder = None; }
+        if self.chat_recording_id.is_some() {
+            self.stop_recording();
+        } else {
+            self.recorder = None;
+        }
         self.stop_speech();
         self.credit_time();
         if self.dirty {
@@ -1784,10 +2235,18 @@ impl eframe::App for WordApp {
 
 fn edit_material(ui: &mut egui::Ui, draft: &mut wordweave5::material::Draft) {
     let append = draft.mode == wordweave5::material::Mode::Append;
-    let baseline_replacements = draft.baseline.as_ref().map(|e| e.replacements.len()).unwrap_or(0);
-    let baseline_examples = draft.baseline.as_ref().map(|e| e.examples.len()).unwrap_or(0);
+    let baseline_replacements = draft
+        .baseline
+        .as_ref()
+        .map(|e| e.replacements.len())
+        .unwrap_or(0);
+    let baseline_examples = draft
+        .baseline
+        .as_ref()
+        .map(|e| e.examples.len())
+        .unwrap_or(0);
     let entry = &mut draft.candidate;
-    ui.collapsing("基本の説明・問題を確認／編集", |ui| {
+    ui.ww_collapsing("基本の説明・問題を確認／編集", |ui| {
         if append { ui.small("追加モードでは既存の基本項目は変更しない。語感・文法の補足は追加例文の説明に記入する。"); }
         ui.add_enabled_ui(!append, |ui| {
             for (label, text) in [
@@ -1808,42 +2267,98 @@ fn edit_material(ui: &mut egui::Ui, draft: &mut wordweave5::material::Draft) {
             }
         });
     });
-    ui.collapsing(format!("言い換えを確認／編集（{}件）", entry.replacements.len()), |ui| {
-        let mut remove = None;
-        for (i, r) in entry.replacements.iter_mut().enumerate() {
-            ui.push_id(("material-replacement", i), |ui| ui.group(|ui| {
-                ui.add_enabled_ui(!append || i >= baseline_replacements, |ui| {
-                    for (label, text) in [("語句",&mut r.phrase),("意味",&mut r.meaning),("使用条件・違い",&mut r.conditions)] {
-                        ui.label(label);
-                        ui.add(egui::TextEdit::multiline(text).desired_rows(2).desired_width(f32::INFINITY).char_limit(1000));
-                    }
-                    if ui.button("この言い換えを案から除く").clicked() { remove = Some(i); }
+    ui.ww_collapsing(
+        format!("言い換えを確認／編集（{}件）", entry.replacements.len()),
+        |ui| {
+            let mut remove = None;
+            for (i, r) in entry.replacements.iter_mut().enumerate() {
+                ui.push_id(("material-replacement", i), |ui| {
+                    ui.group(|ui| {
+                        ui.add_enabled_ui(!append || i >= baseline_replacements, |ui| {
+                            for (label, text) in [
+                                ("語句", &mut r.phrase),
+                                ("意味", &mut r.meaning),
+                                ("使用条件・違い", &mut r.conditions),
+                            ] {
+                                ui.label(label);
+                                ui.add(
+                                    egui::TextEdit::multiline(text)
+                                        .desired_rows(2)
+                                        .desired_width(f32::INFINITY)
+                                        .char_limit(1000),
+                                );
+                            }
+                            if ui.ww_button("この言い換えを案から除く").clicked() {
+                                remove = Some(i);
+                            }
+                        });
+                    })
                 });
-            }));
-        }
-        if let Some(i) = remove { entry.replacements.remove(i); }
-        if ui.add_enabled(entry.replacements.len() < 30, egui::Button::new("言い換え欄を追加")).clicked() {
-            entry.replacements.push(model::Replacement { phrase:String::new(), meaning:String::new(), conditions:String::new() });
-        }
-    });
-    ui.collapsing(format!("完成例文を確認／編集（{}件）", entry.examples.len()), |ui| {
-        let mut remove = None;
-        for (i, e) in entry.examples.iter_mut().enumerate() {
-            ui.push_id(("material-example", i), |ui| ui.group(|ui| {
-                ui.add_enabled_ui(!append || i >= baseline_examples, |ui| {
-                    for (label, text) in [("英文",&mut e.english),("日本語訳",&mut e.japanese),("語感・文法・使い方の説明",&mut e.note)] {
-                        ui.label(label);
-                        ui.add(egui::TextEdit::multiline(text).desired_rows(2).desired_width(f32::INFINITY).char_limit(1000));
-                    }
-                    if ui.button("この例文を案から除く").clicked() { remove = Some(i); }
+            }
+            if let Some(i) = remove {
+                entry.replacements.remove(i);
+            }
+            if ui
+                .add_enabled(
+                    entry.replacements.len() < 30,
+                    crate::app::controls::Button::new("言い換え欄を追加"),
+                )
+                .clicked()
+            {
+                entry.replacements.push(model::Replacement {
+                    phrase: String::new(),
+                    meaning: String::new(),
+                    conditions: String::new(),
                 });
-            }));
-        }
-        if let Some(i) = remove { entry.examples.remove(i); }
-        if ui.add_enabled(entry.examples.len() < 200, egui::Button::new("例文欄を追加")).clicked() {
-            entry.examples.push(model::Example { english:String::new(), japanese:String::new(), note:String::new() });
-        }
-    });
+            }
+        },
+    );
+    ui.ww_collapsing(
+        format!("完成例文を確認／編集（{}件）", entry.examples.len()),
+        |ui| {
+            let mut remove = None;
+            for (i, e) in entry.examples.iter_mut().enumerate() {
+                ui.push_id(("material-example", i), |ui| {
+                    ui.group(|ui| {
+                        ui.add_enabled_ui(!append || i >= baseline_examples, |ui| {
+                            for (label, text) in [
+                                ("英文", &mut e.english),
+                                ("日本語訳", &mut e.japanese),
+                                ("語感・文法・使い方の説明", &mut e.note),
+                            ] {
+                                ui.label(label);
+                                ui.add(
+                                    egui::TextEdit::multiline(text)
+                                        .desired_rows(2)
+                                        .desired_width(f32::INFINITY)
+                                        .char_limit(1000),
+                                );
+                            }
+                            if ui.ww_button("この例文を案から除く").clicked() {
+                                remove = Some(i);
+                            }
+                        });
+                    })
+                });
+            }
+            if let Some(i) = remove {
+                entry.examples.remove(i);
+            }
+            if ui
+                .add_enabled(
+                    entry.examples.len() < 200,
+                    crate::app::controls::Button::new("例文欄を追加"),
+                )
+                .clicked()
+            {
+                entry.examples.push(model::Example {
+                    english: String::new(),
+                    japanese: String::new(),
+                    note: String::new(),
+                });
+            }
+        },
+    );
 }
 
 fn read_limited(path: &std::path::Path, max: u64) -> Result<String, String> {

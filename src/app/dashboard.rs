@@ -2,98 +2,183 @@ use super::*;
 
 fn vocabulary_counts(deck: &[Entry], progress: &Progress) -> (usize, usize) {
     let mut bases = std::collections::BTreeMap::<String, bool>::new();
-    for entry in deck.iter().filter(|e| !progress.deleted_entries.contains(&e.id)) {
-        let answered = Skill::ALL.iter().any(|skill| progress.memories
-            .get(&skill.key(&entry.id)).is_some_and(|m| m.reviews > 0));
+    for entry in deck
+        .iter()
+        .filter(|e| !progress.deleted_entries.contains(&e.id))
+    {
+        let answered = Skill::ALL.iter().any(|skill| {
+            progress
+                .memories
+                .get(&skill.key(&entry.id))
+                .is_some_and(|m| m.reviews > 0)
+        });
         let learned = bases.entry(entry.base.trim().to_lowercase()).or_default();
         *learned |= answered;
     }
-    (bases.len(), bases.values().filter(|&&learned| learned).count())
+    (
+        bases.len(),
+        bases.values().filter(|&&learned| learned).count(),
+    )
 }
 
 impl WordApp {
     pub(super) fn home_dashboard(&mut self, ui: &mut egui::Ui) {
-        ux::heading(ui, "今日の学習", "少しずつ思い出す練習を重ねる。まずは自分に合う時間から。");
-        let minutes = self.progress.settings.minutes;
-        ux::panel(ui, true, |ui| {
-            ui.label(format!("目安時間：約{minutes}分。回答の途中で時間になっても、その問題を終えてから区切る。"));
-            ui.add_space(12.0);
-            let title = if self.session.is_some() { "学習を再開する" } else { "今日の学習を始める" };
-            if ux::primary(ui, title, self.pending.is_none() && self.recorder.is_none() && !self.batch_running).clicked() { self.start(minutes); }
-            if self.session.is_some() { ui.small("入力中の回答と学習の進み具合は保持されている。"); }
-        });
-        ui.add_space(16.0);
+        let (registered, answered) = vocabulary_counts(&self.deck, &self.progress);
         let date = today();
-        let answers = self.progress.reviews.iter().filter(|r| r.date == date).count();
-        let new_today = self.progress.reviews.iter().filter(|r| r.date == date && r.first).count();
-        let seconds = self.progress.study_seconds.get(&date).copied().unwrap_or(0);
-        let due = scheduler::make_queue(&self.deck, &self.progress, now(), &date, 0).len();
-        ux::metric_group(ui, |ui| {
-            ux::metric(ui, "今日の学習時間", ux::duration(seconds as u64), "休止・AI待機を除く保存済み時間");
-            ux::metric(ui, "今日の回答", format!("{answers}回"), &format!("うち初回回答 {new_today}回"));
-            ux::metric(ui, "今回の復習候補", format!("{due}項目"), "現在の出題設定・1回最大18項目");
-        });
-        ui.add_space(16.0);
-        ux::panel(ui, false, |ui| {
-            ui.heading("学習の積み重ね");
-            self.vocabulary_dashboard(ui);
-        });
-        ui.add_space(16.0);
-        ui.collapsing("学習のヒントと教材について", |ui| {
-            ui.label("期限を過ぎた復習は、今後のセッションに分けて出題する。休んでも記録は失われない。");
-            ui.label("新しい教材は、例を確認してから別の問題を挟んで思い出す。ヒントや直後の再現は独力の回答と区別する。");
-            let count = self.deck.iter().filter(|e| !self.progress.deleted_entries.contains(&e.id)).count();
-            ui.small(format!("教材{count}項目。中高水準から選んだ独自教材であり、全教科書の網羅リストではない。"));
-            ui.small("復習時期はWordWeaveの規則で計算する。AIは任意の生成・添削に使用する。");
-        });
-    }
-    pub(super) fn vocabulary_dashboard(&self, ui: &mut egui::Ui) {
-        let (registered, learned) = vocabulary_counts(&self.deck, &self.progress);
-        ui.add_space(15.0);
-        ux::metric_group(ui, |ui| {
-            for (label, count) in [("登録されている語彙", registered),
-                ("学習済みの語彙", learned), ("未学習の語彙", registered - learned)] {
-                ui.group(|ui| { ui.label(label); ui.heading(format!("{count}語")); });
+        let mut view = super::home_view::HomeView {
+            registered,
+            answered,
+            due: scheduler::make_queue(&self.deck, &self.progress, now(), &date, 0).len(),
+            first_today: self
+                .progress
+                .reviews
+                .iter()
+                .filter(|r| r.date == date && r.first)
+                .count(),
+            seconds: self.progress.study_seconds.get(&date).copied().unwrap_or(0) as u64,
+            minutes: self.progress.settings.minutes,
+            resuming: self.session.is_some(),
+            enabled: self.fatal.is_none()
+                && self.pending.is_none()
+                && self.recorder.is_none()
+                && !self.batch_running,
+            start_requested: false,
+            tips_requested: false,
+        };
+        ui.scope(|ui| {
+            ui.spacing_mut().item_spacing = egui::vec2(16.0, 12.0);
+            for (style, size) in [
+                (egui::TextStyle::Body, 19.0),
+                (egui::TextStyle::Small, 13.0),
+                (egui::TextStyle::Button, 16.0),
+            ] {
+                ui.style_mut()
+                    .text_styles
+                    .insert(style, super::home_art::home_font(size));
             }
+            ui.style_mut().visuals.override_text_color = Some(super::home_art::INK);
+            egui::Frame::new()
+                .inner_margin(16)
+                .show(ui, |ui| view.show(ui));
         });
-        ui.small("語彙数は教材の基本語・表現の重複を除いた数（削除済みを除く）。");
-        ui.small("学習済み＝現在の教材で1回以上回答した語彙。正解・習得完了を意味しない。");
-        if registered > 0 {
-            ui.add(egui::ProgressBar::new(learned as f32 / registered as f32)
-                .text(format!("学習経験あり {learned} / {registered}語")));
-        } else {
-            ui.label("登録された教材がない。「語彙を追加」タブから追加できる。");
+        if view.start_requested {
+            self.start(view.minutes);
+        }
+        if view.tips_requested {
+            self.message = "例文で意味を確認し、別の問題を挟んでから思い出す。回答した経験と、独力で使える状態は区別する。".into();
         }
     }
 
     pub(super) fn study_start(&mut self, ui: &mut egui::Ui) {
-        ux::heading(ui, "学習を始める", "期限を迎えた復習を優先し、新しい表現を少しずつ学ぶ。");
+        use super::home_art::*;
+        use egui::{Color32, Frame, RichText, TextStyle};
         let minutes = self.progress.settings.minutes;
-        ux::panel(ui, true, |ui| {
-            ui.label(format!("まずは{minutes}分。時間になったら回答の区切りで終了でき、続けたければそのまま継続できる。"));
-            ui.add_space(12.0);
-            if ux::primary(ui, format!("{minutes}分の学習を始める"), true).clicked() { self.start(minutes); }
-            ui.add_space(8.0);
-            if ui.button("今日は2分だけ").clicked() { self.start(2); }
-        });
-        ui.add_space(16.0);
         let queue = self.study_queue(minutes);
-        ux::metric_group(ui, |ui| {
-            ux::metric(ui, "今回の復習候補", format!("{}項目", queue.iter().filter(|t| !t.introduce).count()), "期限を迎えた項目を優先");
-            ux::metric(ui, "新しく学ぶ候補", format!("{}項目", queue.iter().filter(|t| t.introduce).count()), "設定した1日の上限内で出題");
+        let due = queue.iter().filter(|task| !task.introduce).count();
+        let new = queue.iter().filter(|task| task.introduce).count();
+        let enabled = self.fatal.is_none()
+            && self.pending.is_none()
+            && self.recorder.is_none()
+            && !self.batch_running;
+        let mut requested = None;
+        ui.scope(|ui| {
+            ui.spacing_mut().item_spacing = egui::vec2(16.0, 12.0);
+            for (style, size) in [(TextStyle::Body, 19.0), (TextStyle::Small, 15.0), (TextStyle::Button, 17.0)] {
+                ui.style_mut().text_styles.insert(style, home_font(size));
+            }
+            ui.style_mut().visuals.override_text_color = Some(INK);
+            Frame::new().inner_margin(16).show(ui, |ui| {
+                let width = ui.available_width();
+                card(ui, width, 320.0, Color32::from_rgb(233, 246, 255), |ui| {
+                    if width > 950.0 {
+                        let r = egui::Rect::from_min_size(ui.cursor().min + egui::vec2(width * 0.68, 0.0), egui::vec2(width * 0.25, 155.0));
+                        scenery(ui.painter(), r);
+                    }
+                    title(ui, "学習を始める", 42.0);
+                    ui.label("期限を迎えた復習を優先し、新しい表現を少しずつ学びましょう。");
+                    ui.label(format!("まずは{minutes}分。回答の区切りで終了でき、そのまま続けることもできます。"));
+                    ui.add_space(16.0);
+                    let start_label = format!("▶  {minutes}分の学習を始める");
+                    ui.horizontal(|ui| {
+                        badge(ui, Icon::Clock, BLUE, 64.0);
+                        title(ui, &format!("約 {minutes} 分"), 35.0);
+                        if width >= 900.0 && ui.add_enabled_ui(enabled, |ui| primary(ui, &start_label, 390.0)).inner.clicked() {
+                            requested = Some(minutes);
+                        }
+                    });
+                    if width < 900.0 && ui.add_enabled_ui(enabled, |ui| primary(ui, &start_label, 390.0)).inner.clicked() {
+                        requested = Some(minutes);
+                    }
+                    ui.add_enabled_ui(enabled, |ui| {
+                        if ui.ww_button("今日は2分だけ").clicked() { requested = Some(2); }
+                    });
+                });
+                ui.add_space(12.0);
+                let metrics = [
+                    ("今回の復習候補", format!("{due} 項目"), "期限を迎えた項目を優先", Icon::Refresh, ROSE),
+                    ("新しく学ぶ候補", format!("{new} 項目"), "設定した1日の上限内で出題", Icon::File, GREEN),
+                    ("今回の学習の目安", format!("{minutes} 分"), "短い時間から、無理なく続ける", Icon::Clock, BLUE),
+                ];
+                let columns = if width >= 900.0 { 3 } else { 1 };
+                let card_width = (width - 16.0 * (columns - 1) as f32) / columns as f32;
+                for row in metrics.chunks(columns) {
+                    ui.horizontal_top(|ui| {
+                        for (label, value, note, icon, color) in row {
+                            card(ui, card_width, 165.0, Color32::WHITE, |ui| {
+                                ui.horizontal(|ui| {
+                                    badge(ui, *icon, *color, 50.0);
+                                    ui.vertical(|ui| {
+                                        ui.label(*label);
+                                        title(ui, value, 32.0);
+                                    });
+                                });
+                                ui.label(RichText::new(*note).size(16.0).color(MUTED));
+                            });
+                        }
+                    });
+                }
+                ui.add_space(12.0);
+                let content_width = if width >= 950.0 { (width - 16.0) / 2.0 } else { width };
+                let draw_skills = |ui: &mut egui::Ui| {
+                    card(ui, content_width, 270.0, Color32::WHITE, |ui| {
+                        ui.horizontal(|ui| { badge(ui, Icon::Book, BLUE, 48.0); title(ui, "練習する内容", 25.0); });
+                        ui.label("現在の設定で選ばれている練習です。");
+                        for skill in &self.progress.settings.skills { ui.label(format!("・{}", skill.label())); }
+                        ui.label(RichText::new("学習時間・対象分野・技能は「設定」で変更できます。").size(16.0).color(MUTED));
+                    });
+                };
+                let draw_tips = |ui: &mut egui::Ui| {
+                    card(ui, content_width, 270.0, Color32::from_rgb(255, 251, 240), |ui| {
+                        ui.horizontal(|ui| { badge(ui, Icon::Bulb, Color32::from_rgb(159, 111, 0), 48.0); title(ui, "上手に続けるコツ", 25.0); });
+                        ui.label("・完璧を目指さず、まずは短い時間から。");
+                        ui.label("・間違えた問題は、次の復習につなげましょう。");
+                        ui.label("・疲れたら回答の区切りで終了できます。");
+                        ui.label("・続けたくなったら、終了画面からもう少し学習できます。");
+                    });
+                };
+                if width >= 950.0 { ui.horizontal_top(|ui| { draw_skills(ui); draw_tips(ui); }); }
+                else { draw_skills(ui); ui.add_space(12.0); draw_tips(ui); }
+                ui.add_space(12.0);
+                card(ui, width, 66.0, Color32::from_rgb(237, 247, 254), |ui| {
+                    ui.label(if queue.is_empty() {
+                        "今取り組める問題はありません。復習予定を待つか、設定の対象分野・教材を確認してください。".to_owned()
+                    } else { format!("今回の候補は復習 {due} 項目・新規 {new} 項目です。復習時期はWordWeaveの規則で計算します。") });
+                });
+            });
         });
-        ui.add_space(16.0);
-        ui.heading("練習する内容");
-        for skill in &self.progress.settings.skills { ui.label(format!("・{}", skill.label())); }
-        if queue.is_empty() { ui.label("今取り組める問題はない。復習予定を待つか、設定の対象分野・教材を確認できる。"); }
-        ui.small("学習時間・対象分野・技能は「設定」タブから変更できる。");
+        if let Some(minutes) = requested {
+            self.start(minutes);
+        }
     }
 
     pub(super) fn version_dialog(&mut self, ctx: &egui::Context) {
         let mut close = false;
         egui::Window::new("バージョン情報")
-            .open(&mut self.about_open).collapsible(false).resizable(false)
+            .open(&mut self.about_open)
+            .collapsible(false)
+            .resizable(false)
             .show(ctx, |ui| {
+                ux::dialog_body(ui);
                 ui.heading("WordWeave5");
                 ui.label(format!("バージョン {}", env!("CARGO_PKG_VERSION")));
                 ui.label("Windows向け英語語彙学習アプリ");
@@ -101,7 +186,7 @@ impl WordApp {
                 ui.separator();
                 ui.small("この番号はWordWeave5本体のバージョンである。");
                 ui.small("Codex CLIのバージョンとは異なる。");
-                close = ui.button("閉じる").clicked();
+                close = ui.ww_button("閉じる").clicked();
             });
         if close || ctx.input(|i| i.key_pressed(egui::Key::Escape)) {
             self.about_open = false;
@@ -126,7 +211,8 @@ mod tests {
         deck.push(other);
         let mut p = Progress::default();
         assert_eq!(vocabulary_counts(&deck, &p), (2, 0));
-        p.memories.insert(Skill::ALL[0].key(&deck[0].id), scheduler::Memory::default());
+        p.memories
+            .insert(Skill::ALL[0].key(&deck[0].id), scheduler::Memory::default());
         assert_eq!(vocabulary_counts(&deck, &p), (2, 0));
         let mut memory = scheduler::Memory::default();
         memory.reviews = 1;

@@ -25,7 +25,7 @@ impl WordApp {
                 for row in &rows {
                     let relevant:Vec<_>=reasons.iter().filter(|r|r.path==row.path||r.path.starts_with(&format!("{}/",row.path))).collect();
                     let reason=if relevant.is_empty(){"理由未取得（推測で補完しない）".into()}else{relevant.iter().map(|r|r.reason.as_str()).collect::<Vec<_>>().join("\n")};
-                    if ui.selectable_label(selected==row.path,format!("{}：{}",row.kind,row.label)).on_hover_text(&reason).clicked(){selected=row.path.clone();}
+                    if ui.ww_selectable_label(selected==row.path,format!("{}：{}",row.kind,row.label)).on_hover_text(&reason).clicked(){selected=row.path.clone();}
                     let(a,b)=material_diff::spans(&row.before,&row.after);
                     ui.columns(2,|sides|{
                         sides[0].add(egui::Label::new(diff_text(&a,Color32::from_rgb(255,217,217))).wrap().selectable(true)).on_hover_text(&reason);
@@ -49,8 +49,8 @@ impl WordApp {
                         }
                         for a in &s.exchange.attachments {
                             ui.small(format!("媒体の根拠：{}",a.source_text));
-                            if let Some(r)=&a.image {if ui.button("注釈画像を表示").clicked(){image=Some(r.clone());}}
-                            if a.original.kind==wordweave5::assets::AssetKind::AudioWav && ui.add_enabled(self.pending.is_none(),egui::Button::new("原録音を再生")).clicked(){audio=Some(a.original.clone());}
+                            if let Some(r)=&a.image {if ui.ww_button("注釈画像を表示").clicked(){image=Some(r.clone());}}
+                            if a.original.kind==wordweave5::assets::AssetKind::AudioWav && ui.add_enabled(self.pending.is_none(),crate::app::controls::Button::new("原録音を再生")).clicked(){audio=Some(a.original.clone());}
                         }
                         ui.separator();
                     });

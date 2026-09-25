@@ -13,11 +13,16 @@ mod annotation;
 
 #[cfg(windows)]
 fn main() -> eframe::Result<()> {
+    #[cfg(debug_assertions)]
+    if std::env::args().any(|arg| arg == "--ui-check") {
+        return app::visual_check::run();
+    }
     let options = eframe::NativeOptions {
         viewport: eframe::egui::ViewportBuilder::default()
             .with_title("WordWeave 5 — 使い分ける英語")
-            .with_inner_size([1120.0, 850.0])
-            .with_min_inner_size([820.0, 650.0]),
+            .with_inner_size([1150.0, 950.0])
+            .with_min_inner_size([820.0, 650.0])
+            .with_drag_and_drop(true),
         ..Default::default()
     };
     eframe::run_native(

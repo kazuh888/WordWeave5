@@ -16,17 +16,74 @@ pub struct Attachment {
     pub image: Option<crate::assets::AssetRef>,
     #[serde(default)]
     pub background: Option<crate::assets::AssetRef>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file_name: Option<String>,
     pub source_text: String,
     pub transcript: Option<String>,
 }
 impl Attachment {
+    /// Validate a display name before storing an original, as well as on reload.
+    pub fn validate_file_name(name: &str) -> Result<(), String> {
+        let stem = name
+            .split('.')
+            .next()
+            .unwrap_or_default()
+            .to_ascii_uppercase();
+        let reserved = ["CON", "PRN", "AUX", "NUL"].contains(&stem.as_str())
+            || (stem.len() == 4
+                && (stem.starts_with("COM") || stem.starts_with("LPT"))
+                && stem.as_bytes()[3].is_ascii_digit()
+                && stem.as_bytes()[3] != b'0');
+        if name.trim().is_empty()
+            || name.encode_utf16().count() > 255
+            || name.chars().last().is_some_and(|c| c == '.' || c == ' ')
+            || name.chars().any(|c| {
+                c.is_control() || matches!(c, '/' | '\\' | '<' | '>' | ':' | '"' | '|' | '?' | '*')
+            })
+            || reserved
+        {
+            return Err("添付ファイル名が不正です。".into());
+        }
+        Ok(())
+    }
+
     pub fn validate(&self) -> Result<(), String> {
         use crate::assets::AssetKind;
         self.original.validate()?;
-        if let Some(image) = &self.image { image.validate()?; if image.kind != AssetKind::ImagePng { return Err("添付画像の形式が不正です。".into()); } }
-        if let Some(image) = &self.background { image.validate()?; if image.kind != AssetKind::ImagePng { return Err("背景画像の形式が不正です。".into()); } }
-        if self.source_text.chars().count() > 4000 || self.transcript.as_ref().is_some_and(|s| s.chars().count() > 4000)
-            || (self.original.kind == AssetKind::InkJson && self.image.is_none()) {
+        if let Some(name) = &self.file_name {
+            Self::validate_file_name(name)?;
+        }
+        if self.original.kind == AssetKind::FileBlob
+            && (self.file_name.is_none() || self.image.is_some() || self.background.is_some())
+        {
+            return Err("添付ファイルの名前・画像が不正です。".into());
+        }
+        if matches!(
+            self.original.kind,
+            AssetKind::ImageBmp | AssetKind::ImageGif | AssetKind::ImageJpeg
+        ) && self.image.is_none()
+        {
+            return Err("添付画像の表示用画像がありません。".into());
+        }
+        if let Some(image) = &self.image {
+            image.validate()?;
+            if image.kind != AssetKind::ImagePng {
+                return Err("添付画像の形式が不正です。".into());
+            }
+        }
+        if let Some(image) = &self.background {
+            image.validate()?;
+            if image.kind != AssetKind::ImagePng {
+                return Err("背景画像の形式が不正です。".into());
+            }
+        }
+        if self.source_text.chars().count() > 4000
+            || self
+                .transcript
+                .as_ref()
+                .is_some_and(|s| s.chars().count() > 4000)
+            || (self.original.kind == AssetKind::InkJson && self.image.is_none())
+        {
             return Err("添付の説明・画像が不正です。".into());
         }
         Ok(())
@@ -53,6 +110,9 @@ pub struct Conversation {
     #[serde(default)]
     pub deleted_at: Option<i64>,
     pub title: String,
+    /// A learner-edited title is authoritative and must not be replaced by later AI replies.
+    #[serde(default)]
+    pub title_manual: bool,
     #[serde(default)]
     pub pinned: bool,
     #[serde(default)]
@@ -66,50 +126,119 @@ pub struct Conversation {
 impl Conversation {
     pub fn new() -> Self {
         Self {
-            id: format!("{}-{}", std::process::id(), chrono::Utc::now().timestamp_nanos_opt().unwrap()),
+            id: format!(
+                "{}-{}",
+                std::process::id(),
+                chrono::Utc::now().timestamp_nanos_opt().unwrap()
+            ),
             deleted_at: None,
-            title: "新しい会話".into(), pinned: false, created_at: chrono::Utc::now().timestamp(),
-            memo: String::new(), draft: String::new(), exchanges: Vec::new(), draft_attachments: Vec::new(),
+            title: "新しい会話".into(),
+            title_manual: false,
+            pinned: false,
+            created_at: chrono::Utc::now().timestamp(),
+            memo: String::new(),
+            draft: String::new(),
+            exchanges: Vec::new(),
+            draft_attachments: Vec::new(),
         }
     }
     pub fn validate(&self) -> Result<(), String> {
-        for attachments in std::iter::once(&self.draft_attachments).chain(self.exchanges.iter().map(|e| &e.attachments)) {
-            if attachments.len() > 8 { return Err("一つの発言の添付は8件までです。".into()); }
-            for attachment in attachments { attachment.validate()?; }
+        for attachments in std::iter::once(&self.draft_attachments)
+            .chain(self.exchanges.iter().map(|e| &e.attachments))
+        {
+            if attachments.len() > 8 {
+                return Err("一つの発言の添付は8件までです。".into());
+            }
+            for attachment in attachments {
+                attachment.validate()?;
+            }
         }
-        if self.id.is_empty() || self.title.chars().count() > 100
-            || self.memo.chars().count() > 2000 || self.draft.chars().count() > 4000
+        if self.id.is_empty()
+            || self.title.chars().count() > 100
+            || self.memo.chars().count() > 2000
+            || self.draft.chars().count() > 4000
             || self.exchanges.len() > MAX_EXCHANGES
-            || self.exchanges.iter().any(|e| e.question.trim().is_empty()
-                || e.question.chars().count() > 4000 || e.answer.trim().is_empty()
-                || e.answer.chars().count() > 16000) {
+            || self.exchanges.iter().any(|e| {
+                e.question.trim().is_empty()
+                    || e.question.chars().count() > 4000
+                    || e.answer.trim().is_empty()
+                    || e.answer.chars().count() > 16000
+            })
+        {
             return Err("チャットのデータが不正、または保存上限を超えています。".into());
         }
         Ok(())
     }
     // Only a completed answer is committed. Failed attempts keep the draft and
     // are never included in the next context as successful assistant replies.
-    pub fn complete(&mut self, question: String, answer: String, execution: Execution) -> Result<(), String> {
-        if self.deleted_at.is_some() { return Err("ごみ箱の会話には回答を追加できません。復元してください。".into()); }
-        if self.exchanges.len() >= MAX_EXCHANGES { return Err("この会話は200往復に達しました。新しい会話を作成してください。".into()); }
-        if question.trim().is_empty() || question.chars().count() > 4000
-            || answer.trim().is_empty() || answer.chars().count() > 16000 {
+    pub fn complete(
+        &mut self,
+        question: String,
+        answer: String,
+        execution: Execution,
+    ) -> Result<(), String> {
+        if self.deleted_at.is_some() {
+            return Err("ごみ箱の会話には回答を追加できません。復元してください。".into());
+        }
+        if self.exchanges.len() >= MAX_EXCHANGES {
+            return Err("この会話は200往復に達しました。新しい会話を作成してください。".into());
+        }
+        if question.trim().is_empty()
+            || question.chars().count() > 4000
+            || answer.trim().is_empty()
+            || answer.chars().count() > 16000
+        {
             return Err("回答が空、または保存上限を超えたため会話に追加しませんでした。質問の下書きは保持しています。".into());
         }
-        if self.exchanges.is_empty() && self.title == "新しい会話" {
+        if !self.title_manual && self.exchanges.is_empty() && self.title == "新しい会話" {
             self.title = automatic_title(&question);
         }
-        self.exchanges.push(Exchange { question: question.clone(), answer, at: chrono::Utc::now().timestamp(), execution, pinned: false, for_material: false,
-            attachments: self.draft_attachments.clone() });
+        self.exchanges.push(Exchange {
+            question: question.clone(),
+            answer,
+            at: chrono::Utc::now().timestamp(),
+            execution,
+            pinned: false,
+            for_material: false,
+            attachments: self.draft_attachments.clone(),
+        });
         self.draft_attachments.clear();
-        if self.draft.trim() == question.trim() { self.draft.clear(); }
+        if self.draft.trim() == question.trim() {
+            self.draft.clear();
+        }
+        Ok(())
+    }
+    pub fn rename(&mut self, title: &str) -> Result<(), String> {
+        if self.deleted_at.is_some() {
+            return Err("ごみ箱の会話は編集できません。復元してください。".into());
+        }
+        let title = title.trim();
+        if title.is_empty()
+            || title.chars().count() > 100
+            || title.contains('\r')
+            || title.contains('\n')
+        {
+            return Err("タイトルは改行なしの1〜100文字で入力してください。".into());
+        }
+        self.title = title.to_owned();
+        self.title_manual = true;
         Ok(())
     }
     pub fn apply_recognition(&mut self, expected: &str, text: &str) -> Result<(), String> {
-        if self.deleted_at.is_some() { return Err("ごみ箱の会話は編集できません。復元してください。".into()); }
-        if self.draft != expected { return Err("入力欄が変更されたため、認識結果を自動反映しませんでした。結果を確認して貼り付けてください。".into()); }
-        let next = if expected.trim().is_empty() { text.to_owned() } else { format!("{expected}\n{text}") };
-        if text.trim().is_empty() || next.chars().count() > 4000 { return Err("認識結果が空、または入力上限を超えています。".into()); }
+        if self.deleted_at.is_some() {
+            return Err("ごみ箱の会話は編集できません。復元してください。".into());
+        }
+        if self.draft != expected {
+            return Err("入力欄が変更されたため、認識結果を自動反映しませんでした。結果を確認して貼り付けてください。".into());
+        }
+        let next = if expected.trim().is_empty() {
+            text.to_owned()
+        } else {
+            format!("{expected}\n{text}")
+        };
+        if text.trim().is_empty() || next.chars().count() > 4000 {
+            return Err("認識結果が空、または入力上限を超えています。".into());
+        }
         self.draft = next;
         Ok(())
     }
@@ -117,21 +246,30 @@ impl Conversation {
 
 /// Display order only: never reorder stored conversations or invalidate an active index.
 pub fn ordered_indices(chats: &[Conversation]) -> Vec<usize> {
-    let mut indices: Vec<_> = (0..chats.len()).filter(|&i| chats[i].deleted_at.is_none()).collect();
+    let mut indices: Vec<_> = (0..chats.len())
+        .filter(|&i| chats[i].deleted_at.is_none())
+        .collect();
     indices.sort_by_key(|&i| {
         let c = &chats[i];
-        (std::cmp::Reverse(c.pinned), std::cmp::Reverse(c.exchanges.last().map_or(c.created_at, |e| e.at)))
+        (
+            std::cmp::Reverse(c.pinned),
+            std::cmp::Reverse(c.exchanges.last().map_or(c.created_at, |e| e.at)),
+        )
     });
     indices
 }
 
 fn automatic_title(question: &str) -> String {
     let normalized = question.split_whitespace().collect::<Vec<_>>().join(" ");
-    if normalized.chars().count() <= 48 { return normalized; }
+    if normalized.chars().count() <= 48 {
+        return normalized;
+    }
     let mut title: String = normalized.chars().take(47).collect();
     // Prefer a whole English word, while still supporting Japanese without spaces.
     if let Some((prefix, _)) = title.rsplit_once(' ') {
-        if prefix.chars().count() >= 24 { title = prefix.to_owned(); }
+        if prefix.chars().count() >= 24 {
+            title = prefix.to_owned();
+        }
     }
     title.push('…');
     title
@@ -148,14 +286,26 @@ pub struct Context {
 }
 impl Context {
     pub fn preview(&self) -> String {
-        let mut text = format!("引き継ぎメモ：\n{}\n\n", self.payload["learner_memo"].as_str().unwrap_or_default());
+        let mut text = format!(
+            "引き継ぎメモ：\n{}\n\n",
+            self.payload["learner_memo"].as_str().unwrap_or_default()
+        );
         if let Some(history) = self.payload["conversation_history"].as_array() {
             for pair in history {
-                text.push_str(&format!("あなた：\n{}\n\nCodex：\n{}\n\n",
-                    pair["user"].as_str().unwrap_or_default(), pair["assistant"].as_str().unwrap_or_default()));
+                text.push_str(&format!(
+                    "あなた：\n{}\n\nCodex：\n{}\n\n",
+                    pair["user"].as_str().unwrap_or_default(),
+                    pair["assistant"].as_str().unwrap_or_default()
+                ));
             }
         }
-        let numbers = |indices: &[usize]| indices.iter().map(|i| (i + 1).to_string()).collect::<Vec<_>>().join(", ");
+        let numbers = |indices: &[usize]| {
+            indices
+                .iter()
+                .map(|i| (i + 1).to_string())
+                .collect::<Vec<_>>()
+                .join(", ")
+        };
         text.push_str(&format!("今回の質問：\n{}\n\n送信対象の往復番号：{}\n送信しない過去のやり取り：{}往復（番号：{}）\n保存済みの履歴は削除されません。",
             self.payload["current_question"].as_str().unwrap_or_default(), numbers(&self.included_indices),
             self.omitted, numbers(&self.omitted_indices)));
@@ -174,35 +324,50 @@ fn prepare_with_limit(conversation: &Conversation, limit: usize) -> Result<Conte
 }
 
 /// A bounded catalog is part of the same byte budget as the conversation.
-pub fn prepare_with_catalog(conversation: &Conversation, entries: &[Entry], deleted_entries: &BTreeSet<String>) -> Result<Context, String> {
+pub fn prepare_with_catalog(
+    conversation: &Conversation,
+    entries: &[Entry],
+    deleted_entries: &BTreeSet<String>,
+) -> Result<Context, String> {
     conversation.validate()?;
     let mut required = conversation.clone();
     required.exchanges.retain(|e| e.pinned);
     let required_bytes = prepare_with_limit(&required, CONTEXT_BYTES)?.bytes;
     let budget = ((CONTEXT_BYTES - required_bytes) / 4).min(8_000);
     let query = relevance_terms(&conversation.draft);
-    let mut candidates: Vec<_> = entries.iter().enumerate().filter(|(_, e)| !deleted_entries.contains(&e.id))
+    let mut candidates: Vec<_> = entries
+        .iter()
+        .enumerate()
+        .filter(|(_, e)| !deleted_entries.contains(&e.id))
         .map(|(i, e)| {
             let terms = relevance_terms(&format!("{} {}", e.base, e.meaning));
             (i, terms.intersection(&query).count(), e)
-        }).collect();
+        })
+        .collect();
     candidates.sort_by_key(|&(i, score, _)| (std::cmp::Reverse(score), i));
     let total = candidates.len();
     let mut selected = Vec::new();
     let mut bytes = 2; // JSON array brackets.
     for (_, _, e) in candidates {
         let item = json!({"id": e.id, "base": e.base, "meaning": e.meaning});
-        let item_bytes = serde_json::to_vec(&item).unwrap().len() + usize::from(!selected.is_empty());
-        if bytes + item_bytes <= budget { bytes += item_bytes; selected.push(item); }
+        let item_bytes =
+            serde_json::to_vec(&item).unwrap().len() + usize::from(!selected.is_empty());
+        if bytes + item_bytes <= budget {
+            bytes += item_bytes;
+            selected.push(item);
+        }
     }
-    let mut catalog = json!({"existing_entries": selected, "omitted_catalog": total - selected.len()});
+    let mut catalog =
+        json!({"existing_entries": selected, "omitted_catalog": total - selected.len()});
     // Reserve field-name overhead too, including when required pins nearly fill the budget.
     loop {
         match prepare_selection(conversation, CONTEXT_BYTES, Some(&catalog)) {
             Ok(context) => return Ok(context),
             Err(error) => {
                 let selected = catalog["existing_entries"].as_array_mut().unwrap();
-                if selected.pop().is_none() { return Err(error); }
+                if selected.pop().is_none() {
+                    return Err(error);
+                }
                 let omitted = total - selected.len();
                 catalog["omitted_catalog"] = json!(omitted);
             }
@@ -210,24 +375,48 @@ pub fn prepare_with_catalog(conversation: &Conversation, entries: &[Entry], dele
     }
 }
 
-fn prepare_selection(conversation: &Conversation, limit: usize, catalog: Option<&Value>) -> Result<Context, String> {
-    if conversation.deleted_at.is_some() { return Err("ごみ箱の会話は送信できません。先に復元してください。".into()); }
+fn prepare_selection(
+    conversation: &Conversation,
+    limit: usize,
+    catalog: Option<&Value>,
+) -> Result<Context, String> {
+    if conversation.deleted_at.is_some() {
+        return Err("ごみ箱の会話は送信できません。先に復元してください。".into());
+    }
     conversation.validate()?;
     let question = conversation.draft.trim();
-    if question.is_empty() { return Err("英語についての質問を入力してください。".into()); }
+    if question.is_empty() {
+        return Err("英語についての質問を入力してください。".into());
+    }
     let mut included: Vec<bool> = conversation.exchanges.iter().map(|e| e.pinned).collect();
     let payload_for = |selected: &[bool]| {
-        let history: Vec<_> = conversation.exchanges.iter().zip(selected).filter(|(_, yes)| **yes)
+        let history: Vec<_> = conversation
+            .exchanges
+            .iter()
+            .zip(selected)
+            .filter(|(_, yes)| **yes)
             .map(|(e, _)| {
                 let mut item = json!({"user": e.question, "assistant": e.answer});
-                if !e.attachments.is_empty() { item["attachment_notes_not_original_media"] = json!(e.attachments.iter().map(|a| &a.source_text).collect::<Vec<_>>()); }
+                if !e.attachments.is_empty() {
+                    item["attachment_notes_not_original_media"] = json!(e
+                        .attachments
+                        .iter()
+                        .map(|a| &a.source_text)
+                        .collect::<Vec<_>>());
+                }
                 item
-            }).collect();
+            })
+            .collect();
         let mut payload = json!({"conversation_history": history, "learner_memo": conversation.memo,
             "current_question": question, "omitted_exchanges": selected.iter().filter(|b| !**b).count()});
-        if !conversation.draft_attachments.is_empty() { payload["current_attachments"] = json!(conversation.draft_attachments); }
+        if !conversation.draft_attachments.is_empty() {
+            payload["current_attachments"] = json!(conversation.draft_attachments);
+        }
         if let Some(catalog) = catalog {
-            payload.as_object_mut().unwrap().extend(catalog.as_object().unwrap().clone());
+            payload
+                .as_object_mut()
+                .unwrap()
+                .extend(catalog.as_object().unwrap().clone());
         }
         payload
     };
@@ -240,7 +429,10 @@ fn prepare_selection(conversation: &Conversation, limit: usize, catalog: Option<
     let mut recent_start = included.len();
     // Keep recent complete exchanges first; reserve room to recover older relevant turns.
     for index in (0..included.len()).rev() {
-        if included[index] { recent_start = index; continue; }
+        if included[index] {
+            recent_start = index;
+            continue;
+        }
         included[index] = true;
         let bytes = size(&payload_for(&included));
         if bytes > limit || (bytes > recent_budget && recent_start < included.len()) {
@@ -250,20 +442,29 @@ fn prepare_selection(conversation: &Conversation, limit: usize, catalog: Option<
         recent_start = index;
     }
     let query_terms = relevance_terms(question);
-    let mut relevant: Vec<_> = conversation.exchanges.iter().enumerate()
+    let mut relevant: Vec<_> = conversation
+        .exchanges
+        .iter()
+        .enumerate()
         .filter(|(i, _)| !included[*i])
         .map(|(i, e)| {
             let terms = relevance_terms(&format!("{} {}", e.question, e.answer));
             (i, terms.intersection(&query_terms).count())
-        }).filter(|(_, score)| *score > 0).collect();
+        })
+        .filter(|(_, score)| *score > 0)
+        .collect();
     relevant.sort_by_key(|&(i, score)| (std::cmp::Reverse(score), std::cmp::Reverse(i)));
     for (index, _) in relevant {
         included[index] = true;
-        if size(&payload_for(&included)) > limit { included[index] = false; }
+        if size(&payload_for(&included)) > limit {
+            included[index] = false;
+        }
     }
     // Use remaining room for the recent suffix; a gap never splits an exchange.
     for index in (0..recent_start).rev() {
-        if included[index] { continue; }
+        if included[index] {
+            continue;
+        }
         included[index] = true;
         if size(&payload_for(&included)) > limit {
             included[index] = false;
@@ -272,10 +473,24 @@ fn prepare_selection(conversation: &Conversation, limit: usize, catalog: Option<
     }
     let payload = payload_for(&included);
     let count = included.iter().filter(|b| **b).count();
-    let included_indices = included.iter().enumerate().filter_map(|(i, yes)| yes.then_some(i)).collect();
-    let omitted_indices = included.iter().enumerate().filter_map(|(i, yes)| (!yes).then_some(i)).collect();
-    Ok(Context { bytes: size(&payload), payload, included: count, omitted: included.len() - count,
-        included_indices, omitted_indices })
+    let included_indices = included
+        .iter()
+        .enumerate()
+        .filter_map(|(i, yes)| yes.then_some(i))
+        .collect();
+    let omitted_indices = included
+        .iter()
+        .enumerate()
+        .filter_map(|(i, yes)| (!yes).then_some(i))
+        .collect();
+    Ok(Context {
+        bytes: size(&payload),
+        payload,
+        included: count,
+        omitted: included.len() - count,
+        included_indices,
+        omitted_indices,
+    })
 }
 
 // Local retrieval is a deterministic lexical heuristic, not semantic understanding.
@@ -285,17 +500,27 @@ fn relevance_terms(text: &str) -> BTreeSet<String> {
     for word in text.split(|c: char| !c.is_alphanumeric()) {
         let lower = word.to_lowercase();
         if lower.is_ascii() {
-            if lower.len() >= 2 && !["the", "and", "for", "that", "this", "what", "how", "can", "you", "is", "it", "to", "of", "in", "an", "are", "with", "please"].contains(&lower.as_str()) {
+            if lower.len() >= 2
+                && ![
+                    "the", "and", "for", "that", "this", "what", "how", "can", "you", "is", "it",
+                    "to", "of", "in", "an", "are", "with", "please",
+                ]
+                .contains(&lower.as_str())
+            {
                 terms.insert(lower);
             }
         } else {
             // Retain English embedded in unspaced Japanese and Japanese bigrams.
             for latin in lower.split(|c: char| !c.is_ascii_alphanumeric()) {
-                if latin.len() >= 2 { terms.insert(latin.to_owned()); }
+                if latin.len() >= 2 {
+                    terms.insert(latin.to_owned());
+                }
             }
             let chars: Vec<_> = lower.chars().collect();
             for pair in chars.windows(2) {
-                if pair.iter().all(|c| !c.is_ascii()) { terms.insert(pair.iter().collect()); }
+                if pair.iter().all(|c| !c.is_ascii()) {
+                    terms.insert(pair.iter().collect());
+                }
             }
         }
     }
@@ -310,13 +535,24 @@ mod tests {
         let mut c = Conversation::new();
         c.draft = "丸で囲んだ部分を説明して".into();
         c.draft_attachments.push(Attachment {
-            original: crate::assets::AssetRef { id: "a".repeat(64), kind: crate::assets::AssetKind::InkJson, bytes: 100 },
-            image: Some(crate::assets::AssetRef { id: "b".repeat(64), kind: crate::assets::AssetKind::ImagePng, bytes: 200 }),
+            original: crate::assets::AssetRef {
+                id: "a".repeat(64),
+                kind: crate::assets::AssetKind::InkJson,
+                bytes: 100,
+            },
+            image: Some(crate::assets::AssetRef {
+                id: "b".repeat(64),
+                kind: crate::assets::AssetKind::ImagePng,
+                bytes: 200,
+            }),
             background: None,
-            source_text: "Could you make it?".into(), transcript: None,
+            file_name: None,
+            source_text: "Could you make it?".into(),
+            transcript: None,
         });
         let captured = c.draft.clone();
-        c.complete(captured.clone(), "回答".into(), Execution::default()).unwrap();
+        c.complete(captured.clone(), "回答".into(), Execution::default())
+            .unwrap();
         assert_eq!(c.exchanges[0].attachments.len(), 1);
         assert!(c.draft_attachments.is_empty());
         c.draft = "新しい入力".into();
@@ -324,12 +560,87 @@ mod tests {
         assert_eq!(c.draft, "新しい入力");
         c.apply_recognition("新しい入力", "認識結果").unwrap();
         assert_eq!(c.draft, "新しい入力\n認識結果");
-        let restored: Conversation = serde_json::from_value(serde_json::to_value(&c).unwrap()).unwrap();
-        assert_eq!(restored.exchanges[0].attachments[0].source_text, "Could you make it?");
+        let restored: Conversation =
+            serde_json::from_value(serde_json::to_value(&c).unwrap()).unwrap();
+        assert_eq!(
+            restored.exchanges[0].attachments[0].source_text,
+            "Could you make it?"
+        );
+    }
+    #[test]
+    fn legacy_attachment_defaults_to_no_file_name() {
+        let legacy = json!({
+            "original": {"id": "a".repeat(64), "kind": "audio_wav", "bytes": 12},
+            "image": null,
+            "source_text": "",
+            "transcript": null
+        });
+        let attachment: Attachment = serde_json::from_value(legacy).unwrap();
+        assert_eq!(attachment.file_name, None);
+        assert!(attachment.validate().is_ok());
+    }
+    #[test]
+    fn file_blob_attachment_requires_a_safe_name_and_no_images() {
+        let mut attachment = Attachment {
+            original: crate::assets::AssetRef {
+                id: "c".repeat(64),
+                kind: crate::assets::AssetKind::FileBlob,
+                bytes: 3,
+            },
+            image: None,
+            background: None,
+            file_name: Some("会議メモ.txt".into()),
+            source_text: String::new(),
+            transcript: None,
+        };
+        assert!(attachment.validate().is_ok());
+        let restored: Attachment =
+            serde_json::from_str(&serde_json::to_string(&attachment).unwrap()).unwrap();
+        assert_eq!(restored.file_name.as_deref(), Some("会議メモ.txt"));
+        assert!(restored.validate().is_ok());
+
+        attachment.file_name = None;
+        assert!(attachment.validate().is_err());
+        for name in [
+            "".to_owned(),
+            "../memo.txt".to_owned(),
+            "C:\\memo.txt".to_owned(),
+            "CON.txt".to_owned(),
+            "name\nwith-newline".to_owned(),
+            "bad:stream".to_owned(),
+            "name.".to_owned(),
+            "a".repeat(256),
+        ] {
+            attachment.file_name = Some(name);
+            assert!(attachment.validate().is_err());
+        }
+        attachment.file_name = Some("valid.bin".into());
+        let image = crate::assets::AssetRef {
+            id: "d".repeat(64),
+            kind: crate::assets::AssetKind::ImagePng,
+            bytes: 10,
+        };
+        attachment.image = Some(image.clone());
+        assert!(attachment.validate().is_err());
+        attachment.image = None;
+        attachment.background = Some(image);
+        assert!(attachment.validate().is_err());
+
+        attachment.background = None;
+        attachment.original.kind = crate::assets::AssetKind::AudioWav;
+        attachment.file_name = Some("sample.wav".into());
+        assert!(attachment.validate().is_ok());
     }
     fn exchange(i: usize) -> Exchange {
-        Exchange { question: format!("質問{i}"), answer: "説明".repeat(80), at: 0,
-            execution: Execution::default(), pinned: false, for_material: false, attachments: Vec::new() }
+        Exchange {
+            question: format!("質問{i}"),
+            answer: "説明".repeat(80),
+            at: 0,
+            execution: Execution::default(),
+            pinned: false,
+            for_material: false,
+            attachments: Vec::new(),
+        }
     }
     #[test]
     fn context_preserves_order_and_pins_within_budget() {
@@ -358,11 +669,15 @@ mod tests {
     fn failed_reply_keeps_draft_and_success_survives_reload() {
         let mut c = Conversation::new();
         c.draft = "前置詞について".into();
-        assert!(c.complete(c.draft.clone(), " ".into(), Execution::default()).is_err());
+        assert!(c
+            .complete(c.draft.clone(), " ".into(), Execution::default())
+            .is_err());
         assert!(c.exchanges.is_empty());
         let question = c.draft.clone();
-        c.complete(question, "前置詞の説明".into(), Execution::default()).unwrap();
-        let mut restored: Conversation = serde_json::from_str(&serde_json::to_string(&c).unwrap()).unwrap();
+        c.complete(question, "前置詞の説明".into(), Execution::default())
+            .unwrap();
+        let mut restored: Conversation =
+            serde_json::from_str(&serde_json::to_string(&c).unwrap()).unwrap();
         restored.draft = "別の例は？".into();
         let payload = prepare(&restored).unwrap().payload;
         assert_eq!(payload["conversation_history"][0]["user"], "前置詞について");
@@ -377,30 +692,58 @@ mod tests {
     #[test]
     fn legacy_chats_load_without_pin_or_creation_time() {
         let c: Conversation = serde_json::from_value(json!({"id":"old", "title":"old title",
-            "memo":"memo", "draft":"draft", "exchanges":[]})).unwrap();
+            "memo":"memo", "draft":"draft", "exchanges":[]}))
+        .unwrap();
         assert!(!c.pinned);
+        assert!(!c.title_manual);
         assert_eq!(c.created_at, 0);
         assert_eq!(c.memo, "memo");
         let mut pinned = c.clone();
         pinned.pinned = true;
         pinned.created_at = 123;
-        let restored: Conversation = serde_json::from_value(serde_json::to_value(&pinned).unwrap()).unwrap();
+        let restored: Conversation =
+            serde_json::from_value(serde_json::to_value(&pinned).unwrap()).unwrap();
         assert!(restored.pinned);
         assert_eq!(restored.created_at, 123);
     }
     #[test]
     fn titles_normalize_whitespace_and_keep_custom_titles() {
         let mut c = Conversation::new();
-        c.complete("  Explain\n  affect versus effect  ".into(), "answer".into(), Execution::default()).unwrap();
+        c.complete(
+            "  Explain\n  affect versus effect  ".into(),
+            "answer".into(),
+            Execution::default(),
+        )
+        .unwrap();
         assert_eq!(c.title, "Explain affect versus effect");
-        c.complete("next topic".into(), "answer".into(), Execution::default()).unwrap();
+        c.complete("next topic".into(), "answer".into(), Execution::default())
+            .unwrap();
         assert_eq!(c.title, "Explain affect versus effect");
         assert!(automatic_title(&"英".repeat(60)).chars().count() <= 48);
     }
     #[test]
+    fn manual_title_is_trimmed_validated_and_survives_first_exchange() {
+        let mut c = Conversation::new();
+        c.rename("  海外旅行の会話練習  ").unwrap();
+        assert_eq!(c.title, "海外旅行の会話練習");
+        assert!(c.title_manual);
+        c.complete(
+            "空港で練習したい".into(),
+            "answer".into(),
+            Execution::default(),
+        )
+        .unwrap();
+        assert_eq!(c.title, "海外旅行の会話練習");
+        assert!(c.rename(" ").is_err());
+        assert!(c.rename("改行\nタイトル").is_err());
+        assert_eq!(c.title, "海外旅行の会話練習");
+    }
+    #[test]
     fn display_order_is_pins_then_latest_output_with_stable_ties() {
         let mut chats: Vec<_> = (0..5).map(|_| Conversation::new()).collect();
-        for c in &mut chats { c.created_at = 10; }
+        for c in &mut chats {
+            c.created_at = 10;
+        }
         chats[0].exchanges = vec![exchange(0)];
         chats[0].exchanges[0].at = 30;
         chats[1].pinned = true;
@@ -423,8 +766,14 @@ mod tests {
         assert!(context.included_indices.contains(&0));
         assert!(context.included_indices.contains(&7));
         assert!(context.bytes <= 1800);
-        assert_eq!(context.bytes, serde_json::to_vec(&context.payload).unwrap().len());
-        assert_eq!(context.included_indices.len() + context.omitted_indices.len(), 8);
+        assert_eq!(
+            context.bytes,
+            serde_json::to_vec(&context.payload).unwrap().len()
+        );
+        assert_eq!(
+            context.included_indices.len() + context.omitted_indices.len(),
+            8
+        );
         assert!(context.included_indices.windows(2).all(|w| w[0] < w[1]));
         assert_eq!(serde_json::to_value(&c).unwrap(), before);
         assert!(context.preview().contains("送信対象の往復番号"));
@@ -434,11 +783,18 @@ mod tests {
         let mut c = Conversation::new();
         c.draft = "意味を説明".into();
         c.exchanges = (0..8).map(exchange).collect();
-        for e in &mut c.exchanges { e.answer = "日本語\n\"\\".repeat(40); }
+        for e in &mut c.exchanges {
+            e.answer = "日本語\n\"\\".repeat(40);
+        }
         for limit in [150, 800, 1600, 64000] {
             let context = prepare_with_limit(&c, limit).unwrap();
             assert!(context.bytes <= limit);
-            for (pair, &index) in context.payload["conversation_history"].as_array().unwrap().iter().zip(&context.included_indices) {
+            for (pair, &index) in context.payload["conversation_history"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .zip(&context.included_indices)
+            {
                 assert_eq!(pair["user"], c.exchanges[index].question);
                 assert_eq!(pair["assistant"], c.exchanges[index].answer);
             }
@@ -450,14 +806,18 @@ mod tests {
         let mut c = Conversation::new();
         c.draft = "serendipityについて追加したい".into();
         c.exchanges = (0..8).map(exchange).collect();
-        let template = crate::model::parse_deck(crate::model::BUILTIN_DECK).unwrap().remove(0);
-        let mut entries: Vec<_> = (0..1000).map(|i| {
-            let mut e = template.clone();
-            e.id = format!("entry-{i}");
-            e.base = format!("unrelated{i}");
-            e.meaning = "意味".repeat(100);
-            e
-        }).collect();
+        let template = crate::model::parse_deck(crate::model::BUILTIN_DECK)
+            .unwrap()
+            .remove(0);
+        let mut entries: Vec<_> = (0..1000)
+            .map(|i| {
+                let mut e = template.clone();
+                e.id = format!("entry-{i}");
+                e.base = format!("unrelated{i}");
+                e.meaning = "意味".repeat(100);
+                e
+            })
+            .collect();
         entries[998].base = "serendipity".into();
         entries[999].base = "serendipity".into();
         let deleted = BTreeSet::from(["entry-999".to_owned()]);
@@ -465,9 +825,15 @@ mod tests {
         let catalog = context.payload["existing_entries"].as_array().unwrap();
         assert_eq!(catalog[0]["id"], "entry-998");
         assert!(catalog.iter().all(|e| e["id"] != "entry-999"));
-        assert_eq!(catalog.len() + context.payload["omitted_catalog"].as_u64().unwrap() as usize, 999);
+        assert_eq!(
+            catalog.len() + context.payload["omitted_catalog"].as_u64().unwrap() as usize,
+            999
+        );
         assert!(context.bytes <= CONTEXT_BYTES);
-        assert_eq!(context.bytes, serde_json::to_vec(&context.payload).unwrap().len());
+        assert_eq!(
+            context.bytes,
+            serde_json::to_vec(&context.payload).unwrap().len()
+        );
         assert!(context.preview().contains("entry-998"));
     }
 }

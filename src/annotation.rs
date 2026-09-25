@@ -1,4 +1,5 @@
-//! Fixed-layout English + ink. The texture shown to the user is the PNG sent to Codex.
+use crate::app::controls::UiControls as _;
+// Fixed-layout English + ink. The texture shown to the user is the PNG sent to Codex.
 use eframe::egui::{self, Color32, TextureHandle};
 use image::{Rgba, RgbaImage};
 
@@ -48,10 +49,22 @@ impl Annotation {
         let Some(texture) = &self.texture else {
             return;
         };
+        let texture_id = texture.id();
         let width = ui.available_width().min(1000.0);
         let size = egui::vec2(width, width * HEIGHT as f32 / WIDTH as f32);
-        let response = ui.add(egui::Image::new((texture.id(), size)).sense(egui::Sense::drag()));
         let mut changed = false;
+        ui.horizontal_wrapped(|ui| {
+            if ui.ww_button("一画戻す").clicked() {
+                self.strokes.pop();
+                changed = true;
+            }
+            if ui.ww_button("注釈だけ消す").clicked() {
+                self.strokes.clear();
+                changed = true;
+            }
+            ui.small("赤ペンで丸・矢印・取り消し線を書く。下の画像のまま送信する。");
+        });
+        let response = ui.add(egui::Image::new((texture_id, size)).sense(egui::Sense::drag()));
         if response.drag_started() {
             self.strokes.push(Vec::new());
         }
@@ -68,17 +81,6 @@ impl Annotation {
                 }
             }
         }
-        ui.horizontal(|ui| {
-            if ui.button("一画戻す").clicked() {
-                self.strokes.pop();
-                changed = true;
-            }
-            if ui.button("注釈だけ消す").clicked() {
-                self.strokes.clear();
-                changed = true;
-            }
-            ui.small("赤ペンで丸・矢印・取り消し線を書く。下の画像のまま送信する。");
-        });
         if changed {
             if let Err(error) = self.refresh(ui.ctx()) {
                 ui.colored_label(Color32::RED, error);
