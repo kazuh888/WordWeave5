@@ -1,5 +1,7 @@
 # 現在の状態（2026-09-25）
 
+- UI-INTEGRATION-001：利用者がPR作成・main統合を承認。統合先は [PR #2](https://github.com/kazuh888/WordWeave5/pull/2)、ブランチ `codex/study-records-ui`。記録画面だけでなく `fe69f8e` 以降の受入済みUI・チャット・添付改修全体を含む。添付送信許可・原本保持の独立監査でP1/P2なし。共通操作・通知復旧・再生設定・集計の重点確認でも追加修正なし。以下の「未マージ」は各記録時点の状態であり、統合後も履歴として保持する。CI・レビュー・マージの最新状態と確定SHAはPRの記録を正とする。結果記録だけでアプリCIを再発火させないため、以後の結果はPRへ集約する。残る既知事項は既存の未使用メソッド2件とActionsのNode.js 20廃止警告である。
+
 - STUDY-RECORDS-UI-001 受入・公開・CI完了：2026-09-25に「記録画面OK」の確認を受領。`a612242` を `codex/study-records-ui` へpushし、[Windows CI run 36144196741](https://github.com/kazuh888/WordWeave5/actions/runs/36144196741) の全対象テスト・releaseビルド成功（6分23秒）。ローカル全270テスト、標準80%の記録あり/なし、小画面160%の隔離描画も確認済み。集計の意味・保存データは変更なし。CI後の追補は本ファイルと計測文書のみで、アプリソース・CI構成は検証済みコミットと同一。mainへのマージ・PR作成は未実施。次の判断はmainへの統合である。ログと画像は `.context/compound-engineering/records-*`。
 - UI-PUBLISH-001 完了：以前の改修を `fe69f8e`（アプリ）・`d375c0d`（記録）の2コミットにして `codex/home-dashboard` へpushした。公開前の全268テスト・release成功。GitHub CI [run 36141201583](https://github.com/kazuh888/WordWeave5/actions/runs/36141201583) は `d375c0d` の全テスト・releaseに成功（6分44秒）。mainへのマージ・PR作成は未実施。Actions実行環境のNode.js 20廃止警告は残る。以下の履歴中「未コミット」は当時の状態であり、この2コミット以前の改修は公開済みである。
 
