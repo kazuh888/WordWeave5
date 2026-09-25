@@ -94,6 +94,21 @@ pub(crate) fn run() -> eframe::Result<()> {
                 }
                 app.chat_selected = 0;
             }
+            if args.iter().any(|s| s == "--records-filled") {
+                let today = chrono::Local::now().date_naive();
+                for (offset, seconds) in [360, 420, 0, 120, 480, 300, 0].into_iter().enumerate() {
+                    let date = (today - chrono::Duration::days(offset as i64)).to_string();
+                    app.progress.study_seconds.insert(date.clone(), seconds);
+                    for index in 0..seconds / 60 {
+                        app.progress.reviews.push(wordweave5::store::Review {
+                            key: format!("sample-{}:recall", index % 4),
+                            at: 0, date: date.clone(), grade: Grade::Good,
+                            assisted: false, method: "keyboard".into(), first: offset == 5,
+                            elapsed_days: 1.0, seconds: 60, self_assessed: true,
+                        });
+                    }
+                }
+            }
             if chat_filled {
                 let chat = &mut app.progress.chats[0];
                 chat.complete(

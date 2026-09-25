@@ -66,27 +66,8 @@ pub(super) fn primary(ui: &mut egui::Ui, text: impl Into<String>, enabled: bool)
     )
 }
 
-pub(super) fn metric(ui: &mut egui::Ui, label: &str, value: impl Into<String>, note: &str) {
-    ui.group(|ui| {
-        ui.set_max_width(ui.available_width().min(240.0));
-        ui.label(RichText::new(label).color(MUTED));
-        ui.label(RichText::new(value.into()).size(26.0).strong().color(INK));
-        if !note.is_empty() {
-            ui.small(note);
-        }
-    });
-}
-
 pub(super) fn duration(seconds: u64) -> String {
     format!("{}分{}秒", seconds / 60, seconds % 60)
-}
-
-pub(super) fn metric_group(ui: &mut egui::Ui, content: impl FnOnce(&mut egui::Ui)) {
-    if ui.available_width() < 700.0 {
-        ui.vertical(content);
-    } else {
-        ui.horizontal_wrapped(content);
-    }
 }
 
 #[cfg(test)]
