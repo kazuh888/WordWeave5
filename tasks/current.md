@@ -1,6 +1,6 @@
 # 現在の状態（2026-09-25）
 
-- STUDY-RECORDS-UI-001 利用者受入完了：2026-09-25に「記録画面OK」の確認を受領。ブランチ `codex/study-records-ui`（起点 `d375c0d`）。「学習の記録」を共通の文字サイズ・カードへ更新し、見出し/数値/説明の縦配置と3/2/1列切替を実装。集計の意味・保存データは変更なし。全270テストとreleaseビルド成功。隔離Windowsで標準80%の記録あり/なし、小画面160%の記録ありを描画確認。commit・pushと既存Windows CIの確認を実施する。mainへのマージ・PR作成は対象外。ログと画像は `.context/compound-engineering/records-*`。
+- STUDY-RECORDS-UI-001 受入・公開・CI完了：2026-09-25に「記録画面OK」の確認を受領。`a612242` を `codex/study-records-ui` へpushし、[Windows CI run 36144196741](https://github.com/kazuh888/WordWeave5/actions/runs/36144196741) の全対象テスト・releaseビルド成功（6分23秒）。ローカル全270テスト、標準80%の記録あり/なし、小画面160%の隔離描画も確認済み。集計の意味・保存データは変更なし。CI後の追補は本ファイルと計測文書のみで、アプリソース・CI構成は検証済みコミットと同一。mainへのマージ・PR作成は未実施。次の判断はmainへの統合である。ログと画像は `.context/compound-engineering/records-*`。
 - UI-PUBLISH-001 完了：以前の改修を `fe69f8e`（アプリ）・`d375c0d`（記録）の2コミットにして `codex/home-dashboard` へpushした。公開前の全268テスト・release成功。GitHub CI [run 36141201583](https://github.com/kazuh888/WordWeave5/actions/runs/36141201583) は `d375c0d` の全テスト・releaseに成功（6分44秒）。mainへのマージ・PR作成は未実施。Actions実行環境のNode.js 20廃止警告は残る。以下の履歴中「未コミット」は当時の状態であり、この2コミット以前の改修は公開済みである。
 
 - CHAT-MEDIA-FOLLOWUP-001 利用者受入完了：2026-09-25、ダイアログを縮めても幅が勝手に広がらないことを利用者が確認した。次はUI改修一式のcommit・pushと既存Windows CIのブランチ指定実行、その後に「学習の記録」画面の下書き実装を検証・仕上げる。今回の依頼はmainへのマージではない。
