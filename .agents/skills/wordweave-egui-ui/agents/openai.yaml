@@ -1,0 +1,4 @@
+interface:
+  display_name: "WordWeave egui UI"
+  short_description: "Build and verify WordWeave native egui layouts"
+  default_prompt: "Use $wordweave-egui-ui to refine this WordWeave screen and verify its native rendering."

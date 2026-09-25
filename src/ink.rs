@@ -1,3 +1,4 @@
+use crate::app::controls::UiControls as _;
 use eframe::egui::{self, Color32, Pos2, Sense, Stroke, Vec2};
 use image::{Rgb, RgbImage};
 
@@ -56,10 +57,10 @@ impl Ink {
             }
         }
         ui.horizontal(|ui| {
-            if ui.button("一画戻す").clicked() {
+            if ui.ww_button("一画戻す").clicked() {
                 self.strokes.pop();
             }
-            if ui.button("手書きを消す").clicked() {
+            if ui.ww_button("手書きを消す").clicked() {
                 self.clear();
             }
             ui.small("ペンで回答を書く。無料では見本と照合して自己評価できる。");

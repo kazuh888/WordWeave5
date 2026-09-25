@@ -14,7 +14,11 @@ pub const MAX_ASSET_BYTES: usize = 12 * 1024 * 1024;
 pub enum AssetKind {
     AudioWav,
     ImagePng,
+    ImageBmp,
+    ImageGif,
+    ImageJpeg,
     InkJson,
+    FileBlob,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -44,7 +48,11 @@ impl AssetRef {
             match self.kind {
                 AssetKind::AudioWav => "wav",
                 AssetKind::ImagePng => "png",
+                AssetKind::ImageBmp => "bmp",
+                AssetKind::ImageGif => "gif",
+                AssetKind::ImageJpeg => "jpg",
                 AssetKind::InkJson => "json",
+                AssetKind::FileBlob => "bin",
             }
         )
     }
@@ -55,10 +63,14 @@ fn check_format(kind: AssetKind, bytes: &[u8]) -> Result<(), String> {
         && bytes.len() <= MAX_ASSET_BYTES
         && match kind {
             AssetKind::ImagePng => bytes.starts_with(b"\x89PNG\r\n\x1a\n"),
+            AssetKind::ImageBmp => bytes.starts_with(b"BM"),
+            AssetKind::ImageGif => bytes.starts_with(b"GIF87a") || bytes.starts_with(b"GIF89a"),
+            AssetKind::ImageJpeg => bytes.starts_with(b"\xFF\xD8\xFF"),
             AssetKind::AudioWav => bytes.starts_with(b"RIFF") && bytes.get(8..12) == Some(b"WAVE"),
             AssetKind::InkJson => {
                 serde_json::from_slice::<serde_json::Value>(bytes).is_ok_and(|v| v.is_object())
             }
+            AssetKind::FileBlob => true,
         };
     if valid {
         Ok(())
@@ -160,7 +172,11 @@ impl AssetStore {
             let kind = match path.extension().and_then(|s| s.to_str()) {
                 Some("wav") => AssetKind::AudioWav,
                 Some("png") => AssetKind::ImagePng,
+                Some("bmp") => AssetKind::ImageBmp,
+                Some("gif") => AssetKind::ImageGif,
+                Some("jpg") => AssetKind::ImageJpeg,
                 Some("json") => AssetKind::InkJson,
+                Some("bin") => AssetKind::FileBlob,
                 _ => return Err("媒体フォルダーに未対応ファイルがあります。".into()),
             };
             let reference = AssetRef {
@@ -319,15 +335,58 @@ mod tests {
     }
 
     #[test]
+    fn file_blob_roundtrips_as_content_addressed_bin_and_appears_in_inventory() {
+        let f = Fixture::new();
+        let original = b"\0\xffarbitrary\r\nbytes";
+        let reference = f.store().put(AssetKind::FileBlob, original).unwrap();
+        assert_eq!(reference.kind, AssetKind::FileBlob);
+        assert_eq!(reference.bytes, original.len() as u64);
+        assert_eq!(reference.id, sha256(original).unwrap());
+        assert!(f
+            .0
+            .join("assets")
+            .join(format!("{}.bin", reference.id))
+            .exists());
+        assert_eq!(f.store().read(&reference).unwrap(), original);
+        assert_eq!(
+            f.store().put(AssetKind::FileBlob, original).unwrap(),
+            reference
+        );
+        assert_eq!(f.store().inventory().unwrap(), vec![reference.clone()]);
+
+        let destination = f.0.join("blob-backup");
+        f.store()
+            .export_to(&destination, &[reference.clone()])
+            .unwrap();
+        assert_eq!(
+            AssetStore::new(destination).read(&reference).unwrap(),
+            original
+        );
+
+        let path = f.0.join("assets").join(format!("{}.bin", reference.id));
+        let mut corrupted = original.to_vec();
+        corrupted[0] ^= 1;
+        fs::write(&path, &corrupted).unwrap();
+        assert!(f.store().read(&reference).is_err());
+        assert!(f.store().put(AssetKind::FileBlob, original).is_err());
+        assert_eq!(fs::read(path).unwrap(), corrupted);
+    }
+
+    #[test]
     fn rejects_wrong_format_and_oversize_without_creating_originals() {
         let f = Fixture::new();
         assert!(f.store().put(AssetKind::ImagePng, b"not png").is_err());
         assert!(f.store().put(AssetKind::AudioWav, b"RIFF1234AVI ").is_err());
         assert!(f.store().put(AssetKind::InkJson, b"not json").is_err());
         assert!(f.store().put(AssetKind::InkJson, b"[]").is_err());
+        assert!(f.store().put(AssetKind::FileBlob, b"").is_err());
         assert!(f
             .store()
             .put(AssetKind::ImagePng, &vec![0; MAX_ASSET_BYTES + 1])
+            .is_err());
+        assert!(f
+            .store()
+            .put(AssetKind::FileBlob, &vec![0; MAX_ASSET_BYTES + 1])
             .is_err());
         assert!(!f.0.join("assets").exists());
     }

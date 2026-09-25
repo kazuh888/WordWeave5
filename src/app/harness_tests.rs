@@ -1,17 +1,46 @@
 use super::*;
 
 #[test]
+fn context_base_style_keeps_dialog_text_readable() {
+    let (ctx, app, root) = fixture();
+    let style = ctx.style();
+    for (text_style, expected_size, expected_family) in [
+        (egui::TextStyle::Body, 19.0, "home_body"),
+        (egui::TextStyle::Small, 16.0, "home_body"),
+        (egui::TextStyle::Button, 18.0, "home_body"),
+        (egui::TextStyle::Heading, 24.0, "heading"),
+    ] {
+        let font = &style.text_styles[&text_style];
+        assert_eq!(font.size, expected_size);
+        assert_eq!(font.family, egui::FontFamily::Name(expected_family.into()));
+    }
+    drop(app);
+    std::fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
 fn restoring_trash_blocks_retry_attachment_without_losing_audio() {
     let (_, mut app, root) = fixture();
     let id = app.progress.chats[0].id.clone();
     app.progress.chats[0].deleted_at = Some(123);
-    app.progress.chats.push(wordweave5::chat::Conversation::new());
+    app.progress
+        .chats
+        .push(wordweave5::chat::Conversation::new());
     app.chat_selected = 1;
     let mut wav = Vec::new();
-    let mut writer = hound::WavWriter::new(std::io::Cursor::new(&mut wav), hound::WavSpec {
-        channels: 1, sample_rate: 16_000, bits_per_sample: 16, sample_format: hound::SampleFormat::Int,
-    }).unwrap();
-    for _ in 0..1600 { writer.write_sample(0_i16).unwrap(); }
+    let mut writer = hound::WavWriter::new(
+        std::io::Cursor::new(&mut wav),
+        hound::WavSpec {
+            channels: 1,
+            sample_rate: 16_000,
+            bits_per_sample: 16,
+            sample_format: hound::SampleFormat::Int,
+        },
+    )
+    .unwrap();
+    for _ in 0..1600 {
+        writer.write_sample(0_i16).unwrap();
+    }
     writer.finalize().unwrap();
     let before = serde_json::to_value(&app.progress).unwrap();
     app.save_chat_recording(&id, wav.clone());
@@ -31,8 +60,14 @@ fn restoring_trash_closes_editors_and_selects_an_active_conversation() {
     app.chat_context_open = true;
     app.chat_material_open = true;
     app.chat_media_open = true;
+    app.pending_chat_rename = Some(("stale-chat".into(), "stale title".into()));
     app.restore(restored).unwrap();
-    assert!(!app.chat_context_open && !app.chat_material_open && !app.chat_media_open);
+    assert!(
+        !app.chat_context_open
+            && !app.chat_material_open
+            && !app.chat_media_open
+            && app.pending_chat_rename.is_none()
+    );
     assert_eq!(app.chat_selected, 1);
     // Even a stale window flag must not expose a deleted conversation's editor.
     app.chat_selected = 0;
@@ -41,7 +76,9 @@ fn restoring_trash_closes_editors_and_selects_an_active_conversation() {
     frame(&ctx, &mut app, false);
     let output = frame(&ctx, &mut app, false);
     let mut text = String::new();
-    for shape in output.shapes { shape_text(&shape.shape, &mut text); }
+    for shape in output.shapes {
+        shape_text(&shape.shape, &mut text);
+    }
     assert!(!text.contains("引き継ぎメモ：学習目的"), "{text}");
     assert_eq!(app.progress.chats[0].memo, "keep deleted context");
     drop(app);
@@ -71,12 +108,27 @@ fn effort_choices_are_only_from_the_current_cli_and_model() {
     app.progress.settings.codex_model = "server-model".into();
     app.progress.settings.codex_effort = "server-effort".into();
     assert!(app.effort_choices().is_none());
-    app.effort_catalog = Some((app.progress.settings.codex_path.clone(), vec![wordweave5::effort::ModelEffort {
-        model: "server-model".into(), display_name: "Server model".into(),
-        supported_efforts: Some(vec![wordweave5::effort::EffortOption { effort: "server-effort".into(), description: "From server".into() }]),
-        default_effort: None,
-    }]));
-    assert_eq!(app.effort_choices().unwrap().supported_efforts.as_ref().unwrap()[0].effort, "server-effort");
+    app.effort_catalog = Some((
+        app.progress.settings.codex_path.clone(),
+        vec![wordweave5::effort::ModelEffort {
+            model: "server-model".into(),
+            display_name: "Server model".into(),
+            supported_efforts: Some(vec![wordweave5::effort::EffortOption {
+                effort: "server-effort".into(),
+                description: "From server".into(),
+            }]),
+            default_effort: None,
+        }],
+    ));
+    assert_eq!(
+        app.effort_choices()
+            .unwrap()
+            .supported_efforts
+            .as_ref()
+            .unwrap()[0]
+            .effort,
+        "server-effort"
+    );
     app.progress.settings.codex_model = "another-model".into();
     assert!(app.effort_choices().is_none());
     app.progress.settings.codex_model = "server-model".into();
@@ -103,11 +155,16 @@ fn conversation_trash_roundtrip_preserves_drafts_and_learning_data() {
     frame(&ctx, &mut app, false);
     let output = frame(&ctx, &mut app, false);
     let mut text = String::new();
-    for shape in output.shapes { shape_text(&shape.shape, &mut text); }
+    for shape in output.shapes {
+        shape_text(&shape.shape, &mut text);
+    }
     assert!(text.contains("読み取り専用"), "{text}");
     app.set_conversation_deleted(&id, false).unwrap();
     assert_eq!(serde_json::to_value(&app.progress).unwrap(), before);
-    assert_eq!(serde_json::to_value(app.storage.as_ref().unwrap().load().unwrap()).unwrap(), before);
+    assert_eq!(
+        serde_json::to_value(app.storage.as_ref().unwrap().load().unwrap()).unwrap(),
+        before
+    );
     drop(app);
     std::fs::remove_dir_all(root).unwrap();
 }
@@ -271,23 +328,12 @@ fn unfrozen_annotation_text_survives_fatal_close_and_failed_export() {
         for shape in &output.shapes {
             shape_text(&shape.shape, &mut text);
         }
-        assert!(
-            text.contains("原文をTXTへ退避"),
-            "Recovery controls missing: {text}"
-        );
-        // Reach controls below the fold through the same scroll input as the UI.
-        let pointer = output
-            .shapes
-            .iter()
-            .find_map(|shape| match &shape.shape {
-                egui::epaint::Shape::Text(t) if t.galley.text().contains("原文をTXTへ退避") => {
-                    Some(t.pos + egui::vec2(5.0, 5.0))
-                }
-                _ => None,
-            })
-            .expect("visible recovery control position");
-        for _ in 0..5 {
-            if text.contains("未添付の注釈を破棄") {
+        // Larger dialog text may place recovery actions below the fold. Verify that the
+        // same scroll interaction as the UI reaches both export and discard actions.
+        let pointer = ctx.screen_rect().center();
+        for _ in 0..8 {
+            if text.contains("原文をTXTへ退避") && text.contains("未添付の注釈を破棄")
+            {
                 break;
             }
             let input = egui::RawInput {
@@ -310,6 +356,10 @@ fn unfrozen_annotation_text_survives_fatal_close_and_failed_export() {
                 shape_text(&shape.shape, &mut text);
             }
         }
+        assert!(
+            text.contains("原文をTXTへ退避"),
+            "Recovery export control unreachable after scrolling: {text}"
+        );
         assert!(
             text.contains("未添付の注釈を破棄"),
             "Discard controls unreachable after scrolling: {text}"
@@ -359,6 +409,382 @@ fn frozen_background_without_strokes_blocks_close_until_exported() {
         drop(app);
         std::fs::remove_dir_all(root).unwrap();
     }
+}
+
+#[test]
+fn closing_after_hiding_the_media_dialog_explains_why_exit_is_blocked() {
+    let (ctx, mut app, root) = fixture();
+    app.annotation.freeze_blank(&ctx).unwrap();
+    app.annotation.strokes = vec![vec![[0.1, 0.1], [0.2, 0.2]]];
+    let original = app.annotation.files().unwrap();
+    let audio = b"unsaved recording".to_vec();
+    app.unsaved_chat_audio = Some((app.progress.chats[0].id.clone(), audio.clone()));
+    app.chat_media_open = false;
+    let saved_progress = serde_json::to_value(&app.progress).unwrap();
+
+    let output = frame(&ctx, &mut app, true);
+    assert!(output.viewport_output[&egui::ViewportId::ROOT].commands.iter()
+        .any(|command| matches!(command, egui::ViewportCommand::CancelClose)));
+    assert!(app.chat_media_open && app.exit_media_requested);
+    let output = frame(&ctx, &mut app, false);
+    let mut labels = String::new();
+    for shape in &output.shapes {
+        shape_text(&shape.shape, &mut labels);
+    }
+    assert!(labels.contains("送信するメッセージに添付していない手書き・原文があります。"), "{labels}");
+    assert!(labels.contains("破棄して終了"), "{labels}");
+    assert!(labels.contains("作業を続ける"), "{labels}");
+    assert_eq!(app.annotation.files().unwrap(), original);
+    assert_eq!(app.unsaved_chat_audio.as_ref().unwrap().1, audio);
+    assert_eq!(serde_json::to_value(&app.progress).unwrap(), saved_progress);
+    drop(app);
+    std::fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
+fn explicit_exit_discard_clears_only_unsaved_media_and_requests_close() {
+    let (ctx, mut app, root) = fixture();
+    let id = app.progress.chats[0].id.clone();
+    let source = root.join("keep.txt");
+    std::fs::write(&source, "keep the draft attachment").unwrap();
+    app.attach_chat_file(&id, &source).unwrap();
+    app.progress.chats[0].draft = "保存した下書き".into();
+    app.storage.as_ref().unwrap().save(&app.progress).unwrap();
+    app.annotation.freeze_blank(&ctx).unwrap();
+    app.annotation.strokes = vec![vec![[0.1, 0.1]]];
+    app.unsaved_chat_audio = Some((id, b"unsaved".to_vec()));
+    app.exit_media_requested = true;
+    let saved_progress = serde_json::to_value(&app.progress).unwrap();
+
+    let output = ctx.run(egui::RawInput::default(), |ctx| {
+        app.discard_unsaved_media_and_exit(ctx);
+    });
+    assert!(output.viewport_output[&egui::ViewportId::ROOT].commands.iter()
+        .any(|command| matches!(command, egui::ViewportCommand::Close)));
+    assert!(!app.exit_media_requested && !app.chat_media_open);
+    assert!(!app.annotation.frozen() && app.unsaved_chat_audio.is_none());
+    assert_eq!(serde_json::to_value(&app.progress).unwrap(), saved_progress);
+    assert_eq!(serde_json::to_value(app.storage.as_ref().unwrap().load().unwrap()).unwrap(), saved_progress);
+    drop(app);
+    std::fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
+fn clicking_the_exit_warning_discards_unsaved_media_but_keeps_the_saved_draft() {
+    let (ctx, mut app, root) = fixture();
+    app.page = Page::Chat;
+    app.progress.chats[0].draft = "残す下書き".into();
+    let saved_progress = serde_json::to_value(&app.progress).unwrap();
+    app.annotation.freeze_blank(&ctx).unwrap();
+    app.unsaved_chat_audio = Some((app.progress.chats[0].id.clone(), b"unsaved".to_vec()));
+    app.exit_media_requested = true;
+    app.chat_media_open = true;
+
+    frame(&ctx, &mut app, false);
+    let output = frame(&ctx, &mut app, false);
+    fn label_center(shape: &egui::epaint::Shape, label: &str) -> Option<egui::Pos2> {
+        match shape {
+            egui::epaint::Shape::Text(text) if text.galley.text() == label =>
+                Some(text.pos + text.galley.size() * 0.5),
+            egui::epaint::Shape::Vec(shapes) =>
+                shapes.iter().find_map(|shape| label_center(shape, label)),
+            _ => None,
+        }
+    }
+    let position = output.shapes.iter()
+        .find_map(|shape| label_center(&shape.shape, "破棄して終了"))
+        .expect("visible exit choice");
+    let click = |app: &mut WordApp, pressed| ctx.run(egui::RawInput {
+        screen_rect: Some(egui::Rect::from_min_size(
+            egui::Pos2::ZERO, egui::vec2(1120.0, 850.0))),
+        events: vec![
+            egui::Event::PointerMoved(position),
+            egui::Event::PointerButton {
+                pos: position, button: egui::PointerButton::Primary, pressed,
+                modifiers: egui::Modifiers::NONE,
+            },
+        ],
+        ..Default::default()
+    }, |ctx| app.update_ui(ctx));
+    click(&mut app, true);
+    let output = click(&mut app, false);
+    assert!(output.viewport_output[&egui::ViewportId::ROOT].commands.iter()
+        .any(|command| matches!(command, egui::ViewportCommand::Close)));
+    assert!(!app.exit_media_requested && !app.chat_media_open);
+    assert!(!app.annotation.frozen() && app.unsaved_chat_audio.is_none());
+    assert_eq!(serde_json::to_value(&app.progress).unwrap(), saved_progress);
+    drop(app);
+    std::fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
+fn attached_table_can_resize_and_remove_only_the_selected_draft_attachment() {
+    let (ctx, mut app, root) = fixture();
+    let make_ref = |id: char, kind| wordweave5::assets::AssetRef {
+        id: id.to_string().repeat(64),
+        kind,
+        bytes: 16,
+    };
+    let file = make_ref('a', wordweave5::assets::AssetKind::FileBlob);
+    let audio = make_ref('b', wordweave5::assets::AssetKind::AudioWav);
+    app.progress.chats[0].draft = "保持する下書き".into();
+    app.progress.chats[0].draft_attachments = vec![
+        wordweave5::chat::Attachment {
+            original: file, image: None, background: None,
+            file_name: Some("notes.txt".into()), source_text: "notes.txt".into(),
+            transcript: None,
+        },
+        wordweave5::chat::Attachment {
+            original: audio, image: None, background: None,
+            file_name: Some("voice.wav".into()), source_text: "voice.wav".into(),
+            transcript: None,
+        },
+    ];
+    app.page = Page::Chat;
+    app.chat_media_open = true;
+    frame(&ctx, &mut app, false);
+    let output = frame(&ctx, &mut app, false);
+    let mut labels = String::new();
+    for shape in &output.shapes {
+        shape_text(&shape.shape, &mut labels);
+    }
+    assert!(labels.contains("notes.txt"), "{labels}");
+    assert!(labels.contains("確認・削除"), "{labels}");
+    assert!(labels.contains("添付を追加"), "{labels}");
+    let handle = ctx.data(|data| data.get_temp::<egui::Rect>(
+        egui::Id::new("chat-media-table-resize-handle")))
+        .expect("table resize handle");
+    let start = handle.center();
+    let end = start + egui::vec2(0.0, 52.0);
+    let initial_height = app.chat_media_table_height;
+    let input = |events| egui::RawInput {
+        screen_rect: Some(egui::Rect::from_min_size(
+            egui::Pos2::ZERO, egui::vec2(1120.0, 850.0))),
+        events,
+        ..Default::default()
+    };
+    let _ = ctx.run(input(vec![
+        egui::Event::PointerMoved(start),
+        egui::Event::PointerButton {
+            pos: start, button: egui::PointerButton::Primary, pressed: true,
+            modifiers: egui::Modifiers::NONE,
+        },
+    ]), |ctx| app.update_ui(ctx));
+    let _ = ctx.run(input(vec![egui::Event::PointerMoved(end)]), |ctx| app.update_ui(ctx));
+    let next = end + egui::vec2(0.0, 15.0);
+    let _ = ctx.run(input(vec![egui::Event::PointerMoved(next)]), |ctx| app.update_ui(ctx));
+    let _ = ctx.run(input(vec![egui::Event::PointerButton {
+        pos: next, button: egui::PointerButton::Primary, pressed: false,
+        modifiers: egui::Modifiers::NONE,
+    }]), |ctx| app.update_ui(ctx));
+    assert!((app.chat_media_table_height - (initial_height + 67.0)).abs() < 4.0,
+        "divider should follow each pointer movement without a cumulative jump");
+
+    fn label_center(shape: &egui::epaint::Shape, label: &str) -> Option<egui::Pos2> {
+        match shape {
+            egui::epaint::Shape::Text(text) if text.galley.text() == label =>
+                Some(text.pos + text.galley.size() * 0.5),
+            egui::epaint::Shape::Vec(shapes) =>
+                shapes.iter().find_map(|shape| label_center(shape, label)),
+            _ => None,
+        }
+    }
+    let output = frame(&ctx, &mut app, false);
+    let delete = output.shapes.iter()
+        .find_map(|shape| label_center(&shape.shape, "添付から削除"))
+        .expect("visible delete action in first table row");
+    let _ = ctx.run(input(vec![
+        egui::Event::PointerMoved(delete),
+        egui::Event::PointerButton {
+            pos: delete, button: egui::PointerButton::Primary, pressed: true,
+            modifiers: egui::Modifiers::NONE,
+        },
+    ]), |ctx| app.update_ui(ctx));
+    let _ = ctx.run(input(vec![egui::Event::PointerButton {
+        pos: delete, button: egui::PointerButton::Primary, pressed: false,
+        modifiers: egui::Modifiers::NONE,
+    }]), |ctx| app.update_ui(ctx));
+    assert_eq!(app.progress.chats[0].draft, "保持する下書き");
+    assert_eq!(app.progress.chats[0].draft_attachments.len(), 1);
+    assert_eq!(app.progress.chats[0].draft_attachments[0].file_name.as_deref(),
+        Some("voice.wav"));
+    assert_eq!(app.storage.as_ref().unwrap().load().unwrap().chats[0]
+        .draft_attachments.len(), 1);
+    drop(app);
+    std::fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
+fn attachment_previews_stay_in_front_of_the_media_dialog() {
+    let (ctx, mut app, root) = fixture();
+    app.page = Page::Chat;
+    app.chat_media_open = true;
+    let media_id = egui::Id::new("ファイル・音声・手書きを添付");
+    for (preview_id, file) in [
+        ("添付ファイル：notes.txt", true),
+        ("保存された画像（送信時の固定版）", false),
+    ] {
+        if file {
+            app.file_preview = Some(("notes.txt".into(), "Preview text.".into(), false));
+        } else {
+            app.file_preview = None;
+            app.preview_pixels = Some(("test-image".into(),
+                egui::ColorImage::new([8, 8], egui::Color32::LIGHT_BLUE)));
+        }
+        frame(&ctx, &mut app, false);
+        frame(&ctx, &mut app, false);
+        let preview_id = egui::Id::new(preview_id);
+        let (media, preview) = ctx.memory(|memory| (
+            memory.area_rect(media_id).unwrap(), memory.area_rect(preview_id).unwrap()));
+        let overlap = media.intersect(preview);
+        assert!(overlap.width() > 20.0 && overlap.height() > 20.0,
+            "the two windows should overlap for this test: {media:?} {preview:?}");
+        assert_eq!(ctx.layer_id_at(overlap.center()),
+            Some(egui::LayerId::new(egui::Order::Foreground, preview_id)));
+    }
+    drop(app);
+    std::fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
+fn attachment_table_does_not_force_a_narrow_dialog_wider() {
+    for (zoom, count, exit_warning, solid_scroll) in [
+        (0.8, 0, false, false), (1.0, 3, false, false),
+        (1.6, 18, false, true), (1.0, 3, true, false),
+    ] {
+        let (ctx, mut app, root) = fixture();
+        ctx.set_zoom_factor(zoom);
+        if solid_scroll {
+            ctx.style_mut(|style| style.spacing.scroll = egui::style::ScrollStyle::solid());
+        }
+        let make_ref = |id: char, kind| wordweave5::assets::AssetRef {
+            id: id.to_string().repeat(64), kind, bytes: 16,
+        };
+        let image = make_ref('a', wordweave5::assets::AssetKind::ImagePng);
+        let audio = make_ref('b', wordweave5::assets::AssetKind::AudioWav);
+        let file = make_ref('c', wordweave5::assets::AssetKind::FileBlob);
+        let samples = [
+            wordweave5::chat::Attachment { original: image.clone(), image: Some(image),
+                background: None, file_name: Some("sample.png".into()),
+                source_text: String::new(), transcript: None },
+            wordweave5::chat::Attachment { original: audio, image: None,
+                background: None, file_name: Some("voice.wav".into()),
+                source_text: String::new(), transcript: None },
+            wordweave5::chat::Attachment { original: file, image: None,
+                background: None, file_name: Some("notes.txt".into()),
+                source_text: String::new(), transcript: None },
+        ];
+        app.progress.chats[0].draft_attachments = samples.iter().cycle().take(count).cloned().collect();
+        app.page = Page::Chat;
+        app.chat_media_open = true;
+        app.exit_media_requested = exit_warning;
+        if exit_warning { app.annotation.text = "Unsaved original.".into(); }
+        let run = |app: &mut WordApp, events| {
+            let _ = ctx.run(egui::RawInput {
+                screen_rect: Some(egui::Rect::from_min_size(
+                    egui::Pos2::ZERO, egui::vec2(1400.0, 1000.0))),
+                events,
+                ..Default::default()
+            }, |ctx| app.update_ui(ctx));
+            ctx.memory(|memory| memory.area_rect(
+                egui::Id::new("ファイル・音声・手書きを添付")).unwrap())
+        };
+        for _ in 0..5 { run(&mut app, vec![]); }
+        for distance in [140.0, 160.0, 140.0] {
+            let initial = run(&mut app, vec![]);
+            let start = initial.right_center() - egui::vec2(1.0, 0.0);
+            run(&mut app, vec![egui::Event::PointerMoved(start)]);
+            run(&mut app, vec![egui::Event::PointerButton {
+                pos: start, button: egui::PointerButton::Primary, pressed: true,
+                modifiers: egui::Modifiers::NONE,
+            }]);
+            let end = start - egui::vec2(distance, 0.0);
+            run(&mut app, vec![egui::Event::PointerMoved(end)]);
+            let released = run(&mut app, vec![egui::Event::PointerButton {
+                pos: end, button: egui::PointerButton::Primary, pressed: false,
+                modifiers: egui::Modifiers::NONE,
+            }]);
+            assert!(released.width() < initial.width() - distance * 0.5,
+                "the test must actually shrink the window: {initial:?} -> {released:?}");
+            let mut widths = Vec::new();
+            for _ in 0..60 {
+                widths.push(run(&mut app, vec![]).width());
+            }
+            assert!(widths.iter().all(|width| (*width - released.width()).abs() <= 1.0),
+                "dialog width must stay at the user's resized width while idle: released={} idle={widths:?}",
+                released.width());
+        }
+        drop(app);
+        std::fs::remove_dir_all(root).unwrap();
+    }
+}
+
+#[test]
+fn annotation_discard_modal_cancels_without_loss_and_confirms_only_on_ok() {
+    let (ctx, mut app, root) = fixture();
+    app.page = Page::Chat;
+    app.chat_media_open = true;
+    app.annotation.text = "Keep this English original.".into();
+    app.discard_annotation_confirm = true;
+    frame(&ctx, &mut app, false);
+    frame(&ctx, &mut app, false);
+    fn center(shape: &egui::epaint::Shape, label: &str) -> Option<egui::Pos2> {
+        match shape {
+            egui::epaint::Shape::Text(text) if text.galley.text() == label =>
+                Some(text.pos + text.galley.size() * 0.5),
+            egui::epaint::Shape::Vec(shapes) => shapes.iter()
+                .find_map(|shape| center(shape, label)),
+            _ => None,
+        }
+    }
+    let input = |events| egui::RawInput {
+        screen_rect: Some(egui::Rect::from_min_size(
+            egui::Pos2::ZERO, egui::vec2(1120.0, 850.0))),
+        events,
+        ..Default::default()
+    };
+    let click = |label: &str, app: &mut WordApp| {
+        let output = frame(&ctx, app, false);
+        let pos = output.shapes.iter().filter_map(|shape| center(&shape.shape, label))
+            .last().unwrap_or_else(|| panic!("modal action absent: {label}"));
+        let _ = ctx.run(input(vec![
+            egui::Event::PointerMoved(pos),
+            egui::Event::PointerButton { pos, button: egui::PointerButton::Primary,
+                pressed: true, modifiers: egui::Modifiers::NONE },
+        ]), |ctx| app.update_ui(ctx));
+        let _ = ctx.run(input(vec![
+            egui::Event::PointerButton { pos, button: egui::PointerButton::Primary,
+                pressed: false, modifiers: egui::Modifiers::NONE },
+        ]), |ctx| app.update_ui(ctx));
+    };
+    click("キャンセル", &mut app);
+    assert_eq!(app.annotation.text, "Keep this English original.");
+    assert!(!app.discard_annotation_confirm);
+    app.discard_annotation_confirm = true;
+    click("OK（破棄する）", &mut app);
+    assert!(app.annotation.text.is_empty());
+    assert!(!app.discard_annotation_confirm);
+    drop(app);
+    std::fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
+fn finishing_recovery_after_an_exit_request_closes_without_discarding_it() {
+    let (ctx, mut app, root) = fixture();
+    app.annotation.text = "Keep this sentence.".into();
+    app.annotation.freeze(&ctx).unwrap();
+    let original = app.annotation.files().unwrap();
+    app.exit_media_requested = true;
+    app.chat_media_open = true;
+    let dest = root.join("recovered-annotation");
+    app.export_chat_annotation(&dest).unwrap();
+    let output = frame(&ctx, &mut app, false);
+    assert!(output.viewport_output[&egui::ViewportId::ROOT].commands.iter()
+        .any(|command| matches!(command, egui::ViewportCommand::Close)));
+    assert_eq!(std::fs::read(dest.join("ink.json")).unwrap(), original.0);
+    assert!(!app.exit_media_requested && !app.chat_media_open);
+    drop(app);
+    std::fs::remove_dir_all(root).unwrap();
 }
 
 #[test]

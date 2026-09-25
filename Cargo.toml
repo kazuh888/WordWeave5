@@ -27,7 +27,7 @@ tts = "=0.26.1"
 windows = { version = "=0.56.0", features = ["Foundation", "Foundation_Collections", "Media_Core", "Media_Playback", "Media_SpeechSynthesis", "Storage_Streams", "Win32_System_Registry"] }
 cpal = "=0.15.3"
 hound = "=3.5.1"
-image = { version = "0.25", default-features = false, features = ["png"] }
+image = { version = "0.25", default-features = false, features = ["png", "bmp", "gif", "jpeg"] }
 base64 = "0.22"
 
 [profile.release]

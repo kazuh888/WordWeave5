@@ -2,7 +2,16 @@ use super::*;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub(super) enum Activity {
-    Study, Generate, Connection, Chat, Material, Playback, Recognition, Models, Recovery, Download,
+    Study,
+    Generate,
+    Connection,
+    Chat,
+    Material,
+    Playback,
+    Recognition,
+    Models,
+    Recovery,
+    Download,
 }
 
 impl Activity {
@@ -24,19 +33,34 @@ impl Activity {
 
 impl WordApp {
     pub(super) fn activity_label(&self) -> &'static str {
-        if let Some(pending) = &self.pending { pending.kind.label() }
-        else if self.recorder.is_some() { "録音中。音声・手書き入力から録音を操作できる" }
-        else if self.session.is_some() { "学習中。学習を終了するとチャットを送信できる" }
-        else if self.batch_running { "教材の一括生成中" }
-        else if self.fatal.is_some() { "保存を停止中。設定画面で退避・復旧を確認" }
-        else { "入力して送信できる" }
+        if let Some(pending) = &self.pending {
+            pending.kind.label()
+        } else if self.recorder.is_some() {
+            "録音中。音声・手書き入力から録音を操作できる"
+        } else if self.session.is_some() {
+            "学習中。学習を終了するとチャットを送信できる"
+        } else if self.batch_running {
+            "教材の一括生成中"
+        } else if self.fatal.is_some() {
+            "保存を停止中。設定画面で退避・復旧を確認"
+        } else {
+            "入力して送信できる"
+        }
     }
 
     pub(super) fn connection_label(&self) -> &'static str {
-        if self.pending.as_ref().is_some_and(|p| p.kind == Activity::Connection) {
+        if self
+            .pending
+            .as_ref()
+            .is_some_and(|p| p.kind == Activity::Connection)
+        {
             "接続テスト：確認中"
         } else {
-            match self.connection_check.as_ref().filter(|(path, _)| path == self.progress.settings.codex_path.trim()) {
+            match self
+                .connection_check
+                .as_ref()
+                .filter(|(path, _)| path == self.progress.settings.codex_path.trim())
+            {
                 Some((_, true)) => "接続テスト：前回成功（現在の接続を保証するものではない）",
                 Some((_, false)) => "接続テスト：前回失敗。設定と認証を確認して再試行",
                 None => "接続テスト：未確認",
@@ -47,8 +71,8 @@ impl WordApp {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use super::super::harness_tests::fixture;
+    use super::*;
     #[test]
     fn connection_status_does_not_infer_success_and_is_invalidated_by_path_change() {
         let (_, mut app, root) = fixture();
@@ -66,10 +90,16 @@ mod tests {
         let original = app.progress.settings.codex_path.trim().to_string();
         app.connection_check = Some((original.clone(), false));
         let (tx, rx) = mpsc::channel();
-        app.pending = Some(Pending { kind: Activity::Connection, key: app.key(), rx, cancel: None });
+        app.pending = Some(Pending {
+            kind: Activity::Connection,
+            key: app.key(),
+            rx,
+            cancel: None,
+        });
         assert!(app.connection_label().contains("確認中"));
         app.progress.settings.codex_path = "different-cli".into();
-        tx.send(Ok(AiResult::Connection("接続成功".into()))).unwrap();
+        tx.send(Ok(AiResult::Connection("接続成功".into())))
+            .unwrap();
         app.tick(&ctx);
         assert_eq!(app.connection_check, Some((original, true)));
         assert!(app.connection_label().contains("未確認"));

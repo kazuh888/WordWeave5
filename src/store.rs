@@ -28,6 +28,8 @@ pub struct Settings {
     pub slow_speech: bool,
     /// None preserves the old normal/slow selection until the user changes speed.
     pub speech_rate: Option<f64>,
+    pub speech_volume: f64,
+    pub speech_repeat: bool,
 }
 impl Default for Settings {
     fn default() -> Self {
@@ -41,11 +43,13 @@ impl Default for Settings {
             new_per_day: 3,
             skills: vec![Skill::Recall, Skill::Usage],
             topic: "すべて".into(),
-            font_scale: 1.0,
+            font_scale: 0.8,
             ai_daily_limit: 10,
             voice_id: String::new(),
             slow_speech: false,
             speech_rate: None,
+            speech_volume: 0.5,
+            speech_repeat: false,
         }
     }
 }
@@ -124,11 +128,27 @@ impl Default for Progress {
 impl Progress {
     /// Mutates only the deletion marker. Callers persist a clone before publishing it.
     pub fn set_chat_deleted(&mut self, id: &str, deleted: bool) -> Result<(), String> {
-        let index = self.chats.iter().position(|c| c.id == id).ok_or("会話が見つかりません。")?;
-        if self.chats[index].deleted_at.is_some() == deleted { return Ok(()); }
-        if deleted && (self.chat_action.as_ref().is_some_and(|(chat_id, _)| chat_id == id)
-            || self.material_draft.as_ref().is_some_and(|draft| draft.source.conversation_id == id)) {
-            return Err("この会話の教材操作・教材案を確定または取り消してから削除してください。".into());
+        let index = self
+            .chats
+            .iter()
+            .position(|c| c.id == id)
+            .ok_or("会話が見つかりません。")?;
+        if self.chats[index].deleted_at.is_some() == deleted {
+            return Ok(());
+        }
+        if deleted
+            && (self
+                .chat_action
+                .as_ref()
+                .is_some_and(|(chat_id, _)| chat_id == id)
+                || self
+                    .material_draft
+                    .as_ref()
+                    .is_some_and(|draft| draft.source.conversation_id == id))
+        {
+            return Err(
+                "この会話の教材操作・教材案を確定または取り消してから削除してください。".into(),
+            );
         }
         let previous = self.chats[index].deleted_at;
         self.chats[index].deleted_at = deleted.then(|| chrono::Utc::now().timestamp());
@@ -138,13 +158,25 @@ impl Progress {
         }
         Ok(())
     }
-    pub fn complete_chat(&mut self, id: &str, question: String, reply: crate::chat_action::ChatReply) -> Result<(), String> {
+    pub fn complete_chat(
+        &mut self,
+        id: &str,
+        question: String,
+        reply: crate::chat_action::ChatReply,
+    ) -> Result<(), String> {
         let mut next = self.clone();
-        let chat = next.chats.iter_mut().find(|c| c.id == id)
+        let chat = next
+            .chats
+            .iter_mut()
+            .find(|c| c.id == id)
             .ok_or("回答の保存先の会話が見つかりません。")?;
         chat.complete(question, reply.answer, reply.execution)?;
-        chat.title = reply.title;
-        next.chat_action = reply.action.filter(|a| a.operation != crate::chat_action::Operation::Organize)
+        if !chat.title_manual {
+            chat.title = reply.title;
+        }
+        next.chat_action = reply
+            .action
+            .filter(|a| a.operation != crate::chat_action::Operation::Organize)
             .map(|a| (id.to_owned(), a));
         next.validate()?;
         *self = next;
@@ -168,37 +200,67 @@ impl Progress {
         changed
     }
     pub fn validate(&self) -> Result<(), String> {
-        if self.settings.speech_rate.is_some_and(|rate| !rate.is_finite() || !(0.5..=4.0).contains(&rate))
+        if self
+            .settings
+            .speech_rate
+            .is_some_and(|rate| !rate.is_finite() || !(0.5..=4.0).contains(&rate))
+            || !self.settings.speech_volume.is_finite()
+            || !(0.0..=1.0).contains(&self.settings.speech_volume)
             || self.settings.codex_effort.len() > 64
-            || !self.settings.codex_effort.bytes().all(|c| c.is_ascii_alphanumeric() || c == b'-' || c == b'_') {
-            return Err("読み上げ速度またはeffortの設定値が不正です。".into());
+            || !self
+                .settings
+                .codex_effort
+                .bytes()
+                .all(|c| c.is_ascii_alphanumeric() || c == b'-' || c == b'_')
+        {
+            return Err("読み上げ速度・音量またはeffortの設定値が不正です。".into());
         }
-        if let Some(draft)=&self.material_draft { draft.validate_evidence()?; }
-        for source in &self.material_sources { source.validate()?; }
+        if let Some(draft) = &self.material_draft {
+            draft.validate_evidence()?;
+        }
+        for source in &self.material_sources {
+            source.validate()?;
+        }
         // An editable proposal may be incomplete; validate it only at commit.
-        if serde_json::to_vec(&self.material_draft).map_err(|e| e.to_string())?.len() > 4_000_000
-            || self.material_sources.len() > 10000 {
+        if serde_json::to_vec(&self.material_draft)
+            .map_err(|e| e.to_string())?
+            .len()
+            > 4_000_000
+            || self.material_sources.len() > 10000
+        {
             return Err("教材案または会話参照の保存上限を超えました。".into());
         }
         if self.chats.iter().filter(|c| c.deleted_at.is_none()).count() > crate::chat::MAX_CHATS {
-            return Err("通常のチャットは50件までです。不要な会話をごみ箱へ移動してください。".into());
+            return Err(
+                "通常のチャットは50件までです。不要な会話をごみ箱へ移動してください。".into(),
+            );
         }
-        if self.chats.iter().filter(|c| c.deleted_at.is_some()).count() > crate::chat::MAX_TRASH_CHATS {
+        if self.chats.iter().filter(|c| c.deleted_at.is_some()).count()
+            > crate::chat::MAX_TRASH_CHATS
+        {
             return Err("チャットごみ箱は500件までです。原本保護のため自動削除せず、この操作を停止しました。".into());
         }
         let mut chat_ids = BTreeSet::new();
         for chat in &self.chats {
             chat.validate()?;
-            if !chat_ids.insert(&chat.id) { return Err("会話IDが重複しています。".into()); }
+            if !chat_ids.insert(&chat.id) {
+                return Err("会話IDが重複しています。".into());
+            }
         }
         if let Some((id, action)) = &self.chat_action {
-            if !chat_ids.contains(id) || action.base.chars().count() > 200
+            if !chat_ids.contains(id)
+                || action.base.chars().count() > 200
                 || action.base.chars().any(char::is_control)
-                || action.entry_id.as_ref().is_some_and(|s| s.len() > 1000) {
+                || action.entry_id.as_ref().is_some_and(|s| s.len() > 1000)
+            {
                 return Err("保存されたチャット操作が不正です。".into());
             }
         }
-        if serde_json::to_vec(&self.chats).map_err(|e| e.to_string())?.len() > 20_000_000 {
+        if serde_json::to_vec(&self.chats)
+            .map_err(|e| e.to_string())?
+            .len()
+            > 20_000_000
+        {
             return Err("チャットの合計が20MBを超えています。".into());
         }
         if self.version != 1 {
@@ -211,7 +273,7 @@ impl Progress {
             || !(1..=3000).contains(&self.settings.batch_words)
             || self.settings.skills.is_empty()
             || self.settings.ai_daily_limit > 1000
-            || !(0.8..=1.6).contains(&self.settings.font_scale)
+            || !(0.5..=1.6).contains(&self.settings.font_scale)
         {
             return Err("設定値が範囲外です。".into());
         }
@@ -326,7 +388,11 @@ impl Storage {
         self.save_with_limit(p, crate::commit::PROGRESS_LIMIT)
     }
     fn save_with_limit(&self, p: &Progress, limit: u64) -> Result<(), String> {
-        if crate::commit::pending(&self.dir) { return Err("教材の保存途中です。ほかの記録を上書きせず再起動して復旧してください。".into()); }
+        if crate::commit::pending(&self.dir) {
+            return Err(
+                "教材の保存途中です。ほかの記録を上書きせず再起動して復旧してください。".into(),
+            );
+        }
         p.validate()?;
         let bytes = serde_json::to_vec_pretty(p).map_err(|e| e.to_string())?;
         if bytes.len() as u64 > limit {
@@ -383,14 +449,38 @@ mod tests {
         p.chats.push(chat);
         let before = serde_json::to_value(&p).unwrap();
         let reply = crate::chat_action::ChatReply {
-            answer: "追加案を確認してください".into(), title: "追加".into(),
-            execution: Default::default(), action: Some(crate::chat_action::Action {
-                operation: crate::chat_action::Operation::Append, base: "make".into(),
+            answer: "追加案を確認してください".into(),
+            title: "追加".into(),
+            execution: Default::default(),
+            action: Some(crate::chat_action::Action {
+                operation: crate::chat_action::Operation::Append,
+                base: "make".into(),
                 entry_id: Some("x".repeat(1001)),
             }),
         };
         assert!(p.complete_chat(&id, "追加して".into(), reply).is_err());
         assert_eq!(serde_json::to_value(&p).unwrap(), before);
+    }
+    #[test]
+    fn completed_reply_does_not_replace_a_learner_edited_chat_title() {
+        let mut p = Progress::default();
+        let mut chat = crate::chat::Conversation::new();
+        chat.rename("自分で付けたタイトル").unwrap();
+        let id = chat.id.clone();
+        p.chats.push(chat);
+        p.complete_chat(
+            &id,
+            "question".into(),
+            crate::chat_action::ChatReply {
+                answer: "answer".into(),
+                title: "AIが提案したタイトル".into(),
+                execution: Default::default(),
+                action: None,
+            },
+        )
+        .unwrap();
+        assert_eq!(p.chats[0].title, "自分で付けたタイトル");
+        assert!(p.chats[0].title_manual);
     }
     #[test]
     fn progress_roundtrip_and_observed_retention() {
@@ -435,6 +525,8 @@ mod tests {
             "codex_model",
             "examples_per_word",
             "batch_words",
+            "speech_volume",
+            "speech_repeat",
         ] {
             settings.remove(name);
         }
@@ -447,8 +539,19 @@ mod tests {
         assert_eq!(legacy.settings.codex_path, "codex");
         assert_eq!(legacy.settings.examples_per_word, 6);
         assert!(legacy.settings.codex_model.is_empty());
+        assert_eq!(legacy.settings.speech_volume, 0.5);
+        assert!(!legacy.settings.speech_repeat);
         assert!(migrated.writing_logs.is_empty());
         assert_eq!(migrated.memories["x:recall"].reviews, 2);
+    }
+    #[test]
+    fn playback_volume_validation_rejects_non_finite_and_out_of_range_values() {
+        for volume in [-0.01, 1.01, f64::NAN, f64::INFINITY] {
+            let mut progress = Progress::default();
+            progress.settings.speech_volume = volume;
+            assert!(progress.validate().is_err(), "accepted volume {volume}");
+        }
+        assert_eq!(Progress::default().settings.speech_volume, 0.5);
     }
     #[test]
     fn edited_content_resets_only_that_word() {
@@ -527,7 +630,9 @@ mod tests {
         assert_eq!(fs::read(dir.join("progress.json")).unwrap(), expected);
         assert_eq!(storage.load().unwrap().settings.topic, next.settings.topic);
         let backups: Vec<_> = fs::read_dir(dir.join("backups"))
-            .unwrap().map(|entry| entry.unwrap().path()).collect();
+            .unwrap()
+            .map(|entry| entry.unwrap().path())
+            .collect();
         assert_eq!(backups.len(), 1);
         assert_eq!(fs::read(&backups[0]).unwrap(), original_bytes);
         drop(storage);
@@ -535,16 +640,26 @@ mod tests {
     }
     #[test]
     fn chat_history_draft_and_reported_settings_survive_storage_reopen() {
-        let dir = std::env::temp_dir().join(format!("wordweave-chat-{}-{}",
-            std::process::id(), chrono::Utc::now().timestamp_nanos_opt().unwrap()));
+        let dir = std::env::temp_dir().join(format!(
+            "wordweave-chat-{}-{}",
+            std::process::id(),
+            chrono::Utc::now().timestamp_nanos_opt().unwrap()
+        ));
         let s = Storage::at(dir.clone()).unwrap();
         let mut p = Progress::default();
         let mut chat = crate::chat::Conversation::new();
         chat.memo = "社外メール用".into();
         chat.draft = "最初の質問".into();
-        chat.complete("最初の質問".into(), "回答".into(), crate::execution::Execution {
-            model: Some("test-model".into()), effort: None, at: 123,
-        }).unwrap();
+        chat.complete(
+            "最初の質問".into(),
+            "回答".into(),
+            crate::execution::Execution {
+                model: Some("test-model".into()),
+                effort: None,
+                at: 123,
+            },
+        )
+        .unwrap();
         chat.exchanges[0].pinned = true;
         chat.draft = "次の質問".into();
         p.chats.push(chat);
@@ -557,7 +672,10 @@ mod tests {
         assert_eq!(chat.memo, "社外メール用");
         assert!(chat.exchanges[0].pinned);
         assert_eq!(chat.exchanges[0].execution.effort, None);
-        assert_eq!(chat.exchanges[0].execution.model.as_deref(), Some("test-model"));
+        assert_eq!(
+            chat.exchanges[0].execution.model.as_deref(),
+            Some("test-model")
+        );
         assert_eq!(crate::chat::prepare(chat).unwrap().included, 1);
         drop(reopened);
         fs::remove_dir_all(dir).unwrap();
