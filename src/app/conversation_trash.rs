@@ -134,7 +134,7 @@ impl WordApp {
                 match self.set_conversation_deleted(&id, true) {
                     Ok(()) => self.pending_chat_delete = None,
                     Err(error) => {
-                        self.message = error;
+                        self.notify_error(error);
                         self.pending_chat_delete = None;
                     }
                 }
@@ -183,7 +183,7 @@ impl WordApp {
         self.conversation_trash_open = open;
         if let Some(id) = restore {
             if let Err(error) = self.set_conversation_deleted(&id, false) {
-                self.message = error;
+                self.notify_error(error);
             }
         }
 

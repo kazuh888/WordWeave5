@@ -286,7 +286,7 @@ pub(crate) fn run() -> eframe::Result<()> {
             }
             if path_error || path_guidance {
                 app.message = "指定したCodex実行ファイルがありません。設定で実在するファイルを選ぶか、実行ファイル欄をcodexに変更してPATHから自動検出してください。".into();
-                app.last_notification_message = app.message.clone();
+                app.last_notification_alerts[1] = app.message.clone();
             }
             if path_guidance {
                 app.open_codex_path_guidance();

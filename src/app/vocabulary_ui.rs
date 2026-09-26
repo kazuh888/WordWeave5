@@ -437,7 +437,7 @@ impl WordApp {
                 Ok(words)
             }) {
                 Ok(words) => self.begin_batch(words),
-                Err(error) => self.message = error,
+                Err(error) => self.notify_error(error),
             }
         }
     }
@@ -470,7 +470,7 @@ impl WordApp {
             {
                 if let Err(error) = read_limited(&path, 64_000_000)
                     .and_then(|text| self.prepare_vocabulary_file(&text)) {
-                    self.message = error;
+                    self.notify_error(error);
                 }
             }
         }

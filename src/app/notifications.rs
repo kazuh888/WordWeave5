@@ -16,6 +16,41 @@ fn missing_codex_path(message: &str) -> bool {
 }
 
 impl WordApp {
+    pub(super) fn notify_error(&mut self, message: String) {
+        self.message = message;
+        self.notification_error = self.message.clone();
+        self.notification_attention.clear();
+        self.last_notification_alerts[1].clear();
+    }
+
+    pub(super) fn notify_warning(&mut self, message: impl Into<String>) {
+        self.notify_attention(message);
+    }
+
+    pub(super) fn notify_blocked(&mut self, message: impl Into<String>) {
+        self.notify_attention(message);
+    }
+
+    // Warnings and unfulfilled requests require attention, but are not red errors.
+    fn notify_attention(&mut self, message: impl Into<String>) {
+        self.message = message.into();
+        self.notification_attention = self.message.clone();
+        self.notification_error.clear();
+        // A fresh request may be refused for the same reason as a dismissed one.
+        self.last_notification_alerts[1].clear();
+    }
+
+    pub(super) fn notify_result(&mut self, result: Result<String, String>) {
+        match result {
+            Ok(message) => {
+                self.message = message;
+                self.notification_error.clear();
+                self.notification_attention.clear();
+            }
+            Err(error) => self.notify_error(error),
+        }
+    }
+
     fn notification_is_error(&self) -> bool {
         self.fatal.is_some()
             || missing_codex_path(&self.message)
@@ -26,7 +61,6 @@ impl WordApp {
         self.codex_path_guidance = true;
         self.codex_path_focus_pending = true;
         self.notification_open = false;
-        self.last_notification_message = self.message.clone();
     }
 
     pub(super) fn notification_button(&mut self, ui: &mut egui::Ui) {
@@ -75,13 +109,24 @@ impl WordApp {
     }
 
     pub(super) fn notification_window(&mut self, ctx: &egui::Context) {
-        if self.pending.is_none()
-            && !self.batch_running
-            && self.message != self.last_notification_message
-        {
-            self.last_notification_message = self.message.clone();
-            if !self.message.is_empty() {
-                self.notification_open = true;
+        // Explicit failures, warnings and unfulfilled requests interrupt. Results remain
+        // available through the status button, without reopening a dismissed alert.
+        let alerts = [
+            self.fatal.as_deref().unwrap_or_default(),
+            if missing_codex_path(&self.message)
+                || (!self.message.is_empty() && (self.message == self.notification_error
+                    || self.message == self.notification_attention)) {
+                self.message.as_str()
+            } else { "" },
+            self.font_notice.as_str(),
+        ];
+        if self.pending.is_none() && !self.batch_running {
+            // Removing a warning (e.g. by copying text) is not a new alert.
+            for (alert, seen) in alerts.into_iter().zip(&mut self.last_notification_alerts) {
+                if alert != seen {
+                    if !alert.is_empty() { self.notification_open = true; }
+                    *seen = alert.to_owned();
+                }
             }
         }
         if !self.notification_open {
@@ -247,6 +292,119 @@ impl WordApp {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn generation_limit_opens_notice_on_each_attempt_without_consuming_quota() {
+        let (ctx, mut app, root) = super::super::harness_tests::fixture();
+        app.progress.settings.ai_daily_limit = 1;
+        app.progress.ai_calls.insert(today(), 1);
+        let before = serde_json::to_value(&app.progress).unwrap();
+        for _ in 0..2 {
+            assert!(!app.reserve_generation());
+            assert!(app.message.contains("本日の生成上限"));
+            let _ = ctx.run(egui::RawInput::default(), |ctx| app.notification_window(ctx));
+            assert!(app.notification_open, "a rejected request must explain why");
+            assert!(!app.notification_is_error(), "a quota limit is not an error");
+            app.notification_open = false;
+            let _ = ctx.run(egui::RawInput::default(), |ctx| app.notification_window(ctx));
+            assert!(!app.notification_open, "dismissal lasts until another attempt");
+        }
+        assert_eq!(serde_json::to_value(&app.progress).unwrap(), before);
+        assert!(app.pending.is_none());
+        app.message = "発言をコピーした。".into();
+        let _ = ctx.run(egui::RawInput::default(), |ctx| app.notification_window(ctx));
+        assert!(!app.notification_open);
+        drop(app);
+        std::fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn no_generation_targets_opens_notice_without_starting_work() {
+        let (ctx, mut app, root) = super::super::harness_tests::fixture();
+        app.begin_batch(vec![]);
+        assert!(app.message.contains("すべて自動生成・登録済み"));
+        let _ = ctx.run(egui::RawInput::default(), |ctx| app.notification_window(ctx));
+        assert!(app.notification_open);
+        assert!(!app.batch_running && app.pending.is_none());
+        assert!(!app.notification_is_error());
+        drop(app);
+        std::fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn notification_information_does_not_open_but_errors_do() {
+        let (ctx, mut app, root) = super::super::harness_tests::fixture();
+        for message in ["発言をクリップボードへコピーした。", "設定を保存した。", "接続成功"] {
+            app.message = message.into();
+            let _ = ctx.run(egui::RawInput::default(), |ctx| app.notification_window(ctx));
+            assert!(!app.notification_open, "information must not interrupt: {message}");
+        }
+        app.message = "接続に失敗した。".into();
+        app.notification_error = app.message.clone();
+        let _ = ctx.run(egui::RawInput::default(), |ctx| app.notification_window(ctx));
+        assert!(app.notification_open);
+        app.notification_open = false;
+        let _ = ctx.run(egui::RawInput::default(), |ctx| app.notification_window(ctx));
+        assert!(!app.notification_open, "dismissed alert must stay dismissed");
+        app.notify_error("接続に失敗した。".into());
+        let _ = ctx.run(egui::RawInput::default(), |ctx| app.notification_window(ctx));
+        assert!(app.notification_open, "a new failure must reopen even with the same text");
+        app.notification_open = false;
+        app.notify_warning("実行記録の一部を読み込めなかった。");
+        let _ = ctx.run(egui::RawInput::default(), |ctx| app.notification_window(ctx));
+        assert!(app.notification_open);
+        assert!(!app.notification_is_error());
+        app.notification_open = false;
+        let _ = ctx.run(egui::RawInput::default(), |ctx| app.notification_window(ctx));
+        assert!(!app.notification_open);
+        // Informational details remain available when explicitly opened.
+        app.message = "発言をクリップボードへコピーした。".into();
+        app.notification_open = true;
+        let _ = ctx.run(egui::RawInput::default(), |ctx| app.notification_window(ctx));
+        assert!(app.notification_open);
+        drop(app);
+        std::fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn notification_failure_warning_and_fatal_are_not_lost_or_reopened_by_copy() {
+        let (ctx, mut app, root) = super::super::harness_tests::fixture();
+        let frame = |app: &mut WordApp| {
+            let _ = ctx.run(egui::RawInput::default(), |ctx| app.notification_window(ctx));
+        };
+        app.notify_result(Err("保存に失敗した。".into()));
+        app.batch_running = true;
+        frame(&mut app);
+        assert!(!app.notification_open, "defer alerts while work is active");
+        app.batch_running = false;
+        frame(&mut app);
+        assert!(app.notification_open && app.notification_is_error());
+        app.notification_open = false;
+        app.notify_result(Ok("保存した。".into()));
+        frame(&mut app);
+        assert!(!app.notification_open);
+        app.notify_warning("録音の一部だけを保持した。");
+        frame(&mut app);
+        assert!(app.notification_open);
+        app.notification_open = false;
+        app.fatal = Some("保存先を開けない。".into());
+        frame(&mut app);
+        assert!(app.notification_open);
+        app.notification_open = false;
+        app.message = "発言をコピーした。".into();
+        frame(&mut app);
+        assert!(!app.notification_open, "a copy must not reopen the same fatal alert");
+        app.fatal = None;
+        app.font_notice = "フォントを代替した。".into();
+        frame(&mut app);
+        assert!(app.notification_open);
+        app.notification_open = false;
+        app.message = "別の発言をコピーした。".into();
+        frame(&mut app);
+        assert!(!app.notification_open);
+        drop(app);
+        std::fs::remove_dir_all(root).unwrap();
+    }
 
     #[test]
     fn notification_glyphs_align_with_status_row() {

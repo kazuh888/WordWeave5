@@ -16,7 +16,8 @@ mod result_tests {
             app.finish();
             assert!(app.session.is_none());
             assert!(app.session_summary.is_some());
-            assert_eq!(app.message, app.last_notification_message);
+            let _ = ctx.run(egui::RawInput::default(), |ctx| app.notification_window(ctx));
+            assert!(!app.notification_open, "学習終了の情報だけでは通知を自動表示しない");
             let records = serde_json::to_value(&app.progress).unwrap();
             for reason in [EndReason::Time, EndReason::Manual, EndReason::NoTasks] {
                 app.session_summary.as_mut().unwrap().reason = reason;

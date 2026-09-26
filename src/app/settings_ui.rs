@@ -319,7 +319,7 @@ impl WordApp {
             egui::Id::new("settings-save-button"), save.rect));
         if save.clicked() {
             if let Err(error) = self.save_settings(ui.ctx()) {
-                self.message = error.clone();
+                self.notify_error(error.clone());
                 self.settings_editor.error = Some(error);
             }
         }
@@ -541,10 +541,8 @@ impl WordApp {
                     .add_filter("TSV", &["tsv"])
                     .save_file()
                 {
-                    self.message =
-                        store::atomic_write(&path, model::deck_text(&self.deck).as_bytes())
-                            .map(|_| "教材TSVを書き出した。「語彙を追加」の③から追加・更新できる。".into())
-                            .unwrap_or_else(|e| e);
+                    self.notify_result(store::atomic_write(&path, model::deck_text(&self.deck).as_bytes())
+                        .map(|_| "教材TSVを書き出した。「語彙を追加」の③から追加・更新できる。".into()));
                 }
             }
             if ui
@@ -567,7 +565,7 @@ impl WordApp {
                     .add_filter("JSON", &["json"]).save_file() {
                     let result = serde_json::to_vec_pretty(&self.progress).map_err(|e| e.to_string())
                         .and_then(|bytes| store::atomic_write(&path, &bytes));
-                    self.message = result.map(|_| "学習記録をバックアップした。このJSONに教材TSV・録音・筆跡原本は含まれない。媒体付きバックアップも使用してください。".into()).unwrap_or_else(|e| e);
+                    self.notify_result(result.map(|_| "学習記録をバックアップした。このJSONに教材TSV・録音・筆跡原本は含まれない。媒体付きバックアップも使用してください。".into()));
                 }
             }
             if ui.add_enabled(idle && self.storage.is_some(), crate::app::controls::Button::new("学習記録を復元")).clicked() {
@@ -576,7 +574,7 @@ impl WordApp {
                         .and_then(|text| serde_json::from_str::<Progress>(&text).map_err(|e| e.to_string()))
                         .and_then(|progress| { progress.validate()?; Ok(progress) }) {
                         Ok(progress) => self.pending_restore = Some(progress),
-                        Err(error) => self.message = error,
+                        Err(error) => self.notify_error(error),
                     }
                 }
             }
@@ -611,8 +609,8 @@ impl WordApp {
                 }
                 if ui.ww_button("診断情報を保存").clicked() {
                     if let Some(path) = rfd::FileDialog::new().set_file_name("wordweave-codex-diagnostics.txt").save_file() {
-                        self.message = store::atomic_write(&path, report.as_bytes())
-                            .map(|_| "診断情報を保存した。".into()).unwrap_or_else(|e| e);
+                        self.notify_result(store::atomic_write(&path, report.as_bytes())
+                            .map(|_| "診断情報を保存した。".into()));
                     }
                 }
                 ui.hyperlink_to("ChatGPTを開く（手動貼り付け）", "https://chatgpt.com/");

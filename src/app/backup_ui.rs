@@ -12,12 +12,14 @@ impl WordApp {
                     let dest=parent.join(format!("WordWeave5-backup-{}",chrono::Utc::now().timestamp_millis()));
                     let result=self.storage.as_ref().ok_or_else(||"保存先がありません。".to_string())
                         .and_then(|s|backup::export(&s.dir,&dest,&self.deck,&self.progress));
-                    self.message=match result {Ok(())=>format!("バックアップを作成した：{}",dest.display()),Err(e)=>format!("バックアップ未完了。完了マーカーのないフォルダーは復元に使用しない：{e}")};
+                    self.notify_result(result
+                        .map(|()| format!("バックアップを作成した：{}", dest.display()))
+                        .map_err(|e| format!("バックアップ未完了。完了マーカーのないフォルダーは復元に使用しない：{e}")));
                 }
             }
             if ui.ww_button("媒体付きバックアップを復元").clicked() {
                 if let Some(path)=rfd::FileDialog::new().pick_folder() {
-                    match backup::prepare(path) {Ok(prepared)=>self.backup_restore=Some(prepared),Err(e)=>self.message=e}
+                    match backup::prepare(path) {Ok(prepared)=>self.backup_restore=Some(prepared),Err(e)=>self.notify_error(e)}
                 }
             }
         }));
@@ -61,7 +63,7 @@ impl WordApp {
                             self.fatal =
                                 Some("復元の保存が途中で停止した。再起動で復旧する。".into());
                         }
-                        self.message = e;
+                        self.notify_error(e);
                     }
                 }
             }

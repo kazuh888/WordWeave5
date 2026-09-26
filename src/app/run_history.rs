@@ -47,17 +47,17 @@ impl WordApp {
             Ok(r) => {
                 self.run_records = r.records;
                 if !r.warnings.is_empty() {
-                    self.message = r.warnings.join("\n");
+                    self.notify_warning(r.warnings.join("\n"));
                 }
             }
-            Err(e) => self.message = e,
+            Err(e) => self.notify_error(e),
         }
     }
     fn recover_run(&mut self, id: String) {
         let config = match ai::Config::from_settings(&self.progress.settings) {
             Ok(c) => c,
             Err(e) => {
-                self.message = e;
+                self.notify_error(e);
                 return;
             }
         };

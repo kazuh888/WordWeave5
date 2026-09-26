@@ -103,7 +103,7 @@ impl WordApp {
         let config = match ai::Config::from_settings(&self.settings_for_ui()) {
             Ok(config) => config,
             Err(error) => {
-                self.message = error;
+                self.notify_error(error);
                 return;
             }
         };
@@ -127,13 +127,14 @@ impl WordApp {
     }
 
     pub(super) fn persistent_diagnostics_ui(&mut self, ui: &mut egui::Ui) {
+        let mut export_result = None;
         ui.ww_collapsing("診断ログ（再起動後も保持）", |ui| {
             ui.label(wordweave5::diagnostics::status());
             ui.small("操作・失敗分類・所要時間だけを記録する。入力文・回答を含む「実行記録」や、原音・筆跡の保存先とは別である。自動送信はしない。");
             if ui.ww_button("診断ログを読み込む／更新").clicked() {
                 match wordweave5::diagnostics::export() {
                     Ok(text) => self.diagnostic_export = Some(text),
-                    Err(error) => { self.diagnostic_export = None; self.message = error; }
+                    Err(error) => { self.diagnostic_export = None; self.notify_error(error); }
                 }
             }
             if let Some(text) = &self.diagnostic_export {
@@ -148,15 +149,19 @@ impl WordApp {
                         if ui.ww_button("表示中のログをファイルに保存").clicked() {
                             if let Some(path) = rfd::FileDialog::new().set_file_name("wordweave-diagnostics.jsonl").save_file() {
                                 let operation = DiagnosticOperation::begin(DiagnosticEntry::Settings);
-                                self.message = match store::atomic_write(&path, text.as_bytes()) {
-                                    Ok(()) => { operation.event(DiagnosticStage::Export, DiagnosticEvent::Completed); "診断ログを保存した。共有前に内容を確認してください。".into() }
-                                    Err(error) => { operation.fail(DiagnosticStage::Export, DiagnosticError::Io); error }
-                                };
+                                export_result = Some(match store::atomic_write(&path, text.as_bytes()) {
+                                    Ok(()) => { operation.event(DiagnosticStage::Export, DiagnosticEvent::Completed); Ok("診断ログを保存した。共有前に内容を確認してください。".into()) }
+                                    Err(error) => {
+                                        operation.fail(DiagnosticStage::Export, DiagnosticError::Io);
+                                        Err(error)
+                                    }
+                                });
                             }
                         }
                     });
                 }
             }
         });
+        if let Some(result) = export_result { self.notify_result(result); }
     }
 }

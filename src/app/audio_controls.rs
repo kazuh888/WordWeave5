@@ -39,6 +39,28 @@ mod tests {
     use super::*;
 
     #[test]
+    fn playback_position_updates_never_seek_without_user_input() {
+        let (ctx, mut app, root) = super::super::harness_tests::fixture();
+        for position in [12.1234567, 7.1234567, 17.1234567, 7.1234567] {
+            for _ in 0..3 {
+                let _ = ctx.run(egui::RawInput {
+                    screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(1150.0, 950.0))),
+                    ..Default::default()
+                }, |ctx| {
+                    let actions = app.speech_panel(ctx, &media::PlaybackSnapshot {
+                        loaded: true, can_seek: true, playing: true,
+                        position_seconds: position, duration_seconds: 30.1234567,
+                        ..Default::default()
+                    });
+                    assert!(actions.seek.is_none(), "rendering {position} submitted an unintended seek: {:?}", actions.seek);
+                });
+            }
+        }
+        drop(app);
+        std::fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
     fn last_clicked_button_is_exclusive_and_stop_clears_it() {
         let mut selected = None;
         for (back, toggle, forward, expected) in [
@@ -416,7 +438,7 @@ impl WordApp {
                 if let Some(operation) = &self.speech_operation {
                     operation.fail(DiagnosticStage::Play, DiagnosticError::Unavailable);
                 }
-                self.message = error;
+                self.notify_error(error);
                 false
             }
         }
@@ -460,7 +482,7 @@ impl WordApp {
                 }
                 self.stop_speech();
                 self.speech_visible = false;
-                self.message = error;
+                self.notify_error(error);
                 return;
             }
         };
@@ -520,24 +542,24 @@ impl WordApp {
                     if let Some(operation) = &self.speech_operation {
                         operation.fail(DiagnosticStage::Play, DiagnosticError::Unavailable);
                     }
-                    self.message = error;
+                    self.notify_error(error);
                 }
             }
         }
         if let Some(rate) = rate_change {
             if let Err(error) = self.change_speech_rate(rate) {
-                self.message = error;
+                self.notify_error(error);
             }
         }
         if let Some(volume) = volume {
             if let Err(error) = self.change_speech_volume(volume) {
-                self.message = error;
+                self.notify_error(error);
             }
         }
         if !stop {
             if let Some(repeat) = repeat {
                 if let Err(error) = self.change_speech_repeat(repeat) {
-                    self.message = error;
+                    self.notify_error(error);
                 }
             }
         }
@@ -595,15 +617,12 @@ impl WordApp {
                         operation.fail(DiagnosticStage::Record, DiagnosticError::Unavailable);
                     }
                 }
-                self.message = match result {
-                    Ok(()) => if paused {
+                self.notify_result(result.map(|()| if paused {
                         "録音を再開した。"
                     } else {
                         "録音を一時停止した。停止時間は録音に含めない。"
                     }
-                    .into(),
-                    Err(error) => error,
-                };
+                    .into()));
             }
         }
         if finish {

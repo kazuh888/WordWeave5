@@ -303,7 +303,7 @@ impl WordApp {
                         if ui.ww_button("編集内容を確認して保存へ").clicked() {
                             match model::parse_deck(&self.draft_text) {
                                 Ok(items) => self.pending_import = Some(items),
-                                Err(error) => self.message = error,
+                                Err(error) => self.notify_error(error),
                             }
                         }
                     }
@@ -352,7 +352,7 @@ impl WordApp {
                         self.replacement_meaning.clear();
                         self.replacement_conditions.clear();
                     }
-                    Err(error) => self.message = error,
+                    Err(error) => self.notify_error(error),
                 }
             }
         });

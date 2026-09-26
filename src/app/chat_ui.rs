@@ -115,7 +115,7 @@ impl WordApp {
                         ui.add_space(18.0);
                         if ui.add_enabled_ui(idle, |ui| home_art::primary(ui, "＋  新しい会話", 300.0))
                             .inner.clicked() {
-                            if let Err(error) = self.create_conversation() { self.message = error; }
+                            if let Err(error) = self.create_conversation() { self.notify_error(error); }
                         }
                     });
                 });
@@ -283,7 +283,7 @@ impl WordApp {
                 }
             }
             if let Some(text)=annotate {
-                if self.annotation.frozen() {self.message="作成中の注釈がある。先に添付または破棄する。".into();}
+                if self.annotation.frozen() {self.notify_blocked("作成中の注釈がある。先に添付または破棄する。");}
                 else {self.annotation.text=text;}
                 self.chat_media_open=true;
             }
@@ -295,23 +295,23 @@ impl WordApp {
 
     fn offer_dropped_chat_files(&mut self, id: &str, files: &[egui::DroppedFile], idle: bool) {
         if !idle || self.pending_chat_file_send.is_some() {
-            self.message = "処理中は添付できません。処理完了後、もう一度ドロップしてください。".into();
+            self.notify_warning("処理中は添付できません。処理完了後、もう一度ドロップしてください。");
             return;
         }
         if self.pending_chat_drop.is_some() {
-            self.message = "先のファイル添付を確認またはキャンセルしてから、もう一度ドロップしてください。".into();
+            self.notify_warning("先のファイル添付を確認またはキャンセルしてから、もう一度ドロップしてください。");
             return;
         }
         let paths: Vec<_> = files.iter().filter_map(|file| file.path.clone()).collect();
         let unsupported = files.len() - paths.len();
         if paths.is_empty() {
-            self.message = "ファイルのパスを取得できません。ファイル選択から添付してください。".into();
+            self.notify_warning("ファイルのパスを取得できません。ファイル選択から添付してください。");
             return;
         }
         let existing = self.progress.chats.iter().find(|chat| chat.id == id)
             .map_or(0, |chat| chat.draft_attachments.len());
         if existing + paths.len() > 8 {
-            self.message = format!("添付は一つの発言につき8件までです。現在{existing}件あるため、{}件をまとめて追加できません。今回のドロップは保存していません。", paths.len());
+            self.notify_warning(format!("添付は一つの発言につき8件までです。現在{existing}件あるため、{}件をまとめて追加できません。今回のドロップは保存していません。", paths.len()));
             return;
         }
         self.pending_chat_drop = Some(ChatDropProposal {
@@ -324,7 +324,7 @@ impl WordApp {
         let Some(chat) = self.progress.chats.get(self.chat_selected)
             .filter(|chat| chat.deleted_at.is_none() && chat.id == proposal.chat_id) else {
             self.pending_chat_drop = None;
-            self.message = "会話が切り替わったため、ドロップしたファイルは添付していません。".into();
+            self.notify_warning("会話が切り替わったため、ドロップしたファイルは添付していません。");
             return;
         };
         let mut open = true;
@@ -372,12 +372,12 @@ impl WordApp {
             && self.progress.chats.get(self.chat_selected)
                 .is_some_and(|chat| chat.deleted_at.is_none() && chat.id == proposal.chat_id);
         if !can_edit {
-            self.message = "会話が切り替わったか処理中のため、ファイルは添付していません。".into();
+            self.notify_warning("会話が切り替わったか処理中のため、ファイルは添付していません。");
             return;
         }
         let existing = self.progress.chats[self.chat_selected].draft_attachments.len();
         if existing + proposal.files.len() > 8 {
-            self.message = format!("確認中に添付数が変わった。上限は8件で、現在{existing}件あるため今回は保存していません。");
+            self.notify_warning(format!("確認中に添付数が変わった。上限は8件で、現在{existing}件あるため今回は保存していません。"));
             return;
         }
         self.attach_dropped_chat_files(&proposal.chat_id, &proposal.files, proposal.unsupported);
@@ -413,6 +413,7 @@ impl WordApp {
             (ok, ng) => format!("{ok}件をメッセージに添付した。{ng}件は添付できなかった：{}",
                 first_error.as_deref().unwrap_or("不明なエラー")),
         };
+        if failed > 0 { self.notify_warning(self.message.clone()); }
     }
 
     fn chat_header(
@@ -604,7 +605,7 @@ impl WordApp {
         {
             match self.create_conversation() {
                 Ok(()) => close = true,
-                Err(error) => self.message = error,
+                Err(error) => self.notify_error(error),
             }
         }
         ui.label(
@@ -762,7 +763,7 @@ impl WordApp {
                         self.message = "チャットのタイトルを変更した。".into();
                         self.pending_chat_rename = None;
                     }
-                    Err(error) => self.message = error,
+                    Err(error) => self.notify_error(error),
                 }
             } else if cancel || !open {
                 self.pending_chat_rename = None;
@@ -967,7 +968,7 @@ impl WordApp {
                 true
             }
             Err(error) => {
-                self.message = format!("保存に失敗したため削除・復元を反映していない：{error}");
+                self.notify_error(format!("保存に失敗したため削除・復元を反映していない：{error}"));
                 false
             }
         }

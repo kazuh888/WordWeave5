@@ -202,8 +202,9 @@ pub struct WordApp {
     feedback: String,
     message: String,
     notification_open: bool,
-    last_notification_message: String,
+    last_notification_alerts: [String; 3],
     notification_error: String,
+    notification_attention: String,
     codex_path_guidance: bool,
     codex_path_focus_pending: bool,
     settings_section: settings_ui::SettingsSection,
@@ -486,8 +487,9 @@ impl WordApp {
             feedback: String::new(),
             message: String::new(),
             notification_open: false,
-            last_notification_message: String::new(),
+            last_notification_alerts: Default::default(),
             notification_error: String::new(),
+            notification_attention: String::new(),
             codex_path_guidance: false,
             codex_path_focus_pending: false,
             settings_section: settings_ui::SettingsSection::Learning,
@@ -695,9 +697,6 @@ impl WordApp {
                 s.completed,
                 ux::duration(s.elapsed.as_secs())
             );
-            // The completion screen already presents this result; keep the
-            // notification accessible without opening a duplicate popup.
-            self.last_notification_message = self.message.clone();
         }
         self.current = None;
         self.stop_speech();
@@ -802,9 +801,9 @@ impl WordApp {
                                     {
                                         a.transcript = Some(text.clone());
                                     }
-                                    self.message = match chat.apply_recognition(&expected, &text) {
-                                        Ok(()) => "認識結果を入力欄に追加した。確認・訂正してから送信する。原録音も保存している。".into(),
-                                        Err(e) => format!("{e}\n認識結果：{text}"),
+                                    match chat.apply_recognition(&expected, &text) {
+                                        Ok(()) => self.message = "認識結果を入力欄に追加した。確認・訂正してから送信する。原録音も保存している。".into(),
+                                        Err(e) => self.notify_warning(format!("{e}\n認識結果：{text}")),
                                     };
                                     self.dirty = true;
                                     self.persist();
@@ -850,7 +849,7 @@ impl WordApp {
                                 }
                                 Err(e) => {
                                     self.fetch_then_generate = false;
-                                    self.message = e;
+                                    self.notify_error(e);
                                 }
                             },
                             Ok(AiResult::Connection(t)) => {
@@ -864,7 +863,7 @@ impl WordApp {
                                     self.message = format!("Codexから{}件のモデル候補を取得した。モデルを選びeffortを指定できる。", models.len());
                                     self.effort_catalog = Some((path, models));
                                 } else {
-                                    self.message = "実行ファイルの設定が変わったため、候補を再取得してください。".into();
+                                    self.notify_blocked("実行ファイルの設定が変わったため、候補を再取得してください。");
                                 }
                             }
                             Ok(AiResult::Recovered(record)) => {
@@ -896,14 +895,14 @@ impl WordApp {
                                     }
                                 }
                                 Err(e) => {
-                                    self.message = e;
+                                    self.notify_error(e);
                                 }
                             },
                             Ok(AiResult::Generated(e)) => {
                                 let saved_word = e.base.clone();
                                 if let Err(err) = self.import_deck(vec![e]) {
                                     self.batch_running = false;
-                                    self.message = err;
+                                    self.notify_error(err);
                                 } else {
                                     if !self.saved_generated_words.contains(&saved_word) {
                                         self.saved_generated_words.push(saved_word);
@@ -911,7 +910,7 @@ impl WordApp {
                                     self.batch_queue.pop_front();
                                     if let Err(err) = self.save_queue() {
                                         self.batch_running = false;
-                                        self.message = err;
+                                        self.notify_error(err);
                                     } else {
                                         self.message = format!(
                                             "生成・登録した。残り{}語。",
@@ -923,7 +922,7 @@ impl WordApp {
                             Ok(AiResult::Updated(e, translated)) => {
                                 let id = e.id.clone();
                                 if let Err(err) = self.import_deck(vec![e]) {
-                                    self.message = err;
+                                    self.notify_error(err);
                                 } else if translated {
                                     self.progress.japanese_drafts.remove(&id);
                                     self.dirty = true;
@@ -937,8 +936,7 @@ impl WordApp {
                             Err(e) => {
                                 self.batch_running = false;
                                 self.fetch_then_generate = false;
-                                self.notification_error = e.clone();
-                                self.message = e;
+                                self.notify_error(e);
                             }
                         }
                     }
@@ -947,8 +945,7 @@ impl WordApp {
                     self.pending = None;
                     self.batch_running = false;
                     self.fetch_then_generate = false;
-                    self.message = "処理が終了したが結果を取得できなかった。入力は保持している。Codexの処理は実行記録から状態と再取得可否を確認してから再試行する。".into();
-                    self.notification_error = self.message.clone();
+                    self.notify_error("処理が終了したが結果を取得できなかった。入力は保持している。Codexの処理は実行記録から状態と再取得可否を確認してから再試行する。".into());
                 }
                 Err(TryRecvError::Empty) => {}
             }
@@ -964,14 +961,13 @@ impl WordApp {
         let config = match ai::Config::from_settings(&self.progress.settings) {
             Ok(c) => c,
             Err(e) => {
-                self.message = e;
+                self.notify_error(e);
                 return;
             }
         };
         let count = self.progress.ai_calls.get(&today()).copied().unwrap_or(0);
         if count >= self.progress.settings.ai_daily_limit {
-            self.message =
-                "本日のAI送信回数の上限に達しました。無料の自己評価は続けられます。".into();
+            self.notify_warning("本日のAI送信回数の上限に達しました。無料の自己評価は続けられます。");
             return;
         }
         let Some(task) = self.current.clone() else {
@@ -992,7 +988,7 @@ impl WordApp {
             match self.ink.png() {
                 Ok(p) => Some(p),
                 Err(e) => {
-                    self.message = e;
+                    self.notify_error(e);
                     return;
                 }
             }
@@ -1003,7 +999,7 @@ impl WordApp {
             match self.wav.clone() {
                 Some(w) => Some(w),
                 None => {
-                    self.message = "先に録音してください。".into();
+                    self.notify_warning("先に録音してください。");
                     return;
                 }
             }
@@ -1011,7 +1007,7 @@ impl WordApp {
             None
         };
         if action == 0 && answer.trim().is_empty() {
-            self.message = "回答または自作の英文を入力してください。".into();
+            self.notify_warning("回答または自作の英文を入力してください。");
             return;
         }
         *self.progress.ai_calls.entry(today()).or_default() += 1;
@@ -1067,6 +1063,7 @@ impl WordApp {
                         self.message.push_str(&format!(
                             "\n録音障害が発生したため取得できた音声だけを保持した：{warning}"
                         ));
+                        self.notify_warning(self.message.clone());
                     }
                 }
                 Err(e) => {
@@ -1074,7 +1071,7 @@ impl WordApp {
                         operation.fail(DiagnosticStage::Record, DiagnosticError::Unavailable);
                     }
                     self.chat_recording_id = None;
-                    self.message = e;
+                    self.notify_error(e);
                 }
             }
         }
@@ -1086,7 +1083,7 @@ impl WordApp {
 
     fn say_with_settings(&mut self, text: &str, settings: &wordweave5::store::Settings, preview: bool) {
         if let Err(error) = self.check_speech_start() {
-            self.message = error;
+            self.notify_error(error);
             return;
         }
         let operation = DiagnosticOperation::begin(DiagnosticEntry::Playback);
@@ -1096,7 +1093,7 @@ impl WordApp {
                     settings.speech_rate.unwrap_or(if settings.slow_speech { 0.8 } else { 1.0 }))
         {
             operation.fail(DiagnosticStage::Synthesize, DiagnosticError::Unavailable);
-            self.message = e;
+            self.notify_error(e);
         } else {
             if let Some(previous) = self.speech_operation.replace(operation) {
                 previous.event(DiagnosticStage::Play, DiagnosticEvent::Stopped);
@@ -1402,7 +1399,7 @@ impl WordApp {
                                                 DiagnosticStage::Record,
                                                 DiagnosticError::Unavailable,
                                             );
-                                            self.message = e;
+                                            self.notify_error(e);
                                         }
                                     }
                                 }
@@ -1551,12 +1548,12 @@ impl WordApp {
         }
         self.batch_queue.retain(|w| !existing(w));
         if self.batch_queue.is_empty() {
-            self.message =
-                "対象語はすべて自動生成・登録済みである。例文追加は教材画面から実行できる。".into();
+            self.notify_blocked(
+                "対象語はすべて自動生成・登録済みである。例文追加は教材画面から実行できる。");
             return;
         }
         if let Err(e) = self.save_queue() {
-            self.message = e;
+            self.notify_error(e);
             return;
         }
         self.batch_running = true;
@@ -1577,7 +1574,7 @@ impl WordApp {
             self.batch_queue.pop_front();
             if let Err(e) = self.save_queue() {
                 self.batch_running = false;
-                self.message = e;
+                self.notify_error(e);
             }
             return;
         }
@@ -1585,7 +1582,7 @@ impl WordApp {
             Ok(c) => c,
             Err(e) => {
                 self.batch_running = false;
-                self.message = e;
+                self.notify_error(e);
                 return;
             }
         };
@@ -1623,7 +1620,7 @@ impl WordApp {
         if self.progress.ai_calls.get(&today()).copied().unwrap_or(0)
             >= self.progress.settings.ai_daily_limit
         {
-            self.message="本日の生成上限に達した。設定の上限を変更するか、翌日「未処理の語から再開」を押してください。".into();
+            self.notify_blocked("本日の生成上限に達した。設定の上限を変更するか、翌日、今回の操作を再実行してください。語彙の一括生成は「未処理の語から再開」で続けられます。");
             return false;
         }
         *self.progress.ai_calls.entry(today()).or_default() += 1;
@@ -1647,7 +1644,7 @@ impl WordApp {
         let config = match ai::Config::from_settings(&request_settings) {
             Ok(c) => c,
             Err(e) => {
-                self.message = e;
+                self.notify_error(e);
                 return;
             }
         };
@@ -1657,7 +1654,7 @@ impl WordApp {
             .cloned()
             .unwrap_or_default();
         if action == 2 && (japanese.trim().is_empty() || japanese.chars().count() > 2000) {
-            self.message = "日本語原文を1〜2,000文字で登録してください。".into();
+            self.notify_warning("日本語原文を1〜2,000文字で登録してください。");
             return;
         }
         if action != 0 && !self.reserve_generation() {
@@ -1702,8 +1699,7 @@ impl WordApp {
     }
     fn launch_chat_with_file_consent(&mut self, consented: bool) {
         if self.progress.chat_action.is_some() {
-            self.message =
-                "確認中の教材操作を確定またはキャンセルしてから送信してください。".into();
+            self.notify_warning("確認中の教材操作を確定またはキャンセルしてから送信してください。");
             return;
         }
         if self.pending.is_some()
@@ -1717,9 +1713,7 @@ impl WordApp {
             return;
         };
         if chat.exchanges.len() >= wordweave5::chat::MAX_EXCHANGES {
-            self.message =
-                "この会話は200往復に達した。引き継ぎメモをコピーして新しい会話を作成してください。"
-                    .into();
+            self.notify_warning("この会話は200往復に達した。引き継ぎメモをコピーして新しい会話を作成してください。");
             return;
         }
         let mut context = match wordweave5::chat::prepare_with_catalog(
@@ -1729,7 +1723,7 @@ impl WordApp {
         ) {
             Ok(c) => c,
             Err(e) => {
-                self.message = e;
+                self.notify_error(e);
                 return;
             }
         };
@@ -1739,13 +1733,13 @@ impl WordApp {
         let images = match self.attachment_images(&attachments) {
             Ok(images) => images,
             Err(error) => {
-                self.message = error;
+                self.notify_error(error);
                 return;
             }
         };
         let texts = match self.attachment_texts(&attachments) {
             Ok(texts) => texts,
-            Err(error) => { self.message = error; return; }
+            Err(error) => { self.notify_error(error); return; }
         };
         if !texts.is_empty() && !consented {
             let labels = attachments.iter().map(|attachment| {
@@ -1765,13 +1759,13 @@ impl WordApp {
             return;
         }
         if let Err(error) = add_chat_text_files(&mut context.payload, &texts) {
-            self.message = error;
+            self.notify_error(error);
             return;
         }
         let config = match ai::Config::from_settings(&self.progress.settings) {
             Ok(c) => c,
             Err(e) => {
-                self.message = e;
+                self.notify_error(e);
                 return;
             }
         };
@@ -1831,14 +1825,14 @@ impl WordApp {
         ) {
             Ok(r) => r,
             Err(e) => {
-                self.message = e;
+                self.notify_error(e);
                 return;
             }
         };
         let config = match ai::Config::from_settings(&self.progress.settings) {
             Ok(c) => c,
             Err(e) => {
-                self.message = e;
+                self.notify_error(e);
                 return;
             }
         };
@@ -1851,7 +1845,7 @@ impl WordApp {
         let images = match self.attachment_images(&attachments) {
             Ok(images) => images,
             Err(error) => {
-                self.message = error;
+                self.notify_error(error);
                 return;
             }
         };
@@ -1993,7 +1987,7 @@ impl WordApp {
                 self.progress.material_draft = None;
                 if let Err(e) = self.progress.validate() {
                     self.progress = old_progress;
-                    self.message = e;
+                    self.notify_error(e);
                     return;
                 }
                 match self.import_deck(vec![entry]) {
@@ -2007,7 +2001,7 @@ impl WordApp {
                         if model::deck_text(&self.deck) == old_deck {
                             self.progress = old_progress;
                         }
-                        self.message = e;
+                        self.notify_error(e);
                     }
                 }
             }
@@ -2037,7 +2031,7 @@ impl WordApp {
                     .join(", ")
             );
         } else {
-            self.message = "元の会話は現在の学習記録にありません。".into();
+            self.notify_warning("元の会話は現在の学習記録にありません。");
         }
     }
     fn import_deck(&mut self, items: Vec<Entry>) -> Result<(), String> {
@@ -2169,7 +2163,7 @@ impl WordApp {
             if apply {
                 let items = self.pending_import.take().unwrap();
                 if let Err(e) = self.import_deck(items) {
-                    self.message = e;
+                    self.notify_error(e);
                 }
             } else if cancel {
                 self.pending_import = None;
@@ -2186,7 +2180,7 @@ impl WordApp {
             if apply {
                 let p = self.pending_restore.take().unwrap();
                 if let Err(e) = self.restore(p) {
-                    self.message = e;
+                    self.notify_error(e);
                 }
             } else if cancel {
                 self.pending_restore = None;
@@ -2215,7 +2209,7 @@ impl WordApp {
                 self.chat_media_open = true;
                 self.exit_media_requested = true;
                 self.exit_media_scroll_to_warning = true;
-                self.message="終了前に未保存の録音・手書き注釈を確認してください。".into();
+                self.notify_blocked("終了前に未保存の録音・手書き注釈を確認してください。");
             }
             }
         }

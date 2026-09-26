@@ -198,18 +198,19 @@ impl WordApp {
                 },
             )
         })();
-        self.message = match result {
+        let result = match result {
             Ok(()) => {
                 operation.event(DiagnosticStage::Save, DiagnosticEvent::Attached);
                 self.unsaved_chat_audio = None;
-                "原録音を保存した。「文字起こし」で認識し、確認・訂正して送信できる。".into()
+                Ok("原録音を保存した。「文字起こし」で認識し、確認・訂正して送信できる。".into())
             }
             Err(error) => {
                 operation.fail(DiagnosticStage::Save, DiagnosticError::Io);
                 self.unsaved_chat_audio = Some((id.into(), wav));
-                format!("録音の保存に失敗した。アプリを閉じず、音声入力画面で再保存またはWAV退避を選んでください：{error}")
+                Err(format!("録音の保存に失敗した。アプリを閉じず、音声入力画面で再保存またはWAV退避を選んでください：{error}"))
             }
         };
+        self.notify_result(result);
     }
     pub(super) fn preview_asset(&mut self, reference: &AssetRef) {
         let result = (|| {
@@ -236,21 +237,21 @@ impl WordApp {
                 // The context is supplied by the current viewport in chat_media_windows.
                 self.preview_pixels = Some((reference.id.clone(), image));
             }
-            Err(e) => self.message = e,
+            Err(e) => self.notify_error(e),
         }
     }
     pub(super) fn preview_file_asset(&mut self, reference: &AssetRef, name: &str) {
         self.file_preview = None;
         if reference.kind != AssetKind::FileBlob {
-            self.message = "選択した添付はファイルではありません。".into();
+            self.notify_warning("選択した添付はファイルではありません。");
             return;
         }
         match self.asset_store().and_then(|store| store.read(reference)) {
             Ok(bytes) => match text_preview(&bytes) {
                 Some((text, truncated)) => self.file_preview = Some((name.to_owned(), text, truncated)),
-                None => self.message = format!("{name}はテキストファイルではないため、内容を表示しません。"),
+                None => self.notify_blocked(format!("{name}はテキストファイルではないため、内容を表示しません。")),
             },
-            Err(error) => self.message = error,
+            Err(error) => self.notify_error(error),
         }
     }
     pub(super) fn play_asset(&mut self, reference: &AssetRef) {
@@ -259,11 +260,11 @@ impl WordApp {
             return;
         }
         if let Err(error) = self.check_speech_start() {
-            self.message = error;
+            self.notify_error(error);
             return;
         }
         if reference.kind != AssetKind::AudioWav {
-            self.message = "選択した添付はWAV音声ではありません。".into();
+            self.notify_warning("選択した添付はWAV音声ではありません。");
             return;
         }
         let rate = self.speech_rate();
@@ -279,7 +280,7 @@ impl WordApp {
                 self.speech_selected = None;
                 self.message = "保存した音声を再生中。読み上げパネルで一時停止・再生位置を操作できる。".into();
             }
-            Err(e) => self.message = e,
+            Err(e) => self.notify_error(e),
         }
     }
     fn recognize_chat(&mut self, id: String, reference: AssetRef, original_id: String) {
@@ -299,7 +300,7 @@ impl WordApp {
         let (bytes, config) = match prepared {
             Ok(v) => v,
             Err(e) => {
-                self.message = e;
+                self.notify_error(e);
                 return;
             }
         };
@@ -411,7 +412,7 @@ impl WordApp {
             if unchanged {
                 self.launch_chat_with_file_consent(true);
             } else {
-                self.message = "確認中に質問または添付が変更された。内容を確認し、もう一度送信してください。".into();
+                self.notify_warning("確認中に質問または添付が変更された。内容を確認し、もう一度送信してください。");
             }
         }
     }
@@ -580,7 +581,7 @@ impl WordApp {
             {
                 match self.annotation.freeze(ctx) {
                     Ok(()) => self.chat_media_focus_ink = true,
-                    Err(error) => self.message = error,
+                    Err(error) => self.notify_error(error),
                 }
             }
             ui.separator();
@@ -592,7 +593,7 @@ impl WordApp {
             {
                 match self.annotation.freeze_blank(ctx) {
                     Ok(()) => self.chat_media_focus_ink = true,
-                    Err(error) => self.message = error,
+                    Err(error) => self.notify_error(error),
                 }
             }
             ui.separator();
@@ -936,9 +937,10 @@ impl WordApp {
         }
         if let Some(id) = import_file {
             if let Some(path) = rfd::FileDialog::new().set_title("チャットに添付するファイルを選択").pick_file() {
-                self.message = self.attach_chat_file(&id, &path)
+                let result = self.attach_chat_file(&id, &path)
                     .map(|_| format!("{}を添付した。送信前に内容を確認できる。", path.file_name().and_then(|s| s.to_str()).unwrap_or("ファイル")))
-                    .unwrap_or_else(|e| format!("ファイルを添付できなかった：{e}"));
+                    .map_err(|e| format!("ファイルを添付できなかった：{e}"));
+                self.notify_result(result);
             }
         }
         if let Some((reference, name)) = preview_file {
@@ -950,7 +952,7 @@ impl WordApp {
                 .add_filter("WAV", &["wav"])
                 .save_file()
             {
-                self.message = self
+                let result = self
                     .export_unsaved_chat_audio(&path)
                     .map(|_| {
                         format!(
@@ -958,9 +960,10 @@ impl WordApp {
                             path.display()
                         )
                     })
-                    .unwrap_or_else(|e| {
+                    .map_err(|e| {
                         format!("WAV退避に失敗した。未保存の録音は保持している：{e}")
                     });
+                self.notify_result(result);
             }
         }
         if export_annotation_text {
@@ -969,7 +972,7 @@ impl WordApp {
                 .add_filter("Text", &["txt"])
                 .save_file()
             {
-                self.message = self
+                let result = self
                     .export_chat_annotation_text(&dest)
                     .map(|_| {
                         format!(
@@ -977,9 +980,10 @@ impl WordApp {
                             dest.display()
                         )
                     })
-                    .unwrap_or_else(|e| {
+                    .map_err(|e| {
                         format!("原文のTXT退避に失敗した。入力した原文は保持している：{e}")
                     });
+                self.notify_result(result);
             }
         }
         if export_annotation {
@@ -988,7 +992,10 @@ impl WordApp {
                 .set_file_name("WordWeave5-annotation")
                 .save_file()
             {
-                self.message=self.export_chat_annotation(&dest).map(|_|format!("筆跡・背景・送信画像を退避した：{}。チャットへの添付登録は行っていない。",dest.display())).unwrap_or_else(|e|format!("注釈の退避は未完了。筆跡は保持している。complete.jsonのないフォルダーは未完了である：{e}"));
+                let result = self.export_chat_annotation(&dest)
+                    .map(|_| format!("筆跡・背景・送信画像を退避した：{}。チャットへの添付登録は行っていない。", dest.display()))
+                    .map_err(|e| format!("注釈の退避は未完了。筆跡は保持している。complete.jsonのないフォルダーは未完了である：{e}"));
+                self.notify_result(result);
             }
         }
         if retry {
@@ -1018,7 +1025,7 @@ impl WordApp {
                 }
                 Err(e) => {
                     operation.fail(DiagnosticStage::Save, DiagnosticError::Io);
-                    self.message = e;
+                    self.notify_error(e);
                 }
             }
         }
@@ -1041,7 +1048,7 @@ impl WordApp {
                 }
                 Err(e) => {
                     operation.fail(DiagnosticStage::Record, DiagnosticError::Unavailable);
-                    self.message = e;
+                    self.notify_error(e);
                 }
             }
         }
@@ -1080,12 +1087,12 @@ impl WordApp {
                     },
                 )
             })();
-            self.message = match result {
+            match result {
                 Ok(()) => {
                     self.annotation = Default::default();
-                    "注釈画像と原本を保存した。質問を入力し、添付を確認してから送信する。".into()
+                    self.message = "注釈画像と原本を保存した。質問を入力し、添付を確認してから送信する。".into();
                 }
-                Err(e) => e,
+                Err(e) => self.notify_error(e),
             };
         }
         if self.exit_media_requested
@@ -1136,7 +1143,7 @@ mod attachment_tests {
 
     #[test]
     fn selected_file_is_saved_with_the_draft_and_binary_is_not_previewed() {
-        let (_ctx, mut app, root) = super::super::harness_tests::fixture();
+        let (ctx, mut app, root) = super::super::harness_tests::fixture();
         let id = app.progress.chats[0].id.clone();
         let text_path = root.join("sample.txt");
         std::fs::write(&text_path, "添付テキスト\nsecond line").unwrap();
@@ -1154,6 +1161,8 @@ mod attachment_tests {
         app.preview_file_asset(&binary.original, "sample.pdf");
         assert!(app.file_preview.is_none());
         assert!(app.message.contains("表示しません"));
+        let _ = ctx.run(egui::RawInput::default(), |ctx| app.notification_window(ctx));
+        assert!(app.notification_open, "unsupported preview must explain why it cannot open");
         let reloaded = app.storage.as_ref().unwrap().load().unwrap();
         assert_eq!(reloaded.chats[0].draft_attachments.len(), 2);
         drop(app);
