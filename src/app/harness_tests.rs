@@ -518,6 +518,49 @@ fn clicking_the_exit_warning_discards_unsaved_media_but_keeps_the_saved_draft() 
 }
 
 #[test]
+fn attachment_table_viewport_reaches_the_compact_resize_boundary() {
+    for (zoom, width) in [(0.8, 1150.0), (1.6, 820.0)] {
+        let (ctx, mut app, root) = fixture();
+        ctx.set_zoom_factor(zoom);
+        app.page = Page::Chat;
+        app.chat_media_open = true;
+        for count in [0, 1, 8] {
+            app.progress.chats[0].draft_attachments = (0..count).map(|index| {
+                wordweave5::chat::Attachment {
+                    original: wordweave5::assets::AssetRef {
+                        id: "a".repeat(64), kind: wordweave5::assets::AssetKind::FileBlob, bytes: 16,
+                    }, image: None, background: None,
+                    file_name: Some(format!("notes-{index}.txt")),
+                    source_text: String::new(), transcript: None,
+                }
+            }).collect();
+            for height in [130.0, 210.0, 360.0] {
+                app.chat_media_table_height = height;
+                for _ in 0..4 {
+                    let _ = ctx.run(egui::RawInput {
+                        screen_rect: Some(egui::Rect::from_min_size(
+                            egui::Pos2::ZERO, egui::vec2(width, 950.0))),
+                        ..Default::default()
+                    }, |ctx| app.update_ui(ctx));
+                }
+                let rect = |id| ctx.data(|data| data.get_temp::<egui::Rect>(egui::Id::new(id))).unwrap();
+                let panel = rect("chat-media-table-frame");
+                let viewport = rect("chat-media-table-viewport");
+                let handle = rect("chat-media-table-resize-handle");
+                let gap = panel.bottom() - viewport.bottom();
+                assert!((9.0..=12.0).contains(&gap),
+                    "only the bottom frame inset should remain, zoom={zoom} count={count} height={height} gap={gap}");
+                assert!((panel.height() - height).abs() <= 2.0,
+                    "filling the table must not increase its height: {panel:?}");
+                assert_eq!(handle.height(), 14.0, "preserve the draggable hit target");
+            }
+        }
+        drop(app);
+        std::fs::remove_dir_all(root).unwrap();
+    }
+}
+
+#[test]
 fn attached_table_can_resize_and_remove_only_the_selected_draft_attachment() {
     let (ctx, mut app, root) = fixture();
     let make_ref = |id: char, kind| wordweave5::assets::AssetRef {

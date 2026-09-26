@@ -705,7 +705,7 @@ impl WordApp {
             }
             let table_max_height = (dialog_height - 60.0).max(160.0);
             let table_height = self.chat_media_table_height.clamp(130.0, table_max_height);
-            egui::Frame::new()
+            let table_frame = egui::Frame::new()
                 .fill(Color32::from_rgb(236, 247, 255))
                 .stroke(egui::Stroke::new(1.0_f32, Color32::from_rgb(177, 207, 233)))
                 .inner_margin(10)
@@ -714,15 +714,18 @@ impl WordApp {
                     // the parent width minus padding alone grows the window 2pt/frame.
                     ui.set_width(ui.available_width());
                     ui.set_min_height((table_height - 22.0).max(0.0));
+                    let table_inner_bottom = ui.cursor().top() + (table_height - 22.0).max(0.0);
                     let count = self.progress.chats.get(self.chat_selected)
                         .map_or(0, |chat| chat.draft_attachments.len());
                     ui.horizontal_wrapped(|ui| {
                         ui.heading(format!("添付済み（{count}件）"));
                         ui.small("境界をドラッグで高さ変更");
                     });
-                    egui::ScrollArea::vertical()
+                    let attached_scroll = egui::ScrollArea::vertical()
                         .id_salt("chat-media-attached-scroll")
-                        .max_height((table_height - 95.0).max(45.0))
+                        // Reserve the actual heading height, including any wrapping.
+                        // A fixed allowance leaves a blank strip above the resize handle.
+                        .max_height((table_inner_bottom - ui.cursor().top()).max(45.0))
                         .auto_shrink([false, false])
                         .show(ui, |ui| {
                             // Use the scroll content width, after reserving the bar.
@@ -845,7 +848,17 @@ impl WordApp {
                                 }
                             }
                         });
+                    #[cfg(test)]
+                    ui.ctx().data_mut(|data| data.insert_temp(
+                        egui::Id::new("chat-media-table-viewport"), attached_scroll.inner_rect));
+                    #[cfg(not(test))]
+                    let _ = attached_scroll;
                 });
+            #[cfg(test)]
+            ui.ctx().data_mut(|data| data.insert_temp(
+                egui::Id::new("chat-media-table-frame"), table_frame.response.rect));
+            #[cfg(not(test))]
+            let _ = table_frame;
             let (handle_rect, handle) = ui.allocate_exact_size(
                 egui::vec2(ui.available_width(), 14.0), egui::Sense::drag());
             #[cfg(test)]

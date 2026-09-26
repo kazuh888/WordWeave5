@@ -1,4 +1,8 @@
-# 現在の状態（2026-09-25）
+# 現在の状態（2026-09-26）
+
+- CHAT-MEDIA-SPACING-001 受入完了：2026-09-26に利用者の「OKです」と続くpush承認を受領。以下の余白調整の見た目を確認済み。アプリソースの追加変更なし。`codex/attachment-table-spacing` をcommit・pushする対象とする。PR作成・main統合は今回の依頼に含まない。次は利用者承認済みの「設定」画面の見た目・配置を見直す。以下の未コミット・未push・受入未確認は各記録時点の状態である。
+
+- CHAT-MEDIA-SPACING-001 実装・ローカル検証完了：添付ダイアログの一覧下に残る空白を、見出しの実際の高さからスクロール領域を算出して解消。枠内余白と14ptの高さ変更バーを維持。修正前39ptの空白を再現する回帰試験を追加し、空/1/8件・高さ3段階・倍率2種類で成功。全271テスト、debug/releaseビルド、diffチェック成功。隔離Windows描画を標準80%・小画面160%で確認。`target/release/wordweave5.exe` 更新済み。利用者受入は未確認、ブランチ `codex/attachment-table-spacing` で未コミット・未push。ログ/画像は `.context/compound-engineering/attachment-spacing-*`。実データと添付の保存・送信処理は変更なし。
 
 - UI-INTEGRATION-001：利用者がPR作成・main統合を承認。統合先は [PR #2](https://github.com/kazuh888/WordWeave5/pull/2)、ブランチ `codex/study-records-ui`。記録画面だけでなく `fe69f8e` 以降の受入済みUI・チャット・添付改修全体を含む。添付送信許可・原本保持の独立監査でP1/P2なし。共通操作・通知復旧・再生設定・集計の重点確認でも追加修正なし。以下の「未マージ」は各記録時点の状態であり、統合後も履歴として保持する。CI・レビュー・マージの最新状態と確定SHAはPRの記録を正とする。結果記録だけでアプリCIを再発火させないため、以後の結果はPRへ集約する。残る既知事項は既存の未使用メソッド2件とActionsのNode.js 20廃止警告である。
 
