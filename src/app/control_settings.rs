@@ -3,12 +3,12 @@ use super::*;
 impl WordApp {
     pub(super) fn effort_choices(&self) -> Option<&wordweave5::effort::ModelEffort> {
         let (path, models) = self.effort_catalog.as_ref()?;
-        if path != self.progress.settings.codex_path.trim() {
+        if path != self.settings_for_ui().codex_path.trim() {
             return None;
         }
         models
             .iter()
-            .find(|m| m.model == self.progress.settings.codex_model.trim())
+            .find(|m| m.model == self.settings_for_ui().codex_model.trim())
     }
 
     pub(super) fn effort_settings(&mut self, ui: &mut egui::Ui) {
@@ -24,7 +24,7 @@ impl WordApp {
         let catalog = self
             .effort_catalog
             .as_ref()
-            .filter(|(path, _)| path == self.progress.settings.codex_path.trim())
+            .filter(|(path, _)| path == self.settings_for_ui().codex_path.trim())
             .map(|(_, models)| models.clone());
         if let Some(models) = catalog {
             egui::ComboBox::from_id_salt("advertised-models")
@@ -33,13 +33,13 @@ impl WordApp {
                 .selected_text("取得済みモデルから選択")
                 .show_ui(ui, |ui| {
                     ui.ww_selectable_value(
-                        &mut self.progress.settings.codex_model,
+                        &mut self.settings_editor.draft.codex_model,
                         String::new(),
                         "Codexの既定モデル",
                     );
                     for model in models {
                         ui.ww_selectable_value(
-                            &mut self.progress.settings.codex_model,
+                            &mut self.settings_editor.draft.codex_model,
                             model.model.clone(),
                             format!("{} ({})", model.display_name, model.model),
                         );
@@ -48,10 +48,10 @@ impl WordApp {
         }
         let model = self.effort_choices().cloned();
         let choices = model.as_ref().and_then(|m| m.supported_efforts.as_ref());
-        let selected = if self.progress.settings.codex_effort.is_empty() {
+        let selected = if self.settings_for_ui().codex_effort.is_empty() {
             "Codexの既定値（指定しない）".to_string()
         } else {
-            self.progress.settings.codex_effort.clone()
+            self.settings_for_ui().codex_effort.clone()
         };
         ui.label("effort（推論強度）");
         egui::ComboBox::from_id_salt("codex-effort")
@@ -60,14 +60,14 @@ impl WordApp {
             .selected_text(selected)
             .show_ui(ui, |ui| {
                 ui.ww_selectable_value(
-                    &mut self.progress.settings.codex_effort,
+                    &mut self.settings_editor.draft.codex_effort,
                     String::new(),
                     "Codexの既定値（指定しない）",
                 );
                 if let Some(choices) = choices {
                     for choice in choices {
                         ui.ww_selectable_value(
-                            &mut self.progress.settings.codex_effort,
+                            &mut self.settings_editor.draft.codex_effort,
                             choice.effort.clone(),
                             &choice.effort,
                         )
@@ -86,10 +86,10 @@ impl WordApp {
                 "このモデルのeffort候補は未取得。候補を取得し、モデルを選択すると指定できる。",
             );
         }
-        if !self.progress.settings.codex_effort.is_empty()
+        if !self.settings_for_ui().codex_effort.is_empty()
             && !choices.is_some_and(|c| {
                 c.iter()
-                    .any(|e| e.effort == self.progress.settings.codex_effort)
+                    .any(|e| e.effort == self.settings_for_ui().codex_effort)
             })
         {
             ui.colored_label(Color32::from_rgb(145, 75, 10), "保存済みeffortはこのモデルで未確認。自動変更はしない。実行時に再検査し、非対応なら送信を止める。");
@@ -100,14 +100,14 @@ impl WordApp {
         if self.pending.is_some() || self.recorder.is_some() || self.fatal.is_some() {
             return;
         }
-        let config = match ai::Config::from_settings(&self.progress.settings) {
+        let config = match ai::Config::from_settings(&self.settings_for_ui()) {
             Ok(config) => config,
             Err(error) => {
                 self.message = error;
                 return;
             }
         };
-        let path = self.progress.settings.codex_path.trim().to_string();
+        let path = self.settings_for_ui().codex_path.trim().to_string();
         self.effort_catalog = None;
         let cancel = config.cancel.clone();
         let (tx, rx) = mpsc::channel();

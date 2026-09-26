@@ -254,6 +254,7 @@ impl WordApp {
         }
     }
     pub(super) fn play_asset(&mut self, reference: &AssetRef) {
+        self.settings_editor.preview_speech = false;
         if self.pending.is_some() {
             return;
         }

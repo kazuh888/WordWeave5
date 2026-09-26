@@ -49,6 +49,10 @@ impl WordApp {
     }
 
     pub(super) fn connection_label(&self) -> &'static str {
+        self.connection_label_for(&self.progress.settings.codex_path)
+    }
+
+    pub(super) fn connection_label_for(&self, path: &str) -> &'static str {
         if self
             .pending
             .as_ref()
@@ -59,7 +63,7 @@ impl WordApp {
             match self
                 .connection_check
                 .as_ref()
-                .filter(|(path, _)| path == self.progress.settings.codex_path.trim())
+                .filter(|(checked, _)| checked == path.trim())
             {
                 Some((_, true)) => "接続テスト：前回成功（現在の接続を保証するものではない）",
                 Some((_, false)) => "接続テスト：前回失敗。設定と認証を確認して再試行",

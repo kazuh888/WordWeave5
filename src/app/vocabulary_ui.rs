@@ -172,7 +172,8 @@ fn vocabulary_file_help(ui: &mut egui::Ui) {
     ui.add_space(8.0);
     ui.separator();
     ui.strong("完成済み教材TSVについて");
-    ui.label("ここで読み込むのは、教材を新しく生成するための単語リストである。WordWeave5から書き出した意味・解説・例文入りの教材TSVは、「設定」の教材TSV取り込みで復元する。");
+    ui.label("③は列名で自動判定する。Word・Headword・Lemma列は単語リストとしてAIで教材を生成する。id・base・meaningなど15列または17列を持つ完成済み教材TSVは、AI生成せず追加・更新する。列の順序は変更できるが、列名は残す。");
+    ui.label("完成済み教材は、追加・変更の差分を確認してから取り込む。同じIDは更新、新しいIDは追加であり、バックアップの復元とは異なる。教材形式に不備がある場合は停止し、単語リストとして生成し直すことはない。");
 }
 
 impl WordApp {
@@ -198,6 +199,11 @@ impl WordApp {
     }
 
     fn words_content(&mut self, ui: &mut egui::Ui) {
+        #[cfg(debug_assertions)]
+        if ui.ctx().data(|d| d.get_temp::<bool>(egui::Id::new("preview-vocabulary-file")).unwrap_or(false)) {
+            self.vocabulary_file(ui);
+            return;
+        }
         #[cfg(debug_assertions)]
         if ui.ctx().data(|d| {
             d.get_temp::<bool>(egui::Id::new("preview-vocabulary-candidates"))
@@ -246,7 +252,7 @@ impl WordApp {
 
     fn vocabulary_generation_settings(&mut self, ui: &mut egui::Ui, idle: bool) {
         ux::panel(ui, false, |ui| {
-            ui.strong("生成・登録の設定（すべての追加方法に共通）");
+            ui.strong("AIで生成する場合の設定（完成済み教材TSVには適用しない）");
             ui.add_enabled_ui(idle, |ui| {
                 let compact = ui.available_width() < 620.0;
                 let controls = |ui: &mut egui::Ui| {
@@ -442,15 +448,16 @@ impl WordApp {
             "3",
             "CSV・TSV・TXTから追加",
             super::home_art::PURPLE,
-            "ファイルを選んで生成・登録",
+            "ファイルを選んで追加",
             true,
             |ui| {
-                ui.label("UTF-8のCSV・TSV・TXTを読み込む（2MBまで）。");
+                ui.label("UTF-8のCSV・TSV・TXTを読み込む。列名で単語リストと完成済み教材を自動判定する。");
                 ui.label(
-                    "ここでは単語リストを読み込み、AIが意味・解説・例文を新しく作って登録する。",
+                    "単語リスト（2MBまで）：AIが意味・解説・例文を新しく作って登録する。",
                 );
-                ui.small("ファイルの語は、まず④の候補一覧へ保存し、その後に教材を生成・登録する。エラーで教材登録に失敗しても候補は残るため、④から1語を選んで再実行できる。");
-                ui.small("ファイル選択後、共通設定の語数まで処理する。中断した未処理語は「未処理の語から再開」で続行できる。");
+                ui.small("単語リストの語は、まず④の候補一覧へ保存し、その後に教材を生成・登録する。エラーで教材登録に失敗しても候補は残るため、④から1語を選んで再実行できる。");
+                ui.label("完成済み教材TSV（64MBまで）：AI生成せず、追加・変更の差分を確認してから取り込む。");
+                ui.small("単語リストは共通設定の語数まで処理する。中断した未処理語は「未処理の語から再開」で続行できる。");
                 ui.ww_collapsing("ファイルの書き方", |ui| {
                     vocabulary_file_help(ui);
                 });
@@ -458,19 +465,33 @@ impl WordApp {
         );
         if generate {
             if let Some(path) = rfd::FileDialog::new()
-                .add_filter("語彙（UTF-8）", &["csv", "tsv", "txt"])
+                .add_filter("単語リスト・教材（UTF-8）", &["csv", "tsv", "txt"])
                 .pick_file()
             {
-                match read_limited(&path, 2_000_000).and_then(|text| {
-                    let words = learning::parse_words(&text)?;
-                    self.cache_words(&text)?;
-                    Ok(words)
-                }) {
-                    Ok(words) => self.begin_batch(words),
-                    Err(error) => self.message = error,
+                if let Err(error) = read_limited(&path, 64_000_000)
+                    .and_then(|text| self.prepare_vocabulary_file(&text)) {
+                    self.message = error;
                 }
             }
         }
+    }
+
+    fn prepare_vocabulary_file(&mut self, text: &str) -> Result<(), String> {
+        if self.session.is_some() || self.pending.is_some() || self.recorder.is_some()
+            || self.batch_running || self.fatal.is_some() || self.pending_import.is_some() {
+            return Err("学習・録音・生成・確認を終了してからファイルを追加してください。".into());
+        }
+        match learning::parse_vocabulary_file(text)? {
+            learning::VocabularyFile::Materials(items) => {
+                self.message = "完成済み教材TSVとして読み込んだ。まだ登録していない。差分を確認してください。".into();
+                self.pending_import = Some(items);
+            }
+            learning::VocabularyFile::Words(words) => {
+                self.cache_words(&words.join("\n"))?;
+                self.begin_batch(words);
+            }
+        }
+        Ok(())
     }
 
     fn vocabulary_candidates(&mut self, ui: &mut egui::Ui, idle: bool) {
@@ -545,6 +566,71 @@ impl WordApp {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn material_file_waits_for_confirmation_without_saving_or_generating() {
+        let (ctx, mut app, root) = super::super::harness_tests::fixture();
+        let before = serde_json::to_value(&app.progress).unwrap();
+        let deck = model::deck_text(&app.deck);
+        let words = app.words.clone();
+        let saved = std::fs::read(root.join("data/progress.json")).unwrap();
+        let mut changed = app.deck[0].clone(); changed.meaning = "確認用の変更".into();
+        let text = model::deck_text(&[changed]);
+        app.prepare_vocabulary_file(&text).unwrap();
+        assert!(app.pending_import.is_some());
+        assert!(app.pending.is_none() && !app.batch_running && app.batch_queue.is_empty());
+        assert_eq!(serde_json::to_value(&app.progress).unwrap(), before);
+        assert_eq!(model::deck_text(&app.deck), deck);
+        assert_eq!(app.words, words);
+        assert_eq!(std::fs::read(root.join("data/progress.json")).unwrap(), saved);
+        for _ in 0..3 { super::super::harness_tests::frame(&ctx, &mut app, false); }
+        let cancel = ctx.data(|d| d.get_temp::<egui::Rect>(egui::Id::new("material-import-cancel"))).unwrap();
+        for pressed in [true, false] {
+            let _ = ctx.run(egui::RawInput { screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(1120.0, 850.0))),
+                events: vec![egui::Event::PointerMoved(cancel.center()), egui::Event::PointerButton {
+                    pos: cancel.center(), button: egui::PointerButton::Primary, pressed, modifiers: egui::Modifiers::NONE }],
+                ..Default::default() }, |ctx| app.update_ui(ctx));
+        }
+        assert!(app.pending_import.is_none());
+        assert_eq!(model::deck_text(&app.deck), deck);
+        assert!(app.prepare_vocabulary_file("id\tbase\na\thappy").is_err());
+        assert_eq!(app.words, words);
+        assert!(app.pending.is_none() && app.pending_import.is_none());
+        assert_eq!(std::fs::read(root.join("data/progress.json")).unwrap(), saved);
+        app.prepare_vocabulary_file(&text).unwrap();
+        for _ in 0..3 { super::super::harness_tests::frame(&ctx, &mut app, false); }
+        let apply = ctx.data(|d| d.get_temp::<egui::Rect>(egui::Id::new("material-import-apply"))).unwrap();
+        for pressed in [true, false] {
+            let _ = ctx.run(egui::RawInput { screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(1120.0, 850.0))),
+                events: vec![egui::Event::PointerMoved(apply.center()), egui::Event::PointerButton {
+                    pos: apply.center(), button: egui::PointerButton::Primary, pressed, modifiers: egui::Modifiers::NONE }],
+                ..Default::default() }, |ctx| app.update_ui(ctx));
+        }
+        assert!(app.pending_import.is_none() && app.pending.is_none());
+        assert_eq!(app.deck[0].meaning, "確認用の変更");
+        assert_eq!(serde_json::to_value(&app.progress).unwrap()["chats"], before["chats"]);
+        assert_eq!(std::fs::read_to_string(root.join("data/custom.tsv")).unwrap(), model::deck_text(&app.deck));
+        drop(app); std::fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn material_confirmation_actions_fit_a_small_viewport() {
+        let (ctx, mut app, root) = super::super::harness_tests::fixture();
+        let mut item = app.deck[0].clone(); item.meaning = "確認用".into();
+        app.prepare_vocabulary_file(&model::deck_text(&[item])).unwrap();
+        for width in [512.5, 360.0] {
+            for _ in 0..4 {
+                let _ = ctx.run(egui::RawInput { screen_rect: Some(egui::Rect::from_min_size(
+                    egui::Pos2::ZERO, egui::vec2(width, 406.25))), ..Default::default() },
+                    |ctx| app.confirmations(ctx));
+            }
+            for name in ["material-import-apply", "material-import-cancel"] {
+                let rect = ctx.data(|d| d.get_temp::<egui::Rect>(egui::Id::new(name))).unwrap();
+                assert!(ctx.screen_rect().contains_rect(rect), "{name} inaccessible at {width}: {rect:?}");
+            }
+        }
+        drop(app); std::fs::remove_dir_all(root).unwrap();
+    }
 
     #[test]
     fn documented_word_file_examples_are_accepted() {

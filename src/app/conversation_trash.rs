@@ -2,6 +2,7 @@ use super::*;
 
 impl WordApp {
     pub(super) fn reset_chat_view_after_restore(&mut self) {
+        self.reset_settings_after_restore();
         self.chat_selected = wordweave5::chat::ordered_indices(&self.progress.chats)
             .first()
             .copied()

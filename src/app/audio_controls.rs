@@ -376,8 +376,12 @@ impl WordApp {
         if self.speech_visible {
             self.speaker.set_rate(rate)?;
         }
-        self.progress.settings.speech_rate = Some(rate);
-        self.dirty = true;
+        if self.settings_editor.preview_speech {
+            self.settings_editor.draft.speech_rate = Some(rate);
+        } else {
+            self.progress.settings.speech_rate = Some(rate);
+            self.dirty = true;
+        }
         if let Some(operation) = &self.speech_operation {
             operation.event(DiagnosticStage::Play, DiagnosticEvent::RateChanged);
         }
@@ -428,7 +432,10 @@ impl WordApp {
             ctx,
             snapshot,
             self.speech_selected,
-            self.speech_rate(),
+            if self.settings_editor.preview_speech {
+                self.settings_editor.draft.speech_rate.unwrap_or(
+                    if self.settings_editor.draft.slow_speech { 0.8 } else { 1.0 })
+            } else { self.speech_rate() },
             self.fatal.is_none(),
         );
         self.speech_selected = selected_speech_button(

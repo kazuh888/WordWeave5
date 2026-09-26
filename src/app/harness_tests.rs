@@ -221,6 +221,7 @@ pub(super) fn frame(ctx: &egui::Context, app: &mut WordApp, close: bool) -> egui
             .events
             .push(egui::ViewportEvent::Close);
     }
+    app.settings_zoom_input(ctx, &mut input);
     ctx.run(input, |ctx| app.update_ui(ctx))
 }
 
