@@ -134,6 +134,11 @@ impl WordApp {
 
     fn apply_chrome_zoom(&mut self, ctx: &Context, value: f32) {
         let value = bounded_zoom(value);
+        if self.settings_editor.active {
+            self.settings_editor.draft.font_scale = value;
+            self.preview_settings_zoom(ctx, value);
+            return;
+        }
         ctx.set_zoom_factor(value);
         if self.progress.settings.font_scale != value {
             self.progress.settings.font_scale = value;
@@ -156,7 +161,7 @@ impl WordApp {
             )
             .show(ctx, |ui| {
                 if ui.available_width() < 800.0 {
-                    self.chrome_zoom_controls(ui);
+                    ui.add_enabled_ui(!confirming, |ui| self.chrome_zoom_controls(ui));
                     self.chrome_navigation(ui, confirming);
                 } else {
                     ui.horizontal(|ui| {
@@ -168,7 +173,7 @@ impl WordApp {
                                 self.chrome_navigation(ui, confirming);
                             },
                         );
-                        self.chrome_zoom_controls(ui);
+                        ui.add_enabled_ui(!confirming, |ui| self.chrome_zoom_controls(ui));
                     });
                 }
             });

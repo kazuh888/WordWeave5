@@ -84,6 +84,34 @@ pub(crate) fn run() -> eframe::Result<()> {
                     _ => Page::Home,
                 };
             }
+            if let Some(section) = args.iter().position(|s| s == "--settings-section")
+                .and_then(|index| args.get(index + 1)) {
+                app.page = Page::Settings;
+                app.settings_section = match section.as_str() {
+                    "voice" => settings_ui::SettingsSection::Voice,
+                    "connection" => settings_ui::SettingsSection::Connection,
+                    "data" => settings_ui::SettingsSection::Data,
+                    "help" => settings_ui::SettingsSection::Help,
+                    _ => settings_ui::SettingsSection::Learning,
+                };
+            }
+            if args.iter().any(|s| s == "--vocabulary-file") {
+                app.page = Page::Words;
+                cc.egui_ctx.data_mut(|d| d.insert_temp(egui::Id::new("preview-vocabulary-file"), true));
+            }
+            if args.iter().any(|s| s == "--settings-zoom") {
+                app.page = Page::Settings;
+                app.begin_settings_edit();
+                app.settings_editor.zoom_open = true;
+            }
+            if args.iter().any(|s| s == "--material-import") {
+                let mut changed = app.deck[0].clone();
+                changed.meaning = "確認用の変更された意味".into();
+                let mut added = changed.clone();
+                added.id = "preview_new_material".into();
+                added.base = "preview phrase".into();
+                app.pending_import = Some(vec![changed, added]);
+            }
             if chat_empty || chat_filled || chat_rename || chat_attachments || chat_consent
                 || chat_drop_confirm || chat_media_entry || chat_media_ink || chat_media_exit
                 || chat_media_table {
@@ -304,6 +332,7 @@ struct MediaResizeCheck {
 
 impl eframe::App for Capture {
     fn raw_input_hook(&mut self, ctx: &egui::Context, input: &mut egui::RawInput) {
+        self.app.settings_zoom_input(ctx, input);
         let Some(check) = &mut self.media_resize else { return };
         // Exercise egui's actual edge-drag path in the isolated native capture.
         input.events.retain(|event| !matches!(event, egui::Event::PointerMoved(_)

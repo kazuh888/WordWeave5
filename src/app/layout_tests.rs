@@ -23,6 +23,11 @@ fn pages_fit_logical_width_at_minimum_window_and_maximum_zoom() {
                 |ctx| {
                     egui::CentralPanel::default().show(ctx, |ui| {
                         let right = ui.max_rect().right();
+                        if page == Page::Settings {
+                            app.settings(ui, ctx);
+                            assert!(ui.min_rect().right() <= right + 1.0);
+                            return;
+                        }
                         egui::ScrollArea::vertical().show(ui, |ui| {
                             ui.set_width(ui.available_width());
                             match page {

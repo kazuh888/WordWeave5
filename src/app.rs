@@ -33,6 +33,7 @@ mod playback_panel;
 mod run_history;
 mod session_end;
 mod settings_ui;
+mod settings_edit;
 mod stats_ui;
 #[cfg(test)]
 mod study_tests;
@@ -205,6 +206,9 @@ pub struct WordApp {
     notification_error: String,
     codex_path_guidance: bool,
     codex_path_focus_pending: bool,
+    settings_section: settings_ui::SettingsSection,
+    settings_editor: settings_edit::SettingsEditor,
+    settings_zoom_input_target: Option<f32>,
     search: String,
     selected: usize,
     last_frame: Instant,
@@ -486,6 +490,9 @@ impl WordApp {
             notification_error: String::new(),
             codex_path_guidance: false,
             codex_path_focus_pending: false,
+            settings_section: settings_ui::SettingsSection::Learning,
+            settings_editor: settings_edit::SettingsEditor::default(),
+            settings_zoom_input_target: None,
             search: String::new(),
             selected: 0,
             last_frame: Instant::now(),
@@ -853,7 +860,7 @@ impl WordApp {
                                 self.message = t;
                             }
                             Ok(AiResult::ModelChoices { path, models }) => {
-                                if path == self.progress.settings.codex_path.trim() {
+                                if path == self.settings_for_ui().codex_path.trim() {
                                     self.message = format!("Codexから{}件のモデル候補を取得した。モデルを選びeffortを指定できる。", models.len());
                                     self.effort_catalog = Some((path, models));
                                 } else {
@@ -1073,6 +1080,11 @@ impl WordApp {
         }
     }
     fn say(&mut self, text: &str) {
+        let settings = self.progress.settings.clone();
+        self.say_with_settings(text, &settings, false);
+    }
+
+    fn say_with_settings(&mut self, text: &str, settings: &wordweave5::store::Settings, preview: bool) {
         if let Err(error) = self.check_speech_start() {
             self.message = error;
             return;
@@ -1080,7 +1092,8 @@ impl WordApp {
         let operation = DiagnosticOperation::begin(DiagnosticEntry::Playback);
         if let Err(e) =
             self.speaker
-                .say_at_rate(text, &self.progress.settings.voice_id, self.speech_rate())
+                .say_at_rate(text, &settings.voice_id,
+                    settings.speech_rate.unwrap_or(if settings.slow_speech { 0.8 } else { 1.0 }))
         {
             operation.fail(DiagnosticStage::Synthesize, DiagnosticError::Unavailable);
             self.message = e;
@@ -1090,6 +1103,7 @@ impl WordApp {
             }
             self.speech_visible = true;
             self.speech_selected = None;
+            self.settings_editor.preview_speech = preview;
         }
     }
     fn card(&mut self, ui: &mut egui::Ui, entry: &Entry) {
@@ -1625,11 +1639,12 @@ impl WordApp {
         {
             return;
         }
+        let request_settings = if action == 0 { self.settings_for_ui() } else { &self.progress.settings }.clone();
         if action == 0 {
             self.connection_check =
-                Some((self.progress.settings.codex_path.trim().to_string(), false));
+                Some((request_settings.codex_path.trim().to_string(), false));
         }
-        let config = match ai::Config::from_settings(&self.progress.settings) {
+        let config = match ai::Config::from_settings(&request_settings) {
             Ok(c) => c,
             Err(e) => {
                 self.message = e;
@@ -2105,14 +2120,50 @@ impl WordApp {
             let (mut apply, mut cancel) = (false, false);
             egui::Window::new("教材の取り込みを確認")
                 .collapsible(false)
-                .resizable(false)
+                .default_width(680.0)
+                .max_width((ctx.screen_rect().width() - 32.0).max(240.0))
                 .show(ctx, |ui| {
                     ux::dialog_body(ui);
                     ui.label(format!("追加：{added}項目 / 内容の変更：{updated}項目"));
-                    ui.label("問題・解答・用法を変更した項目は再学習に戻す。追加例文・言い換えだけの変更では成績を保持する。以前の教材は退避する。");
-                    ui.horizontal(|ui| {
-                        apply = ui.ww_button("取り込む").clicked();
-                        cancel = ui.ww_button("キャンセル").clicked();
+                    egui::ScrollArea::vertical().id_salt("import-material-diff")
+                        .max_height((ctx.screen_rect().height() * 0.35).min(320.0))
+                        .show(ui, |ui| {
+                            ui.label("問題・解答・用法を変更した項目は再学習に戻す。追加例文・言い換えだけの変更では成績を保持する。以前の教材は退避する。");
+                            for item in items {
+                                let old = self.deck.iter().find(|entry| entry.id == item.id);
+                                if old.is_some_and(|entry| entry.to_tsv() == item.to_tsv()) { continue; }
+                                ui.push_id(&item.id, |ui| {
+                                    if old.is_some() {
+                                        let rows = wordweave5::material_diff::rows(old, item);
+                                        let labels = rows.iter().take(6).map(|row| row.label.as_str()).collect::<Vec<_>>().join("・");
+                                        ui.add(egui::Label::new(format!("変更項目：{labels}{}", if rows.len() > 6 { " ほか（詳細を展開）" } else { "" })).wrap());
+                                    } else {
+                                        ui.add(egui::Label::new(format!("新しい教材：{}", item.meaning)).wrap());
+                                    }
+                                    ui.ww_collapsing(format!("{}：{}", if old.is_some() { "変更" } else { "追加" },
+                                        item.base.chars().take(40).collect::<String>()), |ui| {
+                                        ui.add(egui::Label::new(format!("ID：{}", item.id)).wrap());
+                                        for row in wordweave5::material_diff::rows(old, item) {
+                                            ui.strong(format!("{}：{}", row.kind, row.label));
+                                            if old.is_some() {
+                                                ui.add(egui::Label::new(format!("変更前：{}", row.before)).wrap());
+                                            }
+                                            ui.add(egui::Label::new(format!("取り込み後：{}", row.after)).wrap());
+                                        }
+                                    });
+                                });
+                            }
+                        });
+                    ui.horizontal_wrapped(|ui| {
+                        let apply_response = ui.ww_button("取り込む");
+                        let cancel_response = ui.ww_button("キャンセル");
+                        #[cfg(test)]
+                        ui.ctx().data_mut(|data| {
+                            data.insert_temp(egui::Id::new("material-import-apply"), apply_response.rect);
+                            data.insert_temp(egui::Id::new("material-import-cancel"), cancel_response.rect);
+                        });
+                        apply = apply_response.clicked();
+                        cancel = cancel_response.clicked();
                     });
                 });
             if apply {
@@ -2128,6 +2179,7 @@ impl WordApp {
             let (mut apply, mut cancel) = (false, false);
             egui::Window::new("学習記録の復元を確認").collapsible(false).resizable(false).show(ctx,|ui|{
                 ux::dialog_body(ui);
+                if self.settings_changed() { ui.label("未保存の設定変更も破棄し、バックアップの設定へ戻す。"); }
                 ui.label("現在の記録を退避し、選択した記録に戻す。現在の教材と内容が異なる項目は再学習にする。");
                 ui.horizontal(|ui|{apply=ui.ww_button("復元する").clicked();cancel=ui.ww_button("キャンセル").clicked();});
             });
@@ -2145,7 +2197,12 @@ impl WordApp {
 
 impl WordApp {
     fn update_ui(&mut self, ctx: &egui::Context) {
+        if self.page == Page::Settings { self.begin_settings_edit(); }
         if ctx.input(|i| i.viewport().close_requested()) {
+            if self.settings_changed() {
+                ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
+                self.settings_editor.leave = Some(settings_edit::Destination::Close);
+            } else {
             if self.chat_recording_id.is_some() {
                 self.stop_recording();
             }
@@ -2160,13 +2217,16 @@ impl WordApp {
                 self.exit_media_scroll_to_warning = true;
                 self.message="終了前に未保存の録音・手書き注釈を確認してください。".into();
             }
+            }
         }
         self.tick(ctx);
         let confirming = self.pending_import.is_some()
             || self.pending_restore.is_some()
-            || self.backup_restore.is_some();
-        self.handle_zoom_input(ctx);
+            || self.backup_restore.is_some()
+            || self.settings_editor.leave.is_some();
+        if !confirming { self.handle_zoom_input(ctx); }
         self.navigation_chrome(ctx, confirming);
+        self.guard_settings_navigation(ctx);
         self.operation_notice(ctx);
         egui::TopBottomPanel::bottom("status").show(ctx, |ui| {
             self.status_summary(ui);
@@ -2182,6 +2242,10 @@ impl WordApp {
                 self.deck_page(ui);
                 return;
             }
+            if self.page == Page::Settings {
+                self.settings(ui, ctx);
+                return;
+            }
             egui::ScrollArea::vertical().id_salt(format!("page-{}",self.page as u8)).show(ui,|ui|{
                 if self.fatal.is_some()&&self.page!=Page::Settings {
                     ui.heading("学習を停止している");ui.label("設定画面で記録のエクスポート・復元を確認してください。元の保存ファイルは自動で初期化しない。");return;
@@ -2191,6 +2255,7 @@ impl WordApp {
             });
         });
         self.confirmations(ctx);
+        self.guard_settings_navigation(ctx);
         self.notification_window(ctx);
         self.version_dialog(ctx);
         self.run_history(ctx);
@@ -2206,10 +2271,15 @@ impl WordApp {
         self.chat_file_send_confirmation(ctx);
         self.media_preview_window(ctx);
         self.file_preview_window(ctx);
+        self.settings_leave_dialog(ctx);
+        if !confirming { self.settings_zoom_panel(ctx); }
         ctx.request_repaint_after(Duration::from_millis(200));
     }
 }
 impl eframe::App for WordApp {
+    fn raw_input_hook(&mut self, ctx: &egui::Context, input: &mut egui::RawInput) {
+        self.settings_zoom_input(ctx, input);
+    }
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         self.update_ui(ctx);
     }
