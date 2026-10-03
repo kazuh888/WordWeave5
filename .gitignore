@@ -1,8 +1,32 @@
-/target/
+# Cargo build output, including standalone tools.
+target/
 /dist/
+
+# Local audio and secrets. Synthetic test audio remains shareable.
 *.wav
+!tools/qwen-audio/tests/fixtures/formats/*.wav
 *.key
 .env
+.env.*
+!.env.example
 
 .vs
 /.context/compound-engineering/
+
+# Local verification output. Keep task specifications and results (*.md).
+/tasks/**/logs/
+/tasks/**/artifacts/
+/tasks/**/native/
+/tasks/**/screenshots/
+/tasks/**/ui-check/
+/tasks/**/probe/
+/tasks/**/*.log
+/tasks/**/*.png
+/tasks/**/*.diff
+/tasks/**/*.patch
+/tasks/**/*.sha256
+/tasks/**/runner*.txt
+
+# One-off local UI verification scripts, not application sources.
+/tasks/QWEN-INTEGRATION-001/live-check.mjs
+/tasks/QWEN-INTEGRATION-001/release-smoke.mjs
