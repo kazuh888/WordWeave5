@@ -4,6 +4,21 @@
 
 現ソースの検証範囲は [0.6.0検証記録](validation/ux-0.6.0.md)、旧版の履歴は [VALIDATION.md](VALIDATION.md) に分けている。モック・headless試験の成功を実IME・マイク・ペン・実ChatGPT接続や利用者のUX受入の成功として扱わない。
 
+## 別のWindows PCへ配置する
+
+既にビルドした `wordweave5.exe` を移すだけなら、RustやVisual Studioは不要である。利用する機能に応じて、次を移行先で用意する。**ChatGPTデスクトップアプリだけでは、本ツールが起動するCodex CLIの有無を確認できない。**
+
+| 対象 | 必要になる機能 | 移行先での扱い |
+| --- | --- | --- |
+| Windows標準機能と機器 | 読み上げ、原音再生、録音、`codex.cmd` の起動 | 英語音声、スピーカー、録音する場合はマイクと使用許可を確認する。`.cmd` 起動にはWindows標準の `cmd.exe` を使う |
+| Codex CLI（`codex`） | 英語チャット、教材生成、AIによる文字起こし等 | 別途導入して、そのPCの利用者でChatGPT認証する。Codexデスクトップアプリの配置だけに依存しない |
+| FFmpeg **と** ffprobe | 教材 → 主な例文 → **「読んで発音を確認」→「音声を選ぶ」**でMP3/AAC/AMR/3GP/3GPPを使うとき | ファイルの検査と原音再生用の復号に両方必要。通常の学習・Windows読み上げ・PCM16 WAV・アプリ内録音には不要。配置方法は下記手順書を参照 |
+| Alibaba Cloud Model Studioの接続設定 | 「読んで発音を確認」でQwenの評価を送るとき | サービス利用とAPIキーが必要。「設定 → AI接続 → 音読評価：Qwen」で地域・接続先・キーを設定する |
+| Node.js **と** npm | Codex CLIを **npm経由で導入・更新**する場合 | **Voltaを使わない場合でも、npm方式なら必要**。通常のnpm版起動にはNode.jsも必要。公式Windows用CLIを直接導入する方式なら、WordWeave5用にNode.js/npmを追加する必要はない |
+| Volta | Codex CLIをVoltaで管理する場合だけ | 任意であり必須ではない。Volta版の `codex.cmd` を使うなら移行先にもVoltaと管理対象のNode.js/Codexが必要 |
+
+導入場所、確認コマンド、学習データの移動順序は [Windows PCへの配置・導入手順](docs/install-windows.md) を参照する。Python、Git、Cargo、Visual Studioは、ビルド済みEXEで学習するための追加必須ツールではない。
+
 ## ビルド・起動
 
 既に0.1/0.2をビルドできた環境では、同じVisual StudioのC++開発環境とRustを使用できる。新規導入の場合はVisual Studio Installerで「C++によるデスクトップ開発」とWindows SDKを追加し、[Rust公式](https://rust-lang.org/tools/install/)からMSVC版Rustを導入する。
@@ -20,9 +35,15 @@ cargo build --release --locked --bin wordweave5
 
 ## AI接続
 
-Codex CLIを導入し、PowerShellで `codex login` を実行してChatGPTでログインする。アプリの「設定」→「接続・ChatGPT認証を確認」で確認する。実行ファイル欄が `codex` のときは、起動時PATH→保存システムPATH→保存ユーザーPATH→npmの順に探索する。ユーザーはWordWeaveを実行するアカウントである。明示したパスが消えても別版へ自動代替しない。設定欄を `codex` に変更して自動検出するか、使用する `codex.exe` / `codex.cmd` を選択する。探索は版の互換性や0.153.4であることを保証しない。
+Codex CLIを導入し、PowerShellで `codex login` を実行してChatGPTでログインする。アプリの「設定」→「接続・ChatGPT認証を確認」で確認する。実行ファイル欄が `codex` のときは、起動時PATH→保存システムPATH→保存ユーザーPATH→npmの順に探索する。ユーザーはWordWeaveを実行するアカウントである。明示したパスが消えても別版へ自動代替しない。設定欄を `codex` に変更して自動検出するか、使用する `codex.exe` / `codex.cmd` を選択する。探索は版の互換性を保証しない。
 
-アプリはAPIキー認証を拒否し、APIへのフォールバックを行わない。ChatGPT契約の利用枠は消費する。1日の生成試行上限は初期値10回、設定可能範囲0〜1,000回である。利用枠が尽きた場合は処理を停止する。
+移行先でのCodex CLI導入・確認は [Windows PCへの配置・導入手順](docs/install-windows.md) にまとめた。
+
+チャット・教材生成のCodex接続はAPIキー認証を拒否し、APIへのフォールバックを行わない。ChatGPT契約の利用枠は消費する。1日の生成試行上限は初期値10回、設定可能範囲0〜1,000回である。利用枠が尽きた場合は処理を停止する。
+
+音読評価だけは別のQwen接続を使う。「設定 → AI接続」のQwen欄から地域・Workspace専用API Host・APIキーを明示的に保存する。Qwenの保存・キャンセルはWindows資格情報を対象とする専用操作であり、画面上部の通常設定の保存・キャンセルとは別である。保存だけでは評価を送信しない。地域またはWorkspaceを変える際には、その送信先のキーを入力し直す。Codexの認証や学習記録には保存しない。
+
+Qwen欄では同じページ内で設定を編集し、編集中の接続を確認できる。接続確認はモデル一覧だけを取得し、音声や例文は送らず、設定も保存しない。成功しても音声評価の実行権限・品質・費用を保証しない。一覧APIに対応しない接続先でも、別の地域やホストへ自動切替しない。
 
 [公式Codex CLI](https://learn.chatgpt.com/docs/codex/cli) / [公式App Server仕様](https://learn.chatgpt.com/docs/app-server)
 

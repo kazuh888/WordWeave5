@@ -6,7 +6,7 @@ impl WordApp {
         ui.separator();
         ui.strong("教材・学習記録・録音・筆跡をまとめて退避");
         ui.small("原本は添付から外したものも含む。実行記録・Codex認証情報・処理待ちの語彙一覧はこのバックアップに含めない。");
-        ui.add_enabled_ui(idle,|ui|ui.horizontal_wrapped(|ui|{
+        ui.add_enabled_ui(idle && self.color_editor.is_none(),|ui|ui.horizontal_wrapped(|ui|{
             if ui.ww_button("媒体を含めてバックアップ").clicked() {
                 if let Some(parent)=rfd::FileDialog::new().pick_folder() {
                     let dest=parent.join(format!("WordWeave5-backup-{}",chrono::Utc::now().timestamp_millis()));
@@ -32,10 +32,14 @@ impl WordApp {
         let mut cancel = false;
         egui::Window::new("媒体付きバックアップの復元を確認").collapsible(false).show(ctx,|ui|{
             ux::dialog_body(ui);
+            if self.color_editor.is_some() {
+                ui.label("配色の保存かキャンセルを終えてから復元してください。");
+            }
             if self.settings_changed() { ui.label("未保存の設定変更も破棄し、バックアップの設定へ戻す。"); }
             ui.label(format!("教材{}件・会話{}件・原本{}ファイルで、現在の教材と学習記録を置き換える。",prepared.deck.len(),prepared.progress.chats.len(),prepared.media_count()));
             ui.label("現在の教材・学習記録はbackupsへ退避する。現在の媒体原本は削除しない。Codexへの通信は発生しない。");
-            let restore = ui.ww_button("内容を確認して復元する");
+            let restore = ui.add_enabled(self.color_editor.is_none(),
+                crate::app::controls::Button::new("内容を確認して復元する"));
             let dismiss = ui.ww_button("キャンセル");
             #[cfg(test)]
             ctx.data_mut(|data| data.insert_temp(egui::Id::new("backup-confirm-actions"), (restore.rect, dismiss.rect)));
@@ -46,6 +50,10 @@ impl WordApp {
             self.backup_restore = None;
         }
         if commit {
+            if self.color_editor.is_some() {
+                self.notify_blocked("配色の保存かキャンセルを終えてから復元してください。");
+                return;
+            }
             if let (Some(prepared), Some(storage)) =
                 (self.backup_restore.take(), self.storage.as_ref())
             {
@@ -75,6 +83,34 @@ impl WordApp {
 mod tests {
     use super::*;
     use crate::app::harness_tests::fixture;
+
+    #[test]
+    fn feedback_ui_palette_blocks_media_restore_confirmation_and_pending_restore_blocks_editor() {
+        let (ctx, mut app, root) = fixture();
+        let source = app.storage.as_ref().unwrap().dir.clone();
+        let destination = root.join("palette-media-restore");
+        backup::export(&source, &destination, &app.deck, &app.progress).unwrap();
+        let before = serde_json::to_value(&app.progress).unwrap();
+        let disk_before = serde_json::to_value(app.storage.as_ref().unwrap().load().unwrap()).unwrap();
+        let deck_before = model::deck_text(&app.deck);
+        app.begin_color_editor();
+        app.color_editor.as_mut().unwrap().draft.page = wordweave5::store::TintChoice {
+            rgb: [0, 0, 255], depth: 100,
+        };
+        app.backup_restore = Some(backup::prepare(destination.clone()).unwrap());
+        confirm(&ctx, &mut app, true);
+        assert!(app.backup_restore.is_some(), "disabled restore must remain pending");
+        assert!(app.color_editor.is_some(), "preview must remain open");
+        assert_eq!(serde_json::to_value(&app.progress).unwrap(), before);
+        assert_eq!(model::deck_text(&app.deck), deck_before);
+        assert_eq!(serde_json::to_value(app.storage.as_ref().unwrap().load().unwrap()).unwrap(), disk_before);
+        app.cancel_color_editor();
+        app.begin_color_editor();
+        assert!(app.color_editor.is_none(), "pending media restore requires an explicit decision first");
+        assert!(app.backup_restore.is_some());
+        drop(app);
+        std::fs::remove_dir_all(root).unwrap();
+    }
 
     fn confirm(ctx: &egui::Context, app: &mut WordApp, accept: bool) {
         let mut draw = |events| {

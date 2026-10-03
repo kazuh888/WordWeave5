@@ -1,5 +1,91 @@
 # 開発タスクの使用量記録
 
+## QWEN-STOP-001 U2 利用者受入からの色差再改善（2026-10-03）
+
+- 最終release成功13:40:31.7980909Z→13:48:41.8423670Z、既存unused警告4のみ、新規推論警告解消。最終記録時刻22:49:41 JST以降・最終応答前である。使用量欠測は解消していない。実装/自動検証/合成画面比較/EXE更新まで完了、利用者目視受入は残る。
+
+- 同じタスクの手戻りとして記録する。22:02:53 JSTの初期観測から、無効■と有効円枠のみ改善した。親指定gpt-6.1-sol/high、planner/spec gpt-6-astra/high、独立test/review gpt-6.1-sol/high。runtime metadata・親子usage counterの開始/終了/差分・包含関係は未取得であり推定しない。
+- 初回全体testは397pass/1fail、integration未到達。appのlightテーマと無効native枠のfadeをoracleが再現できていなかったため、旧/新native paintを同条件で比較するよう修正した。明度・contrastの期待値は保持し、全470件成功した。失敗ログと修正根拠を残した。旧sourceはU1ハッシュ一致の復元であり実開始前コピーではない。
+- 合成native4画像を比較した。debug後の新規float推論警告2件は明示f32で除去する。同値2tokenを独立照合し、全体testの重複ではなく最終release再buildで確認する。既存global fmt39ファイル不一致は保持する。各時刻・結果・限界はタスク結果へ記録する。
+- 改善候補：paint oracleを作る前に実appテーマとdisabled描画経路を確認すること、source固定前に数値型を明示すること。harness/settings・親model/effort・品質gateは変更していない。正確な終了・所要は最終配布記録時点で追記する。
+
+## QWEN-STOP-001 原音停止ボタン（2026-10-03）
+
+- 現行方式、HEAD `d86e7e9d4fe4497d8be9040d30a078582f2887d8`、既存dirty保持。境界は停止アイコン共有・実再生状態のみ有効・限定独立回帰/レビュー・全体検証・合成外観・本体release更新まで。実音声停止/自然終了・支援技術・利用者受入は別途である。音響解析/API/資格情報/公開は対象外。[結果](../../../tasks/QWEN-STOP-001/results.md)を参照する。
+- 初期観測21:30:30 JST、終了記録21:53:47 JST以降（最終記録・レビュー照合・応答前）。正確な開始時刻、入力/cache/出力/推論の開始値・終了値・差分、親子counterと包含関係は未取得であり推定しない。runtime model/effort metadataも未取得である。
+- 親designer/implementer/test runnerは利用者選択gpt-6.1-sol/highを維持。planner/specはgpt-6-astra/high、独立test author/reviewerは計画者選定gpt-6.1-sol/highで明示起動。役責任を分け、再委任・親model/effort/harness/settings/検証基準変更は行っていない。
+- 全469件（追加停止4件）exit 0、debug/release exit 0、合成native5画像の実見と通常終了を確認した。全体fmtは既存39ファイル差分でexit 1、対象3ファイルは成功。修正前RED/sourceコピーは未取得。全gate合格と判定しない。
+- test前後入力hash一致、test後の整形は引数末尾カンマ・改行・空白だけで、作者とreviewerが条件・期待値・イベント不変を確認した。整形後debug/release入力hashは一致。成功試験を意味変更なしで重複実行しなかった。基準コピーはtest後整形前だけ取得し、着手前コピーとは区別する。
+- 検証時刻はtest12:38:13.0559089Z→12:43:24.8582327Z、debug12:44:36.3074691Z→12:47:35.6822519Z、release12:47:35.8225006Z→12:53:47.9062745Z。実時間をusageへ換算しない。native狭幅125%初期画面は操作行がclip外であり、狭幅80%と標準125%を追加して停止ボタンの実見を分離した。手戻りは書式の機械変更確認・撮影条件の補完のみであり、判定条件を緩めていない。
+- 効率候補はテスト作成時の整形をcompile凍結前に済ませること、拡大nativeでは操作部品を可視にする撮影条件を先に選ぶことである。削減効果は未測定。通常sandbox読取のACL helper障害は限定read/build昇格で回避し、秘密や学習本文を収集していない。
+
+## QWEN-UX-003 番号付き音読評価画面（2026-10-03）
+
+- 現行方式。開始HEAD `d86e7e9d4fe4497d8be9040d30a078582f2887d8`、既存dirtyを保持。完了境界は承認済み3段階UI、独立回帰・レビュー、合成native、release生成と記録である。全体fmt gate不合格・未実施native・利用者受入を残し、全gate合格とはしない。実キー・実音声/API・Skill新設・公開は対象外。証拠は[結果](../../../tasks/QWEN-UX-003/results.md)・[検証](../../../tasks/QWEN-UX-003/runner.md)。
+- 初期調査後の観測は19:15 JST、終了記録境界は20:27:39 JST（最終記録・応答前）。正確な開始時刻と入力/cache/出力/推論の開始値・終了値・差分、子counterと親子包含関係は未取得。過去値で補完せず、消費量・チーム総量・elapsedを推定しない。
+- 親は利用者選択Sol/highのdesigner/implementer。planner/spec/reviewerは明示Astra/high、独立test authorはSol/high、runnerはSol/mediumで起動指定した。実行model/effort metadataは未取得であり、指定値と区別する。親model/harness/settings/検証基準は変更していない。
+- 初回全体384 pass/9 failを保持。clip外操作と③未描画を実スクロール・親Area高さの修正で解消し、設定案内の旧文言期待を1か所更新した。レビューのfold寿命・長名見出し2件を実装と独立回帰で解消した。可視性の期待値を緩めていない。
+- v2全465件成功（音読34件を含む）、debug/release成功、native14画像の独立実見を完了。全体fmtは既存39ファイル差分でexit 1、対象3ファイルは成功。実マイク/API・nativeキー操作・取消し終端native画像・IME/DPI・利用者受入は未検証である。source/Cargo入力のtest/debug/release前後差分0、共有package変更0を確認した。
+- 検証の実時間はrunnerログによる。v2全体10:59:37Z→11:06:01Z、debug11:06:21Z→11:10:32Z、release11:15:25.0349412Z→11:21:29.7893740Zである。usageに換算しない。
+- 効率上の観測：Cargoを一担当・直列に集約し、合格後の再実行と変更なし共有packageの重複検証を避けた。今後の同種UIではArea親の最大高さと完全可視の操作fixtureを初期段階で確認する余地がある。削減効果は対照測定がなく未判定である。本文・秘密をusage測定用に複製していない。
+
+## FEEDBACK-UI-001 設定誘導・配色・引用診断（2026-09-27）
+
+- 2026-09-28 U5再改善着手: 利用者受入でflat通知・JSON改行escape・情報階層不足が判明。承認済みの構造化通知/引用Markdown・原文切替/全文/技術情報折畳みを実装し、厳密照合と登録承認は維持する。終了境界は独立回帰・代表native・alltargets/release、実AI・公開なし。開始観測2026-09-28T12:56:39.106Z: input732595535、cached711562112、output1743551、reasoning530630、total734339086。直前の表示方式相談と初期読込は欠測。親model変更なし、子包含/実行metadata未取得。
+- U5終了側観測2026-09-28T14:13:26.120Z（全対象/debug/native完了、ユーザーapp終了待ちまで）: input764656927、cached743518080、output1770043、reasoning535338、total766426970。差分input32061392、cached31955968、output26492、reasoning4708、total32087884。release待機/完了記録/最終応答は欠測。内数再加算・費用換算・未取得子量の合算なし。
+- U5手戻り: UIfixtureのfont初期化/初回paint/scroll安定待ち、native撮影位置不足、実装の旧payload残留/font案内欠落/タイトルサイズ/footer横配置回帰を修正。全体試験を不合格で停止して同期待値で再検証した。runnerが内側exec戻り値のsession_idを出力しなかった誤認はホスト異常でなく手順誤りで、全戻り値とwrite_stdin待機へ訂正。定型コマンドはsession/終了マーカーを含めて渡すこと、footer構造変更を独立UI回帰へ早期反映することが再発防止の機会である。検証水準/モデル設定を下げず、比較対照なしで削減効果は未判定。
+
+- 着手。完了境界は条件付き上限設定誘導、背景/入力欄別の色・濃さプレビューと明示保存/取消し、引用診断の平易化、回帰/native/全対象/release/独立レビュー。実データ・実AI・公開は対象外。既存未コミット変更を保持する。
+- 親01a08550-055c-7aa1-9834-905e4a7ce148の開始側観測10:24:42.717Z: input671285709、cached650778240、output1672568、reasoning510183、total672958277。要求後の初期読込/質問/限定調査は開始側取得前で欠測。子カウンターと包含関係は未取得、親model/effort変更なし。
+- 終了側観測13:07:21.999Z（release待機中まで）: input730577993、cached709671680、output1738490、reasoning530382、total732316483。差分はinput59292284、cached58893440、output65922、reasoning20199、total59358206。内数を再加算せず費用換算しない。終了側観測後の待機・完了記録・応答は欠測。子の実行モデルmetadata/カウンター/親への包含は未取得で合算不可。
+- 改善機会: 独立UI fixtureの全選択修飾キー・fade待機・同名ボタンの区別・TextEdit内外矩形の誤認で再試行が増えた。狭幅Window高さと本文フォントの実欠陥は修正した。focused試験をまとめ、同じcompileを行うcheckの重複を避けた。Cargo依存再compileの設定、親model/effort、検証基準は変更していない。比較対照なしのため削減効果は未判定である。
+
+## MATERIAL-QUOTE-001 U5 教材確認UI（2026-09-27）
+
+- 利用者承認済み比較画面/言い換え一覧/反映方法説明。ローカル、base d86e7e9 + U1～U4等の既存差分保持。完了境界は実装・回帰・合成native描画・全対象test/release・独立レビュー。最終結果は同タスクresults.md U5、実利用者データ/実AI再生成は未実施、commit/pushなし。
+- 親01a08550-055c-7aa1-9834-905e4a7ce148の観測05:19:14.499Z→07:05:38.192Z（1時間46分23.693秒、release終了側の観測まで）。input 623681460→669257803（45576343）、cached input 603424384→648784000（45359616）、output 1632014→1666780（34766）、reasoning output 502992→509469（6477）、total 625313474→670924583（45611109）。開始前読込と終了側取得後の照合/記録/応答は欠測。内数を再加算せず費用換算しない。
+- 最終結果は315テスト成功・release成功・隔離native確認・独立局所レビュー指摘解消である。後半の手戻りは窓全体の高さ/横枠余白と長い禁止理由、およびfold展開後のclip外内容を即時検査したfixture。改善機会は初期から窓外寸と表示到達を一緒に検査すること、テストの実クリック後に必要なスクロールを明示することである。依存再ビルド待ちと短間隔の待機照会も増えた。設定・モデル・検証基準は変更せず、削減効果は未判定である。
+- 子material_ui_plan/spec/design/tests/impl/detail_impl/runner/reviewは計画指定の役割とモデルを明示起動。実行metadata、子使用量、親への包含は未取得で合算不可。親設定は変更なし。
+- 手戻り: 独立テストの別fixture再生成、背景チャット文字の誤検出、foldアニメ/clip外全文と状態の混同、先行大幅scrollによる見出し観測漏れを修正した。本体は旧案欠落説明/fold寿命とnative狭幅の高さ算出不良を修正。headless footer成功だけでは本文到達を保証しないことがnativeで判明した。検証を省略せず最新差分へ実行した。
+- 改善機会: 最初からnativeスクロール後の本文到達を受入へ含め、headless試験では同一snapshot比較・背景と固有文字を分離・animationとclipの観測を明示する。これらは今回の限定fixtureへ反映した。依存再コンパイルと工程引継ぎの待ち時間もあったが、ビルド設定/モデル/品質ゲートは変更していない。全worktree diff hashの文書変化をソース変化と誤認しないようrunnerへ対象Rust hash分離を指示した。対照測定なしのため削減効果は未判定。
+
+## MATERIAL-QUOTE-001 U4 回復通知修正（2026-09-27）
+
+- 同タスクの追補、ローカル方式、base `d86e7e9` + 既存未コミット差分。完了境界は通知分類修正・独立回帰・全対象test/release・独立レビューである。実AI再生成/実機受入は利用者確認、timeout変更・実データ変更・commit/pushは含まない。検証の最終結果は同タスクresults.md U4を参照する。
+- 親 `01a08550-055c-7aa1-9834-905e4a7ce148` の観測 `2026-09-27T02:26:55.332Z` → `02:43:11.415Z`（16分16.083秒、release待機中まで）。input 613963082→621719311（7756229）、cached input 593834368→601499392（7665024）、output 1618594→1626736（8142）、reasoning output 502056→502806（750）、total 615581676→623346047（7764371）。開始前の読込と終了側取得後のビルド待機・記録・最終応答は欠測。内数を再加算せず、金額/使用枠換算はしない。
+- 子はrecovery_notice_plan/spec/design/tests/impl/runner/review。指定モデル/effortはplan.md U4表どおり、実行metadata・子カウンター・親への包含関係は未取得で合算不可。親設定変更なし。仕様と設計は一回の独立確認で別判定し、RED中の実装準備と固定差分のreview/runnerだけ並列化した。
+- REDは旧分岐の通知不備2件を再現、GREENは通知13件成功。仕様の旧attention消去assertをRED後に補充し、その条件はGREENで初検証した。管理コストは7役の短い追補と引継ぎ、常駐計測器なし。依存再コンパイルが待ち時間を占めたが、ビルド設定/検証水準は変更していない。比較対象がなく削減効果は未判定である。
+
+## MATERIAL-QUOTE-001 U3 format-first修正（2026-09-27）
+
+- 同タスクの手戻り、ローカル方式、base `d86e7e9` + 既存未コミット差分。依頼文/schema/runtime契約を共有定義へ揃え、受理範囲を広げず具体的な理由番号/path診断を追加した。回帰7件、focused22/22・実Config::materialモック1/1・pattern正例4/負例6・全305件成功、逐次release成功、独立最終レビューpass。実AI/実機は別受入、実データ変更とcommit/pushなし。
+- 親 `01a08550-055c-7aa1-9834-905e4a7ce148` の観測 `2026-09-27T01:29:48.851Z` → `02:06:08.164Z`（36分19.313秒）。input 595440024→610960580（15520556）、cached input 575744768→591093888（15349120）、output 1593222→1611432（18210）、reasoning output 497383→501069（3686）、total 597033246→612572012（15538766）。開始前の初期読込と終了後の記録/最終応答は欠測。内数は再加算せず、費用・使用枠へ換算しない。
+- 起動指定: quote_planner/format_spec/format_design/quote_review=Astra/high、format_tests/format_impl=Sol/high、quote_run=5.6-terra/medium。実行metadata・子のカウンター・親子包含関係は未取得、合算不可。親model/effortは変更していない。
+- REDはmaterial21件中4失敗、実送信1件失敗。RED後の合成引用/改行表示fixture訂正と後追加のpath240/241試験はRED済みとせず、GREEN22/22と全対象で確認した。所有を交代して同一Rustファイルの競合を回避し、本体・期待値の担当を分離した。初回integration build/linkは4分15秒。今回は全対象試験の実session終了後にreleaseを開始し、前回のcargo重複起動は再発していない。
+- 管理コスト/改善: 既存仕様・設計を狭い追補として再利用し、独立レビューを限定、設計の別ファイル準備/本体のread-only準備のみ並列化した。既知Windows ACL初期化失敗は明示昇格で回避した。長い親文脈の再読と役間の逐次待ち、ビルド待ちが残り、所要時間の短縮効果は確認できていない。品質ゲートを変更せず、今回追加した共有契約と実送信試験を今後再利用する。比較可能な対照測定はなく削減実績と扱わない。
+
+## MATERIAL-QUOTE-001 再報告: 変更理由pathの拒否（2026-09-27）
+
+- 同タスクの手戻りとして記録。最新生成記録1件と既存path契約を読み取り診断し、5件目の項目全体path拒否を特定した。前回引用修正は有効範囲を限定しており、この別条件と一般化エラーは残っていた。今回は受理形式の修正案について確認待ち、本体/テスト/EXE/実データ変更なし。アプリビルド不要、診断記録のdiffチェックのみ。
+- 親の途中観測 `01:21:26.765Z` → `01:23:28.081Z`（2分1.316秒）：input 593802402→594402457（600055）、cached input 574127744→574715776（588032）、output 1585206→1588484（3278）、reasoning 493820→495510（1690）、total 595387608→595990941（603333）。初期Skill読込/調査と最終記録/応答は欠測。子なし、親model/effort変更なし・実行値未取得。費用換算しない。
+- 改善候補: 生成側スキーマ・指示とアプリ側のpath/上限契約を同一にする必要がある。個々の返却不備への文言修正だけでは別条件で再停止する。受理範囲を変更する実装はまだ承認・実施していない。
+
+## MATERIAL-QUOTE-001 引用拒否の診断と識別表示（2026-09-27）
+
+- ローカル方式、base `d86e7e9` + 未コミット差分。完了境界は原因特定・表示/prompt改善・全298テスト・release更新・独立レビューまで。実機UI/実AIは別受入、commit/pushなし。実記録は限定readのみ、原文複写/実データ試験なし。詳細は `tasks/MATERIAL-QUOTE-001/`。
+- 親 `01a08550-055c-7aa1-9834-905e4a7ce148` の途中観測 `00:37:13.756Z` → `01:10:45.231Z`（33分31.475秒）：input 575089149→592178400（17089251）、cached input 555578368→572523264（16944896）、output 1556398→1579655（23257）、reasoning 484918→492678（7760）、total 576645547→593758055（17112508）。初動調査と観測後の最終レビュー/記録/応答は欠測。内数を再加算せず費用/使用枠へ換算しない。
+- 子は `/root/quote_planner`・`quote_spec`・`quote_design`・`quote_review` にAstra/high、`quote_tests`・`quote_impl` にSol/high、`quote_run` にTerra/mediumを計画者が指定し起動した。ホストによる7役の検出/起動は成功。実行metadata・子の使用量・親子包含関係は未取得であり、指定値と実測値を同一視/合算しない。親model/effortは変更なし。
+- 回帰7件追加。修正前materialの新規5件失敗→修正後16/16成功、通知経路1/1成功、最終298件成功。独立テスト作成で連続部分文字列の正常fixtureを誤って拒否期待にした1件を、本体変更前に仕様へ整合させた。通知試験は本体反映後の成功だったためREDへ含めない。仕様/設計/差分の独立レビューは重大指摘なし。
+- 検証担当が起動ラッパーの完了を内部cargo終了と取り違え、test/releaseを重ねて起動した。親が旧EXEの時刻を検出し是正した。新規ログの各exit 0・生成物更新・対象hash不変で確認し、成功済み検証は繰り返さなかった。以後の完了判定は終了コード/ログ終了マーカー/生成物の組で行う。releaseは2分55秒、既存warning2件。
+- 管理コスト/改善候補：7役初回適用で仕様・設計の独立レビューと計画同期が複数往復発生した。読み取り準備/独立レビューをビルド待ちに並行させたが、同種の小修正では承認済み仕様・設計の再利用が短縮候補である。harness/モデル/品質ゲートは変更していない。削減効果は未測定。
+
+## DEVELOPMENT-TEAM-001 7役のエージェント定義（2026-09-26）
+
+- branch `codex/development-agent-team`、base d86e7e9。計画/外部仕様Astra固定、他5役は計画者選定。既存Skillを採用し新規Skillなし。完了境界は7定義・引継ぎ/モデル/所有範囲規則・静的検証まで。役名のホスト検出/実起動とcommit/pushは未実施。アプリ変更なしのためCargoテスト/release再ビルドは不要とした。
+- 7TOML構文・必須キー・固定2/可変5モデル・sandbox・名前一意性・共通規約参照と9Skillの存在を確認。限定独立確認 `agent_team_check`（ww-scout、gpt-5.6-terra/medium）は継承effortの起動前確認を指摘し、必須チェックとして明記した。モデル自動ルーターやファイル単位ACLが実装されたとは扱わない。
+- 親 `01a08550-055c-7aa1-9834-905e4a7ce148` の観測11:57:14.943Z→12:01:52.730Z（4分37.787秒）：input 572501771→573352716（850945）、cached input 553308288→554141824（833536）、output 1544125→1551794（7669）、reasoning 482878→484049（1171）、total 574045896→574904510（858614）。前段のOpus確認、今回の初期Skill/公式文書調査、終了後の記録/最終応答、子の使用量と包含関係は欠測。親model/effortは変更せず実行値未取得。内数は再加算・費用換算しない。
+- 改善：バージョン付き個人キャッシュパスを役定義に埋めず、ホストのSkill名で解決する方式とした。7役を同時常駐させず必要工程だけ起動し、テスト実施担当が期待値を変更できない責務境界を設けた。削減効果は未測定。
+
 ## PLAYBACK-NOTICE-001 追加対応：操作未実施理由の自動通知（2026-09-26）
 
 - ローカル方式、同じ未コミット変更を保持。完了境界は通知分類の補完・全291テスト・release更新まで。上限/保存条件・再生処理は変更なし。実操作受入、commit/pushは未実施。生成上限で通知が出ない回帰の失敗を確認してから修正した。独立確認 `notice_quality`（ww-scout、Terra/medium、再利用）で終了拒否と同文言エラー再試行の不足を検出・修正した。
@@ -540,3 +626,167 @@ HOME-PREVIEW-001、同じ親ID、現行方式、子なし。利用者の確認�
 | total_tokens | 544,454,902 | 549,643,093 | 5,188,191 |
 
 - 非キャッシュ入力差分219,377。内数を再加算せず、金額・使用枠へ換算しない。管理コスト：新規常駐計測器なし。復帰時に既読Skill/sourceの一部再読が発生。PowerShellの巨大ログ末尾200行取得にも待ち時間が生じたため、今後は固定バイト末尾からカウンターのみ抽出する小さな読取へ絞れる。各Cargo呼出の依存再ビルドも継続しており、設定/検証水準変更を伴う調査は別作業とする。対照測定なしのため削減効果は未判定。
+
+## FEEDBACK-UI-001 U6 Markdownと登録結果（2026-09-29〜30）
+
+- 現行ローカル方式、開始HEAD `d86e7e9d4fe4497d8be9040d30a078582f2887d8`、branch `codex/development-agent-team`。既存dirtyを保持。完了境界は実装・独立検証・Windows隔離表示・release更新であり、実AI/利用者データによる受入・commit/pushは別である。最終結果は `tasks/FEEDBACK-UI-001/gfm-results.md` に記録する。
+- 親 `01a08550-055c-7aa1-9834-905e4a7ce148` の集計観測は2026-09-29T13:34:58.204Z→2026-09-30T02:07:15.1Z。中断・再開・待機を含み、実作業時間ではない。開始前の初動、終了観測後の集計記録/最終応答は欠測。累積は単調増加だが子のカウンターと親への包含関係は未取得であり、総費用や全体消費を取得したとは扱わない。
+- 7役はplanner/spec/designer/reviewer Astra/high、implementer/test author Sol/high、runner Terra/medium指定。途中の独立rowテスト著者もSol/highである。親model/effortは変更していない。実行model metadata未取得。最終reviewer再開はホストthread limitにより不可となり、既取得の独立本体/分割PNG証拠を維持して親が最後のdebug fixture差分を照合する。
+
+| カウンター | 開始 | 終了観測 | 差分 |
+| --- | ---: | ---: | ---: |
+| input_tokens | 767,340,734 | 825,565,890 | 58,225,156 |
+| cached_input_tokens | 745,916,160 | 803,430,272 | 57,514,112 |
+| output_tokens | 1,774,810 | 1,866,558 | 91,748 |
+| reasoning_output_tokens | 535,789 | 572,896 | 37,107 |
+| total_tokens | 769,115,544 | 827,432,448 | 58,316,904 |
+
+- 内数を再加算せず、費用・使用枠へ換算しない。native画像で表の長い行と次行の重なりを発見し、本体を上端配置・実高計上へ修正。新回帰1件とfocused12件、全373件、深い引用1件、releaseビルドは成功。新row回帰のREDは修正先行のため未取得であり、修正前の実表示を不具合証拠とする。
+- 手戻りと管理コスト：tight list装飾/Rule/code wrap/深い引用、閉dialog後のクリックfixture、table行高、native前フレーム観測/安定前座標/スクロール慣性/折返しglyph判定で修正と再確認が発生。debug nativeの再ビルド・再撮影が多く、実装とfixtureの切分けが遅れた。末尾バイト限定の集計読取は実施したが対照測定なしのため削減効果は未判定である。
+- 改善候補：native fixtureは最初に安定フレーム・実clip・描画と同じglyph座標・画像保存時点の対応を確定する。画面外の過長合成文で期待判定を壊さず、折返しを保つ最小例を使う。debug-only fixture変更では成功済みの出荷Cargo試験を繰り返さない。検証水準・親model/effort・利用者設定は変更していない。
+
+## FEEDBACK-UI-001 U7 固定会話と独立スクロール（2026-09-30）
+
+- 開始HEAD/branchはU6と同じ、既存dirtyを保持。親カウンター観測は2026-09-30T10:56:21.073Z→2026-09-30T12:48:51.282Z。初動の開始前と最終記録/応答の終了後は欠測。待機・再開を含み実作業時間ではない。子カウンター/親子包含は未取得、総費用/全体消費を取得したとは扱わない。
+- 役割指定はplanner/spec Astra/high、designer/implementer/test author/reviewer Sol/high、runner Terra/medium。U6仕様は再利用し局所設計を作成、独立author/runnerを再利用した。thread limitによる再起動待ちと入力修正の親統合が発生したが、別modelへの無断置換なし。実行metadata未取得、親model/effort変更なし。
+
+| カウンター | 開始 | 終了観測 | 差分 |
+| --- | ---: | ---: | ---: |
+| input_tokens | 826,510,955 | 860,540,025 | 34,029,070 |
+| cached_input_tokens | 804,253,952 | 837,973,248 | 33,719,296 |
+| output_tokens | 1,868,986 | 1,932,602 | 63,616 |
+| reasoning_output_tokens | 573,297 | 604,225 | 30,928 |
+| total_tokens | 828,379,941 | 862,472,627 | 34,092,686 |
+
+- 非キャッシュ入力差分309,774。内数を再加算せず、費用/使用枠へ換算しない。開始/終了観測はログ末尾1MiBからcounterのみ抽出し、本文は出力しなかった。
+- 結果はfocused4件/旧狭幅1件/全377件、debug/release、最終Windows4画像が成功。実AI/音声/touch/penの受入と公開は別である。登録/原文/厳密引用/保存契約を保持した。
+- 手戻り: Point wheel慣性と描画遅延、追跡見出しのclip、実footer高さ/幅の破綻、同frame pointer deltaによるdrag誤適用、全layer撮影の背後チャット偽陽性、runner起動引数漏れを順に切分けた。compile-failをREDや製品不具合に数えず、撮影exit0を表示受入に数えなかった。最終debug-only変更後は成功済み出荷Cargoの再反復を避け、debug/nativeを再確認した。
+- 改善候補: inputをbounded settleで安定させ、撮影を対象LayerId/clip/markerの実可視で駆動し、必須引数とstdout/stderr保存を先に検証する。今回の具体的手戻りに基づく候補であり、対照測定なしのため削減効果は未判定。harness設定・model/effort・検証水準は変更しない。
+
+## QWEN-AUDIO-001 独立音声評価ツール（2026-10-02）
+
+- 開始HEAD `d86e7e9d4fe4497d8be9040d30a078582f2887d8`、branch `codex/development-agent-team`。既存dirtyと本体データを保持し、独立packageへ隔離した。親の観測境界は2026-10-02T12:04:19.317Z→13:17:16.332Z。初動調査と終了観測後の最終記録/応答は欠測。待機を含むため実作業時間ではない。
+- 7役割当はplanner/spec/reviewer Astra high、designer/implementer/test author Sol 6.1 high、runner Luna medium。計画者がrunnerの利用可能exact IDを再選定した。親設定は変更なし。子のカウンター/親子包含/実行model metadataは未取得であり、下記をチーム全体の使用量や費用とは扱わない。
+
+| カウンター | 開始 | 終了観測 | 差分 |
+| --- | ---: | ---: | ---: |
+| input_tokens | 872,401,075 | 894,519,204 | 22,118,129 |
+| cached_input_tokens | 848,583,296 | 870,389,888 | 21,806,592 |
+| output_tokens | 1,961,425 | 2,021,487 | 60,062 |
+| reasoning_output_tokens | 610,324 | 635,276 | 24,952 |
+| total_tokens | 874,362,500 | 896,540,691 | 22,178,191 |
+
+- 非キャッシュ入力差分311,537。内数を再加算せず、料金・使用枠へ換算しない。ログ末尾1MiBから数値だけを抽出し本文は出力しなかった。
+- 覆域: U0仕様/設計の独立レビュー、独立81tests、本体377tests、独立/root release、標準/狭幅native4画像、実GUI起動とcancel/EOF/親crash回収、MCP STDIO/fixture拒否。実API/実キー設定/音声評価品質/IME等と公開は別である。詳細はtasks/QWEN-AUDIO-001/{results,tests,verification,review}.md。
+- 手戻り: U0の終端ACKと本番controller試験境界、PCMサイズ算術、SSE完了後EOF待ち、JSON escape時秘密反射、結果の画面外表示、両テーマへのfont適用、MCP標準_meta拒否、NULL blobへの無条件書込みを修正した。テストinclude相対path訂正とfixture内部path修正はcompile-failであり、製品挙動REDとは扱わない。期待値の緩和なし。
+- 効率上の証拠: agent slot上限で複数回dispatchが拒否されたため完了後の再開へ直列化した。生成途中のEXEと撮影が重なり、画面の再撮影が必要となった。GUI subsystemのPowerShell直接pipeで終了捕捉できなかったが、明示したNode subprocess pipesでは成功した。
+- 改善候補: productionの固定・ビルド識別・native撮影を一つの境界にまとめ、GUI EXEのCLI検証は最初から明示したstdin/stdout handleで行う。効果の対照測定は未実施。harness設定や品質水準の引下げは行わない。
+
+## REUSE-DESIGN-001 再利用境界の文書化（2026-10-02）
+
+- 開始HEAD `d86e7e9d4fe4497d8be9040d30a078582f2887d8`、既存dirtyを保持。今回の境界は全体/4機能/ADRの設計文書と独立レビュー・文書検証までである。実装、Cargo、実API/実データ、commit/pushは対象外。ソース98件とルートCargo2件は開始hashと一致した。
+- 親ID `01a08550-055c-7aa1-9834-905e4a7ce148`。子は `/root/reuse_planner`、`/root/reuse_spec`、`/root/reuse_designer`、`/root/reuse_review`。planner指定Astra/xhigh、他3役指定Astra/high。親は利用者申告Astra/xhighであり変更なし。独立した実行metadata・子カウンター・包含関係は未取得。実装/本体テスト役は非該当とした。
+- カウンターevent境界は2026-10-02T13:37:52.026Z→14:23:34.05Z。観測時刻は22:38:09.6438106→23:23:53.5472672 JST、区間2,743.904秒で待機を含む。初動と終了観測後の最終記録/検査/応答は欠測。ログ末尾1MiBから数値だけを取得し、本文・認証情報は出力していない。
+
+| カウンター | 開始 | 終了観測 | 差分 |
+| --- | ---: | ---: | ---: |
+| input_tokens | 898682028 | 910085969 | 11403941 |
+| cached_input_tokens | 874406272 | 885609088 | 11202816 |
+| output_tokens | 2038299 | 2081777 | 43478 |
+| reasoning_output_tokens | 640179 | 654420 | 14241 |
+| total_tokens | 900720327 | 912167746 | 11447419 |
+
+- 非キャッシュ入力差分201125。内数を再加算せず、チーム総消費・費用・使用枠へ換算しない。最終証拠は [results.md](../../../tasks/REUSE-DESIGN-001/results.md) に集約した。
+- 独立レビューのP2はMarkdown第二実製品候補不足と、Qwenの承認済み方向性を未決に戻した表現の2件。各所有者が修正し、限定再レビューで両方解消・AC01–AC07の文書受入PASS。修正/計画精緻化後は10文書・99リンク・35表に問題0、終了記録追記後の最終確認は10文書・101リンク・36表で問題0、diff check成功、未完チェック0件。本体試験・release build・実接続・実機表示は今回未実施である。
+- 管理/手戻り: 1群の修正と限定再レビュー。通常shellのACL初期化失敗は承認付き読取で回復し、設定変更なし。大きな履歴/記録出力のtruncationとSkill全文確認の再読、計画精緻化待ちで複数回の状態確認があった。次回は必要な節を初めから限定し、完了通知を待つ。効果の対照測定は未実施であり、効率改善達成とは断定しない。
+
+## FRAMEWORK-DESIGN-001 Frameworkと追加候補の文書化（2026-10-03）
+
+- 境界はFramework方針、既存4設計の補足、候補9件の判定、追加3部品設計と独立レビューまで。コード/設定/実API/実データ/EXE/公開は対象外。開始HEAD `d86e7e9d4fe4497d8be9040d30a078582f2887d8`、既存dirtyを保持し、ソース等98件とCargo/AGENTS/旧計画5件の開始hash一致を確認した。
+- 親session `01a08550-055c-7aa1-9834-905e4a7ce148`。子は `/root/framework_planner`（Astra/xhigh）、`framework_spec`（Astra/high）、`framework_components`（gpt-6.1-sol/high）、`framework_review`（gpt-6.1-sol/high）。通常補助1名で直列の責務を分け、設計時は親が別文書を並行作成した。実装/本体テスト役は非該当。親設定の変更なし、実行metadata・子counter・包含関係は未取得である。
+- counter event境界は2026-10-02T14:58:45.576Z→15:28:48.271Z、観測は2026-10-02T23:59:09.9120168→2026-10-03T00:29:15.2640323 JST。区間1805.352秒は待機を含む。初動と終了観測後の最終記録/再検査/応答は欠測。ログ末尾1MiBから数値のみを取得し本文や秘密を出力しなかった。
+
+| カウンター | 開始 | 終了観測 | 差分 |
+| --- | ---: | ---: | ---: |
+| input_tokens | 913347012 | 917507878 | 4160866 |
+| cached_input_tokens | 888795520 | 892686848 | 3891328 |
+| output_tokens | 2100777 | 2127716 | 26939 |
+| reasoning_output_tokens | 661033 | 665520 | 4487 |
+| total_tokens | 915447789 | 919635594 | 4187805 |
+
+- 非キャッシュ入力差分269538。内数を再加算せず、費用/使用枠/チーム総消費へ換算しない。独立レビューはS00と最終設計ともP1/P2なし。FW-AC01–07の設計受入を確認し、08は親の最終証拠記録で完了した。追加設計完成時の直接検査は16文書・186リンク・61表、問題0件。詳細と最終記録後の検査は [results](../../../tasks/FRAMEWORK-DESIGN-001/results.md) に集約する。
+- 手戻りはSpeakerソースリンク1件の訂正。執筆途中の未作成リンクは完了後の検査で解消した。初動にSkill/長い履歴の合算出力が切れたため、必須Skillは個別に全文再取得し、以後は必要な範囲と結果の集計値だけ出力した。計画の最終状態更新は親へ移譲し、終了待ち専用agentは設けなかった。対照測定がないため削減効果は未判定、モデル/effort・harness・品質ゲートを変更していない。
+
+## QWEN-INTEGRATION-001 共通評価ライブラリと本体組込み（2026-10-03）
+
+- 現行方式。開始HEAD `d86e7e9d4fe4497d8be9040d30a078582f2887d8`、既存dirtyを保持。境界は仕様/設計、共通coreと本体主例文の音読評価、回帰/独立レビュー、両EXEまで。実接続・発音助言の妥当性は人の確認送信待ちで、全体受入とは区別する。commit/pushは対象外。
+- 親session `01a08550-055c-7aa1-9834-905e4a7ce148`、利用者選択`gpt-6.1-sol/high`を維持。planner/spec/design/test/reviewの子は`qwen_integration_planner`、`qwen_integration_spec`、`qwen_integration_design`、`qwen_integration_tests`、`qwen_integration_spec_review`、指定Astra/high。計画の実装/runner helperはthread capで起動不成立、同指定Sol/highの親が実装/実行し、独立テスト/レビューは維持した。七役の子が全て実行したとはしない。実行model metadata、子counter、親子包含は不明。
+- 観測境界2026-10-03T00:43:06.2591656+09:00→02:27:53.2978659+09:00（6287.039秒、待機込み）。counter eventは2026-10-02T15:42:39.261Z→17:27:20.653Z。初動調査、終了観測後の最終記録/応答は欠測。ログ末尾から数値のみ取得し、本文/秘密は出力しなかった。
+
+| カウンター | 開始 | 終了観測 | 差分 |
+| --- | ---: | ---: | ---: |
+| input_tokens | 920310970 | 940297726 | 19986756 |
+| cached_input_tokens | 895251200 | 914715904 | 19464704 |
+| output_tokens | 2139804 | 2228684 | 88880 |
+| reasoning_output_tokens | 669752 | 704418 | 34666 |
+| total_tokens | 922450774 | 942526410 | 20075636 |
+
+- 非キャッシュ入力差分522052、cache write観測0。内数を再加算せず、チーム総量/費用/アカウント使用枠に換算しない。長期親counter差分であり公平な性能比較ではない。
+- 覆域：本体415件/単独90件全locked test、core-only check/再利用3件、両release、MCP initialize/tools/list、最終合成native5画像、独立レビュー合格。root全体fmtは開始時から771差分の不合格、変更範囲/package書式は合格。実API/マイク/IME/DPI/助言精度を自動試験に含めない。証拠は [results](../../../tasks/QWEN-INTEGRATION-001/results.md)。
+- 手戻り：設計のInvalidated再開迂回/所有者識別、UI試験初期zoom境界、Invalidated遠隔課金不明表示、native過大offset/Wrap/文字size/width、smoke期待ツール名を修正した。品質期待値の緩和なし。起動中ならbuildを止めるguardへ修正後、配布ビルド成功。初回live harnessのstatus誤読とEOFで結果未取得を保持し、無断で再送しない。
+- 効率候補：同じCargo検証でも依存再compileを観測したが原因/削減効果は未判定。呼出し/ビルドfingerprintの調査は別範囲とし、harness/toolchain/model/effort/検証水準を変更しなかった。終了専用agentを置かず、ソース固定後の必要検証を集約した。
+
+## QWEN-FORMATS-001 音声6形式と確認表示（2026-10-03）
+
+- 現行方式。開始HEAD `d86e7e9d4fe4497d8be9040d30a078582f2887d8` と既存dirtyを保持。境界は設計、共通lib/本体/単独GUIの6形式対応、指定UI整理、隔離検証/独立レビュー/両releaseまで。実API追加送信、実データ、commit/pushは対象外。
+- 親session `01a08550-055c-7aa1-9834-905e4a7ce148` は利用者選択Astra/high。計画/spec/design/backend実装/reviewは指定Astra/high、単独実装Sol6.1/high、runner Sol6.1/medium。親はroot実装とbackend独立テストを担当し、rootテストの著者独立性不足はreviewerの期待値独立確認で補った。実行metadata、子counter、親子包含関係は未取得でありチーム総量は不明。
+- 観測境界 2026-10-03T11:14:02.9703965+09:00 → 2026-10-03T12:43:53.6979212+09:00（5390.727秒、待機込み）。counter event 2026-10-03T02:13:42.024Z → 2026-10-03T03:43:40.745Z。初動と終了観測後の残る配布検査・最終記録・応答は欠測。ログ末尾1MiBから数値のみ取得し本文/秘密は出力していない。
+
+| カウンター | 開始 | 終了観測 | 差分 |
+| --- | ---: | ---: | ---: |
+| input_tokens | 943489805 | 970954723 | 27464918 |
+| cached_input_tokens | 917517696 | 944492800 | 26975104 |
+| output_tokens | 2237969 | 2304249 | 66280 |
+| reasoning_output_tokens | 704625 | 725659 | 21034 |
+| total_tokens | 945727774 | 973258972 | 27531198 |
+
+- 非キャッシュ入力差分489814、cache write観測0。内数を再加算せず、費用/契約使用枠/チーム総量へ換算しない。長期親counterであり公平なmodel性能比較ではない。
+- 覆域と最終成果物は [results](../../../tasks/QWEN-FORMATS-001/results.md) / [runner](../../../tasks/QWEN-FORMATS-001/runner-results.md)。root418件と単独113件成功、6形式の元bytes/wire・境界/破損・取消し・process寿命、native合成5画像、review残存P1/P2=0を確認。追加形式の実API/実音声出力、IME/マイク、削除失敗native警告表示、配布先codecは未検証である。
+- 手戻りは設計のtemp/cleanup寿命と終了時警告、テストimport/不安定module配置、reviewで不足した60秒境界とAMR-WB container証拠を修正。単独all-targetsの初回はLNK1102メモリ不足で失敗、同じ検査を-j1で再実行し113件成功。期待値/品質gateを緩めていない。既存mainモジュール順/visual_check整形差分を保持し、新規警告文字列の折返しだけ修正した。
+- 効率上の観測：helper枠制限により実装helperは直列、Cargo target-dir不一致による別cache生成とlinkメモリ不足があった。最終検証はtarget/qwen-audioへ固定し直列実行した。永続harness/settings/親model/effortは変更していない。削減効果は対照測定がなく未判定である。
+
+## WINDOWS-DEPLOY-DOC-001 別PCへの導入文書（2026-10-03）
+
+- 現行方式。対象はREADMEの実行時依存一覧とWindows導入手順書の文書化であり、アプリコード・EXE・外部設定の変更はない。開始HEADは `d86e7e9d4fe4497d8be9040d30a078582f2887d8`、既存dirtyは保持した。別PCでの実導入は未検証である。
+- 親session `01a08550-055c-7aa1-9834-905e4a7ce148`。この文書限定作業は親のみで実施し、子counterや包含関係は非該当。親の実行model/effort metadataは未取得。
+- counter観測2026-10-03T13:01:19.0922711+09:00→13:03:48.6630408+09:00（149.571秒、待機込み）、event2026-10-03T04:01:10.86Z→04:03:37.195Z。初動調査・最終記録/応答は観測区間外。ログ末尾1MiBから数値だけ取得した。
+
+| カウンター | 開始 | 終了観測 | 差分 |
+| --- | ---: | ---: | ---: |
+| input_tokens | 974574258 | 975270876 | 696618 |
+| cached_input_tokens | 947939968 | 948629120 | 689152 |
+| output_tokens | 2314098 | 2319077 | 4979 |
+| reasoning_output_tokens | 727868 | 728679 | 811 |
+| total_tokens | 976888356 | 977589953 | 701597 |
+
+- 非キャッシュ入力差分7466。内数を再加算せず、費用や契約枠へ換算しない。長期親counterであり他タスクとの性能比較には使わない。
+- コードの外部process検索と既存配布説明、OpenAI Docs・FFmpeg・Voltaの公式案内を照合した。実行時とビルド時を分離し、Codex CLI、ffmpeg+ffprobe、条件付きVolta/Node、Windows標準機能、Qwenサービス設定を明示した。READMEと新規手順書のローカルリンク検査missing0、差分空白検査exit0。文書のみのためCargoの再buildは行っていない。
+- 手戻り：Node.js/npmを起動時の一律条件と読める文言を、導入方式依存へ訂正した。効率候補：別PCでの初回配置時に手順の実証記録を追加し、必要なら配布パッケージの構成を固める。現時点で配布設定・harness・検証水準は変更していない。
+
+## QWEN-UX-002 応答説明・音読画面・AI接続UX（2026-10-03）
+
+- 現行方式。開始HEAD `d86e7e9d4fe4497d8be9040d30a078582f2887d8` と既存dirtyを保持。目的・境界は[調査](../../../tasks/QWEN-UX-002/evidence.md)、最終結果は[results](../../../tasks/QWEN-UX-002/results.md)に記録する。実API・実資格情報・利用者音声の外部送信・Skill新設・公開は対象外。
+- 親`/root`、7役の指定は[plan](../../../tasks/QWEN-UX-002/plan.md)。計画/spec/design/core/settings/reviewはAstra/high、reading実装と独立test-authorはSol/high、runnerはSol/medium。親の選択モデルは変更していない。起動指定と実行metadataは別であり、後者は未取得。
+- 正確な開始時刻、入力/cache/出力/推論の開始値・終了値・差分、子の使用量・親子包含関係は取得できていない。前タスクの値から補完せず、elapsedを推定しない。終了境界と実際の検証時間はrunnerの各コマンドログに残す。
+- 手戻り：レビュー2件（Qwen編集の通知誘導guard、状態に存在しない操作への案内）と、Invalidatedで送信状態を描画から検出できない2ケースを修正・再試験対象にした。失敗ログと期待値を保持する。全体fmtの既存差分は未解消として報告する。
+- 効率上の観測：Cargoコマンドごとに依存再コンパイルが発生した。Cargoを一担当・直列・同じPowerShell実行へまとめたが、削減効果は未測定である。実行環境やキャッシュ設定、親モデル、検証基準は変更していない。モデル容量不足は同じ割当で継続した。根拠のない繰返しを避け、実装変更・失敗・構成差のある検査だけ再実施する。
+- 最終応答前の記録時点で本体451件、共通147件/core100件、構成check、両releaseと合成nativeが成功。実API・利用者受入は別途。nativeは起動時の仮viewportとスクロールアニメーションによる撮影失敗をdebug専用変更で修正し、実アプリ最小820×650と追加stress480×640を区別した。標準と最小150～160%を実見した。初めから実際の最小幅を確認し、表示が安定してから撮影するfixtureを用いれば撮り直しを減らせる。効果量は未計測である。実行時間・hashはrunner.md、usage終了値は未取得のままである。
+
+## QWEN-SETTINGS-001 別英文の結果・地域別接続設定（2026-10-03）
+
+- 現行方式。開始HEAD `d86e7e9d4fe4497d8be9040d30a078582f2887d8` と既存dirtyを保持。境界は設計、共通lib/本体/単独版の実装、独立テスト・レビュー、自動検証、debug合成native、両release生成まで。実API、実資格情報操作、利用者音声の判定精度、release実機受入、commit/pushは対象外。
+- 観測時点は初期調査後13:42 JST、終了記録15:28 JST（最終応答前）。正確な作業開始時刻と開始/終了usage counterは未取得。入力・cache・出力・推論の開始値/終了値/差分、子の消費と親子包含関係は不明であり推定しない。前タスクのcounterを開始値に流用しない。
+- 親`/root`は利用者選択モデルを変更していない。計画/spec/core実装/独立reviewは指定`gpt-6-astra/high`、独立test author`/root/qwen_settings_tests`は`gpt-6.1-sol/high`、runner`/root/qwen_settings_runner`は`gpt-6.1-sol/medium`。親は設計/root実装/統合/文書を担当。runtime model/effort metadataは未取得。
+- 最終証拠は[results](../../../tasks/QWEN-SETTINGS-001/results.md)/[runner](../../../tasks/QWEN-SETTINGS-001/runner.md)。root439件（設定焦点20件と重複）、package default135件/core88件（構成間重複あり）成功、feature check、両release/debug、担当範囲fmt、標準/狭幅の合成native、独立レビューを完了。root全体fmtの40ファイル広範差分は不合格として保持。最終Rust/Cargo入力114件の前後hash差分0。
+- 手戻り：focus復帰・旧v1 decode証拠を補完。ビルドとnative fixtureのEXE競合を通常終了で解消。未設定ボタンのclip外描画検査は実スクロールfixtureへ修正。focus IDだけでは可視性を保証しないため実文字/clipを追加し、初回zoomによる仮viewport12500でのflag早期消費を観測した。sizing/実画面guardを加え、実寸描画→modal操作の順を独立著者/レビューで確定し、可視assertは緩めず成功した。失敗試行を最終ログで上書きしていない。
+- 効率上の観測：root診断testのコンパイル3m25s、rootdebug3m26s、rootrelease5m32s、package release4m30s等の待ちが発生した。Cargoを直列・package target-dir固定へ集約し、合格後のpackage再検証を省いた。将来の同種UI試験では最初から「表示安定を確認してから操作する」fixtureと実描画assertを使う余地がある。恒久harness/モデル/effort/検証水準の変更や、削減効果の主張は行わない。

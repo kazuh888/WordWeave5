@@ -20,6 +20,7 @@ chrono = { version = "0.4", features = ["serde"] }
 fs2 = "0.4"
 
 [target.'cfg(windows)'.dependencies]
+pulldown-cmark = { version = "=0.13.0", default-features = false }
 eframe = { version = "=0.31.1", default-features = false, features = ["default_fonts", "glow"] }
 rfd = "=0.15.3"
 reqwest = { version = "0.12", default-features = false, features = ["blocking", "native-tls"] }
@@ -29,6 +30,14 @@ cpal = "=0.15.3"
 hound = "=3.5.1"
 image = { version = "0.25", default-features = false, features = ["png", "bmp", "gif", "jpeg"] }
 base64 = "0.22"
+qwen-audio = { path = "tools/qwen-audio", default-features = false, features = ["windows-credentials"] }
+tokio = { version = "1", features = ["rt-multi-thread", "time", "sync"] }
+tokio-util = "0.7"
+zeroize = "1"
+futures-util = "0.3"
+
+[target.'cfg(windows)'.dev-dependencies]
+tokio = { version = "1", features = ["macros", "test-util"] }
 
 [profile.release]
 lto = "thin"

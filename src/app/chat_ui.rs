@@ -3,6 +3,7 @@ use wordweave5::chat_action::Operation;
 
 impl WordApp {
     pub(super) fn chat_page(&mut self, ui: &mut egui::Ui) {
+        let input_tint = self.effective_tint().input;
         let previous_style = (*ui.style()).clone();
         ui.spacing_mut().item_spacing = egui::vec2(14.0, 10.0);
         ui.spacing_mut().scroll = egui::style::ScrollStyle::solid();
@@ -160,11 +161,13 @@ impl WordApp {
                         let height = (ui.available_height() - if compact_vertical { 44.0 } else { 72.0 }).max(34.0);
                         egui::ScrollArea::vertical().id_salt(("composer-scroll", &id))
                             .min_scrolled_height(0.0).max_height(height).show(ui, |ui| {
-                            let response = ui.add_enabled_ui(idle, |ui| ui.add_sized(
-                                [ui.available_width(), height], egui::TextEdit::multiline(&mut chat.draft)
-                                .id(input_id)
-                                .hint_text("英語の質問、会話練習、または教材にしたい表現を入力")
-                                .desired_width(f32::INFINITY).desired_rows(1).char_limit(4000))).inner;
+                            let response = ui.add_enabled_ui(idle, |ui| {
+                                color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| ui.add_sized(
+                                    [ui.available_width(), height], egui::TextEdit::multiline(&mut chat.draft)
+                                    .id(input_id)
+                                    .hint_text("英語の質問、会話練習、または教材にしたい表現を入力")
+                                    .desired_width(f32::INFINITY).desired_rows(1).char_limit(4000)))
+                            }).inner;
                             let visible_rect = response.rect.intersect(ui.clip_rect());
                             drop_rect = Some(visible_rect);
                             self.dirty |= response.changed();
@@ -216,6 +219,7 @@ impl WordApp {
                 ui.ctx().request_repaint();
             }
             self.chat_header(ui, idle, activity, compact_vertical, &id, &title);
+            self.show_material_registration_receipt(ui);
             ui.add_space(10.0);
             let transcript_empty = self.progress.chats[self.chat_selected].exchanges.is_empty();
             egui::ScrollArea::vertical().id_salt(("chat-transcript", &id))
@@ -708,6 +712,7 @@ impl WordApp {
     }
 
     fn chat_windows(&mut self, ctx: &egui::Context, idle: bool) {
+        let input_tint = self.effective_tint().input;
         if let Some((id, mut draft)) = self.pending_chat_rename.clone() {
             let mut open = true;
             let mut save = false;
@@ -721,11 +726,11 @@ impl WordApp {
                     ux::dialog_body(ui);
                     ui.spacing_mut().button_padding = egui::vec2(18.0, 8.0);
                     ui.label("会話一覧とチャット上部に表示するタイトルを入力する。");
-                    let response = ui.add(
-                        egui::TextEdit::singleline(&mut draft)
+                    let response = color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| {
+                        ui.add(egui::TextEdit::singleline(&mut draft)
                             .desired_width(f32::INFINITY)
-                            .char_limit(100),
-                    );
+                            .char_limit(100))
+                    });
                     response.on_hover_text("1〜100文字。改行は入力できない。");
                     let count = draft.chars().count();
                     ui.label(
@@ -777,8 +782,12 @@ impl WordApp {
             ux::dialog_body(ui);
             let Some(chat) = self.progress.chats.get_mut(self.chat_selected).filter(|c| c.deleted_at.is_none()) else { return; };
             ui.label("引き継ぎメモ：学習目的・重要な訂正（毎回送信）");
-            self.dirty |= ui.add_enabled(idle, egui::TextEdit::multiline(&mut chat.memo)
-                .desired_width(f32::INFINITY).char_limit(2000)).changed();
+            self.dirty |= ui.add_enabled_ui(idle, |ui| {
+                color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| {
+                    ui.add(egui::TextEdit::multiline(&mut chat.memo)
+                        .desired_width(f32::INFINITY).char_limit(2000))
+                })
+            }).inner.changed();
             ui.label("古い発言も保存される。「文脈に必ず含める」は会話のピン留めとは別の指定である。");
             match wordweave5::chat::prepare_with_catalog(chat, &self.deck, &self.progress.deleted_entries) {
                 Ok(context) => {
@@ -793,45 +802,57 @@ impl WordApp {
         });
         self.chat_context_open = open;
         let mut open = self.chat_material_open;
+        let viewport = ctx.input(|input| input.screen_rect());
+        let status_top = egui::containers::panel::PanelState::load(ctx, egui::Id::new("status"))
+            .map(|state| state.rect.top())
+            .filter(|top| *top > viewport.top() && *top <= viewport.bottom())
+            .unwrap_or(viewport.bottom());
+        let work_rect = egui::Rect::from_min_max(
+            viewport.min,
+            egui::pos2(viewport.right(), status_top),
+        );
+        let frame_width = egui::Frame::window(&ctx.style()).total_margin().sum().x;
+        let material_window_width = (work_rect.width() - 8.0 - frame_width)
+            .max(1.0)
+            .min(1100.0);
+        let material_window_height = (work_rect.height() - 24.0).max(1.0).min(760.0);
         egui::Window::new("教材の根拠と差分を確認")
             .open(&mut open)
-            .default_width(1100.0)
-            .vscroll(true)
+            .default_pos(work_rect.min + egui::vec2(8.0, 8.0))
+            .constrain_to(work_rect.shrink(4.0))
+            .default_width(material_window_width)
+            .min_width(material_window_width.min(320.0))
+            .max_width(material_window_width)
+            .default_height(material_window_height)
+            .max_height(material_window_height)
+            .vscroll(false)
             .show(ctx, |ui| {
                 ux::dialog_body(ui);
-                ui.label(
-                    RichText::new("1 根拠を選ぶ → 2 教材案を作る → 3 差分を確認して登録")
-                        .strong()
-                        .color(ux::ACCENT),
-                );
-                ui.small("登録を確認するまで教材は変更しない。追加と訂正は区別して確認する。");
-                ui.separator();
+                self.show_material_registration_receipt(ui);
                 if self.progress.material_draft.is_none() {
-                    ui.label("教材に使う往復だけを選び、対象語と反映方法を確認する。");
-                    if let Some(chat) = self
-                        .progress
-                        .chats
-                        .get_mut(self.chat_selected)
-                        .filter(|c| c.deleted_at.is_none())
-                    {
-                        for (i, e) in chat.exchanges.iter_mut().enumerate() {
-                            self.dirty |= ui
-                                .add_enabled(
-                                    idle,
-                                    egui::Checkbox::new(
-                                        &mut e.for_material,
-                                        format!(
-                                            "{}：{}",
-                                            i + 1,
-                                            e.question.chars().take(60).collect::<String>()
-                                        ),
-                                    ),
-                                )
-                                .changed();
-                        }
-                    }
+                    ui.label(
+                        RichText::new("根拠を選ぶ → 案を作る → 差分を確認")
+                            .strong().color(ux::ACCENT),
+                    );
+                    egui::ScrollArea::vertical()
+                        .id_salt("material-request-body")
+                        .scroll_bar_visibility(egui::scroll_area::ScrollBarVisibility::AlwaysVisible)
+                        .max_height(ui.available_height())
+                        .show(ui, |ui| {
+                            if let Some(chat) = self.progress.chats.get_mut(self.chat_selected)
+                                .filter(|chat| chat.deleted_at.is_none()) {
+                                for (i, exchange) in chat.exchanges.iter_mut().enumerate() {
+                                    self.dirty |= ui.add_enabled(idle, egui::Checkbox::new(
+                                        &mut exchange.for_material,
+                                        format!("{}：{}", i + 1,
+                                            exchange.question.chars().take(60).collect::<String>()))).changed();
+                                }
+                            }
+                            self.material_panel(ui);
+                        });
+                } else {
+                    self.material_panel(ui);
                 }
-                self.material_panel(ui);
             });
         self.chat_material_open = open;
         self.chat_action_window(ctx, idle);
@@ -1219,7 +1240,11 @@ fn bubble_with_attachments(
                         } else {
                             home_art::GREEN
                         }));
-                        ui.add(egui::Label::new(text).wrap().selectable(true));
+                        if user {
+                            ui.add(egui::Label::new(text).wrap().selectable(true));
+                        } else {
+                            super::notifications::show_markdown(ui, _copy_id.with("markdown"), text);
+                        }
                         if !attachments.is_empty() {
                             ui.add_space(8.0);
                             ui.separator();
@@ -1259,7 +1284,7 @@ fn bubble_with_attachments(
                                     home_art::Icon::Copy,
                                     home_art::MUTED,
                                 );
-                                #[cfg(test)]
+                                #[cfg(any(test, debug_assertions))]
                                 ui.ctx().data_mut(|data| {
                                     data.insert_temp(_copy_id, response.rect);
                                     data.insert_temp(_copy_id.with("clip"), ui.clip_rect());

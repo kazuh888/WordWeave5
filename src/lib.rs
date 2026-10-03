@@ -14,3 +14,5 @@ pub mod material_diff;
 pub mod run_journal;
 pub mod commit;
 pub mod backup;
+#[cfg(windows)]
+pub mod qwen_reading;

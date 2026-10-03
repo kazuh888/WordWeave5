@@ -10,6 +10,12 @@ use std::{
     path::{Path, PathBuf},
 };
 
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct TintChoice {
+    pub rgb: [u8; 3],
+    pub depth: u8,
+}
+
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(default)]
 pub struct Settings {
@@ -30,6 +36,8 @@ pub struct Settings {
     pub speech_rate: Option<f64>,
     pub speech_volume: f64,
     pub speech_repeat: bool,
+    pub page_tint: TintChoice,
+    pub input_tint: TintChoice,
 }
 impl Default for Settings {
     fn default() -> Self {
@@ -50,6 +58,8 @@ impl Default for Settings {
             speech_rate: None,
             speech_volume: 0.5,
             speech_repeat: false,
+            page_tint: TintChoice::default(),
+            input_tint: TintChoice::default(),
         }
     }
 }
@@ -200,6 +210,9 @@ impl Progress {
         changed
     }
     pub fn validate(&self) -> Result<(), String> {
+        if self.settings.page_tint.depth > 100 || self.settings.input_tint.depth > 100 {
+            return Err("配色の濃さは0から100までの整数で指定してください。".into());
+        }
         if self
             .settings
             .speech_rate
@@ -440,6 +453,62 @@ pub fn atomic_write(path: &Path, bytes: &[u8]) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn feedback_ui_legacy_palette_keys_default_without_changing_other_settings() {
+        let root = std::env::temp_dir().join(format!(
+            "ww-feedback-ui-legacy-{}-{}",
+            std::process::id(),
+            chrono::Utc::now().timestamp_nanos_opt().unwrap()
+        ));
+        let storage = Storage::at(root.clone()).unwrap();
+        let mut old = Progress::default();
+        old.settings.ai_daily_limit = 37;
+        old.settings.topic = "保存済みの合成設定".into();
+        let mut legacy = serde_json::to_value(&old).unwrap();
+        legacy["settings"].as_object_mut().unwrap().remove("page_tint");
+        legacy["settings"].as_object_mut().unwrap().remove("input_tint");
+        fs::write(root.join("progress.json"), serde_json::to_vec_pretty(&legacy).unwrap()).unwrap();
+        let saved = fs::read(root.join("progress.json")).unwrap();
+        let loaded = storage.load().unwrap();
+        let settings = serde_json::to_value(&loaded.settings).unwrap();
+        assert_eq!(settings["page_tint"]["rgb"], serde_json::json!([0, 0, 0]));
+        assert_eq!(settings["page_tint"]["depth"], 0);
+        assert_eq!(settings["input_tint"]["rgb"], serde_json::json!([0, 0, 0]));
+        assert_eq!(settings["input_tint"]["depth"], 0);
+        assert_eq!(loaded.settings.ai_daily_limit, 37);
+        assert_eq!(loaded.settings.topic, "保存済みの合成設定");
+        assert_eq!(fs::read(root.join("progress.json")).unwrap(), saved);
+        drop(storage);
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn feedback_ui_invalid_persisted_palette_is_rejected_without_repair() {
+        let root = std::env::temp_dir().join(format!(
+            "ww-feedback-ui-invalid-{}-{}",
+            std::process::id(),
+            chrono::Utc::now().timestamp_nanos_opt().unwrap()
+        ));
+        let storage = Storage::at(root.clone()).unwrap();
+        let path = root.join("progress.json");
+        for invalid in [
+            serde_json::json!({"rgb":[0,0,0], "depth":101}),
+            serde_json::json!({"rgb":[0,0,0], "depth":-1}),
+            serde_json::json!({"rgb":[0,0,0], "depth":1.5}),
+            serde_json::json!({"rgb":[0,0,0], "depth":"40"}),
+            serde_json::json!({"rgb":[256,0,0], "depth":40}),
+        ] {
+            let mut document = serde_json::to_value(Progress::default()).unwrap();
+            document["settings"]["page_tint"] = invalid;
+            let original = serde_json::to_vec_pretty(&document).unwrap();
+            fs::write(&path, &original).unwrap();
+            assert!(storage.load().is_err(), "invalid palette was accepted: {document}");
+            assert_eq!(fs::read(&path).unwrap(), original, "load repaired user data");
+        }
+        drop(storage);
+        fs::remove_dir_all(root).unwrap();
+    }
     #[test]
     fn invalid_chat_action_preserves_transcript_and_draft() {
         let mut p = Progress::default();

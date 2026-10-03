@@ -9,6 +9,49 @@ pub struct Row {
     pub after: String,
     pub kind: &'static str,
 }
+
+/// Name an individual field from a validated reason path without changing the diff rules.
+pub fn reason_path_label(path: &str) -> Option<String> {
+    let top = match path {
+        "/base" => Some("基本語"),
+        "/meaning" => Some("意味"),
+        "/level" => Some("分類"),
+        "/business" => Some("社外メール"),
+        "/elevated" => Some("文体"),
+        "/register" => Some("語調"),
+        "/usage" => Some("説明・使い方"),
+        "/context" => Some("場面"),
+        "/example" => Some("空欄問題"),
+        "/translation" => Some("訳"),
+        "/answers" => Some("正解"),
+        "/question" => Some("用法の質問"),
+        "/explanation" => Some("解説"),
+        "/tag" => Some("タグ"),
+        _ => None,
+    };
+    if let Some(label) = top {
+        return Some(label.into());
+    }
+    let mut parts = path.split('/');
+    let (Some(""), Some(array), Some(index), Some(field), None) =
+        (parts.next(), parts.next(), parts.next(), parts.next(), parts.next()) else {
+        return None;
+    };
+    if !(index == "0" || (!index.starts_with('0') && index.bytes().all(|byte| byte.is_ascii_digit()))) {
+        return None;
+    }
+    let number = index.parse::<usize>().ok()?.checked_add(1)?;
+    let (item, field) = match (array, field) {
+        ("examples", "english") => ("追加例文", "英文"),
+        ("examples", "japanese") => ("追加例文", "訳"),
+        ("examples", "note") => ("追加例文", "補足"),
+        ("replacements", "phrase") => ("言い換え", "表現"),
+        ("replacements", "meaning") => ("言い換え", "意味"),
+        ("replacements", "conditions") => ("言い換え", "使用条件"),
+        _ => return None,
+    };
+    Some(format!("{number}件目の{item}の{field}"))
+}
 fn text(v: &Value) -> String {
     match v {
         Value::Null => String::new(),
@@ -159,6 +202,23 @@ pub fn spans(before: &str, after: &str) -> (Vec<(String, bool)>, Vec<(String, bo
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn feedback_ui_reason_path_labels_identify_fields_without_inventing_invalid_items() {
+        for (path, label) in [
+            ("/base", "基本語"),
+            ("/meaning", "意味"),
+            ("/usage", "説明・使い方"),
+            ("/examples/0/note", "1件目の追加例文の補足"),
+            ("/examples/1/japanese", "2件目の追加例文の訳"),
+            ("/replacements/0/conditions", "1件目の言い換えの使用条件"),
+        ] {
+            assert_eq!(reason_path_label(path).as_deref(), Some(label), "{path}");
+        }
+        for path in ["/id", "/examples/01/note", "/examples/-1/note", "/examples/0", "/examples/0/unknown", "/replacements/0/unknown", "/examples/184467440737095516160/note"] {
+            assert!(reason_path_label(path).is_none(), "unknown path named as a real item: {path}");
+        }
+    }
     #[test]
     fn unicode_differences_preserve_both_originals_and_multiple_changes() {
         let (a, b) = spans("猫と犬🐕を学ぶ", "鳥と犬🐕を習う");

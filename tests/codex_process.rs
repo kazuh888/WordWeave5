@@ -12,6 +12,54 @@ use std::{
 };
 use wordweave5::codex;
 
+#[cfg(windows)]
+#[path = "../src/ai.rs"]
+mod ai;
+
+#[cfg(windows)]
+#[test]
+fn material_config_sends_restricted_path_schema_and_actionable_instructions() {
+    use wordweave5::{chat::Conversation, execution::Execution, material::{Mode, Request}, model};
+    let f = Fixture::new("structured_material");
+    let mut conversation = Conversation::new();
+    conversation.complete("What does this mean?".into(), "Use **improve clarity** here.".into(), Execution::default()).unwrap();
+    conversation.exchanges[0].for_material = true;
+    let old = model::parse_deck(model::BUILTIN_DECK).unwrap().remove(0);
+    let request = Request::new(&conversation, &old.base, Mode::Correct, Some(old.clone())).unwrap();
+    let mut entry = old;
+    entry.usage = "合成会話に沿って訂正".into();
+    fs::write(f.dir.join("material-response.json"), json!({"entry":entry,"reasons":[{
+        "path":"/usage","reason":"意味を明確にした","quotes":[{
+            "exchange_index":0,"role":"assistant","quote":"**improve clarity**"}]
+    }]}).to_string()).unwrap();
+    let config = ai::Config { exe:f.exe.clone(), cwd:f.dir.clone(), model:String::new(), effort:String::new(),
+        examples:3, cancel:Arc::new(AtomicBool::new(false)) };
+    let draft = config.material(request, vec![]).unwrap();
+    assert_eq!(draft.reasons.len(), 1);
+    assert_eq!(draft.reasons[0].path, "/usage");
+    let thread: serde_json::Value = serde_json::from_slice(&fs::read(f.dir.join("thread-start.json")).unwrap()).unwrap();
+    let instruction = thread["developerInstructions"].as_str().unwrap();
+    for expected in ["/answers", "/examples/0/note", "/replacements/0/conditions", "0始まり",
+        "個別", "要素全体", "Markdown", "改行"] {
+        assert!(instruction.contains(expected), "missing {expected} in instructions");
+    }
+    for forbidden in ["/examples/0 を指定", "/replacements/0 を指定"] {
+        assert!(!instruction.contains(forbidden), "whole item encouraged: {forbidden}");
+    }
+    let turn: serde_json::Value = serde_json::from_slice(&fs::read(f.dir.join("material-turn-start.json")).unwrap()).unwrap();
+    let schema = &turn["outputSchema"];
+    let path = &schema["properties"]["reasons"]["items"]["properties"]["path"];
+    assert_eq!(path["type"], "string");
+    assert_eq!(path["pattern"], "^/(base|meaning|level|business|elevated|register|usage|context|example|translation|answers|question|explanation|tag|examples/(0|[1-9][0-9]*)/(english|japanese|note)|replacements/(0|[1-9][0-9]*)/(phrase|meaning|conditions))$");
+    assert_eq!(schema["properties"]["reasons"]["maxItems"], 100);
+    assert_eq!(schema["properties"]["reasons"]["items"]["properties"]["quotes"]["minItems"], 1);
+    assert_eq!(schema["properties"]["reasons"]["items"]["properties"]["quotes"]["maxItems"], 10);
+    assert_eq!(schema["properties"]["reasons"]["items"]["properties"]["quotes"]["items"]["properties"]["exchange_index"]["minimum"], 0);
+    assert_eq!(schema["required"], json!(["entry","reasons"]));
+    assert_eq!(schema["additionalProperties"], false);
+    println!("MATERIAL_PATH_PATTERN={}", path["pattern"].as_str().unwrap());
+}
+
 #[test]
 fn codex_diagnostics_correlate_phases_without_retaining_content_or_paths() {
     const CHILD: &str = "WORDWEAVE_DIAGNOSTICS_TEST_CHILD";

@@ -191,7 +191,7 @@ impl WordApp {
             let compact = ui.available_width() < 650.0;
             let show_save_hint = ui.available_width() >= 800.0;
             // Keep saving and category navigation outside the scrolling form.
-            if !compact || self.codex_path_guidance {
+            if !compact || self.codex_path_guidance || self.daily_limit_guidance {
             egui::TopBottomPanel::bottom("settings-save-bar")
                 .resizable(false)
                 .frame(egui::Frame::new().fill(Color32::WHITE).inner_margin(8))
@@ -208,8 +208,9 @@ impl WordApp {
                 .stroke(egui::Stroke::new(1.0_f32, ux::BORDER)).corner_radius(10)
                 .inner_margin(if compact { 6 } else { 16 })
                 .show(ui, |ui| {
+                if self.qwen_settings.is_some() { ui.disable(); }
                 ui.set_width(ui.available_width());
-                if compact && !self.codex_path_guidance {
+                if compact && !self.codex_path_guidance && !self.daily_limit_guidance {
                     ui.horizontal(|ui| {
                         home_art::title(ui, "設定", 24.0);
                         let menu = egui::ComboBox::from_id_salt("settings-category")
@@ -241,9 +242,9 @@ impl WordApp {
                 }
                 ui.horizontal(|ui| {
                     home_art::badge(ui, home_art::Icon::Gear, home_art::BLUE, 36.0);
-                    home_art::title(ui, if self.codex_path_guidance { "AI接続の修正" } else { "設定" }, 28.0);
+                    home_art::title(ui, if self.codex_path_guidance { "AI接続の修正" } else if self.daily_limit_guidance { "生成・添削の上限設定" } else { "設定" }, 28.0);
                 });
-                if !self.codex_path_guidance {
+                if !self.codex_path_guidance && !self.daily_limit_guidance {
                     if ui.available_width() >= 650.0 {
                         ui.label("変更したい項目を選ぶ。設定値は分類を切り替えても保持される。");
                     }
@@ -267,39 +268,57 @@ impl WordApp {
             });
             ui.add_space(4.0);
             let content = egui::ScrollArea::vertical()
-                .id_salt(("settings-content", self.settings_section as u8, self.codex_path_guidance))
+                .id_salt(("settings-content", self.settings_section as u8, self.codex_path_guidance, self.daily_limit_guidance))
+                .animated(!self.qwen_settings_focus)
                 .auto_shrink([false, false])
                 .show(ui, |ui| {
                     ui.set_width(ui.available_width());
-                    if self.codex_path_guidance {
-                        // Preserve the focused recovery view and its one-shot field focus.
-                        ux::panel(ui, true, |ui| self.connection_settings_panel(ui));
-                    } else {
-                        match self.settings_section {
-                            SettingsSection::Learning => ux::panel(ui, false, |ui| self.learning_settings_panel(ui, ctx)),
-                            SettingsSection::Voice => ux::panel(ui, false, |ui| self.voice_settings_panel(ui)),
-                            SettingsSection::Connection => {
-                                ux::panel(ui, false, |ui| self.connection_settings_panel(ui));
+                    if self.color_editor.is_some() {
+                        ui.small("配色を保存またはキャンセルするまで、通常設定の編集・保存とバックアップ復元はできない。");
+                    }
+                    ui.add_enabled_ui(self.color_editor.is_none(), |ui| {
+                        if self.codex_path_guidance && self.qwen_settings.is_none() {
+                            // Preserve the focused recovery view and its one-shot field focus.
+                            ux::panel(ui, true, |ui| self.connection_settings_panel(ui));
+                        } else if self.daily_limit_guidance && self.qwen_settings.is_none() {
+                            ux::panel(ui, true, |ui| self.generation_settings_panel(ui));
+                            if ui.ww_button("案内を閉じる").clicked() {
+                                self.daily_limit_guidance = false;
+                                self.daily_limit_focus_pending = false;
+                            }
+                        } else {
+                            match self.settings_section {
+                                SettingsSection::Learning => ux::panel(ui, false, |ui| self.learning_settings_panel(ui, ctx)),
+                                SettingsSection::Voice => ux::panel(ui, false, |ui| self.voice_settings_panel(ui)),
+                                SettingsSection::Connection => {
+                                    ui.add_enabled_ui(self.qwen_settings.is_none(), |ui| {
+                                        ux::panel(ui, false, |ui| self.connection_settings_panel(ui));
+                                    });
+                                    ui.add_space(8.0);
+                                    ux::panel(ui, false, |ui| self.qwen_connection_panel(ui));
             ui.add_space(4.0);
             if let Some(error) = &self.settings_editor.error {
                 ui.colored_label(Color32::DARK_RED, format!("設定を保存できなかった：{error}"));
             }
-                                ux::panel(ui, false, |ui| self.generation_settings_panel(ui));
-                            }
-                            SettingsSection::Data => ux::panel(ui, false, |ui| self.backup_settings_panel(ui)),
-                            SettingsSection::Help => {
-                                ux::panel(ui, false, |ui| self.diagnostic_settings_panel(ui));
-                                ui.add_space(4.0);
-                                ux::panel(ui, false, |ui| {
-                                    ui.ww_collapsing("学習方式と限界", |ui| {
-                                        ui.label("間隔学習・想起練習・段階的ヒントを採用。復習間隔は透明な独自の計算規則であり、FSRSでも『科学的に最速と証明された方式』でもない。");
-                                        ui.label("復習結果・入力方式別の記録を確認しながら、学習量を調整する。自己評価を含むため、数値は能力の厳密な測定ではない。");
-                                        ui.label("詳細な研究根拠・教材の選定基準は同梱のRESEARCH.mdを参照。");
+                                    ui.add_enabled_ui(self.qwen_settings.is_none(), |ui| {
+                                        ux::panel(ui, false, |ui| self.generation_settings_panel(ui));
                                     });
-                                });
+                                }
+                                SettingsSection::Data => ux::panel(ui, false, |ui| self.backup_settings_panel(ui)),
+                                SettingsSection::Help => {
+                                    ux::panel(ui, false, |ui| self.diagnostic_settings_panel(ui));
+                                    ui.add_space(4.0);
+                                    ux::panel(ui, false, |ui| {
+                                        ui.ww_collapsing("学習方式と限界", |ui| {
+                                            ui.label("間隔学習・想起練習・段階的ヒントを採用。復習間隔は透明な独自の計算規則であり、FSRSでも『科学的に最速と証明された方式』でもない。");
+                                            ui.label("復習結果・入力方式別の記録を確認しながら、学習量を調整する。自己評価を含むため、数値は能力の厳密な測定ではない。");
+                                        ui.label("詳細な研究根拠・教材の選定基準は同梱のRESEARCH.mdを参照。");
+                                        });
+                                    });
+                                }
                             }
                         }
-                    }
+                    });
                 });
             #[cfg(test)]
             ui.ctx().data_mut(|data| data.insert_temp(
@@ -310,7 +329,7 @@ impl WordApp {
     }
 
     fn settings_save_button(&mut self, ui: &mut egui::Ui) {
-        let save = ui.add_enabled(self.fatal.is_none() && self.settings_changed(),
+        let save = ui.add_enabled(self.fatal.is_none() && self.color_editor.is_none() && self.qwen_settings.is_none() && self.settings_changed(),
             crate::app::controls::Button::new(
                 RichText::new("保存").color(Color32::WHITE))
                 .fill(home_art::BLUE).min_size(egui::vec2(72.0, 44.0)));
@@ -323,41 +342,88 @@ impl WordApp {
                 self.settings_editor.error = Some(error);
             }
         }
-        if ui.ww_button("キャンセル").clicked() { self.cancel_settings(ui.ctx()); }
+        if ui.add_enabled(self.color_editor.is_none() && self.qwen_settings.is_none(), crate::app::controls::Button::new("キャンセル")).clicked() {
+            self.cancel_settings(ui.ctx());
+        }
         if let Some(error) = &self.settings_editor.error {
             save.on_hover_text(error);
         }
     }
 
     fn generation_settings_panel(&mut self, ui: &mut egui::Ui) {
+        let input_tint = self.effective_tint().input;
         home_art::title(ui, "生成・添削の上限", 22.0);
         ui.label("生成・添削の1日上限（試行回数）");
-        ui.add(egui::Slider::new(
-            &mut self.settings_editor.draft.ai_daily_limit,
-            0..=1000,
+        let limit = color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| {
+            ui.add(egui::Slider::new(
+                &mut self.settings_editor.draft.ai_daily_limit,
+                0..=1000,
+            ))
+        });
+        #[cfg(test)]
+        ui.ctx().data_mut(|data| data.insert_temp(
+            egui::Id::new("feedback-ui-daily-limit-slider"),
+            (limit.rect, limit.id, ui.clip_rect(), limit.enabled()),
         ));
+        if self.daily_limit_focus_pending {
+            limit.scroll_to_me_animation(
+                Some(egui::Align::Center),
+                egui::style::ScrollAnimation::none(),
+            );
+            if ui.clip_rect().contains(limit.rect.center())
+                && !ui.ctx().will_discard() && self.color_editor.is_none()
+            {
+                limit.request_focus();
+                self.daily_limit_focus_pending = false;
+            }
+        }
+        if self.daily_limit_guidance {
+            ui.painter().rect_stroke(
+                limit.rect.expand(3.0),
+                3.0,
+                egui::Stroke::new(2.0_f32, Color32::from_rgb(190, 100, 20)),
+                egui::StrokeKind::Outside,
+            );
+            if self.color_editor.is_some() {
+                ui.colored_label(Color32::from_rgb(165, 75, 15),
+                    "上限を変更するには、先に配色を保存またはキャンセルする。");
+            } else {
+                ui.colored_label(Color32::from_rgb(165, 75, 15),
+                    "上限を変更して保存する。保存後の次の操作から有効になる。");
+            }
+        }
         ui.label("1回に生成する例文数");
-        ui.add(egui::Slider::new(
-            &mut self.settings_editor.draft.examples_per_word,
-            3..=12,
-        ));
+        color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| {
+            ui.add(egui::Slider::new(
+                &mut self.settings_editor.draft.examples_per_word,
+                3..=12,
+            ))
+        });
         ui.small(
             "生成・添削の上限は語数ではなく試行回数である。ChatGPT契約側の利用枠とは別の設定。",
         );
     }
 
     fn learning_settings_panel(&mut self, ui: &mut egui::Ui, _ctx: &egui::Context) {
+        let input_tint = self.effective_tint().input;
         home_art::title(ui, "学習と表示", 22.0);
+        if ui.ww_button("配色を調整").clicked() {
+            self.begin_color_editor();
+        }
         ui.label("通常コースの目安時間（分）");
-        ui.add(egui::Slider::new(
-            &mut self.settings_editor.draft.minutes,
-            1..=30,
-        ));
+        color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| {
+            ui.add(egui::Slider::new(
+                &mut self.settings_editor.draft.minutes,
+                1..=30,
+            ))
+        });
         ui.label("新規項目の1日上限");
-        ui.add(egui::Slider::new(
-            &mut self.settings_editor.draft.new_per_day,
-            0..=20,
-        ));
+        color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| {
+            ui.add(egui::Slider::new(
+                &mut self.settings_editor.draft.new_per_day,
+                0..=20,
+            ))
+        });
         ui.small("1日5分では3項目を初期値とする。復習候補が6項目を超える日は新規を出さない。");
         ui.add_space(8.0);
         ui.label("練習で出題する形式");
@@ -409,6 +475,7 @@ impl WordApp {
     }
 
     fn voice_settings_panel(&mut self, ui: &mut egui::Ui) {
+        let input_tint = self.effective_tint().input;
         home_art::title(ui, "読み上げと音声入力", 22.0);
         ui.label("読み上げに使用する音声");
         let current_voice = self
@@ -435,8 +502,9 @@ impl WordApp {
         ui.label("読み上げ速度（倍）");
         let mut rate = self.settings_editor.draft.speech_rate.unwrap_or(
             if self.settings_editor.draft.slow_speech { 0.8 } else { 1.0 });
-        if ui
-            .add(egui::Slider::new(&mut rate, 0.5..=4.0).step_by(0.1))
+        if color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| {
+            ui.add(egui::Slider::new(&mut rate, 0.5..=4.0).step_by(0.1))
+        })
             .changed()
         {
             self.settings_editor.draft.speech_rate = Some(rate);
@@ -451,19 +519,21 @@ impl WordApp {
     }
 
     fn connection_settings_panel(&mut self, ui: &mut egui::Ui) {
-        home_art::title(ui, "AI接続・モデル・effort", 22.0);
+        let input_tint = self.effective_tint().input;
+        let input_fill = color_theme::blend(ux::TINT, input_tint);
+        home_art::title(ui, "チャット・教材作成：Codex", 22.0);
         ui.label(
             "Codex CLIをインストールし、ターミナルで codex login を実行してChatGPTでログインする。",
         );
-        ui.small("APIキーは使用しない。生成はChatGPT契約の利用枠を使用し、上限到達時は停止する。");
+        ui.small("CodexはChatGPT認証を使い、APIキーは使用しない。生成はChatGPT契約の利用枠を使用し、上限到達時は停止する。");
         ui.add_space(8.0);
         ui.label("Codex実行ファイル");
-        let response = ui.add(
-            egui::TextEdit::singleline(&mut self.settings_editor.draft.codex_path)
+        let response = color_theme::editable_input(ui, input_tint, ux::TINT, |ui| {
+            ui.add(egui::TextEdit::singleline(&mut self.settings_editor.draft.codex_path)
                 .id_salt("codex-executable-input")
-                .background_color(ux::TINT)
-                .desired_width(ui.available_width().min(720.0)),
-        );
+                .background_color(input_fill)
+                .desired_width(ui.available_width().min(720.0)))
+        });
         #[cfg(test)]
         ui.ctx().data_mut(|data| data.insert_temp(
             egui::Id::new("settings-path-input"), (response.id, response.rect, ui.clip_rect())));
@@ -479,7 +549,7 @@ impl WordApp {
                 "入力中の回答・学習セッションは保持している。案内を閉じると設定の全項目へ戻る。",
             );
         }
-        if self.codex_path_focus_pending {
+        if self.codex_path_focus_pending && self.color_editor.is_none() && ui.is_enabled() {
             response.scroll_to_me_animation(
                 Some(egui::Align::Center),
                 egui::style::ScrollAnimation::none(),
@@ -505,16 +575,15 @@ impl WordApp {
         ui.small("実行ファイル欄をcodexにすると、起動時PATH → システムPATH → ユーザーPATH → npmの順に探索する。特定のCLIを使う場合はファイルを選択する。引数は入力しない。");
         ui.add_space(8.0);
         ui.label("要求するモデル（空欄はCodexの既定値）");
-        ui.add(
-            egui::TextEdit::singleline(&mut self.settings_editor.draft.codex_model)
-                .background_color(ux::TINT)
-                .desired_width(ui.available_width().min(440.0)),
-        );
+        color_theme::editable_input(ui, input_tint, ux::TINT, |ui| {
+            ui.add(egui::TextEdit::singleline(&mut self.settings_editor.draft.codex_model)
+                .background_color(input_fill)
+                .desired_width(ui.available_width().min(440.0)))
+        });
         self.effort_settings(ui);
         ui.small(
             "ここは次回の要求設定。実際のモデル・effortは、Codexの返却後に画面下部へ表示する。",
         );
-        ui.label(self.connection_label_for(&self.settings_editor.draft.codex_path));
         if ui
             .add_enabled(
                 self.pending.is_none(),
@@ -524,6 +593,7 @@ impl WordApp {
         {
             self.launch_content(0, None);
         }
+        ui.label(self.connection_label_for(&self.settings_editor.draft.codex_path));
         if self.codex_path_guidance && ui.ww_button("修正案内を閉じる").clicked() {
             self.codex_path_guidance = false;
         }
@@ -568,7 +638,8 @@ impl WordApp {
                     self.notify_result(result.map(|_| "学習記録をバックアップした。このJSONに教材TSV・録音・筆跡原本は含まれない。媒体付きバックアップも使用してください。".into()));
                 }
             }
-            if ui.add_enabled(idle && self.storage.is_some(), crate::app::controls::Button::new("学習記録を復元")).clicked() {
+            if ui.add_enabled(idle && self.storage.is_some() && self.color_editor.is_none(),
+                crate::app::controls::Button::new("学習記録を復元")).clicked() {
                 if let Some(path) = rfd::FileDialog::new().add_filter("JSON", &["json"]).pick_file() {
                     match read_limited(&path, 100_000_000)
                         .and_then(|text| serde_json::from_str::<Progress>(&text).map_err(|e| e.to_string()))

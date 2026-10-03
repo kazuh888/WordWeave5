@@ -3,7 +3,7 @@ use super::*;
 use wordweave5::store::Settings;
 
 #[derive(Clone, Copy)]
-pub(super) enum Destination { Page(Page), Close }
+pub(super) enum Destination { Page(Page), Close, ColorEditor }
 
 #[derive(Default)]
 pub(super) struct SettingsEditor {
@@ -190,6 +190,9 @@ impl WordApp {
     }
 
     pub(super) fn save_settings(&mut self, ctx: &egui::Context) -> Result<(), String> {
+        if self.color_editor.is_some() {
+            return Err("配色の保存かキャンセルを終えてから通常設定を保存してください。".into());
+        }
         if let Some(error) = &self.fatal { return Err(error.clone()); }
         self.credit_time();
         let mut next = self.progress.clone();
@@ -210,6 +213,10 @@ impl WordApp {
     }
 
     pub(super) fn cancel_settings(&mut self, ctx: &egui::Context) {
+        if self.color_editor.is_some() {
+            self.settings_editor.error = Some("配色の保存かキャンセルを終えてから通常設定を編集してください。".into());
+            return;
+        }
         if self.settings_editor.preview_speech { self.stop_speech(); }
         self.settings_editor.preview_speech = false;
         self.settings_editor.draft = self.progress.settings.clone();
@@ -245,7 +252,7 @@ impl WordApp {
         let mut action = 0;
         egui::Window::new("未保存の設定変更")
             .collapsible(false).resizable(false)
-            .max_width((ctx.screen_rect().width() - 32.0).max(240.0))
+            .max_width((ctx.screen_rect().width() - 32.0).max(1.0))
             .show(ctx, |ui| {
                 ux::dialog_body(ui);
                 ui.label("設定はまだ保存されていない。変更をどう扱うか選択してください。");
@@ -272,6 +279,7 @@ impl WordApp {
             match destination {
                 Destination::Page(page) => self.page = page,
                 Destination::Close => ctx.send_viewport_cmd(egui::ViewportCommand::Close),
+                Destination::ColorEditor => self.begin_color_editor(),
             }
         }
     }
@@ -280,11 +288,12 @@ impl WordApp {
     /// Slider hit target. Never move a dragged Slider between parents/IDs.
     pub(super) fn settings_zoom_panel(&mut self, ctx: &egui::Context) {
         if !self.settings_editor.active || !self.settings_editor.zoom_open
-            || self.settings_editor.leave.is_some() { return; }
+            || self.settings_editor.leave.is_some() || self.color_editor.is_some() { return; }
         let scale = 1.0 / ctx.zoom_factor();
         let screen = ctx.screen_rect();
         let position = egui::pos2(screen.right() - 360.0 * scale,
             screen.bottom() - 180.0 * scale);
+        let tint = self.effective_tint();
         let mut close = false;
         egui::Area::new(egui::Id::new("fixed-settings-zoom"))
             .order(egui::Order::Foreground).fixed_pos(position)
@@ -297,7 +306,7 @@ impl WordApp {
                 for style in [egui::TextStyle::Body, egui::TextStyle::Button, egui::TextStyle::Small, egui::TextStyle::Monospace] {
                     ui.style_mut().text_styles.insert(style, home_art::home_font(15.0 * scale));
                 }
-                egui::Frame::new().fill(Color32::WHITE)
+                egui::Frame::new().fill(color_theme::blend(Color32::WHITE, tint.page))
                     .stroke(egui::Stroke::new(scale, ux::BORDER))
                     .inner_margin(egui::Margin::same((8.0 * scale).round() as i8))
                     .show(ui, |ui| {
@@ -305,10 +314,12 @@ impl WordApp {
                             ui.label("倍率プレビュー");
                             close = ui.ww_button("×").clicked();
                         });
-                        let slider = ui.add(egui::Slider::new(&mut self.settings_editor.draft.font_scale, 0.5..=1.6)
-                            .step_by(0.01)
-                            .custom_formatter(|value, _| format!("{:.0}%", value * 100.0))
-                            .custom_parser(|text| text.trim().trim_end_matches('%').trim().parse::<f64>().ok().map(|value| value / 100.0)));
+                        let slider = color_theme::editable_input(ui, tint.input, Color32::WHITE, |ui| {
+                            ui.add(egui::Slider::new(&mut self.settings_editor.draft.font_scale, 0.5..=1.6)
+                                .step_by(0.01)
+                                .custom_formatter(|value, _| format!("{:.0}%", value * 100.0))
+                                .custom_parser(|text| text.trim().trim_end_matches('%').trim().parse::<f64>().ok().map(|value| value / 100.0)))
+                        });
                         #[cfg(test)]
                         ctx.data_mut(|data| data.insert_temp(egui::Id::new("settings-zoom"), slider.rect));
                         if slider.changed() { self.preview_settings_zoom(ctx, self.settings_editor.draft.font_scale); }

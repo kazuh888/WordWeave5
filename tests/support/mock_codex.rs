@@ -142,6 +142,9 @@ fn main() {
                 "nextCursor":null
             }})),
             "turn/start" => {
+                if mode == "structured_material" {
+                    fs::write("material-turn-start.json", serde_json::to_vec(&v["params"]).unwrap()).unwrap();
+                }
                 if mode=="lost_id" { return; }
                 if mode=="lost_result" || mode=="large_lost_result" {
                     if mode=="large_lost_result" {fs::write("media-input.json",serde_json::to_vec(&v["params"]["input"]).unwrap()).unwrap();}
@@ -158,7 +161,9 @@ fn main() {
                     // Keep the process alive even if stdin closes. The test must kill it.
                     loop { std::thread::park(); }
                 }
-                let response = if mode == "structured_chat" {
+                let response = if mode == "structured_material" {
+                    fs::read_to_string("material-response.json").unwrap()
+                } else if mode == "structured_chat" {
                     assert_eq!(v["params"]["outputSchema"], wordweave5::chat_action::schema());
                     json!({"answer":"apologize for を新規登録する案を確認してください。",
                         "title":"apologize for の登録", "action":{"operation":"new",

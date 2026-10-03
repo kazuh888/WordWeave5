@@ -20,21 +20,21 @@ impl WordApp {
             .data_mut(|d| d.get_temp::<bool>(ime_id).unwrap_or(false));
         let check = ui.input_mut(|i| study_keys(&mut i.events, focused, multiline, &mut composing));
         ui.ctx().data_mut(|d| d.insert_temp(ime_id, composing));
-        egui::Frame::new()
-            .fill(Color32::from_rgb(248, 251, 255))
-            .stroke(egui::Stroke::new(1.0_f32, ux::BORDER))
+        let input_tint = self.effective_tint().input;
+        let frame = color_theme::input_frame(Color32::from_rgb(248, 251, 255), input_tint, enabled)
             .corner_radius(8)
             .inner_margin(12)
             .show(ui, |ui| {
-                ui.add(
+                color_theme::editable_input(ui, input_tint, Color32::from_rgb(248, 251, 255), |ui| ui.add(
                     egui::TextEdit::multiline(&mut self.answer)
                         .frame(false)
                         .id(id)
                         .desired_rows(if multiline { 3 } else { 2 })
                         .desired_width(f32::INFINITY)
                         .hint_text("回答を入力 / 認識結果を確認・修正"),
-                );
+                )).has_focus()
             });
+        color_theme::input_focus_outline(ui, frame.response.rect, frame.inner);
         ui.small(if multiline {
             "Enterで改行 / Ctrl+Enterで照合。照合後に自分で評価して記録する。"
         } else {

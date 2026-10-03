@@ -251,6 +251,7 @@ impl WordApp {
     }
 
     fn vocabulary_generation_settings(&mut self, ui: &mut egui::Ui, idle: bool) {
+        let input_tint = self.effective_tint().input;
         ux::panel(ui, false, |ui| {
             ui.strong("AIで生成する場合の設定（完成済み教材TSVには適用しない）");
             ui.add_enabled_ui(idle, |ui| {
@@ -258,12 +259,14 @@ impl WordApp {
                 let controls = |ui: &mut egui::Ui| {
                     ui.horizontal(|ui| {
                         ui.label("1回の追加上限");
-                        let response = ui.add_sized(
-                            egui::vec2(104.0, 40.0),
-                            egui::DragValue::new(&mut self.progress.settings.batch_words)
-                                .range(1..=3000)
-                                .suffix(" 語"),
-                        );
+                        let response = color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| {
+                            ui.add_sized(
+                                egui::vec2(104.0, 40.0),
+                                egui::DragValue::new(&mut self.progress.settings.batch_words)
+                                    .range(1..=3000)
+                                    .suffix(" 語"),
+                            )
+                        });
                         #[cfg(test)]
                         ui.ctx().data_mut(|data| {
                             data.insert_temp(
@@ -277,12 +280,14 @@ impl WordApp {
                     });
                     ui.horizontal(|ui| {
                         ui.label("1語あたり");
-                        let response = ui.add_sized(
-                            egui::vec2(104.0, 40.0),
-                            egui::DragValue::new(&mut self.progress.settings.examples_per_word)
-                                .range(3..=12)
-                                .suffix(" 例文"),
-                        );
+                        let response = color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| {
+                            ui.add_sized(
+                                egui::vec2(104.0, 40.0),
+                                egui::DragValue::new(&mut self.progress.settings.examples_per_word)
+                                    .range(3..=12)
+                                    .suffix(" 例文"),
+                            )
+                        });
                         #[cfg(test)]
                         ui.ctx().data_mut(|data| {
                             data.insert_temp(
@@ -402,6 +407,7 @@ impl WordApp {
     }
 
     fn vocabulary_provided(&mut self, ui: &mut egui::Ui) {
+        let input_tint = self.effective_tint().input;
         let enabled = !self.provided_words.trim().is_empty();
         let generate = method_card(
             ui,
@@ -412,20 +418,19 @@ impl WordApp {
             enabled,
             |ui| {
                 ui.label("1行に1語または1フレーズを入力する。");
-                egui::Frame::new()
-                    .fill(Color32::WHITE)
-                    .stroke(egui::Stroke::new(1.0_f32, ux::BORDER))
+                let frame = color_theme::input_frame(Color32::WHITE, input_tint, ui.is_enabled())
                     .inner_margin(10)
                     .corner_radius(8)
                     .show(ui, |ui| {
-                        ui.add(
+                        color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| ui.add(
                             egui::TextEdit::multiline(&mut self.provided_words)
                                 .frame(false)
                                 .desired_rows(3)
                                 .desired_width(f32::INFINITY)
                                 .hint_text("take\nlook forward to\nas soon as"),
-                        );
+                        )).has_focus()
                     });
+                color_theme::input_focus_outline(ui, frame.response.rect, frame.inner);
                 ui.small("入力した語は、まず④の候補一覧へ保存し、その後に教材を生成・登録する。エラーで教材登録に失敗しても候補は残るため、④から1語を選んで再実行できる。");
                 ui.small("中断した未処理語は「未処理の語から再開」でまとめて続行できる。");
             },
@@ -495,26 +500,25 @@ impl WordApp {
     }
 
     fn vocabulary_candidates(&mut self, ui: &mut egui::Ui, idle: bool) {
+        let input_tint = self.effective_tint().input;
         ux::panel(ui, false, |ui| {
             ui.strong(format!(
                 "④ 保存された単語から1語を選ぶ（全{}語）",
                 self.words.len()
             ));
-            let search_changed = egui::Frame::new()
-                .fill(ux::TINT)
-                .stroke(egui::Stroke::new(1.0_f32, ux::BORDER))
+            let search = color_theme::input_frame(ux::TINT, input_tint, ui.is_enabled())
                 .inner_margin(8)
                 .corner_radius(6)
                 .show(ui, |ui| {
-                    ui.add(
+                    color_theme::editable_input(ui, input_tint, ux::TINT, |ui| ui.add(
                         egui::TextEdit::singleline(&mut self.word_search)
                             .frame(false)
                             .hint_text("英単語・フレーズを絞り込む（例：take）")
                             .desired_width(f32::INFINITY),
-                    )
-                })
-                .inner
-                .changed();
+                    ))
+                });
+            color_theme::input_focus_outline(ui, search.response.rect, search.inner.has_focus());
+            let search_changed = search.inner.changed();
             let visible = visible_candidates(&self.words, &self.word_search);
             ui.label("検索対象は保存された単語リストである。初期状態はNGSLで、②・③で登録開始した語も追加される。教材本文・日本語の意味は検索しない。");
             ui.small(format!("{}語を表示 / 全{}語。入力文字を含む語を検索する（大文字・小文字は区別しない）。空欄なら全語を表示する。", visible.len(), self.words.len()));

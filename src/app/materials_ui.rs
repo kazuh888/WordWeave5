@@ -38,19 +38,19 @@ impl WordApp {
                 "意味と使い分けを確認し、必要なときに例文や言い換えを追加する。",
             );
         }
-        egui::Frame::new()
-            .fill(Color32::WHITE)
-            .stroke(egui::Stroke::new(1.0_f32, ux::BORDER))
+        let input_tint = self.effective_tint().input;
+        let search = color_theme::input_frame(Color32::WHITE, input_tint, ui.is_enabled())
             .inner_margin(10)
             .corner_radius(8)
             .show(ui, |ui| {
-                ui.add(
+                color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| ui.add(
                     egui::TextEdit::singleline(&mut self.search)
                         .frame(false)
                         .hint_text("基本語・表現・日本語で検索")
                         .desired_width(f32::INFINITY),
-                );
+                )).has_focus()
             });
+        color_theme::input_focus_outline(ui, search.response.rect, search.inner);
         let query = self.search.trim().to_lowercase();
         let matches: Vec<usize> = self
             .deck
@@ -142,23 +142,24 @@ impl WordApp {
                 super::home_art::title(ui, &entry.base, 36.0);
                 ui.label(RichText::new(&entry.meaning).size(22.0));
                 ui.add_space(12.0);
-                ui.strong("言い換え・語調");
+                if !entry.replacements.is_empty() {
+                    ui.strong("言い換えと使い分け");
+                    ui.vertical(|ui| {
+                        for (index, replacement) in entry.replacements.iter().enumerate() {
+                            if index > 0 {
+                                ui.separator();
+                            }
+                            ui.strong(&replacement.phrase);
+                            ui.label(&replacement.meaning);
+                            ui.label(&replacement.conditions);
+                        }
+                    });
+                }
+                ui.add_space(12.0);
+                ui.strong("語調・文体");
                 ui.label(format!("社外メール：{}", shown(&entry.business)));
                 ui.label(format!("格調・文体：{}", shown(&entry.elevated)));
                 ui.label(format!("語調・意味：{}", entry.register));
-                if !entry.replacements.is_empty() {
-                    ui.ww_collapsing(
-                        format!("追加の言い換えと条件（{}件）", entry.replacements.len()),
-                        |ui| {
-                            for replacement in &entry.replacements {
-                                ui.strong(&replacement.phrase);
-                                ui.label(&replacement.meaning);
-                                ui.label(&replacement.conditions);
-                                ui.separator();
-                            }
-                        },
-                    );
-                }
                 ui.separator();
                 ui.strong("使い分けのポイント");
                 ui.label(&entry.usage);
@@ -176,6 +177,10 @@ impl WordApp {
                         .clicked()
                     {
                         self.say(&entry.completed());
+                    }
+                    if ui.add(crate::app::controls::Button::new("読んで発音を確認")
+                        .min_size(egui::vec2(180.0, 44.0))).clicked() {
+                        self.open_qwen_reading(&entry);
                     }
                 });
                 self.material_examples(ui, &entry);
@@ -262,6 +267,7 @@ impl WordApp {
     }
 
     fn material_management(&mut self, ui: &mut egui::Ui, entry: &Entry) {
+        let input_tint = self.effective_tint().input;
         let idle = self.pending.is_none()
             && self.session.is_none()
             && self.recorder.is_none()
@@ -281,8 +287,10 @@ impl WordApp {
                 }
                 ui.ww_collapsing("日本文を登録して英文を生成", |ui| {
                     let draft = self.progress.japanese_drafts.entry(entry.id.clone()).or_default();
-                    if ui.add(egui::TextEdit::multiline(draft).desired_rows(3)
-                        .desired_width(f32::INFINITY).hint_text("この表現で伝えたい日本語を入力")).changed() {
+                    if color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| {
+                        ui.add(egui::TextEdit::multiline(draft).desired_rows(3)
+                            .desired_width(f32::INFINITY).hint_text("この表現で伝えたい日本語を入力"))
+                    }).changed() {
                         self.dirty = true;
                     }
                     if ui.ww_button("日本文を登録し、英文を生成・登録").clicked() {
@@ -297,8 +305,10 @@ impl WordApp {
                         self.draft_text = model::deck_text(std::slice::from_ref(entry));
                     }
                     if !self.draft_text.is_empty() {
-                        ui.add(egui::TextEdit::multiline(&mut self.draft_text).desired_rows(7)
-                            .desired_width(f32::INFINITY));
+                        color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| {
+                            ui.add(egui::TextEdit::multiline(&mut self.draft_text).desired_rows(7)
+                                .desired_width(f32::INFINITY))
+                        });
                         ui.small("保存する対象は編集欄のTSVである。末尾2列は言い換えと例文のJSON配列。設定からファイルの書き出し・取り込みもできる。");
                         if ui.ww_button("編集内容を確認して保存へ").clicked() {
                             match model::parse_deck(&self.draft_text) {
@@ -322,23 +332,24 @@ impl WordApp {
     }
 
     fn material_replacement_editor(&mut self, ui: &mut egui::Ui, entry: &Entry) {
+        let input_tint = self.effective_tint().input;
         ui.ww_collapsing("言い換えを手動登録", |ui| {
             ui.label("置き換えの語句");
-            ui.add(
+            color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| ui.add(
                 egui::TextEdit::singleline(&mut self.replacement_phrase)
                     .desired_width(f32::INFINITY),
-            );
+            ));
             ui.label("日本語の意味");
-            ui.add(
+            color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| ui.add(
                 egui::TextEdit::singleline(&mut self.replacement_meaning)
                     .desired_width(f32::INFINITY),
-            );
+            ));
             ui.label("使える条件・意味の違い");
-            ui.add(
+            color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| ui.add(
                 egui::TextEdit::multiline(&mut self.replacement_conditions)
                     .desired_rows(3)
                     .desired_width(f32::INFINITY),
-            );
+            ));
             if ui.ww_button("言い換えを追加").clicked() {
                 let mut changed = entry.clone();
                 changed.replacements.push(model::Replacement {

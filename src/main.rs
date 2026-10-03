@@ -15,7 +15,9 @@ mod annotation;
 fn main() -> eframe::Result<()> {
     #[cfg(debug_assertions)]
     if std::env::args().any(|arg| arg == "--ui-check") {
-        return app::visual_check::run();
+        let result = app::visual_check::run();
+        finish_audio_jobs();
+        return result;
     }
     let options = eframe::NativeOptions {
         viewport: eframe::egui::ViewportBuilder::default()
@@ -25,11 +27,27 @@ fn main() -> eframe::Result<()> {
             .with_drag_and_drop(true),
         ..Default::default()
     };
-    eframe::run_native(
+    let result = eframe::run_native(
         "WordWeave 5",
         options,
         Box::new(|cc| Ok(Box::new(app::WordApp::new(cc)))),
-    )
+    );
+    finish_audio_jobs();
+    result
+}
+
+#[cfg(windows)]
+fn finish_audio_jobs() {
+    qwen_audio::shutdown_audio_jobs();
+    if qwen_audio::take_audio_cleanup_warning() {
+        rfd::MessageDialog::new()
+            .set_level(rfd::MessageLevel::Warning)
+            .set_title("一時音声の削除を確認")
+            .set_description(
+                "検査用の一時音声コピーを削除できなかった。元の音声ファイルは変更していない。",
+            )
+            .show();
+    }
 }
 
 #[cfg(not(windows))]

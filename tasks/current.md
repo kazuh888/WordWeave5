@@ -1,4 +1,46 @@
-# 現在の状態（2026-09-26）
+# 現在の状態（2026-10-03）
+
+- QWEN-STOP-001 U2色差再改善完了：無効■を#C8CFD6、有効円枠を#0064BE/2.0へ変更。全470件成功、合成native4比較・独立レビュー確定欠陥0。型明示のみの同値修正を照合し最終release成功、対象fmt成功・指定5入力hash一致。EXE22:48:40 JST、SHA256 `8BA9C64E1893A1D247FD8916037D89DB068E06BBD6170C93FAD748241E421DE6`。全体fmt既存39ファイル不一致・実音声/DPI未検証は保持する。次は利用者の色差目視受入、commit/pushなし。[結果](QWEN-STOP-001/results.md)。下記U1は履歴である。
+
+- QWEN-STOP-001実装・自動検証・release更新完了：音読評価の停止を共有円＋■へ変更し、常時描画・実再生中のみ有効とした。全469件（追加4件）成功、合成native5画像確認。実音声の停止/自然終了は未検証、狭幅拡大は既存本文スクロールが必要。全体fmtは既存39ファイル差分でFAIL、対象3ファイルは成功。EXEは2026-10-03 21:53:46 JST、SHA256 `7E5E931752A5F14FBA722CD0798BC0ACCF57AE35AB97242030322D64890D6B97`。音響解析・commit/pushは未実施。正本は[結果](QWEN-STOP-001/results.md)。
+
+- QWEN-UX-003実装・自動検証・合成native・release更新完了：音読評価を①準備→②送信確認→③結果へ整理し、状態案内を各段階へ移し、丁寧語・句点改行・評価後の折畳みを実装した。本体全体465件成功、native14画像の表示確認、独立review新規P1/P2なし。全体fmt gateは既存39ファイル差分でFAILのまま、対象3ファイルは整形成功であり全gate合格とはしない。EXEは2026-10-03 20:21:28 JST、SHA256 `F6C1960698C86EA809B7AC7D0CE82DDCE236717660AC09513D4EB4E420DCB532`。次は利用者の新UI受入・実音声/API確認。nativeキー操作・取消し終端画像・DPI等は未確認。Skill化・commit/pushは未実施。正本は[結果](QWEN-UX-003/results.md)と[検証](QWEN-UX-003/runner.md)。
+
+- QWEN-UX-002実装・自動検証・合成native・両release更新完了：形式エラーを発音の良否と区別しJSON Object要求を追加、音読画面を階層化、AI接続ページ内のQwen編集とモデル一覧だけの接続確認を追加した。本体451件、共通147件/core100件、資格情報構成check成功。標準と実最小820×650の拡大表示を確認。root全体fmtの既存差分は保持。EXEは2026-10-03 18:13:01 JST、SHA256 `42E13397C323A34D5A1F77E6456C4B5DE5D764ADECD2E50559018C3B49FE4B49`。過去の生応答がなく実障害原因は未確定。次は利用者の接続確認・同MP3再評価・新UI受入。Skill化は受入後、実キー/音声送信・commit/pushは未実施。正本は[結果](QWEN-UX-002/results.md)と[検証](QWEN-UX-002/runner.md)。
+
+- QWEN-SETTINGS-001実装・自動検証・両release更新完了：別英文の適合応答を形式不正と分け、本体「設定→AI接続」へQwen設定を移設し6地域を追加、READMEのNode/npm/Volta・FFmpeg条件を明確化。本体439件（設定20件含む）、共通lib135件/core88件成功。既存v1互換・保存取消し・キー非流用・背景操作遮断を確認し、標準/狭幅の合成native画面と独立レビューを完了。root全体fmtの広範差分は保持。EXEは2026-10-03 15:26:35 JST更新、SHA256 `F9F708A48E8EFC3ECDC4CD50C19DB211158BE1C3BBEA5D6A319FB7F1EB78FF24`。次は利用者が同じMP3で実APIの別英文表示を確認する。実キー/課金送信・利用者音声精度・release実機受入・commit/pushは未実施。正本は[結果](QWEN-SETTINGS-001/results.md)と[検証](QWEN-SETTINGS-001/runner.md)。
+
+- Windows別PCへの導入文書を追加：READMEに実行時の外部ツール/OS機能/クラウド設定と開発専用ツールの一覧を掲載し、[導入手順](../docs/install-windows.md)に配置・Codex CLI認証・FFmpeg/ffprobe/AMR-WB・Qwen設定・学習データ移動を記した。コード/EXEは変更していない。文書リンクと差分形式を確認済み。別PC実機での導入検証は未実施。
+
+- QWEN-FORMATS-001設計・実装・自動検証・両release更新完了：WAV/MP3/AAC/AMR/3GP/3GPPを共通lib/両hostへ追加し、本体の指定3説明を削除、取消し注記を冒頭へ移動した。原bytes保持、再生PCM分離、60秒/6MiB維持、破損/属性変化/取消し/終了回収を検証。本体418件、単独113件、core-only8+3+12件成功、native合成5画像、独立review P1/P2なし。本体EXE 2026-10-03 12:52:27 JST、SHA256 D859AACB60B0B5060E5F2579ED56DFD99015EDC37C86DA2BC8DB155834AD9C56。FFmpeg/ffprobeが必要、codec条件は設計に明記。既存整形差分は保持。追加形式の実機原音/実API・配布先backendは未確認、実API追加送信・commit/pushなし。正本は[計画](QWEN-FORMATS-001/plan.md)と[結果](QWEN-FORMATS-001/results.md)。以下QWEN-INTEGRATION-001のWAV実接続待ちは利用者受入で解消、客観的な発音精度は未保証のままである。
+
+- QWEN-INTEGRATION-001の実装・自動検証完了：step2の共通Qwen評価ライブラリと、本体「教材→主な例文→読んで発音を確認」を実装した。チャット/教材生成のCodex経路を維持し、本体音声評価は単独ツールと別の専用接続設定・毎回確認送信・メモリ限定結果である。本体415件/単独90件、core-only、両release、MCP smoke、標準/狭幅の合成native5画像と独立レビュー合格。本体release EXEを2026-10-03 02:23:00 JSTに更新。親は利用者選択Sol/highを維持し、helper起動capにより同指定の親が実装/検証を担当した。実API接続/助言の妥当性は人のGUI操作待ち、実マイク/IME/DPI等も別受入であり、step2全体完了ではない。本体設定にTokyo Host/キーを明示入力し、短い音声で確認送信する。キーをチャットへ収集しない。既存dirty/原音/記録を保持し、commit/pushは対象外。証拠は [results](QWEN-INTEGRATION-001/results.md)、設計は [共通音声評価](../docs/reuse/qwen-audio.md)。
+
+- FRAMEWORK-DESIGN-001の文書化完了：[Framework方針](../docs/reuse/framework.md)に技術部品・学習進行・教科/ホストの境界と第二教科の縦断gate、[候補台帳](../docs/reuse/library-candidates.md)に今設計3件/条件付き保留6件を記録。音声I/O・原本管理・egui controlsの設計を追加し、既存4設計は元の本文を保ちFramework補足だけ追加した。仕様/設計の独立レビューP1/P2なし、FW-AC01–08文書受入PASS、リンク/構造検査成功。ソース/設定98件とCargo/AGENTS/旧計画5件は開始hash一致。本体EXE・実API・実データ・commit/pushは操作なし。次のライブラリ化/第二教科仕様着手時には台帳を読み、着手条件を再判定する。切出し・二製品利用・第二教科実証は未実施。証拠 [results](FRAMEWORK-DESIGN-001/results.md)。
+
+- REUSE-DESIGN-001の文書化完了：音声評価/Qwen、Codex app-server、Markdown表示、チャットの再利用境界とADRを作成した。入口は [docs/reuse/README.md](../docs/reuse/README.md)。現行/提案/未検証、同意・取消し・保存失敗、互換性・二製品での将来受入を区別。独立レビュー指摘2件を修正しAC01–AC07文書受入PASS、リンク/構造検査成功。本体ソース98件とルートCargo2件は開始hashと一致し、本体/EXE/設定/実データ/commit/pushは変更なし。ライブラリ切出しや実APIは今回行っていない。次は利用者が選ぶ実接続確認または個別の切出しタスク。証拠 tasks/REUSE-DESIGN-001/。
+
+- QWEN-AUDIO-001のオフライン開発完了：Qwen3.8-Omni-Flash/Tokyo用の独立した日本語音読評価GUIとSTDIO MCP、再利用用Rustライブラリを実装。EXEは `target/qwen-audio/release/qwen-audio.exe`、SHA256 `9B36D56936D39852F0A24C66B153D5BBA475514F8FF65C5DF17F4041DEBB64CC`。独立81tests・fmt・release・MCP smoke成功、本体377tests/release成功。標準/狭幅native画面、実GUI子1件とcancel/EOF/親crash回収を確認し、独立レビューPASS。キーは専用Windows資格情報、毎回GUIで確認して送信、自動再送なし。本体AI/教材/学習記録は未変更。実キー保存・Tokyo接続・音声評価品質・IME等・実Codex登録は別受入。利用者MCP設定変更/課金送信/commit/pushなし。次はEXEの接続設定にTokyo API Hostとキーを入力し、短いWAVで実接続・評価内容を確認する。手順 tools/qwen-audio/README.md、証拠 tasks/QWEN-AUDIO-001/。
+
+- AUDIO-EVAL-001：ChatGPT認証の実app-serverで能力を照会。実返却モデルgpt-6.1-sol／medium、取得した7モデルは全てtext/imageのみで音声対応なし、実モデルは一覧にない。現行の音声対応確認条件を満たせないため、音声付き生成は行わず停止。原音理解・発音評価は未検証。設定変更・利用者録音の送信・アプリ変更なし。詳細はtasks/AUDIO-EVAL-001/feasibility.md。
+
+- FEEDBACK-UI-001 U7完了。教材案確認の固定会話AI回答をMarkdown表示、変更項目一覧/詳細を独立スクロール、選択変更時は右先頭へ戻す。原文/strict/承認/保存契約を保持。focused4/4、既存狭幅1/1、全targets377件、debug/release成功。標準/狭幅の日本語太字・表・固定回答末尾と固定操作を新native4画像で親/独立reviewer確認、blocking指摘0。EXE更新2026-09-30 21:31:46 JST、11,962,880 bytes、SHA256 C91B34B1900D0D31DEC09E314153AEB7F0326055189588D2F9803BE2A8868F23。実AI/IME/touch/pen受入・commit/pushなし。音声評価は「例文を読む練習」を優先とし、Codex原音評価能力の確認が次の課題（未実装）。詳細はtasks/FEEDBACK-UI-001/review-detail-{plan,design,results,runner}.md。
+
+- FEEDBACK-UI-001 U6実装・検証・release更新完了。通知引用と英語チャットAI回答のCommonMark＋GFM表/取消線/タスクリストを表示し、対象語付き登録成功receiptと失敗通知を実装。原文copy/strict照合/登録前承認/保存形式は維持。表の折返し行高修正、focused12/12・全targets373件・深い引用単独1件・release成功。EXE更新2026-09-30 10:17:47 JST、11,960,832 bytes、SHA256 F982FD5DEE9BE799AF713C54562B2FD10D6AD30544A1382374865942B9A7763D。起動0件を確認し強制終了なし。独立本体/分割PNG review済み、通知/chat標準・小画面のnative成功証拠と親目視を取得。最後のdebug helper条件変更後chatは再実行せず、詳細はgfm-results.mdに区別して記録した。実AI/利用者受入・commit/pushなし。次は利用者の実表示・実AI登録確認である。詳細はtasks/FEEDBACK-UI-001/gfm-{plan,spec,design,tests,results,runner-results}.md。
+
+- FEEDBACK-UI-001 U5実装・検証・release更新完了。通知を要点/理由/次の操作・引用比較・原文/Markdown切替・全文copy・折畳み技術情報へ改修。strict照合/登録承認/String互換維持。独立review指摘解消、最新alltargets361件成功/debug/release実exit0、native8状態と親の要約/比較/原文/狭幅末尾目視を確認。利用者がアプリを閉じた後、起動0を確認してEXE更新（2026-09-28 23:16:07 JST、11,598,336 bytes、SHA256 3674873D6CE550127CFE0FE5DDD107781D7965E3BB557A42E8E7E2664EFDDB76）。アプリ強制終了/再起動なし。画像はtasks/FEEDBACK-UI-001/artifacts/notice-native-rerun2/、最終結果はnotice-runner-results.md。次は利用者の表示受入であり、実AI/実データ試験/commit/pushなし。以下は前回時点の状態である。
+
+- FEEDBACK-UI-001実装・ローカル検証・release更新完了。上限拒否時だけの設定誘導、背景/入力欄別の色・濃さプレビューと明示保存取消し、引用診断の対象/原因/比較/対処分離を実装。全343テスト・debug/releaseビルドexit0、独立レビューblockingなし。標準/狭幅の隔離Windows描画を確認。設定移動後のshortcut撮影は通知が残るためSlider可視証拠にせず、実クリック・可視化・1回focusの自動試験と区別した。最新EXE SHA256 `F09882DA963F1643065040B16DEFE4851B053A53B529F528B3F72A04C22C446E`。実IME/実AI・全ダイアログの実機操作受入は別途、commit/pushなし。既存変更と実データを保持。詳細はtasks/FEEDBACK-UI-001/results.md、tests.md。
+
+- MATERIAL-QUOTE-001 U5実装・検証・release更新完了。教材確認を変更一覧＋選択箇所の前後比較＋理由/引用に整理し、固定会話を折畳み、見出し/登録操作を本文スクロールから分離。言い換え/意味/条件を常時表示し、語調・文体と分離。「追加のみ」「内容を見直す（追加・変更・削除）」へUI名称と説明を更新、AI/保存形式/登録処理は維持。全315テスト成功、標準/狭幅/スクロール後の隔離native描画と独立レビュー確認済み。EXEは2026-09-27 16:05:33 JST更新、SHA256 `4644B2AECBF270F28F3AEADB81DB8D374D4A84CB8304193B138B4E60A834FCAE`。次は利用者の実教材での画面受入であり、実AI再生成は今回未実施。commit/pushなし。詳細はtasks/MATERIAL-QUOTE-001/results.md U5。以下は以前の状態である。
+
+- MATERIAL-QUOTE-001 U4の通知修正・自動検証・release更新済み。再取得でCompletedかつ非空白本文の場合だけ情報通知、それ以外は状態と本文の取得有無を示す注意通知とした。本文なしの「実行記録で確認できる」という誤案内を解消。独立回帰3件追加、通知13件/全308件成功・release exit0。EXEは2026-09-27 11:43:55 JST、SHA256 `DD138102A892139D0892BF61FA6A5F8235F1E6E358E6DBFC2533A79578DD82D3`。timeout/生成/登録処理は変更なし。次は利用者による教材案の再作成・通知実機受入である。実AI未実施、commit/pushなし。詳細は同タスクresults.md U4。
+
+- MATERIAL-QUOTE-001 U3の実装・自動検証・release更新完了。format-first（依頼文・応答スキーマ・アプリ検証の整合）を実装し、項目全体pathは引き続き拒否、生成/保存済み案の変更理由番号・path・具体原因を通知へ表示する。追加回帰7件、focused22/22・実送信モック1/1・pattern正例4/負例6・全305テスト成功、独立最終レビューpass。release EXEは2026-09-27 11:05:08 JST更新、SHA256 `CB356D322EA73C576E3EBC2D1B0ACC07623F1C82C245995469F5D409BA24706A`。厳密引用照合/登録前承認を維持。実AI・実機表示は未検証、commit/pushなし。詳細は同タスクresults.md U3。下段は前回時点の記録である。
+
+- MATERIAL-QUOTE-001 実装・自動検証・release更新完了。実行記録でAIが引用からMarkdown強調記号を省いたことによる厳密包含不一致と特定し、発言消失ではないと確認した。判定は緩めず、理由・元会話の往復番号/話者・引用/生成時原文プレビューと確認案内を表示し、生成指示も明確化。7件回帰追加、全298件成功・release成功（EXE 2026-09-27 10:10:12更新）、独立最終レビューpass。詳細 `tasks/MATERIAL-QUOTE-001/`。実機表示/スクロール/コピーと実AI再生成は未検証。7役は今回ホストから起動できたが実行model/effort metadataは未取得。既存7役設定の未コミット変更を保持し、今回もcommit/pushなし。
+
+- DEVELOPMENT-TEAM-001：7役の開発エージェント定義と `docs/process/development-team.md` を作成。計画/外部仕様はGPT-6 Astra固定、設計/実装/テスト作成/実施/レビューは計画者が起動時モデルを選定。既存Skillを役割別に使用し、新規Skillなし。AGENTS.mdへ選定権と引継ぎを追記した。7TOML構文/必須項目/固定2役・可変5役/権限/9Skill参照先/既存scout保持を静的確認、限定独立確認実施。役名のホスト検出・実起動は未検証で次の開発開始時に確認する。branch `codex/development-agent-team`、未コミット・未push。設定/文書のみ、アプリ本体・EXE・既存検証基準は変更していない。
 
 - PLAYBACK-NOTICE-001 通知修正は利用者が「OK」と受入済み。commit・pushを依頼されたため、`codex/playback-notification-fixes` を公開対象とする。全291テスト/release成功後のアプリ変更はなく、今回の更新は受入記録のみ。PR作成・mainマージは今回の範囲外。commit SHAとpush結果はGitを正とする。再生位置の未再現残件は継続する。
 

@@ -564,15 +564,20 @@ impl WordApp {
         can_edit: bool,
     ) -> (bool, bool, bool) {
         let (mut attach, mut export_annotation, mut export_text) = (false, false, false);
+        let input_tint = self.effective_tint().input;
         let frozen = self.annotation.frozen();
         if !frozen {
             ui.heading("③ 手書きの下地を選ぶ");
             ui.label("③で下地の有無を選んで開始し、④で手書きします。");
             ui.strong("英文を下地にする場合");
             ui.label("下の欄に英文を入力・貼り付け、その英文を固定してから上に書き込みます。");
-            ui.add_enabled(can_edit, egui::TextEdit::multiline(&mut self.annotation.text)
-                .hint_text("手書きの下地にする英文（任意）")
-                .desired_rows(3).desired_width(f32::INFINITY).char_limit(2000));
+            ui.add_enabled_ui(can_edit, |ui| {
+                color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| {
+                    ui.add(egui::TextEdit::multiline(&mut self.annotation.text)
+                        .hint_text("手書きの下地にする英文（任意）")
+                        .desired_rows(3).desired_width(f32::INFINITY).char_limit(2000))
+                })
+            });
             if !self.annotation.text.is_empty() {
                 export_text = ui.ww_button("原文をTXTへ退避（添付登録とは別）").clicked();
             }

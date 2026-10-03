@@ -37,8 +37,14 @@ fn pause_bar_rects(rect: egui::Rect) -> [egui::Rect; 2] {
 
 fn remember(ui: &egui::Ui, key: &str, response: &egui::Response) {
     #[cfg(test)]
-    ui.ctx()
-        .data_mut(|d| d.insert_temp(egui::Id::new(("speech-control", key)), response.rect));
+    ui.ctx().data_mut(|d| {
+        d.insert_temp(egui::Id::new(("speech-control", key)), response.rect);
+        d.insert_temp(
+            egui::Id::new(("speech-control-enabled", key)),
+            response.enabled(),
+        );
+        d.insert_temp(egui::Id::new(("speech-control-id", key)), response.id);
+    });
     #[cfg(not(test))]
     let _ = (ui, key, response);
 }
@@ -144,8 +150,16 @@ fn round_button(
                         .selected(selected)
                         .fill(if selected { ux::ACCENT } else { Color32::WHITE })
                         .stroke(egui::Stroke::new(
-                            1.5_f32,
-                            if selected { ux::ACCENT } else { ux::BORDER },
+                            if matches!(kind, Icon::Stop) && enabled {
+                                2.0_f32
+                            } else {
+                                1.5_f32
+                            },
+                            if selected || (matches!(kind, Icon::Stop) && enabled) {
+                                ux::ACCENT
+                            } else {
+                                ux::BORDER
+                            },
                         )),
                 );
                 response.widget_info(|| {
@@ -157,7 +171,11 @@ fn round_button(
                     response.rect,
                     kind,
                     if !enabled {
-                        ux::MUTED
+                        if matches!(kind, Icon::Stop) {
+                            Color32::from_rgb(200, 207, 214)
+                        } else {
+                            ux::MUTED
+                        }
                     } else if selected {
                         Color32::WHITE
                     } else {
@@ -172,6 +190,10 @@ fn round_button(
         .inner
     })
     .inner
+}
+
+pub(super) fn stop_button(ui: &mut egui::Ui, key: &str, enabled: bool) -> bool {
+    round_button(ui, key, "停止", Icon::Stop, false, enabled)
 }
 
 fn volume_control(ui: &mut egui::Ui, snapshot: &media::PlaybackSnapshot, actions: &mut Actions) {
@@ -283,7 +305,7 @@ fn transport_controls(
         selected == Some(SpeechButton::Toggle),
         !snapshot.loading,
     );
-    actions.stop = round_button(ui, "stop", "停止", Icon::Stop, false, true);
+    actions.stop = stop_button(ui, "stop", true);
     actions.forward = round_button(
         ui,
         "forward",
