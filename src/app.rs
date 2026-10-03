@@ -33,16 +33,16 @@ mod material_review;
 mod materials_ui;
 mod notifications;
 mod playback_panel;
+#[cfg(test)]
+mod qwen_reading_tests;
 mod qwen_reading_ui;
 mod qwen_settings;
 #[cfg(test)]
 mod qwen_settings_tests;
-#[cfg(test)]
-mod qwen_reading_tests;
 mod run_history;
 mod session_end;
-mod settings_ui;
 mod settings_edit;
+mod settings_ui;
 mod stats_ui;
 #[cfg(test)]
 mod study_tests;
@@ -162,19 +162,43 @@ impl ChatFileConsent {
         chat.deleted_at.is_none()
             && chat.id == self.chat_id
             && chat.draft.trim() == self.question
-            && chat.draft_attachments.iter().map(|a| a.original.id.as_str()).collect::<Vec<_>>()
-                == self.attachment_ids.iter().map(String::as_str).collect::<Vec<_>>()
-            && chat.draft_attachments.iter().map(|a| a.file_name.as_ref()).collect::<Vec<_>>()
-                == self.attachment_names.iter().map(Option::as_ref).collect::<Vec<_>>()
+            && chat
+                .draft_attachments
+                .iter()
+                .map(|a| a.original.id.as_str())
+                .collect::<Vec<_>>()
+                == self
+                    .attachment_ids
+                    .iter()
+                    .map(String::as_str)
+                    .collect::<Vec<_>>()
+            && chat
+                .draft_attachments
+                .iter()
+                .map(|a| a.file_name.as_ref())
+                .collect::<Vec<_>>()
+                == self
+                    .attachment_names
+                    .iter()
+                    .map(Option::as_ref)
+                    .collect::<Vec<_>>()
     }
 }
 
-fn add_chat_text_files(payload: &mut serde_json::Value, texts: &[(String, String)]) -> Result<(), String> {
-    if texts.is_empty() { return Ok(()); }
-    payload["current_text_files"] = serde_json::json!(texts.iter()
+fn add_chat_text_files(
+    payload: &mut serde_json::Value,
+    texts: &[(String, String)],
+) -> Result<(), String> {
+    if texts.is_empty() {
+        return Ok(());
+    }
+    payload["current_text_files"] = serde_json::json!(texts
+        .iter()
         .map(|(name, content)| serde_json::json!({"name": name, "content": content}))
         .collect::<Vec<_>>());
-    if serde_json::to_vec(payload).map_or(true, |payload| payload.len() > wordweave5::chat::CONTEXT_BYTES) {
+    if serde_json::to_vec(payload).map_or(true, |payload| {
+        payload.len() > wordweave5::chat::CONTEXT_BYTES
+    }) {
         return Err("添付テキストと会話の文脈が送信上限を超えました。添付または文脈の選択を減らしてください。".into());
     }
     Ok(())
@@ -933,7 +957,8 @@ impl WordApp {
                             }
                             Ok(AiResult::Material(draft)) => {
                                 self.chat_material_open = true;
-                                self.material_selection_epoch = self.material_selection_epoch.wrapping_add(1);
+                                self.material_selection_epoch =
+                                    self.material_selection_epoch.wrapping_add(1);
                                 self.progress.material_draft = Some(draft);
                                 self.material_same_base = false;
                                 self.dirty = true;
@@ -946,8 +971,9 @@ impl WordApp {
                                 self.batch_running = false;
                                 self.fetch_then_generate = false;
                                 match failure {
-                                    wordweave5::material::MaterialFailure::Evidence(detail) =>
-                                        self.notify_material_diagnostic(detail),
+                                    wordweave5::material::MaterialFailure::Evidence(detail) => {
+                                        self.notify_material_diagnostic(detail)
+                                    }
                                     other => self.notify_error(other.legacy_message()),
                                 }
                             }
@@ -1038,7 +1064,9 @@ impl WordApp {
         };
         let count = self.progress.ai_calls.get(&today()).copied().unwrap_or(0);
         if count >= self.progress.settings.ai_daily_limit {
-            self.notify_daily_limit_rejected("本日のAI送信回数の上限に達しました。無料の自己評価は続けられます。");
+            self.notify_daily_limit_rejected(
+                "本日のAI送信回数の上限に達しました。無料の自己評価は続けられます。",
+            );
             return;
         }
         let Some(task) = self.current.clone() else {
@@ -1152,17 +1180,24 @@ impl WordApp {
         self.say_with_settings(text, &settings, false);
     }
 
-    fn say_with_settings(&mut self, text: &str, settings: &wordweave5::store::Settings, preview: bool) {
+    fn say_with_settings(
+        &mut self,
+        text: &str,
+        settings: &wordweave5::store::Settings,
+        preview: bool,
+    ) {
         if let Err(error) = self.check_speech_start() {
             self.notify_error(error);
             return;
         }
         let operation = DiagnosticOperation::begin(DiagnosticEntry::Playback);
-        if let Err(e) =
-            self.speaker
-                .say_at_rate(text, &settings.voice_id,
-                    settings.speech_rate.unwrap_or(if settings.slow_speech { 0.8 } else { 1.0 }))
-        {
+        if let Err(e) = self.speaker.say_at_rate(
+            text,
+            &settings.voice_id,
+            settings
+                .speech_rate
+                .unwrap_or(if settings.slow_speech { 0.8 } else { 1.0 }),
+        ) {
             operation.fail(DiagnosticStage::Synthesize, DiagnosticError::Unavailable);
             self.notify_error(e);
         } else {
@@ -1620,7 +1655,8 @@ impl WordApp {
         self.batch_queue.retain(|w| !existing(w));
         if self.batch_queue.is_empty() {
             self.notify_blocked(
-                "対象語はすべて自動生成・登録済みである。例文追加は教材画面から実行できる。");
+                "対象語はすべて自動生成・登録済みである。例文追加は教材画面から実行できる。",
+            );
             return;
         }
         if let Err(e) = self.save_queue() {
@@ -1707,10 +1743,14 @@ impl WordApp {
         {
             return;
         }
-        let request_settings = if action == 0 { self.settings_for_ui() } else { &self.progress.settings }.clone();
+        let request_settings = if action == 0 {
+            self.settings_for_ui()
+        } else {
+            &self.progress.settings
+        }
+        .clone();
         if action == 0 {
-            self.connection_check =
-                Some((request_settings.codex_path.trim().to_string(), false));
+            self.connection_check = Some((request_settings.codex_path.trim().to_string(), false));
         }
         let config = match ai::Config::from_settings(&request_settings) {
             Ok(c) => c,
@@ -1784,7 +1824,9 @@ impl WordApp {
             return;
         };
         if chat.exchanges.len() >= wordweave5::chat::MAX_EXCHANGES {
-            self.notify_warning("この会話は200往復に達した。引き継ぎメモをコピーして新しい会話を作成してください。");
+            self.notify_warning(
+                "この会話は200往復に達した。引き継ぎメモをコピーして新しい会話を作成してください。",
+            );
             return;
         }
         let mut context = match wordweave5::chat::prepare_with_catalog(
@@ -1810,15 +1852,31 @@ impl WordApp {
         };
         let texts = match self.attachment_texts(&attachments) {
             Ok(texts) => texts,
-            Err(error) => { self.notify_error(error); return; }
+            Err(error) => {
+                self.notify_error(error);
+                return;
+            }
         };
         if !texts.is_empty() && !consented {
-            let labels = attachments.iter().map(|attachment| {
-                let kind = if attachment.image.is_some() { "画像" }
-                    else if attachment.original.kind == wordweave5::assets::AssetKind::AudioWav { "音声" }
-                    else { "ファイル" };
-                format!("{kind}：{}", attachment.file_name.as_deref().unwrap_or(&attachment.source_text))
-            }).collect();
+            let labels = attachments
+                .iter()
+                .map(|attachment| {
+                    let kind = if attachment.image.is_some() {
+                        "画像"
+                    } else if attachment.original.kind == wordweave5::assets::AssetKind::AudioWav {
+                        "音声"
+                    } else {
+                        "ファイル"
+                    };
+                    format!(
+                        "{kind}：{}",
+                        attachment
+                            .file_name
+                            .as_deref()
+                            .unwrap_or(&attachment.source_text)
+                    )
+                })
+                .collect();
             self.pending_chat_file_send = Some(ChatFileConsent {
                 chat_id: id,
                 question,
@@ -2012,7 +2070,9 @@ impl WordApp {
             .scroll_bar_visibility(egui::scroll_area::ScrollBarVisibility::AlwaysVisible)
             .max_height(helper_height)
             .show(ui, |ui| {
-                for notice in &draft.notices { ui.label(notice); }
+                for notice in &draft.notices {
+                    ui.label(notice);
+                }
                 if ui.ww_button("元の会話を表示").clicked() {
                     self.open_material_source(&source);
                 }
@@ -2021,11 +2081,17 @@ impl WordApp {
                     ui.add_enabled_ui(idle, |ui| edit_material(ui, &mut draft, input_tint));
                 });
                 if draft.mode == Mode::New
-                    && self.deck.iter().any(|e| model::normalize(&e.base)
-                        == model::normalize(&draft.candidate.base))
+                    && self.deck.iter().any(|e| {
+                        model::normalize(&e.base) == model::normalize(&draft.candidate.base)
+                    })
                 {
-                    ui.add_enabled(idle, egui::Checkbox::new(&mut self.material_same_base,
-                        "同じ基本語の別用法として新規登録する"));
+                    ui.add_enabled(
+                        idle,
+                        egui::Checkbox::new(
+                            &mut self.material_same_base,
+                            "同じ基本語の別用法として新規登録する",
+                        ),
+                    );
                 }
                 ui.label(if draft.resets_learning() {
                     "基本の説明・問題・正解等が変わるため、この教材の復習状態は再学習に戻る。"
@@ -2036,8 +2102,11 @@ impl WordApp {
                 });
             });
         let changed = before != model::deck_text(&[draft.candidate.clone()]);
-        let ready = if draft.baseline.as_ref().is_some_and(|e|
-            self.progress.deleted_entries.contains(&e.id)) {
+        let ready = if draft
+            .baseline
+            .as_ref()
+            .is_some_and(|e| self.progress.deleted_entries.contains(&e.id))
+        {
             Err("対象教材は削除済みである。復元してから登録する。".into())
         } else {
             draft.ready(&self.deck, self.material_same_base)
@@ -2062,21 +2131,29 @@ impl WordApp {
                     ui.horizontal(|ui| {
                         let explain = ui.ww_button("理由を詳しく確認");
                         explain_failure = explain.clicked();
-                        let reason_width = (row_width - explain.rect.width()
-                            - ui.spacing().item_spacing.x).max(1.0);
+                        let reason_width =
+                            (row_width - explain.rect.width() - ui.spacing().item_spacing.x)
+                                .max(1.0);
                         ui.allocate_ui_with_layout(
                             egui::vec2(reason_width, button_height),
                             egui::Layout::top_down(egui::Align::Min),
                             |ui| {
-                                egui::ScrollArea::vertical().id_salt("material-ready-reason")
+                                egui::ScrollArea::vertical()
+                                    .id_salt("material-ready-reason")
                                     .max_width(reason_width)
                                     .min_scrolled_width(0.0)
                                     .min_scrolled_height(0.0)
                                     .auto_shrink([false, false])
-                                    .scroll_bar_visibility(egui::scroll_area::ScrollBarVisibility::AlwaysVisible)
-                                    .max_height(button_height).show(ui, |ui| {
-                                        ui.add(egui::Label::new(RichText::new(e).color(Color32::RED))
-                                            .wrap().selectable(true));
+                                    .scroll_bar_visibility(
+                                        egui::scroll_area::ScrollBarVisibility::AlwaysVisible,
+                                    )
+                                    .max_height(button_height)
+                                    .show(ui, |ui| {
+                                        ui.add(
+                                            egui::Label::new(RichText::new(e).color(Color32::RED))
+                                                .wrap()
+                                                .selectable(true),
+                                        );
                                     });
                             },
                         );
@@ -2084,8 +2161,12 @@ impl WordApp {
                 }
                 ui.add_enabled_ui(idle, |ui| {
                     let mut draw_actions = |ui: &mut egui::Ui| {
-                        commit = ui.add_enabled(ready.is_ok(),
-                            crate::app::controls::Button::new("内容を確認して教材に登録")).clicked();
+                        commit = ui
+                            .add_enabled(
+                                ready.is_ok(),
+                                crate::app::controls::Button::new("内容を確認して教材に登録"),
+                            )
+                            .clicked();
                         discard = ui.ww_button("教材案を破棄").clicked();
                     };
                     if narrow_actions {
@@ -2102,14 +2183,19 @@ impl WordApp {
         }
         if explain_failure {
             if let Err(reason) = &ready {
-                let deleted_target = draft.baseline.as_ref().is_some_and(|entry|
-                    self.progress.deleted_entries.contains(&entry.id));
+                let deleted_target = draft
+                    .baseline
+                    .as_ref()
+                    .is_some_and(|entry| self.progress.deleted_entries.contains(&entry.id));
                 if deleted_target {
                     self.notify_error(reason.clone());
                 } else {
                     match draft.validate_evidence_detailed() {
                         Err(wordweave5::material::MaterialFailure::Evidence(detail))
-                            if detail.legacy_text == *reason => self.notify_material_diagnostic(detail),
+                            if detail.legacy_text == *reason =>
+                        {
+                            self.notify_material_diagnostic(detail)
+                        }
                         _ => self.notify_error(reason.clone()),
                     }
                 }
@@ -2347,16 +2433,28 @@ impl WordApp {
         style.visuals.panel_fill = color_theme::blend(Color32::from_rgb(247, 250, 253), page_tint);
         style.visuals.window_fill = color_theme::blend(Color32::WHITE, page_tint);
         ctx.set_style(style);
-        if self.page == Page::Settings { self.begin_settings_edit(); }
+        if self.page == Page::Settings {
+            self.begin_settings_edit();
+        }
         if ctx.input(|i| i.viewport().close_requested()) {
-            if let Some(dialog) = self.qwen_dialog.as_mut() { dialog.close(); }
+            if let Some(dialog) = self.qwen_dialog.as_mut() {
+                dialog.close();
+            }
             self.qwen_dialog = None;
             if self.qwen_settings.is_some() {
                 ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
-                if self.qwen_settings.as_mut().is_some_and(|editor| editor.request_close()) {
+                if self
+                    .qwen_settings
+                    .as_mut()
+                    .is_some_and(|editor| editor.request_close())
+                {
                     self.finish_qwen_settings();
                 }
-            } else if self.color_editor.as_ref().is_some_and(|editor| editor.dirty()) {
+            } else if self
+                .color_editor
+                .as_ref()
+                .is_some_and(|editor| editor.dirty())
+            {
                 ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
                 if let Some(editor) = &mut self.color_editor {
                     editor.leave_close = true;
@@ -2365,25 +2463,28 @@ impl WordApp {
                 ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
                 self.settings_editor.leave = Some(settings_edit::Destination::Close);
             } else {
-            if self.chat_recording_id.is_some() {
-                self.stop_recording();
-            }
-            if self.unsaved_chat_audio.is_some()
-                || self.annotation.frozen()
-                || !self.annotation.text.is_empty()
-            {
-                ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
-                self.page = Page::Chat;
-                self.chat_media_open = true;
-                self.exit_media_requested = true;
-                self.exit_media_scroll_to_warning = true;
-                self.notify_blocked("終了前に未保存の録音・手書き注釈を確認してください。");
-            }
+                if self.chat_recording_id.is_some() {
+                    self.stop_recording();
+                }
+                if self.unsaved_chat_audio.is_some()
+                    || self.annotation.frozen()
+                    || !self.annotation.text.is_empty()
+                {
+                    ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
+                    self.page = Page::Chat;
+                    self.chat_media_open = true;
+                    self.exit_media_requested = true;
+                    self.exit_media_scroll_to_warning = true;
+                    self.notify_blocked("終了前に未保存の録音・手書き注釈を確認してください。");
+                }
             }
         }
         if self.qwen_settings.is_some()
             && ctx.input_mut(|input| input.consume_key(egui::Modifiers::NONE, egui::Key::Escape))
-            && self.qwen_settings.as_mut().is_some_and(|editor| editor.request_close())
+            && self
+                .qwen_settings
+                .as_mut()
+                .is_some_and(|editor| editor.request_close())
         {
             self.finish_qwen_settings();
         }
@@ -2393,9 +2494,14 @@ impl WordApp {
             || self.pending_restore.is_some()
             || self.backup_restore.is_some()
             || self.settings_editor.leave.is_some()
-            || self.color_editor.as_ref().is_some_and(|editor| editor.leave_close);
+            || self
+                .color_editor
+                .as_ref()
+                .is_some_and(|editor| editor.leave_close);
         let confirming = modal_open || self.qwen_settings.is_some();
-        if !confirming { self.handle_zoom_input(ctx); }
+        if !confirming {
+            self.handle_zoom_input(ctx);
+        }
         self.navigation_chrome(ctx, confirming);
         self.guard_settings_navigation(ctx);
         self.operation_notice(ctx);
@@ -2447,19 +2553,25 @@ impl WordApp {
         self.settings_leave_dialog(ctx);
         self.color_editor_window(ctx);
         self.qwen_reading_window(ctx);
-        if !confirming && self.color_editor.is_none() { self.settings_zoom_panel(ctx); }
+        if !confirming && self.color_editor.is_none() {
+            self.settings_zoom_panel(ctx);
+        }
         ctx.request_repaint_after(Duration::from_millis(200));
     }
 }
 impl eframe::App for WordApp {
     fn raw_input_hook(&mut self, ctx: &egui::Context, input: &mut egui::RawInput) {
-        if self.qwen_dialog.is_none() && self.qwen_settings.is_none() { self.settings_zoom_input(ctx, input); }
+        if self.qwen_dialog.is_none() && self.qwen_settings.is_none() {
+            self.settings_zoom_input(ctx, input);
+        }
     }
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         self.update_ui(ctx);
     }
     fn on_exit(&mut self, _gl: Option<&eframe::glow::Context>) {
-        if let Some(dialog) = self.qwen_dialog.as_mut() { dialog.close(); }
+        if let Some(dialog) = self.qwen_dialog.as_mut() {
+            dialog.close();
+        }
         self.qwen_dialog = None;
         if let Some(p) = self.pending.as_ref() {
             if let Some(c) = p.cancel.as_ref() {
@@ -2480,7 +2592,11 @@ impl eframe::App for WordApp {
     }
 }
 
-fn edit_material(ui: &mut egui::Ui, draft: &mut wordweave5::material::Draft, input_tint: wordweave5::store::TintChoice) {
+fn edit_material(
+    ui: &mut egui::Ui,
+    draft: &mut wordweave5::material::Draft,
+    input_tint: wordweave5::store::TintChoice,
+) {
     let append = draft.mode == wordweave5::material::Mode::Append;
     let baseline_replacements = draft
         .baseline
@@ -2533,10 +2649,12 @@ fn edit_material(ui: &mut egui::Ui, draft: &mut wordweave5::material::Draft, inp
                             ] {
                                 ui.label(label);
                                 color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| {
-                                    ui.add(egui::TextEdit::multiline(text)
-                                        .desired_rows(2)
-                                        .desired_width(f32::INFINITY)
-                                        .char_limit(1000))
+                                    ui.add(
+                                        egui::TextEdit::multiline(text)
+                                            .desired_rows(2)
+                                            .desired_width(f32::INFINITY)
+                                            .char_limit(1000),
+                                    )
                                 });
                             }
                             if ui.ww_button("この言い換えを案から除く").clicked() {
@@ -2579,10 +2697,12 @@ fn edit_material(ui: &mut egui::Ui, draft: &mut wordweave5::material::Draft, inp
                             ] {
                                 ui.label(label);
                                 color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| {
-                                    ui.add(egui::TextEdit::multiline(text)
-                                        .desired_rows(2)
-                                        .desired_width(f32::INFINITY)
-                                        .char_limit(1000))
+                                    ui.add(
+                                        egui::TextEdit::multiline(text)
+                                            .desired_rows(2)
+                                            .desired_width(f32::INFINITY)
+                                            .char_limit(1000),
+                                    )
                                 });
                             }
                             if ui.ww_button("この例文を案から除く").clicked() {

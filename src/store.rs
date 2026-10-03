@@ -466,9 +466,19 @@ mod tests {
         old.settings.ai_daily_limit = 37;
         old.settings.topic = "保存済みの合成設定".into();
         let mut legacy = serde_json::to_value(&old).unwrap();
-        legacy["settings"].as_object_mut().unwrap().remove("page_tint");
-        legacy["settings"].as_object_mut().unwrap().remove("input_tint");
-        fs::write(root.join("progress.json"), serde_json::to_vec_pretty(&legacy).unwrap()).unwrap();
+        legacy["settings"]
+            .as_object_mut()
+            .unwrap()
+            .remove("page_tint");
+        legacy["settings"]
+            .as_object_mut()
+            .unwrap()
+            .remove("input_tint");
+        fs::write(
+            root.join("progress.json"),
+            serde_json::to_vec_pretty(&legacy).unwrap(),
+        )
+        .unwrap();
         let saved = fs::read(root.join("progress.json")).unwrap();
         let loaded = storage.load().unwrap();
         let settings = serde_json::to_value(&loaded.settings).unwrap();
@@ -503,8 +513,15 @@ mod tests {
             document["settings"]["page_tint"] = invalid;
             let original = serde_json::to_vec_pretty(&document).unwrap();
             fs::write(&path, &original).unwrap();
-            assert!(storage.load().is_err(), "invalid palette was accepted: {document}");
-            assert_eq!(fs::read(&path).unwrap(), original, "load repaired user data");
+            assert!(
+                storage.load().is_err(),
+                "invalid palette was accepted: {document}"
+            );
+            assert_eq!(
+                fs::read(&path).unwrap(),
+                original,
+                "load repaired user data"
+            );
         }
         drop(storage);
         fs::remove_dir_all(root).unwrap();

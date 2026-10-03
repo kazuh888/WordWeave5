@@ -11,14 +11,25 @@ pub struct Execution {
 }
 impl Execution {
     pub fn from_response(response: &Value) -> Self {
-        let field = |name| response.get(name).and_then(Value::as_str)
-            .filter(|s| !s.trim().is_empty()).map(str::to_owned);
-        Self { model: field("model"), effort: field("reasoningEffort"), at: chrono::Utc::now().timestamp() }
+        let field = |name| {
+            response
+                .get(name)
+                .and_then(Value::as_str)
+                .filter(|s| !s.trim().is_empty())
+                .map(str::to_owned)
+        };
+        Self {
+            model: field("model"),
+            effort: field("reasoningEffort"),
+            at: chrono::Utc::now().timestamp(),
+        }
     }
     pub fn label(&self) -> String {
-        format!("モデル：{} / effort：{}",
+        format!(
+            "モデル：{} / effort：{}",
             self.model.as_deref().unwrap_or("未取得"),
-            self.effort.as_deref().unwrap_or("未取得（Codexにお任せ）"))
+            self.effort.as_deref().unwrap_or("未取得（Codexにお任せ）")
+        )
     }
 }
 
@@ -29,7 +40,9 @@ pub struct Snapshot {
     id: u64,
 }
 static STATE: OnceLock<Mutex<Snapshot>> = OnceLock::new();
-pub fn snapshot() -> Snapshot { STATE.get_or_init(Default::default).lock().unwrap().clone() }
+pub fn snapshot() -> Snapshot {
+    STATE.get_or_init(Default::default).lock().unwrap().clone()
+}
 pub struct Run(u64);
 impl Run {
     pub fn begin() -> Self {
@@ -41,13 +54,17 @@ impl Run {
     }
     pub fn observed(&self, execution: &Execution) {
         let mut state = STATE.get_or_init(Default::default).lock().unwrap();
-        if state.id == self.0 { state.execution = Some(execution.clone()); }
+        if state.id == self.0 {
+            state.execution = Some(execution.clone());
+        }
     }
 }
 impl Drop for Run {
     fn drop(&mut self) {
         let mut state = STATE.get_or_init(Default::default).lock().unwrap();
-        if state.id == self.0 { state.active = false; }
+        if state.id == self.0 {
+            state.active = false;
+        }
     }
 }
 
@@ -57,7 +74,10 @@ mod tests {
     use serde_json::json;
     #[test]
     fn missing_or_null_effort_is_not_inferred_from_model() {
-        for response in [json!({"model":"test"}), json!({"model":"test","reasoningEffort":null})] {
+        for response in [
+            json!({"model":"test"}),
+            json!({"model":"test","reasoningEffort":null}),
+        ] {
             let settings = Execution::from_response(&response);
             assert_eq!(settings.model.as_deref(), Some("test"));
             assert_eq!(settings.effort, None);
@@ -66,7 +86,8 @@ mod tests {
     }
     #[test]
     fn reported_settings_are_preserved() {
-        let settings = Execution::from_response(&json!({"model":"returned-model","reasoningEffort":"high"}));
+        let settings =
+            Execution::from_response(&json!({"model":"returned-model","reasoningEffort":"high"}));
         assert_eq!(settings.model.as_deref(), Some("returned-model"));
         assert_eq!(settings.effort.as_deref(), Some("high"));
     }

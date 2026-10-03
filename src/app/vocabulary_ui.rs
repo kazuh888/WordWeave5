@@ -200,7 +200,10 @@ impl WordApp {
 
     fn words_content(&mut self, ui: &mut egui::Ui) {
         #[cfg(debug_assertions)]
-        if ui.ctx().data(|d| d.get_temp::<bool>(egui::Id::new("preview-vocabulary-file")).unwrap_or(false)) {
+        if ui.ctx().data(|d| {
+            d.get_temp::<bool>(egui::Id::new("preview-vocabulary-file"))
+                .unwrap_or(false)
+        }) {
             self.vocabulary_file(ui);
             return;
         }
@@ -259,14 +262,15 @@ impl WordApp {
                 let controls = |ui: &mut egui::Ui| {
                     ui.horizontal(|ui| {
                         ui.label("1回の追加上限");
-                        let response = color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| {
-                            ui.add_sized(
-                                egui::vec2(104.0, 40.0),
-                                egui::DragValue::new(&mut self.progress.settings.batch_words)
-                                    .range(1..=3000)
-                                    .suffix(" 語"),
-                            )
-                        });
+                        let response =
+                            color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| {
+                                ui.add_sized(
+                                    egui::vec2(104.0, 40.0),
+                                    egui::DragValue::new(&mut self.progress.settings.batch_words)
+                                        .range(1..=3000)
+                                        .suffix(" 語"),
+                                )
+                            });
                         #[cfg(test)]
                         ui.ctx().data_mut(|data| {
                             data.insert_temp(
@@ -280,14 +284,17 @@ impl WordApp {
                     });
                     ui.horizontal(|ui| {
                         ui.label("1語あたり");
-                        let response = color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| {
-                            ui.add_sized(
-                                egui::vec2(104.0, 40.0),
-                                egui::DragValue::new(&mut self.progress.settings.examples_per_word)
+                        let response =
+                            color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| {
+                                ui.add_sized(
+                                    egui::vec2(104.0, 40.0),
+                                    egui::DragValue::new(
+                                        &mut self.progress.settings.examples_per_word,
+                                    )
                                     .range(3..=12)
                                     .suffix(" 例文"),
-                            )
-                        });
+                                )
+                            });
                         #[cfg(test)]
                         ui.ctx().data_mut(|data| {
                             data.insert_temp(
@@ -422,13 +429,16 @@ impl WordApp {
                     .inner_margin(10)
                     .corner_radius(8)
                     .show(ui, |ui| {
-                        color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| ui.add(
-                            egui::TextEdit::multiline(&mut self.provided_words)
-                                .frame(false)
-                                .desired_rows(3)
-                                .desired_width(f32::INFINITY)
-                                .hint_text("take\nlook forward to\nas soon as"),
-                        )).has_focus()
+                        color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| {
+                            ui.add(
+                                egui::TextEdit::multiline(&mut self.provided_words)
+                                    .frame(false)
+                                    .desired_rows(3)
+                                    .desired_width(f32::INFINITY)
+                                    .hint_text("take\nlook forward to\nas soon as"),
+                            )
+                        })
+                        .has_focus()
                     });
                 color_theme::input_focus_outline(ui, frame.response.rect, frame.inner);
                 ui.small("入力した語は、まず④の候補一覧へ保存し、その後に教材を生成・登録する。エラーで教材登録に失敗しても候補は残るため、④から1語を選んで再実行できる。");
@@ -457,9 +467,7 @@ impl WordApp {
             true,
             |ui| {
                 ui.label("UTF-8のCSV・TSV・TXTを読み込む。列名で単語リストと完成済み教材を自動判定する。");
-                ui.label(
-                    "単語リスト（2MBまで）：AIが意味・解説・例文を新しく作って登録する。",
-                );
+                ui.label("単語リスト（2MBまで）：AIが意味・解説・例文を新しく作って登録する。");
                 ui.small("単語リストの語は、まず④の候補一覧へ保存し、その後に教材を生成・登録する。エラーで教材登録に失敗しても候補は残るため、④から1語を選んで再実行できる。");
                 ui.label("完成済み教材TSV（64MBまで）：AI生成せず、追加・変更の差分を確認してから取り込む。");
                 ui.small("単語リストは共通設定の語数まで処理する。中断した未処理語は「未処理の語から再開」で続行できる。");
@@ -474,7 +482,8 @@ impl WordApp {
                 .pick_file()
             {
                 if let Err(error) = read_limited(&path, 64_000_000)
-                    .and_then(|text| self.prepare_vocabulary_file(&text)) {
+                    .and_then(|text| self.prepare_vocabulary_file(&text))
+                {
                     self.notify_error(error);
                 }
             }
@@ -482,13 +491,20 @@ impl WordApp {
     }
 
     fn prepare_vocabulary_file(&mut self, text: &str) -> Result<(), String> {
-        if self.session.is_some() || self.pending.is_some() || self.recorder.is_some()
-            || self.batch_running || self.fatal.is_some() || self.pending_import.is_some() {
+        if self.session.is_some()
+            || self.pending.is_some()
+            || self.recorder.is_some()
+            || self.batch_running
+            || self.fatal.is_some()
+            || self.pending_import.is_some()
+        {
             return Err("学習・録音・生成・確認を終了してからファイルを追加してください。".into());
         }
         match learning::parse_vocabulary_file(text)? {
             learning::VocabularyFile::Materials(items) => {
-                self.message = "完成済み教材TSVとして読み込んだ。まだ登録していない。差分を確認してください。".into();
+                self.message =
+                    "完成済み教材TSVとして読み込んだ。まだ登録していない。差分を確認してください。"
+                        .into();
                 self.pending_import = Some(items);
             }
             learning::VocabularyFile::Words(words) => {
@@ -510,12 +526,14 @@ impl WordApp {
                 .inner_margin(8)
                 .corner_radius(6)
                 .show(ui, |ui| {
-                    color_theme::editable_input(ui, input_tint, ux::TINT, |ui| ui.add(
-                        egui::TextEdit::singleline(&mut self.word_search)
-                            .frame(false)
-                            .hint_text("英単語・フレーズを絞り込む（例：take）")
-                            .desired_width(f32::INFINITY),
-                    ))
+                    color_theme::editable_input(ui, input_tint, ux::TINT, |ui| {
+                        ui.add(
+                            egui::TextEdit::singleline(&mut self.word_search)
+                                .frame(false)
+                                .hint_text("英単語・フレーズを絞り込む（例：take）")
+                                .desired_width(f32::INFINITY),
+                        )
+                    })
                 });
             color_theme::input_focus_outline(ui, search.response.rect, search.inner.has_focus());
             let search_changed = search.inner.changed();
@@ -578,7 +596,8 @@ mod tests {
         let deck = model::deck_text(&app.deck);
         let words = app.words.clone();
         let saved = std::fs::read(root.join("data/progress.json")).unwrap();
-        let mut changed = app.deck[0].clone(); changed.meaning = "確認用の変更".into();
+        let mut changed = app.deck[0].clone();
+        changed.meaning = "確認用の変更".into();
         let text = model::deck_text(&[changed]);
         app.prepare_vocabulary_file(&text).unwrap();
         assert!(app.pending_import.is_some());
@@ -586,54 +605,120 @@ mod tests {
         assert_eq!(serde_json::to_value(&app.progress).unwrap(), before);
         assert_eq!(model::deck_text(&app.deck), deck);
         assert_eq!(app.words, words);
-        assert_eq!(std::fs::read(root.join("data/progress.json")).unwrap(), saved);
-        for _ in 0..3 { super::super::harness_tests::frame(&ctx, &mut app, false); }
-        let cancel = ctx.data(|d| d.get_temp::<egui::Rect>(egui::Id::new("material-import-cancel"))).unwrap();
+        assert_eq!(
+            std::fs::read(root.join("data/progress.json")).unwrap(),
+            saved
+        );
+        for _ in 0..3 {
+            super::super::harness_tests::frame(&ctx, &mut app, false);
+        }
+        let cancel = ctx
+            .data(|d| d.get_temp::<egui::Rect>(egui::Id::new("material-import-cancel")))
+            .unwrap();
         for pressed in [true, false] {
-            let _ = ctx.run(egui::RawInput { screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(1120.0, 850.0))),
-                events: vec![egui::Event::PointerMoved(cancel.center()), egui::Event::PointerButton {
-                    pos: cancel.center(), button: egui::PointerButton::Primary, pressed, modifiers: egui::Modifiers::NONE }],
-                ..Default::default() }, |ctx| app.update_ui(ctx));
+            let _ = ctx.run(
+                egui::RawInput {
+                    screen_rect: Some(egui::Rect::from_min_size(
+                        egui::Pos2::ZERO,
+                        egui::vec2(1120.0, 850.0),
+                    )),
+                    events: vec![
+                        egui::Event::PointerMoved(cancel.center()),
+                        egui::Event::PointerButton {
+                            pos: cancel.center(),
+                            button: egui::PointerButton::Primary,
+                            pressed,
+                            modifiers: egui::Modifiers::NONE,
+                        },
+                    ],
+                    ..Default::default()
+                },
+                |ctx| app.update_ui(ctx),
+            );
         }
         assert!(app.pending_import.is_none());
         assert_eq!(model::deck_text(&app.deck), deck);
         assert!(app.prepare_vocabulary_file("id\tbase\na\thappy").is_err());
         assert_eq!(app.words, words);
         assert!(app.pending.is_none() && app.pending_import.is_none());
-        assert_eq!(std::fs::read(root.join("data/progress.json")).unwrap(), saved);
+        assert_eq!(
+            std::fs::read(root.join("data/progress.json")).unwrap(),
+            saved
+        );
         app.prepare_vocabulary_file(&text).unwrap();
-        for _ in 0..3 { super::super::harness_tests::frame(&ctx, &mut app, false); }
-        let apply = ctx.data(|d| d.get_temp::<egui::Rect>(egui::Id::new("material-import-apply"))).unwrap();
+        for _ in 0..3 {
+            super::super::harness_tests::frame(&ctx, &mut app, false);
+        }
+        let apply = ctx
+            .data(|d| d.get_temp::<egui::Rect>(egui::Id::new("material-import-apply")))
+            .unwrap();
         for pressed in [true, false] {
-            let _ = ctx.run(egui::RawInput { screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(1120.0, 850.0))),
-                events: vec![egui::Event::PointerMoved(apply.center()), egui::Event::PointerButton {
-                    pos: apply.center(), button: egui::PointerButton::Primary, pressed, modifiers: egui::Modifiers::NONE }],
-                ..Default::default() }, |ctx| app.update_ui(ctx));
+            let _ = ctx.run(
+                egui::RawInput {
+                    screen_rect: Some(egui::Rect::from_min_size(
+                        egui::Pos2::ZERO,
+                        egui::vec2(1120.0, 850.0),
+                    )),
+                    events: vec![
+                        egui::Event::PointerMoved(apply.center()),
+                        egui::Event::PointerButton {
+                            pos: apply.center(),
+                            button: egui::PointerButton::Primary,
+                            pressed,
+                            modifiers: egui::Modifiers::NONE,
+                        },
+                    ],
+                    ..Default::default()
+                },
+                |ctx| app.update_ui(ctx),
+            );
         }
         assert!(app.pending_import.is_none() && app.pending.is_none());
         assert_eq!(app.deck[0].meaning, "確認用の変更");
-        assert_eq!(serde_json::to_value(&app.progress).unwrap()["chats"], before["chats"]);
-        assert_eq!(std::fs::read_to_string(root.join("data/custom.tsv")).unwrap(), model::deck_text(&app.deck));
-        drop(app); std::fs::remove_dir_all(root).unwrap();
+        assert_eq!(
+            serde_json::to_value(&app.progress).unwrap()["chats"],
+            before["chats"]
+        );
+        assert_eq!(
+            std::fs::read_to_string(root.join("data/custom.tsv")).unwrap(),
+            model::deck_text(&app.deck)
+        );
+        drop(app);
+        std::fs::remove_dir_all(root).unwrap();
     }
 
     #[test]
     fn material_confirmation_actions_fit_a_small_viewport() {
         let (ctx, mut app, root) = super::super::harness_tests::fixture();
-        let mut item = app.deck[0].clone(); item.meaning = "確認用".into();
-        app.prepare_vocabulary_file(&model::deck_text(&[item])).unwrap();
+        let mut item = app.deck[0].clone();
+        item.meaning = "確認用".into();
+        app.prepare_vocabulary_file(&model::deck_text(&[item]))
+            .unwrap();
         for width in [512.5, 360.0] {
             for _ in 0..4 {
-                let _ = ctx.run(egui::RawInput { screen_rect: Some(egui::Rect::from_min_size(
-                    egui::Pos2::ZERO, egui::vec2(width, 406.25))), ..Default::default() },
-                    |ctx| app.confirmations(ctx));
+                let _ = ctx.run(
+                    egui::RawInput {
+                        screen_rect: Some(egui::Rect::from_min_size(
+                            egui::Pos2::ZERO,
+                            egui::vec2(width, 406.25),
+                        )),
+                        ..Default::default()
+                    },
+                    |ctx| app.confirmations(ctx),
+                );
             }
             for name in ["material-import-apply", "material-import-cancel"] {
-                let rect = ctx.data(|d| d.get_temp::<egui::Rect>(egui::Id::new(name))).unwrap();
-                assert!(ctx.screen_rect().contains_rect(rect), "{name} inaccessible at {width}: {rect:?}");
+                let rect = ctx
+                    .data(|d| d.get_temp::<egui::Rect>(egui::Id::new(name)))
+                    .unwrap();
+                assert!(
+                    ctx.screen_rect().contains_rect(rect),
+                    "{name} inaccessible at {width}: {rect:?}"
+                );
             }
         }
-        drop(app); std::fs::remove_dir_all(root).unwrap();
+        drop(app);
+        std::fs::remove_dir_all(root).unwrap();
     }
 
     #[test]

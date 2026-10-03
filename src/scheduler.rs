@@ -131,7 +131,9 @@ pub fn make_queue(
                 continue;
             }
             let key = skill.key(&entry.id);
-            if progress.suspended.contains(&entry.id) || progress.deleted_entries.contains(&entry.id) {
+            if progress.suspended.contains(&entry.id)
+                || progress.deleted_entries.contains(&entry.id)
+            {
                 continue;
             }
             match progress.memories.get(&key) {
@@ -204,7 +206,16 @@ mod tests {
         let deck = crate::model::parse_deck(crate::model::BUILTIN_DECK).unwrap();
         let mut p = Progress::default();
         let key = Skill::Recall.key(&deck[0].id);
-        p.record(key.clone(), Grade::Good, false, "keyboard", 100, "2026-09-05", 5, false);
+        p.record(
+            key.clone(),
+            Grade::Good,
+            false,
+            "keyboard",
+            100,
+            "2026-09-05",
+            5,
+            false,
+        );
         let memory = serde_json::to_value(&p.memories).unwrap();
         let reviews = serde_json::to_value(&p.reviews).unwrap();
         p.deleted_entries.insert(deck[0].id.clone());

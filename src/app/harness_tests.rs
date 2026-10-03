@@ -243,7 +243,10 @@ pub(super) fn shape_text(shape: &egui::epaint::Shape, text: &mut String) {
 #[test]
 fn feedback_ui_palette_all_seven_pages_and_later_window_use_fixed_bases_without_compounding() {
     let (ctx, mut app, root) = fixture();
-    let blue = wordweave5::store::TintChoice { rgb: [0, 0, 255], depth: 100 };
+    let blue = wordweave5::store::TintChoice {
+        rgb: [0, 0, 255],
+        depth: 100,
+    };
     app.begin_color_editor();
     app.color_editor.as_mut().unwrap().draft.page = blue;
     let page_color = egui::Color32::from_rgb(198, 200, 253);
@@ -257,30 +260,75 @@ fn feedback_ui_palette_all_seven_pages_and_later_window_use_fixed_bases_without_
     }
     fn collect_fills(shape: &egui::epaint::Shape, rgba: &mut std::collections::BTreeSet<[u8; 4]>) {
         match shape {
-            egui::epaint::Shape::Rect(rect) => { rgba.insert(rect.fill.to_array()); },
-            egui::epaint::Shape::Vec(parts) => for part in parts { collect_fills(part, rgba); },
+            egui::epaint::Shape::Rect(rect) => {
+                rgba.insert(rect.fill.to_array());
+            }
+            egui::epaint::Shape::Vec(parts) => {
+                for part in parts {
+                    collect_fills(part, rgba);
+                }
+            }
             _ => {}
         }
     }
-    for (page, page_name) in [(Page::Home, "home"), (Page::Study, "study"), (Page::Deck, "deck"),
-        (Page::Words, "words"), (Page::Chat, "chat"), (Page::Stats, "stats"), (Page::Settings, "settings")] {
+    for (page, page_name) in [
+        (Page::Home, "home"),
+        (Page::Study, "study"),
+        (Page::Deck, "deck"),
+        (Page::Words, "words"),
+        (Page::Chat, "chat"),
+        (Page::Stats, "stats"),
+        (Page::Settings, "settings"),
+    ] {
         app.page = page;
         // egui Window's Area fades in for 1/12 s; RawInput advances by one predicted_dt per frame.
-        for _ in 0..8 { frame(&ctx, &mut app, false); }
+        for _ in 0..8 {
+            frame(&ctx, &mut app, false);
+        }
         let output = frame(&ctx, &mut app, false);
-        assert_eq!(ctx.style().visuals.panel_fill, page_color, "page style drift");
-        assert_eq!(ctx.style().visuals.window_fill, window_color, "window style drift");
-        assert!(output.shapes.iter().any(|shape| has_fill(&shape.shape, page_color)), "page {page_name} did not paint preview");
+        assert_eq!(
+            ctx.style().visuals.panel_fill,
+            page_color,
+            "page style drift"
+        );
+        assert_eq!(
+            ctx.style().visuals.window_fill,
+            window_color,
+            "window style drift"
+        );
+        assert!(
+            output
+                .shapes
+                .iter()
+                .any(|shape| has_fill(&shape.shape, page_color)),
+            "page {page_name} did not paint preview"
+        );
         let mut rgba = std::collections::BTreeSet::new();
-        for shape in &output.shapes { collect_fills(&shape.shape, &mut rgba); }
-        assert!(output.shapes.iter().any(|shape| has_fill(&shape.shape, window_color)),
-            "later Window on {page_name} did not paint preview: rect fills RGBA={rgba:?}");
+        for shape in &output.shapes {
+            collect_fills(&shape.shape, &mut rgba);
+        }
+        assert!(
+            output
+                .shapes
+                .iter()
+                .any(|shape| has_fill(&shape.shape, window_color)),
+            "later Window on {page_name} did not paint preview: rect fills RGBA={rgba:?}"
+        );
     }
     app.cancel_color_editor();
     let output = frame(&ctx, &mut app, false);
-    assert_eq!(ctx.style().visuals.panel_fill, egui::Color32::from_rgb(247, 250, 253));
+    assert_eq!(
+        ctx.style().visuals.panel_fill,
+        egui::Color32::from_rgb(247, 250, 253)
+    );
     assert_eq!(ctx.style().visuals.window_fill, egui::Color32::WHITE);
-    assert!(!output.shapes.iter().any(|shape| has_fill(&shape.shape, page_color)), "cancel left preview pixels");
+    assert!(
+        !output
+            .shapes
+            .iter()
+            .any(|shape| has_fill(&shape.shape, page_color)),
+        "cancel left preview pixels"
+    );
     drop(app);
     std::fs::remove_dir_all(root).unwrap();
 }
@@ -291,14 +339,27 @@ fn feedback_ui_palette_narrow_window_keeps_whole_bounds_footer_and_scrollable_bo
     app.page = Page::Settings;
     app.begin_color_editor();
     let screen = egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(820.0 / 1.6, 650.0 / 1.6));
-    fn draw(ctx: &egui::Context, app: &mut WordApp, screen: egui::Rect, events: Vec<egui::Event>) -> egui::FullOutput {
-        ctx.run(egui::RawInput { screen_rect: Some(screen), events, ..Default::default() }, |ctx| app.update_ui(ctx))
+    fn draw(
+        ctx: &egui::Context,
+        app: &mut WordApp,
+        screen: egui::Rect,
+        events: Vec<egui::Event>,
+    ) -> egui::FullOutput {
+        ctx.run(
+            egui::RawInput {
+                screen_rect: Some(screen),
+                events,
+                ..Default::default()
+            },
+            |ctx| app.update_ui(ctx),
+        )
     }
     fn visible(output: &egui::FullOutput, needle: &str) -> Option<egui::Rect> {
         fn find(shape: &egui::epaint::Shape, needle: &str) -> Option<egui::Rect> {
             match shape {
-                egui::epaint::Shape::Text(text) if text.galley.text() == needle =>
-                    Some(egui::Rect::from_min_size(text.pos, text.galley.size())),
+                egui::epaint::Shape::Text(text) if text.galley.text() == needle => {
+                    Some(egui::Rect::from_min_size(text.pos, text.galley.size()))
+                }
                 egui::epaint::Shape::Vec(parts) => parts.iter().find_map(|part| find(part, needle)),
                 _ => None,
             }
@@ -309,34 +370,75 @@ fn feedback_ui_palette_narrow_window_keeps_whole_bounds_footer_and_scrollable_bo
         })
     }
     let mut output = draw(&ctx, &mut app, screen, vec![]);
-    for _ in 0..3 { output = draw(&ctx, &mut app, screen, vec![]); }
-    let window = ctx.memory(|memory| memory.area_rect(egui::Id::new("配色を調整"))).expect("palette window rect");
-    assert!(screen.contains_rect(window), "whole palette window escapes narrow viewport: {window:?}");
+    for _ in 0..3 {
+        output = draw(&ctx, &mut app, screen, vec![]);
+    }
+    let window = ctx
+        .memory(|memory| memory.area_rect(egui::Id::new("配色を調整")))
+        .expect("palette window rect");
+    assert!(
+        screen.contains_rect(window),
+        "whole palette window escapes narrow viewport: {window:?}"
+    );
     for label in ["保存", "キャンセル", "標準色に戻す"] {
         let rect = visible(&output, label).unwrap_or_else(|| panic!("footer {label} not visible"));
-        assert!(window.contains_rect(rect) && screen.contains_rect(rect), "footer {label} clipped");
+        assert!(
+            window.contains_rect(rect) && screen.contains_rect(rect),
+            "footer {label} clipped"
+        );
     }
     let pointer = window.left_top() + egui::vec2(window.width() * 0.55, window.height() * 0.48);
     let mut reached_second_group = false;
     for _ in 0..8 {
-        output = draw(&ctx, &mut app, screen, vec![egui::Event::PointerMoved(pointer), egui::Event::MouseWheel {
-            unit: egui::MouseWheelUnit::Point, delta: egui::vec2(0.0, -120.0), modifiers: egui::Modifiers::NONE,
-        }]);
+        output = draw(
+            &ctx,
+            &mut app,
+            screen,
+            vec![
+                egui::Event::PointerMoved(pointer),
+                egui::Event::MouseWheel {
+                    unit: egui::MouseWheelUnit::Point,
+                    delta: egui::vec2(0.0, -120.0),
+                    modifiers: egui::Modifiers::NONE,
+                },
+            ],
+        );
         reached_second_group |= visible(&output, "入力欄の背景").is_some();
-        let at_scroll = ctx.memory(|memory| memory.area_rect(egui::Id::new("配色を調整"))).unwrap();
-        assert!(screen.contains_rect(at_scroll), "palette window escapes viewport while scrolling");
+        let at_scroll = ctx
+            .memory(|memory| memory.area_rect(egui::Id::new("配色を調整")))
+            .unwrap();
+        assert!(
+            screen.contains_rect(at_scroll),
+            "palette window escapes viewport while scrolling"
+        );
         for label in ["保存", "キャンセル", "標準色に戻す"] {
-            let rect = visible(&output, label).unwrap_or_else(|| panic!("footer {label} lost while scrolling"));
-            assert!(at_scroll.contains_rect(rect) && screen.contains_rect(rect), "footer {label} clipped while scrolling");
+            let rect = visible(&output, label)
+                .unwrap_or_else(|| panic!("footer {label} lost while scrolling"));
+            assert!(
+                at_scroll.contains_rect(rect) && screen.contains_rect(rect),
+                "footer {label} clipped while scrolling"
+            );
         }
     }
     output = draw(&ctx, &mut app, screen, vec![]);
-    assert!(reached_second_group, "scroll did not show the second color group at any point");
-    assert!(visible(&output, "見本　#FFFFFF").is_some(), "scroll did not reach the final sample");
-    let window_after = ctx.memory(|memory| memory.area_rect(egui::Id::new("配色を調整"))).unwrap();
-    assert!(screen.contains_rect(window_after), "scrolled window escapes viewport");
+    assert!(
+        reached_second_group,
+        "scroll did not show the second color group at any point"
+    );
+    assert!(
+        visible(&output, "見本　#FFFFFF").is_some(),
+        "scroll did not reach the final sample"
+    );
+    let window_after = ctx
+        .memory(|memory| memory.area_rect(egui::Id::new("配色を調整")))
+        .unwrap();
+    assert!(
+        screen.contains_rect(window_after),
+        "scrolled window escapes viewport"
+    );
     for label in ["保存", "キャンセル", "標準色に戻す"] {
-        let rect = visible(&output, label).unwrap_or_else(|| panic!("footer {label} lost after scroll"));
+        let rect =
+            visible(&output, label).unwrap_or_else(|| panic!("footer {label} lost after scroll"));
         assert!(window_after.contains_rect(rect) && screen.contains_rect(rect));
     }
     drop(app);
@@ -527,7 +629,9 @@ fn closing_after_hiding_the_media_dialog_explains_why_exit_is_blocked() {
     let saved_progress = serde_json::to_value(&app.progress).unwrap();
 
     let output = frame(&ctx, &mut app, true);
-    assert!(output.viewport_output[&egui::ViewportId::ROOT].commands.iter()
+    assert!(output.viewport_output[&egui::ViewportId::ROOT]
+        .commands
+        .iter()
         .any(|command| matches!(command, egui::ViewportCommand::CancelClose)));
     assert!(app.chat_media_open && app.exit_media_requested);
     let output = frame(&ctx, &mut app, false);
@@ -535,7 +639,10 @@ fn closing_after_hiding_the_media_dialog_explains_why_exit_is_blocked() {
     for shape in &output.shapes {
         shape_text(&shape.shape, &mut labels);
     }
-    assert!(labels.contains("送信するメッセージに添付していない手書き・原文があります。"), "{labels}");
+    assert!(
+        labels.contains("送信するメッセージに添付していない手書き・原文があります。"),
+        "{labels}"
+    );
     assert!(labels.contains("破棄して終了"), "{labels}");
     assert!(labels.contains("作業を続ける"), "{labels}");
     assert_eq!(app.annotation.files().unwrap(), original);
@@ -563,12 +670,17 @@ fn explicit_exit_discard_clears_only_unsaved_media_and_requests_close() {
     let output = ctx.run(egui::RawInput::default(), |ctx| {
         app.discard_unsaved_media_and_exit(ctx);
     });
-    assert!(output.viewport_output[&egui::ViewportId::ROOT].commands.iter()
+    assert!(output.viewport_output[&egui::ViewportId::ROOT]
+        .commands
+        .iter()
         .any(|command| matches!(command, egui::ViewportCommand::Close)));
     assert!(!app.exit_media_requested && !app.chat_media_open);
     assert!(!app.annotation.frozen() && app.unsaved_chat_audio.is_none());
     assert_eq!(serde_json::to_value(&app.progress).unwrap(), saved_progress);
-    assert_eq!(serde_json::to_value(app.storage.as_ref().unwrap().load().unwrap()).unwrap(), saved_progress);
+    assert_eq!(
+        serde_json::to_value(app.storage.as_ref().unwrap().load().unwrap()).unwrap(),
+        saved_progress
+    );
     drop(app);
     std::fs::remove_dir_all(root).unwrap();
 }
@@ -588,31 +700,46 @@ fn clicking_the_exit_warning_discards_unsaved_media_but_keeps_the_saved_draft() 
     let output = frame(&ctx, &mut app, false);
     fn label_center(shape: &egui::epaint::Shape, label: &str) -> Option<egui::Pos2> {
         match shape {
-            egui::epaint::Shape::Text(text) if text.galley.text() == label =>
-                Some(text.pos + text.galley.size() * 0.5),
-            egui::epaint::Shape::Vec(shapes) =>
-                shapes.iter().find_map(|shape| label_center(shape, label)),
+            egui::epaint::Shape::Text(text) if text.galley.text() == label => {
+                Some(text.pos + text.galley.size() * 0.5)
+            }
+            egui::epaint::Shape::Vec(shapes) => {
+                shapes.iter().find_map(|shape| label_center(shape, label))
+            }
             _ => None,
         }
     }
-    let position = output.shapes.iter()
+    let position = output
+        .shapes
+        .iter()
         .find_map(|shape| label_center(&shape.shape, "破棄して終了"))
         .expect("visible exit choice");
-    let click = |app: &mut WordApp, pressed| ctx.run(egui::RawInput {
-        screen_rect: Some(egui::Rect::from_min_size(
-            egui::Pos2::ZERO, egui::vec2(1120.0, 850.0))),
-        events: vec![
-            egui::Event::PointerMoved(position),
-            egui::Event::PointerButton {
-                pos: position, button: egui::PointerButton::Primary, pressed,
-                modifiers: egui::Modifiers::NONE,
+    let click = |app: &mut WordApp, pressed| {
+        ctx.run(
+            egui::RawInput {
+                screen_rect: Some(egui::Rect::from_min_size(
+                    egui::Pos2::ZERO,
+                    egui::vec2(1120.0, 850.0),
+                )),
+                events: vec![
+                    egui::Event::PointerMoved(position),
+                    egui::Event::PointerButton {
+                        pos: position,
+                        button: egui::PointerButton::Primary,
+                        pressed,
+                        modifiers: egui::Modifiers::NONE,
+                    },
+                ],
+                ..Default::default()
             },
-        ],
-        ..Default::default()
-    }, |ctx| app.update_ui(ctx));
+            |ctx| app.update_ui(ctx),
+        )
+    };
     click(&mut app, true);
     let output = click(&mut app, false);
-    assert!(output.viewport_output[&egui::ViewportId::ROOT].commands.iter()
+    assert!(output.viewport_output[&egui::ViewportId::ROOT]
+        .commands
+        .iter()
         .any(|command| matches!(command, egui::ViewportCommand::Close)));
     assert!(!app.exit_media_requested && !app.chat_media_open);
     assert!(!app.annotation.frozen() && app.unsaved_chat_audio.is_none());
@@ -629,33 +756,48 @@ fn attachment_table_viewport_reaches_the_compact_resize_boundary() {
         app.page = Page::Chat;
         app.chat_media_open = true;
         for count in [0, 1, 8] {
-            app.progress.chats[0].draft_attachments = (0..count).map(|index| {
-                wordweave5::chat::Attachment {
+            app.progress.chats[0].draft_attachments = (0..count)
+                .map(|index| wordweave5::chat::Attachment {
                     original: wordweave5::assets::AssetRef {
-                        id: "a".repeat(64), kind: wordweave5::assets::AssetKind::FileBlob, bytes: 16,
-                    }, image: None, background: None,
+                        id: "a".repeat(64),
+                        kind: wordweave5::assets::AssetKind::FileBlob,
+                        bytes: 16,
+                    },
+                    image: None,
+                    background: None,
                     file_name: Some(format!("notes-{index}.txt")),
-                    source_text: String::new(), transcript: None,
-                }
-            }).collect();
+                    source_text: String::new(),
+                    transcript: None,
+                })
+                .collect();
             for height in [130.0, 210.0, 360.0] {
                 app.chat_media_table_height = height;
                 for _ in 0..4 {
-                    let _ = ctx.run(egui::RawInput {
-                        screen_rect: Some(egui::Rect::from_min_size(
-                            egui::Pos2::ZERO, egui::vec2(width, 950.0))),
-                        ..Default::default()
-                    }, |ctx| app.update_ui(ctx));
+                    let _ = ctx.run(
+                        egui::RawInput {
+                            screen_rect: Some(egui::Rect::from_min_size(
+                                egui::Pos2::ZERO,
+                                egui::vec2(width, 950.0),
+                            )),
+                            ..Default::default()
+                        },
+                        |ctx| app.update_ui(ctx),
+                    );
                 }
-                let rect = |id| ctx.data(|data| data.get_temp::<egui::Rect>(egui::Id::new(id))).unwrap();
+                let rect = |id| {
+                    ctx.data(|data| data.get_temp::<egui::Rect>(egui::Id::new(id)))
+                        .unwrap()
+                };
                 let panel = rect("chat-media-table-frame");
                 let viewport = rect("chat-media-table-viewport");
                 let handle = rect("chat-media-table-resize-handle");
                 let gap = panel.bottom() - viewport.bottom();
                 assert!((9.0..=12.0).contains(&gap),
                     "only the bottom frame inset should remain, zoom={zoom} count={count} height={height} gap={gap}");
-                assert!((panel.height() - height).abs() <= 2.0,
-                    "filling the table must not increase its height: {panel:?}");
+                assert!(
+                    (panel.height() - height).abs() <= 2.0,
+                    "filling the table must not increase its height: {panel:?}"
+                );
                 assert_eq!(handle.height(), 14.0, "preserve the draggable hit target");
             }
         }
@@ -677,13 +819,19 @@ fn attached_table_can_resize_and_remove_only_the_selected_draft_attachment() {
     app.progress.chats[0].draft = "保持する下書き".into();
     app.progress.chats[0].draft_attachments = vec![
         wordweave5::chat::Attachment {
-            original: file, image: None, background: None,
-            file_name: Some("notes.txt".into()), source_text: "notes.txt".into(),
+            original: file,
+            image: None,
+            background: None,
+            file_name: Some("notes.txt".into()),
+            source_text: "notes.txt".into(),
             transcript: None,
         },
         wordweave5::chat::Attachment {
-            original: audio, image: None, background: None,
-            file_name: Some("voice.wav".into()), source_text: "voice.wav".into(),
+            original: audio,
+            image: None,
+            background: None,
+            file_name: Some("voice.wav".into()),
+            source_text: "voice.wav".into(),
             transcript: None,
         },
     ];
@@ -698,65 +846,105 @@ fn attached_table_can_resize_and_remove_only_the_selected_draft_attachment() {
     assert!(labels.contains("notes.txt"), "{labels}");
     assert!(labels.contains("確認・削除"), "{labels}");
     assert!(labels.contains("添付を追加"), "{labels}");
-    let handle = ctx.data(|data| data.get_temp::<egui::Rect>(
-        egui::Id::new("chat-media-table-resize-handle")))
+    let handle = ctx
+        .data(|data| data.get_temp::<egui::Rect>(egui::Id::new("chat-media-table-resize-handle")))
         .expect("table resize handle");
     let start = handle.center();
     let end = start + egui::vec2(0.0, 52.0);
     let initial_height = app.chat_media_table_height;
     let input = |events| egui::RawInput {
         screen_rect: Some(egui::Rect::from_min_size(
-            egui::Pos2::ZERO, egui::vec2(1120.0, 850.0))),
+            egui::Pos2::ZERO,
+            egui::vec2(1120.0, 850.0),
+        )),
         events,
         ..Default::default()
     };
-    let _ = ctx.run(input(vec![
-        egui::Event::PointerMoved(start),
-        egui::Event::PointerButton {
-            pos: start, button: egui::PointerButton::Primary, pressed: true,
-            modifiers: egui::Modifiers::NONE,
-        },
-    ]), |ctx| app.update_ui(ctx));
-    let _ = ctx.run(input(vec![egui::Event::PointerMoved(end)]), |ctx| app.update_ui(ctx));
+    let _ = ctx.run(
+        input(vec![
+            egui::Event::PointerMoved(start),
+            egui::Event::PointerButton {
+                pos: start,
+                button: egui::PointerButton::Primary,
+                pressed: true,
+                modifiers: egui::Modifiers::NONE,
+            },
+        ]),
+        |ctx| app.update_ui(ctx),
+    );
+    let _ = ctx.run(input(vec![egui::Event::PointerMoved(end)]), |ctx| {
+        app.update_ui(ctx)
+    });
     let next = end + egui::vec2(0.0, 15.0);
-    let _ = ctx.run(input(vec![egui::Event::PointerMoved(next)]), |ctx| app.update_ui(ctx));
-    let _ = ctx.run(input(vec![egui::Event::PointerButton {
-        pos: next, button: egui::PointerButton::Primary, pressed: false,
-        modifiers: egui::Modifiers::NONE,
-    }]), |ctx| app.update_ui(ctx));
-    assert!((app.chat_media_table_height - (initial_height + 67.0)).abs() < 4.0,
-        "divider should follow each pointer movement without a cumulative jump");
+    let _ = ctx.run(input(vec![egui::Event::PointerMoved(next)]), |ctx| {
+        app.update_ui(ctx)
+    });
+    let _ = ctx.run(
+        input(vec![egui::Event::PointerButton {
+            pos: next,
+            button: egui::PointerButton::Primary,
+            pressed: false,
+            modifiers: egui::Modifiers::NONE,
+        }]),
+        |ctx| app.update_ui(ctx),
+    );
+    assert!(
+        (app.chat_media_table_height - (initial_height + 67.0)).abs() < 4.0,
+        "divider should follow each pointer movement without a cumulative jump"
+    );
 
     fn label_center(shape: &egui::epaint::Shape, label: &str) -> Option<egui::Pos2> {
         match shape {
-            egui::epaint::Shape::Text(text) if text.galley.text() == label =>
-                Some(text.pos + text.galley.size() * 0.5),
-            egui::epaint::Shape::Vec(shapes) =>
-                shapes.iter().find_map(|shape| label_center(shape, label)),
+            egui::epaint::Shape::Text(text) if text.galley.text() == label => {
+                Some(text.pos + text.galley.size() * 0.5)
+            }
+            egui::epaint::Shape::Vec(shapes) => {
+                shapes.iter().find_map(|shape| label_center(shape, label))
+            }
             _ => None,
         }
     }
     let output = frame(&ctx, &mut app, false);
-    let delete = output.shapes.iter()
+    let delete = output
+        .shapes
+        .iter()
         .find_map(|shape| label_center(&shape.shape, "添付から削除"))
         .expect("visible delete action in first table row");
-    let _ = ctx.run(input(vec![
-        egui::Event::PointerMoved(delete),
-        egui::Event::PointerButton {
-            pos: delete, button: egui::PointerButton::Primary, pressed: true,
+    let _ = ctx.run(
+        input(vec![
+            egui::Event::PointerMoved(delete),
+            egui::Event::PointerButton {
+                pos: delete,
+                button: egui::PointerButton::Primary,
+                pressed: true,
+                modifiers: egui::Modifiers::NONE,
+            },
+        ]),
+        |ctx| app.update_ui(ctx),
+    );
+    let _ = ctx.run(
+        input(vec![egui::Event::PointerButton {
+            pos: delete,
+            button: egui::PointerButton::Primary,
+            pressed: false,
             modifiers: egui::Modifiers::NONE,
-        },
-    ]), |ctx| app.update_ui(ctx));
-    let _ = ctx.run(input(vec![egui::Event::PointerButton {
-        pos: delete, button: egui::PointerButton::Primary, pressed: false,
-        modifiers: egui::Modifiers::NONE,
-    }]), |ctx| app.update_ui(ctx));
+        }]),
+        |ctx| app.update_ui(ctx),
+    );
     assert_eq!(app.progress.chats[0].draft, "保持する下書き");
     assert_eq!(app.progress.chats[0].draft_attachments.len(), 1);
-    assert_eq!(app.progress.chats[0].draft_attachments[0].file_name.as_deref(),
-        Some("voice.wav"));
-    assert_eq!(app.storage.as_ref().unwrap().load().unwrap().chats[0]
-        .draft_attachments.len(), 1);
+    assert_eq!(
+        app.progress.chats[0].draft_attachments[0]
+            .file_name
+            .as_deref(),
+        Some("voice.wav")
+    );
+    assert_eq!(
+        app.storage.as_ref().unwrap().load().unwrap().chats[0]
+            .draft_attachments
+            .len(),
+        1
+    );
     drop(app);
     std::fs::remove_dir_all(root).unwrap();
 }
@@ -775,19 +963,29 @@ fn attachment_previews_stay_in_front_of_the_media_dialog() {
             app.file_preview = Some(("notes.txt".into(), "Preview text.".into(), false));
         } else {
             app.file_preview = None;
-            app.preview_pixels = Some(("test-image".into(),
-                egui::ColorImage::new([8, 8], egui::Color32::LIGHT_BLUE)));
+            app.preview_pixels = Some((
+                "test-image".into(),
+                egui::ColorImage::new([8, 8], egui::Color32::LIGHT_BLUE),
+            ));
         }
         frame(&ctx, &mut app, false);
         frame(&ctx, &mut app, false);
         let preview_id = egui::Id::new(preview_id);
-        let (media, preview) = ctx.memory(|memory| (
-            memory.area_rect(media_id).unwrap(), memory.area_rect(preview_id).unwrap()));
+        let (media, preview) = ctx.memory(|memory| {
+            (
+                memory.area_rect(media_id).unwrap(),
+                memory.area_rect(preview_id).unwrap(),
+            )
+        });
         let overlap = media.intersect(preview);
-        assert!(overlap.width() > 20.0 && overlap.height() > 20.0,
-            "the two windows should overlap for this test: {media:?} {preview:?}");
-        assert_eq!(ctx.layer_id_at(overlap.center()),
-            Some(egui::LayerId::new(egui::Order::Foreground, preview_id)));
+        assert!(
+            overlap.width() > 20.0 && overlap.height() > 20.0,
+            "the two windows should overlap for this test: {media:?} {preview:?}"
+        );
+        assert_eq!(
+            ctx.layer_id_at(overlap.center()),
+            Some(egui::LayerId::new(egui::Order::Foreground, preview_id))
+        );
     }
     drop(app);
     std::fs::remove_dir_all(root).unwrap();
@@ -796,8 +994,10 @@ fn attachment_previews_stay_in_front_of_the_media_dialog() {
 #[test]
 fn attachment_table_does_not_force_a_narrow_dialog_wider() {
     for (zoom, count, exit_warning, solid_scroll) in [
-        (0.8, 0, false, false), (1.0, 3, false, false),
-        (1.6, 18, false, true), (1.0, 3, true, false),
+        (0.8, 0, false, false),
+        (1.0, 3, false, false),
+        (1.6, 18, false, true),
+        (1.0, 3, true, false),
     ] {
         let (ctx, mut app, root) = fixture();
         ctx.set_zoom_factor(zoom);
@@ -805,54 +1005,96 @@ fn attachment_table_does_not_force_a_narrow_dialog_wider() {
             ctx.style_mut(|style| style.spacing.scroll = egui::style::ScrollStyle::solid());
         }
         let make_ref = |id: char, kind| wordweave5::assets::AssetRef {
-            id: id.to_string().repeat(64), kind, bytes: 16,
+            id: id.to_string().repeat(64),
+            kind,
+            bytes: 16,
         };
         let image = make_ref('a', wordweave5::assets::AssetKind::ImagePng);
         let audio = make_ref('b', wordweave5::assets::AssetKind::AudioWav);
         let file = make_ref('c', wordweave5::assets::AssetKind::FileBlob);
         let samples = [
-            wordweave5::chat::Attachment { original: image.clone(), image: Some(image),
-                background: None, file_name: Some("sample.png".into()),
-                source_text: String::new(), transcript: None },
-            wordweave5::chat::Attachment { original: audio, image: None,
-                background: None, file_name: Some("voice.wav".into()),
-                source_text: String::new(), transcript: None },
-            wordweave5::chat::Attachment { original: file, image: None,
-                background: None, file_name: Some("notes.txt".into()),
-                source_text: String::new(), transcript: None },
+            wordweave5::chat::Attachment {
+                original: image.clone(),
+                image: Some(image),
+                background: None,
+                file_name: Some("sample.png".into()),
+                source_text: String::new(),
+                transcript: None,
+            },
+            wordweave5::chat::Attachment {
+                original: audio,
+                image: None,
+                background: None,
+                file_name: Some("voice.wav".into()),
+                source_text: String::new(),
+                transcript: None,
+            },
+            wordweave5::chat::Attachment {
+                original: file,
+                image: None,
+                background: None,
+                file_name: Some("notes.txt".into()),
+                source_text: String::new(),
+                transcript: None,
+            },
         ];
-        app.progress.chats[0].draft_attachments = samples.iter().cycle().take(count).cloned().collect();
+        app.progress.chats[0].draft_attachments =
+            samples.iter().cycle().take(count).cloned().collect();
         app.page = Page::Chat;
         app.chat_media_open = true;
         app.exit_media_requested = exit_warning;
-        if exit_warning { app.annotation.text = "Unsaved original.".into(); }
+        if exit_warning {
+            app.annotation.text = "Unsaved original.".into();
+        }
         let run = |app: &mut WordApp, events| {
-            let _ = ctx.run(egui::RawInput {
-                screen_rect: Some(egui::Rect::from_min_size(
-                    egui::Pos2::ZERO, egui::vec2(1400.0, 1000.0))),
-                events,
-                ..Default::default()
-            }, |ctx| app.update_ui(ctx));
-            ctx.memory(|memory| memory.area_rect(
-                egui::Id::new("ファイル・音声・手書きを添付")).unwrap())
+            let _ = ctx.run(
+                egui::RawInput {
+                    screen_rect: Some(egui::Rect::from_min_size(
+                        egui::Pos2::ZERO,
+                        egui::vec2(1400.0, 1000.0),
+                    )),
+                    events,
+                    ..Default::default()
+                },
+                |ctx| app.update_ui(ctx),
+            );
+            ctx.memory(|memory| {
+                memory
+                    .area_rect(egui::Id::new("ファイル・音声・手書きを添付"))
+                    .unwrap()
+            })
         };
-        for _ in 0..5 { run(&mut app, vec![]); }
+        for _ in 0..5 {
+            run(&mut app, vec![]);
+        }
         for distance in [140.0, 160.0, 140.0] {
             let initial = run(&mut app, vec![]);
             let start = initial.right_center() - egui::vec2(1.0, 0.0);
             run(&mut app, vec![egui::Event::PointerMoved(start)]);
-            run(&mut app, vec![egui::Event::PointerButton {
-                pos: start, button: egui::PointerButton::Primary, pressed: true,
-                modifiers: egui::Modifiers::NONE,
-            }]);
+            run(
+                &mut app,
+                vec![egui::Event::PointerButton {
+                    pos: start,
+                    button: egui::PointerButton::Primary,
+                    pressed: true,
+                    modifiers: egui::Modifiers::NONE,
+                }],
+            );
             let end = start - egui::vec2(distance, 0.0);
             run(&mut app, vec![egui::Event::PointerMoved(end)]);
-            let released = run(&mut app, vec![egui::Event::PointerButton {
-                pos: end, button: egui::PointerButton::Primary, pressed: false,
-                modifiers: egui::Modifiers::NONE,
-            }]);
-            assert!(released.width() < initial.width() - distance * 0.5,
-                "the test must actually shrink the window: {initial:?} -> {released:?}");
+            let released = run(
+                &mut app,
+                vec![egui::Event::PointerButton {
+                    pos: end,
+                    button: egui::PointerButton::Primary,
+                    pressed: false,
+                    modifiers: egui::Modifiers::NONE,
+                }],
+            );
+            assert!(
+                released.width() < initial.width() - distance * 0.5,
+                "the test must actually shrink the window: {initial:?} -> {released:?}"
+            );
             let mut widths = Vec::new();
             for _ in 0..60 {
                 widths.push(run(&mut app, vec![]).width());
@@ -877,32 +1119,52 @@ fn annotation_discard_modal_cancels_without_loss_and_confirms_only_on_ok() {
     frame(&ctx, &mut app, false);
     fn center(shape: &egui::epaint::Shape, label: &str) -> Option<egui::Pos2> {
         match shape {
-            egui::epaint::Shape::Text(text) if text.galley.text() == label =>
-                Some(text.pos + text.galley.size() * 0.5),
-            egui::epaint::Shape::Vec(shapes) => shapes.iter()
-                .find_map(|shape| center(shape, label)),
+            egui::epaint::Shape::Text(text) if text.galley.text() == label => {
+                Some(text.pos + text.galley.size() * 0.5)
+            }
+            egui::epaint::Shape::Vec(shapes) => {
+                shapes.iter().find_map(|shape| center(shape, label))
+            }
             _ => None,
         }
     }
     let input = |events| egui::RawInput {
         screen_rect: Some(egui::Rect::from_min_size(
-            egui::Pos2::ZERO, egui::vec2(1120.0, 850.0))),
+            egui::Pos2::ZERO,
+            egui::vec2(1120.0, 850.0),
+        )),
         events,
         ..Default::default()
     };
     let click = |label: &str, app: &mut WordApp| {
         let output = frame(&ctx, app, false);
-        let pos = output.shapes.iter().filter_map(|shape| center(&shape.shape, label))
-            .last().unwrap_or_else(|| panic!("modal action absent: {label}"));
-        let _ = ctx.run(input(vec![
-            egui::Event::PointerMoved(pos),
-            egui::Event::PointerButton { pos, button: egui::PointerButton::Primary,
-                pressed: true, modifiers: egui::Modifiers::NONE },
-        ]), |ctx| app.update_ui(ctx));
-        let _ = ctx.run(input(vec![
-            egui::Event::PointerButton { pos, button: egui::PointerButton::Primary,
-                pressed: false, modifiers: egui::Modifiers::NONE },
-        ]), |ctx| app.update_ui(ctx));
+        let pos = output
+            .shapes
+            .iter()
+            .filter_map(|shape| center(&shape.shape, label))
+            .last()
+            .unwrap_or_else(|| panic!("modal action absent: {label}"));
+        let _ = ctx.run(
+            input(vec![
+                egui::Event::PointerMoved(pos),
+                egui::Event::PointerButton {
+                    pos,
+                    button: egui::PointerButton::Primary,
+                    pressed: true,
+                    modifiers: egui::Modifiers::NONE,
+                },
+            ]),
+            |ctx| app.update_ui(ctx),
+        );
+        let _ = ctx.run(
+            input(vec![egui::Event::PointerButton {
+                pos,
+                button: egui::PointerButton::Primary,
+                pressed: false,
+                modifiers: egui::Modifiers::NONE,
+            }]),
+            |ctx| app.update_ui(ctx),
+        );
     };
     click("キャンセル", &mut app);
     assert_eq!(app.annotation.text, "Keep this English original.");
@@ -926,7 +1188,9 @@ fn finishing_recovery_after_an_exit_request_closes_without_discarding_it() {
     let dest = root.join("recovered-annotation");
     app.export_chat_annotation(&dest).unwrap();
     let output = frame(&ctx, &mut app, false);
-    assert!(output.viewport_output[&egui::ViewportId::ROOT].commands.iter()
+    assert!(output.viewport_output[&egui::ViewportId::ROOT]
+        .commands
+        .iter()
         .any(|command| matches!(command, egui::ViewportCommand::Close)));
     assert_eq!(std::fs::read(dest.join("ink.json")).unwrap(), original.0);
     assert!(!app.exit_media_requested && !app.chat_media_open);
@@ -980,7 +1244,8 @@ pub(super) fn material_ui_draft(app: &WordApp) -> wordweave5::material::Draft {
         "Please improve this synthetic sentence.".into(),
         "Use it in a synthetic business email.".into(),
         wordweave5::execution::Execution::default(),
-    ).unwrap();
+    )
+    .unwrap();
     Draft {
         mode: Mode::Correct,
         baseline: Some(baseline),
@@ -991,16 +1256,31 @@ pub(super) fn material_ui_draft(app: &WordApp) -> wordweave5::material::Draft {
             exchange_indices: vec![0],
             at: 123,
             mode: Mode::Correct,
-            snapshots: vec![Snapshot { exchange_index: 0, exchange: chat.exchanges[0].clone() }],
+            snapshots: vec![Snapshot {
+                exchange_index: 0,
+                exchange: chat.exchanges[0].clone(),
+            }],
         },
         notices: vec![],
         reasons: vec![
-            ChangeReason { path: "/meaning".into(), reason: "合成の意味変更理由".into(),
-                quotes: vec![Quote { exchange_index: 0, role: "user".into(),
-                    quote: "improve this synthetic sentence".into() }] },
-            ChangeReason { path: "/usage".into(), reason: "合成の用法変更理由".into(),
-                quotes: vec![Quote { exchange_index: 0, role: "assistant".into(),
-                    quote: "synthetic business email".into() }] },
+            ChangeReason {
+                path: "/meaning".into(),
+                reason: "合成の意味変更理由".into(),
+                quotes: vec![Quote {
+                    exchange_index: 0,
+                    role: "user".into(),
+                    quote: "improve this synthetic sentence".into(),
+                }],
+            },
+            ChangeReason {
+                path: "/usage".into(),
+                reason: "合成の用法変更理由".into(),
+                quotes: vec![Quote {
+                    exchange_index: 0,
+                    role: "assistant".into(),
+                    quote: "synthetic business email".into(),
+                }],
+            },
         ],
         generated: Some(candidate),
     }
@@ -1008,7 +1288,9 @@ pub(super) fn material_ui_draft(app: &WordApp) -> wordweave5::material::Draft {
 
 fn material_ui_text(output: &egui::FullOutput) -> String {
     let mut text = String::new();
-    for shape in &output.shapes { shape_text(&shape.shape, &mut text); }
+    for shape in &output.shapes {
+        shape_text(&shape.shape, &mut text);
+    }
     text
 }
 
@@ -1019,60 +1301,116 @@ fn material_ui_selects_first_change_and_keeps_reasons_quotes_and_context_in_sync
     let before_progress = serde_json::to_vec(&app.progress).unwrap();
     let before_deck = wordweave5::model::deck_text(&app.deck);
     let before_draft = serde_json::to_vec(&draft).unwrap();
-    let render = |ctx: &egui::Context, app: &mut WordApp, draft: &wordweave5::material::Draft,
+    let render = |ctx: &egui::Context,
+                  app: &mut WordApp,
+                  draft: &wordweave5::material::Draft,
                   events: Vec<egui::Event>| {
-        ctx.run(egui::RawInput { screen_rect: Some(egui::Rect::from_min_size(
-            egui::Pos2::ZERO, egui::vec2(1200.0, 850.0))), events,
-            ..Default::default() }, |ctx| {
-            egui::CentralPanel::default().show(ctx, |ui| app.material_comparison(ui, draft));
-        })
+        ctx.run(
+            egui::RawInput {
+                screen_rect: Some(egui::Rect::from_min_size(
+                    egui::Pos2::ZERO,
+                    egui::vec2(1200.0, 850.0),
+                )),
+                events,
+                ..Default::default()
+            },
+            |ctx| {
+                egui::CentralPanel::default().show(ctx, |ui| app.material_comparison(ui, draft));
+            },
+        )
     };
     let mut output = render(&ctx, &mut app, &draft, vec![]);
     let mut text = material_ui_text(&output);
-    assert!(text.contains("変更：意味") && text.contains("変更：説明・使い方"), "{text}");
-    assert!(text.contains("合成の意味変更理由"), "first row must be selected: {text}");
-    assert!(text.contains("improve this synthetic sentence"), "selected quote: {text}");
-    assert!(!text.contains("合成の用法変更理由"), "unselected reason leaked: {text}");
-    assert!(!text.contains("Please improve this synthetic sentence."),
-        "fixed full context must begin collapsed: {text}");
+    assert!(
+        text.contains("変更：意味") && text.contains("変更：説明・使い方"),
+        "{text}"
+    );
+    assert!(
+        text.contains("合成の意味変更理由"),
+        "first row must be selected: {text}"
+    );
+    assert!(
+        text.contains("improve this synthetic sentence"),
+        "selected quote: {text}"
+    );
+    assert!(
+        !text.contains("合成の用法変更理由"),
+        "unselected reason leaked: {text}"
+    );
+    assert!(
+        !text.contains("Please improve this synthetic sentence."),
+        "fixed full context must begin collapsed: {text}"
+    );
 
     fn text_center(shape: &egui::epaint::Shape, label: &str) -> Option<egui::Pos2> {
         match shape {
-            egui::epaint::Shape::Text(t) if t.galley.text() == label =>
-                Some(t.pos + t.galley.size() * 0.5),
+            egui::epaint::Shape::Text(t) if t.galley.text() == label => {
+                Some(t.pos + t.galley.size() * 0.5)
+            }
             egui::epaint::Shape::Vec(items) => items.iter().find_map(|x| text_center(x, label)),
             _ => None,
         }
     }
-    let pos = output.shapes.iter().find_map(|x| text_center(&x.shape, "変更：説明・使い方"))
+    let pos = output
+        .shapes
+        .iter()
+        .find_map(|x| text_center(&x.shape, "変更：説明・使い方"))
         .expect("second change row must be clickable");
     for events in [
-        vec![egui::Event::PointerMoved(pos), egui::Event::PointerButton {
-            pos, button: egui::PointerButton::Primary, pressed: true,
-            modifiers: egui::Modifiers::NONE }],
-        vec![egui::Event::PointerButton { pos, button: egui::PointerButton::Primary,
-            pressed: false, modifiers: egui::Modifiers::NONE }],
-    ] { render(&ctx, &mut app, &draft, events); }
+        vec![
+            egui::Event::PointerMoved(pos),
+            egui::Event::PointerButton {
+                pos,
+                button: egui::PointerButton::Primary,
+                pressed: true,
+                modifiers: egui::Modifiers::NONE,
+            },
+        ],
+        vec![egui::Event::PointerButton {
+            pos,
+            button: egui::PointerButton::Primary,
+            pressed: false,
+            modifiers: egui::Modifiers::NONE,
+        }],
+    ] {
+        render(&ctx, &mut app, &draft, events);
+    }
     output = render(&ctx, &mut app, &draft, vec![]);
     text = material_ui_text(&output);
-    assert!(text.contains("合成の用法変更理由") && text.contains("synthetic business email"),
-        "second row reason and quote must switch together: {text}");
-    assert!(!text.contains("合成の意味変更理由"), "previous reason leaked: {text}");
-    assert_eq!(serde_json::to_vec(&draft).unwrap(), before_draft,
-        "comparison and selection must not mutate the proposal");
+    assert!(
+        text.contains("合成の用法変更理由") && text.contains("synthetic business email"),
+        "second row reason and quote must switch together: {text}"
+    );
+    assert!(
+        !text.contains("合成の意味変更理由"),
+        "previous reason leaked: {text}"
+    );
+    assert_eq!(
+        serde_json::to_vec(&draft).unwrap(),
+        before_draft,
+        "comparison and selection must not mutate the proposal"
+    );
 
     draft.candidate.usage = draft.baseline.as_ref().unwrap().usage.clone();
     draft.generated = Some(draft.candidate.clone());
     draft.reasons.retain(|reason| reason.path == "/meaning");
     text = material_ui_text(&render(&ctx, &mut app, &draft, vec![]));
-    assert!(text.contains("合成の意味変更理由"), "vanished selection must choose first: {text}");
-    assert!(!text.contains("合成の用法変更理由"), "vanished row leaked: {text}");
+    assert!(
+        text.contains("合成の意味変更理由"),
+        "vanished selection must choose first: {text}"
+    );
+    assert!(
+        !text.contains("合成の用法変更理由"),
+        "vanished row leaked: {text}"
+    );
     draft.candidate = draft.baseline.as_ref().unwrap().clone();
     draft.generated = Some(draft.candidate.clone());
     text = material_ui_text(&render(&ctx, &mut app, &draft, vec![]));
     assert!(text.contains("内容の差分はない"), "{text}");
-    assert!(!text.contains("合成の意味変更理由") && !text.contains("合成の新しい意味🐈"),
-        "zero changes must clear prior detail: {text}");
+    assert!(
+        !text.contains("合成の意味変更理由") && !text.contains("合成の新しい意味🐈"),
+        "zero changes must clear prior detail: {text}"
+    );
     assert_eq!(serde_json::to_vec(&app.progress).unwrap(), before_progress);
     assert_eq!(wordweave5::model::deck_text(&app.deck), before_deck);
     drop(app);
@@ -1088,29 +1426,51 @@ fn material_ui_legacy_proposal_explains_missing_fixed_source_before_expansion() 
     draft.generated = None;
     let before = serde_json::to_vec(&draft).unwrap();
     app.progress.material_draft = Some(draft);
-    let output = ctx.run(egui::RawInput { screen_rect: Some(egui::Rect::from_min_size(
-        egui::Pos2::ZERO, egui::vec2(1200.0, 850.0))), ..Default::default() }, |ctx| {
-        egui::CentralPanel::default().show(ctx, |ui| app.material_panel(ui));
-    });
+    let output = ctx.run(
+        egui::RawInput {
+            screen_rect: Some(egui::Rect::from_min_size(
+                egui::Pos2::ZERO,
+                egui::vec2(1200.0, 850.0),
+            )),
+            ..Default::default()
+        },
+        |ctx| {
+            egui::CentralPanel::default().show(ctx, |ui| app.material_panel(ui));
+        },
+    );
     let text = material_ui_text(&output);
-    assert!(text.contains("旧版の案には固定原文がない"),
-        "missing fixed source must be explained without opening a fold: {text}");
+    assert!(
+        text.contains("旧版の案には固定原文がない"),
+        "missing fixed source must be explained without opening a fold: {text}"
+    );
     fn phrase_rect(shape: &egui::epaint::Shape, phrase: &str) -> Option<egui::Rect> {
         match shape {
-            egui::epaint::Shape::Text(t) if t.galley.text().contains(phrase) =>
-                Some(egui::Rect::from_min_size(t.pos, t.galley.size())),
+            egui::epaint::Shape::Text(t) if t.galley.text().contains(phrase) => {
+                Some(egui::Rect::from_min_size(t.pos, t.galley.size()))
+            }
             egui::epaint::Shape::Vec(items) => items.iter().find_map(|x| phrase_rect(x, phrase)),
             _ => None,
         }
     }
-    assert!(output.shapes.iter().any(|shape| phrase_rect(&shape.shape,
-        "旧版の案には固定原文がない").is_some_and(|rect|
-            shape.clip_rect.contains_rect(rect))),
-        "missing-source explanation must be visible in the initial viewport");
-    assert!(text.contains("元の会話を表示"), "existing source navigation must remain: {text}");
-    assert!(!text.contains("Please improve this synthetic sentence."),
-        "missing source must not be silently substituted: {text}");
-    assert_eq!(serde_json::to_vec(app.progress.material_draft.as_ref().unwrap()).unwrap(), before);
+    assert!(
+        output.shapes.iter().any(
+            |shape| phrase_rect(&shape.shape, "旧版の案には固定原文がない")
+                .is_some_and(|rect| shape.clip_rect.contains_rect(rect))
+        ),
+        "missing-source explanation must be visible in the initial viewport"
+    );
+    assert!(
+        text.contains("元の会話を表示"),
+        "existing source navigation must remain: {text}"
+    );
+    assert!(
+        !text.contains("Please improve this synthetic sentence."),
+        "missing source must not be silently substituted: {text}"
+    );
+    assert_eq!(
+        serde_json::to_vec(app.progress.material_draft.as_ref().unwrap()).unwrap(),
+        before
+    );
     drop(app);
     std::fs::remove_dir_all(root).unwrap();
 }
@@ -1121,11 +1481,13 @@ fn material_ui_new_proposal_starts_with_fixed_context_collapsed_in_the_same_dial
     ctx.style_mut(|style| style.animation_time = 0.0);
     app.page = Page::Chat;
     app.chat_material_open = true;
-    app.progress.chats[0].complete(
-        "Please improve this synthetic sentence.".into(),
-        "Use it in a synthetic business email.".into(),
-        wordweave5::execution::Execution::default(),
-    ).unwrap();
+    app.progress.chats[0]
+        .complete(
+            "Please improve this synthetic sentence.".into(),
+            "Use it in a synthetic business email.".into(),
+            wordweave5::execution::Execution::default(),
+        )
+        .unwrap();
     app.progress.chats[0].exchanges[0].for_material = true;
     let mut first = material_ui_draft(&app);
     first.source.conversation_id = app.progress.chats[0].id.clone();
@@ -1136,16 +1498,26 @@ fn material_ui_new_proposal_starts_with_fixed_context_collapsed_in_the_same_dial
     app.progress.chats[0].title = "Current synthetic conversation".into();
     app.progress.material_draft = Some(first);
     let screen = egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(1400.0, 1000.0));
-    let render = |events: Vec<egui::Event>, app: &mut WordApp| ctx.run(
-        egui::RawInput { screen_rect: Some(screen), events, ..Default::default() },
-        |ctx| app.update_ui(ctx));
+    let render = |events: Vec<egui::Event>, app: &mut WordApp| {
+        ctx.run(
+            egui::RawInput {
+                screen_rect: Some(screen),
+                events,
+                ..Default::default()
+            },
+            |ctx| app.update_ui(ctx),
+        )
+    };
     let mut output = render(vec![], &mut app);
-    for _ in 0..2 { output = render(vec![], &mut app); }
+    for _ in 0..2 {
+        output = render(vec![], &mut app);
+    }
     let label = "生成時の固定会話を展開";
     fn label_center(shape: &egui::epaint::Shape, label: &str) -> Option<egui::Pos2> {
         match shape {
-            egui::epaint::Shape::Text(t) if t.galley.text() == label =>
-                Some(t.pos + t.galley.size() * 0.5),
+            egui::epaint::Shape::Text(t) if t.galley.text() == label => {
+                Some(t.pos + t.galley.size() * 0.5)
+            }
             egui::epaint::Shape::Vec(items) => items.iter().find_map(|x| label_center(x, label)),
             _ => None,
         }
@@ -1157,49 +1529,99 @@ fn material_ui_new_proposal_starts_with_fixed_context_collapsed_in_the_same_dial
             Some((center, clipped.clip_rect))
         });
         if let Some((center, clip)) = header {
-            if clip.contains(center) { pos = Some(center); break; }
-            render(vec![egui::Event::PointerMoved(clip.center()),
-                egui::Event::MouseWheel { unit: egui::MouseWheelUnit::Point,
-                    delta: egui::vec2(0.0, -120.0), modifiers: egui::Modifiers::NONE }],
-                &mut app);
+            if clip.contains(center) {
+                pos = Some(center);
+                break;
+            }
+            render(
+                vec![
+                    egui::Event::PointerMoved(clip.center()),
+                    egui::Event::MouseWheel {
+                        unit: egui::MouseWheelUnit::Point,
+                        delta: egui::vec2(0.0, -120.0),
+                        modifiers: egui::Modifiers::NONE,
+                    },
+                ],
+                &mut app,
+            );
         } else {
-            let dialog = ctx.memory(|m| m.area_rect(egui::Id::new("教材の根拠と差分を確認")))
+            let dialog = ctx
+                .memory(|m| m.area_rect(egui::Id::new("教材の根拠と差分を確認")))
                 .expect("material dialog must remain open");
-            render(vec![egui::Event::PointerMoved(dialog.center()),
-                egui::Event::MouseWheel { unit: egui::MouseWheelUnit::Point,
-                    delta: egui::vec2(0.0, -120.0), modifiers: egui::Modifiers::NONE }],
-                &mut app);
+            render(
+                vec![
+                    egui::Event::PointerMoved(dialog.center()),
+                    egui::Event::MouseWheel {
+                        unit: egui::MouseWheelUnit::Point,
+                        delta: egui::vec2(0.0, -120.0),
+                        modifiers: egui::Modifiers::NONE,
+                    },
+                ],
+                &mut app,
+            );
         }
         output = render(vec![], &mut app);
     }
     pos.expect("fixed context header must be visibly reachable by body scrolling");
-    for _ in 0..30 { output = render(vec![], &mut app); }
-    let (pos, body_clip) = output.shapes.iter().find_map(|clipped| {
-        let center = label_center(&clipped.shape, label)?;
-        clipped.clip_rect.contains(center).then_some((center, clipped.clip_rect))
-    }).expect("fixed context header must remain visible after scroll settles");
+    for _ in 0..30 {
+        output = render(vec![], &mut app);
+    }
+    let (pos, body_clip) = output
+        .shapes
+        .iter()
+        .find_map(|clipped| {
+            let center = label_center(&clipped.shape, label)?;
+            clipped
+                .clip_rect
+                .contains(center)
+                .then_some((center, clipped.clip_rect))
+        })
+        .expect("fixed context header must remain visible after scroll settles");
     render(vec![egui::Event::PointerMoved(pos)], &mut app);
     for events in [
         vec![egui::Event::PointerButton {
-            pos, button: egui::PointerButton::Primary, pressed: true,
-            modifiers: egui::Modifiers::NONE }],
-        vec![egui::Event::PointerButton { pos, button: egui::PointerButton::Primary,
-            pressed: false, modifiers: egui::Modifiers::NONE }],
-    ] { render(events, &mut app); }
-    for _ in 0..3 { output = render(vec![], &mut app); }
+            pos,
+            button: egui::PointerButton::Primary,
+            pressed: true,
+            modifiers: egui::Modifiers::NONE,
+        }],
+        vec![egui::Event::PointerButton {
+            pos,
+            button: egui::PointerButton::Primary,
+            pressed: false,
+            modifiers: egui::Modifiers::NONE,
+        }],
+    ] {
+        render(events, &mut app);
+    }
+    for _ in 0..3 {
+        output = render(vec![], &mut app);
+    }
     // Opening a fold at the bottom of the scroll viewport does not put its
     // contents on screen. Scroll the same body until the snapshot heading is
     // actually visible, rather than treating an off-screen shape as evidence.
-    let turn_visible = |output: &egui::FullOutput| output.shapes.iter().any(|clipped| {
-        label_center(&clipped.shape, "往復 1")
-            .is_some_and(|center| clipped.clip_rect.contains(center))
-    });
+    let turn_visible = |output: &egui::FullOutput| {
+        output.shapes.iter().any(|clipped| {
+            label_center(&clipped.shape, "往復 1")
+                .is_some_and(|center| clipped.clip_rect.contains(center))
+        })
+    };
     let scroll_point = egui::pos2(pos.x, body_clip.center().y);
     for _ in 0..20 {
-        if turn_visible(&output) { break; }
-        render(vec![egui::Event::PointerMoved(scroll_point),
-            egui::Event::MouseWheel { unit: egui::MouseWheelUnit::Point,
-                delta: egui::vec2(0.0, -40.0), modifiers: egui::Modifiers::NONE }], &mut app);
+        if turn_visible(&output) {
+            break;
+        }
+        render(
+            vec![
+                egui::Event::PointerMoved(scroll_point),
+                egui::Event::MouseWheel {
+                    unit: egui::MouseWheelUnit::Point,
+                    delta: egui::vec2(0.0, -40.0),
+                    modifiers: egui::Modifiers::NONE,
+                },
+            ],
+            &mut app,
+        );
         output = render(vec![], &mut app);
     }
     assert!(turn_visible(&output),
@@ -1210,17 +1632,31 @@ fn material_ui_new_proposal_starts_with_fixed_context_collapsed_in_the_same_dial
     second.candidate.meaning = "合成の別案にだけある意味".into();
     second.generated = Some(second.candidate.clone());
     let (tx, rx) = std::sync::mpsc::channel();
-    app.pending = Some(Pending { kind: Activity::Material, key: String::new(),
-        rx, cancel: None });
+    app.pending = Some(Pending {
+        kind: Activity::Material,
+        key: String::new(),
+        rx,
+        cancel: None,
+    });
     tx.send(Ok(AiResult::Material(second))).unwrap();
     output = render(vec![], &mut app);
-    assert!(app.pending.is_none(), "synthetic material result must pass through tick");
+    assert!(
+        app.pending.is_none(),
+        "synthetic material result must pass through tick"
+    );
     let text = material_ui_text(&output);
-    assert!(text.contains("合成の別案にだけある意味"),
-        "the same dialog must render the second proposal: {text}");
-    assert!(text.contains(label), "fixed context fold must remain available: {text}");
-    assert!(!text.contains("\n往復 1\n"),
-        "new proposal must not inherit the previous proposal's expanded context: {text}");
+    assert!(
+        text.contains("合成の別案にだけある意味"),
+        "the same dialog must render the second proposal: {text}"
+    );
+    assert!(
+        text.contains(label),
+        "fixed context fold must remain available: {text}"
+    );
+    assert!(
+        !text.contains("\n往復 1\n"),
+        "new proposal must not inherit the previous proposal's expanded context: {text}"
+    );
     drop(app);
     std::fs::remove_dir_all(root).unwrap();
 }
@@ -1234,8 +1670,14 @@ fn material_ui_mode_names_change_only_the_ui_and_preserve_serialized_mode() {
         egui::CentralPanel::default().show(ctx, |ui| app.material_panel(ui));
     });
     let text = material_ui_text(&output);
-    assert!(text.contains("追加のみ") && text.contains("内容を見直す（追加・変更・削除）"), "{text}");
-    assert!(text.contains("復習") && text.contains("再学習"), "mode impact must be explained: {text}");
+    assert!(
+        text.contains("追加のみ") && text.contains("内容を見直す（追加・変更・削除）"),
+        "{text}"
+    );
+    assert!(
+        text.contains("復習") && text.contains("再学習"),
+        "mode impact must be explained: {text}"
+    );
     app.progress.material_draft = Some(material_ui_draft(&app));
     let output = ctx.run(egui::RawInput::default(), |ctx| {
         egui::CentralPanel::default().show(ctx, |ui| app.material_panel(ui));
@@ -1244,7 +1686,10 @@ fn material_ui_mode_names_change_only_the_ui_and_preserve_serialized_mode() {
     assert_eq!(Mode::Append.label(), "追加（例文・言い換え）");
     assert_eq!(Mode::Correct.label(), "訂正（既存内容を変更）");
     assert_eq!(serde_json::to_string(&Mode::Append).unwrap(), "\"Append\"");
-    assert_eq!(serde_json::to_string(&Mode::Correct).unwrap(), "\"Correct\"");
+    assert_eq!(
+        serde_json::to_string(&Mode::Correct).unwrap(),
+        "\"Correct\""
+    );
     drop(app);
     std::fs::remove_dir_all(root).unwrap();
 }
@@ -1253,20 +1698,43 @@ fn material_ui_mode_names_change_only_the_ui_and_preserve_serialized_mode() {
 fn material_detail_shows_all_replacements_without_expanding_a_fold() {
     let (ctx, mut app, root) = fixture();
     app.deck[0].replacements = vec![
-        wordweave5::model::Replacement { phrase: "strengthen".into(),
-            meaning: "合成の強化する意味".into(), conditions: "合成の業務上の条件".into() },
-        wordweave5::model::Replacement { phrase: "reinforce".into(),
-            meaning: "合成の補強する意味".into(), conditions: "合成の学習場面の条件".into() },
+        wordweave5::model::Replacement {
+            phrase: "strengthen".into(),
+            meaning: "合成の強化する意味".into(),
+            conditions: "合成の業務上の条件".into(),
+        },
+        wordweave5::model::Replacement {
+            phrase: "reinforce".into(),
+            meaning: "合成の補強する意味".into(),
+            conditions: "合成の学習場面の条件".into(),
+        },
     ];
     let before = wordweave5::model::deck_text(&app.deck);
-    let output = ctx.run(egui::RawInput { screen_rect: Some(egui::Rect::from_min_size(
-        egui::Pos2::ZERO, egui::vec2(1400.0, 950.0))), ..Default::default() }, |ctx| {
-        egui::CentralPanel::default().show(ctx, |ui| app.deck_page(ui));
-    });
+    let output = ctx.run(
+        egui::RawInput {
+            screen_rect: Some(egui::Rect::from_min_size(
+                egui::Pos2::ZERO,
+                egui::vec2(1400.0, 950.0),
+            )),
+            ..Default::default()
+        },
+        |ctx| {
+            egui::CentralPanel::default().show(ctx, |ui| app.deck_page(ui));
+        },
+    );
     let text = material_ui_text(&output);
-    for expected in ["言い換えと使い分け", "strengthen", "合成の強化する意味",
-        "合成の業務上の条件", "reinforce", "合成の補強する意味", "合成の学習場面の条件",
-        "語調・文体", "社外メール", "格調・文体"] {
+    for expected in [
+        "言い換えと使い分け",
+        "strengthen",
+        "合成の強化する意味",
+        "合成の業務上の条件",
+        "reinforce",
+        "合成の補強する意味",
+        "合成の学習場面の条件",
+        "語調・文体",
+        "社外メール",
+        "格調・文体",
+    ] {
         assert!(text.contains(expected), "missing {expected}: {text}");
     }
     assert_eq!(wordweave5::model::deck_text(&app.deck), before);
@@ -1287,21 +1755,33 @@ fn material_ui_narrow_dialog_keeps_heading_and_registration_actions_visible_whil
     let before = serde_json::to_vec(&app.progress).unwrap();
     let deck_before = wordweave5::model::deck_text(&app.deck);
     let screen = egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(512.5, 406.25));
-    let render = |events: Vec<egui::Event>, app: &mut WordApp| ctx.run(
-        egui::RawInput { screen_rect: Some(screen), events, ..Default::default() },
-        |ctx| app.update_ui(ctx));
+    let render = |events: Vec<egui::Event>, app: &mut WordApp| {
+        ctx.run(
+            egui::RawInput {
+                screen_rect: Some(screen),
+                events,
+                ..Default::default()
+            },
+            |ctx| app.update_ui(ctx),
+        )
+    };
     let mut output = render(vec![], &mut app);
-    for _ in 0..3 { output = render(vec![], &mut app); }
-    let dialog = ctx.memory(|memory| memory.area_rect(
-        egui::Id::new("教材の根拠と差分を確認")))
+    for _ in 0..3 {
+        output = render(vec![], &mut app);
+    }
+    let dialog = ctx
+        .memory(|memory| memory.area_rect(egui::Id::new("教材の根拠と差分を確認")))
         .expect("material dialog must open");
-    assert!(screen.contains_rect(dialog),
-        "the entire narrow material dialog must fit inside the viewport: {dialog:?} vs {screen:?}");
+    assert!(
+        screen.contains_rect(dialog),
+        "the entire narrow material dialog must fit inside the viewport: {dialog:?} vs {screen:?}"
+    );
     fn visible_text_rect(output: &egui::FullOutput, label: &str) -> Option<egui::Rect> {
         fn find(shape: &egui::epaint::Shape, label: &str) -> Option<egui::Rect> {
             match shape {
-                egui::epaint::Shape::Text(t) if t.galley.text() == label =>
-                    Some(egui::Rect::from_min_size(t.pos, t.galley.size())),
+                egui::epaint::Shape::Text(t) if t.galley.text() == label => {
+                    Some(egui::Rect::from_min_size(t.pos, t.galley.size()))
+                }
                 egui::epaint::Shape::Vec(items) => items.iter().find_map(|x| find(x, label)),
                 _ => None,
             }
@@ -1315,18 +1795,23 @@ fn material_ui_narrow_dialog_keeps_heading_and_registration_actions_visible_whil
         .expect("material heading must be visible in narrow dialog");
     visible_text_rect(&output, "元の会話を表示")
         .expect("proposal body must have a visible source action");
-    let body_viewport = ctx.data(|data| data.get_temp::<egui::Rect>(
-        egui::Id::new("material-change-detail-viewport")))
+    let body_viewport = ctx
+        .data(|data| data.get_temp::<egui::Rect>(egui::Id::new("material-change-detail-viewport")))
         .expect("comparison detail must expose its actual scroll viewport");
-    assert!(body_viewport.is_positive() && screen.contains_rect(body_viewport),
-        "comparison viewport must be visible: {body_viewport:?}");
+    assert!(
+        body_viewport.is_positive() && screen.contains_rect(body_viewport),
+        "comparison viewport must be visible: {body_viewport:?}"
+    );
     let body_point = body_viewport.center();
     let register = visible_text_rect(&output, "内容を確認して教材に登録")
         .expect("registration action must be visible in narrow dialog");
     let discard = visible_text_rect(&output, "教材案を破棄")
         .expect("discard action must be visible in narrow dialog");
     for rect in [heading, register, discard] {
-        assert!(screen.contains_rect(rect), "action outside narrow viewport: {rect:?}");
+        assert!(
+            screen.contains_rect(rect),
+            "action outside narrow viewport: {rect:?}"
+        );
     }
     let mut reached = std::collections::BTreeSet::new();
     for _ in 0..48 {
@@ -1335,14 +1820,27 @@ fn material_ui_narrow_dialog_keeps_heading_and_registration_actions_visible_whil
                 reached.insert(label);
             }
         }
-        if reached.len() == 4 { break; }
-        render(vec![egui::Event::PointerMoved(body_point),
-            egui::Event::MouseWheel { unit: egui::MouseWheelUnit::Point,
-                delta: egui::vec2(0.0, -40.0), modifiers: egui::Modifiers::NONE }], &mut app);
+        if reached.len() == 4 {
+            break;
+        }
+        render(
+            vec![
+                egui::Event::PointerMoved(body_point),
+                egui::Event::MouseWheel {
+                    unit: egui::MouseWheelUnit::Point,
+                    delta: egui::vec2(0.0, -40.0),
+                    modifiers: egui::Modifiers::NONE,
+                },
+            ],
+            &mut app,
+        );
         output = render(vec![], &mut app);
     }
-    assert_eq!(reached.len(), 4,
-        "narrow proposal body must scroll to list and both comparison sides; reached {reached:?}");
+    assert_eq!(
+        reached.len(),
+        4,
+        "narrow proposal body must scroll to list and both comparison sides; reached {reached:?}"
+    );
     for (label, initial) in [
         ("チャットを教材に反映", heading),
         ("内容を確認して教材に登録", register),
@@ -1350,9 +1848,14 @@ fn material_ui_narrow_dialog_keeps_heading_and_registration_actions_visible_whil
     ] {
         let after = visible_text_rect(&output, label)
             .unwrap_or_else(|| panic!("{label} must remain visible after body scroll"));
-        assert!(screen.contains_rect(after), "{label} outside narrow viewport: {after:?}");
-        assert!((after.top() - initial.top()).abs() <= 2.0,
-            "{label} moved with body scroll: {initial:?} -> {after:?}");
+        assert!(
+            screen.contains_rect(after),
+            "{label} outside narrow viewport: {after:?}"
+        );
+        assert!(
+            (after.top() - initial.top()).abs() <= 2.0,
+            "{label} moved with body scroll: {initial:?} -> {after:?}"
+        );
     }
     assert_eq!(serde_json::to_vec(&app.progress).unwrap(), before);
     assert_eq!(wordweave5::model::deck_text(&app.deck), deck_before);
@@ -1361,20 +1864,31 @@ fn material_ui_narrow_dialog_keeps_heading_and_registration_actions_visible_whil
     invalid.reasons[0].path = format!("/{}", "長い合成パス".repeat(45));
     app.progress.material_draft = Some(invalid);
     let invalid_before = serde_json::to_vec(&app.progress).unwrap();
-    for _ in 0..3 { output = render(vec![], &mut app); }
-    let invalid_dialog = ctx.memory(|memory| memory.area_rect(
-        egui::Id::new("教材の根拠と差分を確認")))
+    for _ in 0..3 {
+        output = render(vec![], &mut app);
+    }
+    let invalid_dialog = ctx
+        .memory(|memory| memory.area_rect(egui::Id::new("教材の根拠と差分を確認")))
         .expect("material dialog must remain open for invalid proposal");
     assert!(screen.contains_rect(invalid_dialog),
         "the narrow dialog must fit even with a long registration prohibition: {invalid_dialog:?} vs {screen:?}");
     let text = material_ui_text(&output);
-    assert!(text.contains("変更理由") && text.contains("長い合成パス"),
+    assert!(
+        text.contains("変更理由") && text.contains("長い合成パス"),
         "invalid proposal must expose its long registration prohibition: {}",
-        text.chars().take(400).collect::<String>());
-    for label in ["チャットを教材に反映", "内容を確認して教材に登録", "教材案を破棄"] {
+        text.chars().take(400).collect::<String>()
+    );
+    for label in [
+        "チャットを教材に反映",
+        "内容を確認して教材に登録",
+        "教材案を破棄",
+    ] {
         let rect = visible_text_rect(&output, label)
             .unwrap_or_else(|| panic!("{label} must remain visible beside long prohibition"));
-        assert!(screen.contains_rect(rect), "{label} outside narrow viewport: {rect:?}");
+        assert!(
+            screen.contains_rect(rect),
+            "{label} outside narrow viewport: {rect:?}"
+        );
     }
     assert_eq!(serde_json::to_vec(&app.progress).unwrap(), invalid_before);
     assert_eq!(wordweave5::model::deck_text(&app.deck), deck_before);
@@ -1391,40 +1905,70 @@ fn material_ui_narrow_mode_choices_are_reachable_inside_the_dialog() {
     app.material_base = app.deck[0].base.clone();
     let before = serde_json::to_vec(&app.progress).unwrap();
     let screen = egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(512.5, 406.25));
-    let render = |events: Vec<egui::Event>, app: &mut WordApp| ctx.run(
-        egui::RawInput { screen_rect: Some(screen), events, ..Default::default() },
-        |ctx| app.update_ui(ctx));
+    let render = |events: Vec<egui::Event>, app: &mut WordApp| {
+        ctx.run(
+            egui::RawInput {
+                screen_rect: Some(screen),
+                events,
+                ..Default::default()
+            },
+            |ctx| app.update_ui(ctx),
+        )
+    };
     fn visible_label(output: &egui::FullOutput, label: &str, screen: egui::Rect) -> bool {
         fn find(shape: &egui::epaint::Shape, label: &str) -> Option<egui::Rect> {
             match shape {
-                egui::epaint::Shape::Text(t) if t.galley.text() == label =>
-                    Some(egui::Rect::from_min_size(t.pos, t.galley.size())),
+                egui::epaint::Shape::Text(t) if t.galley.text() == label => {
+                    Some(egui::Rect::from_min_size(t.pos, t.galley.size()))
+                }
                 egui::epaint::Shape::Vec(items) => items.iter().find_map(|x| find(x, label)),
                 _ => None,
             }
         }
-        output.shapes.iter().any(|clipped| find(&clipped.shape, label)
-            .is_some_and(|rect| clipped.clip_rect.contains_rect(rect)
-                && screen.contains_rect(rect)))
+        output.shapes.iter().any(|clipped| {
+            find(&clipped.shape, label).is_some_and(|rect| {
+                clipped.clip_rect.contains_rect(rect) && screen.contains_rect(rect)
+            })
+        })
     }
     let mut output = render(vec![], &mut app);
     let mut reached = std::collections::BTreeSet::new();
     for _ in 0..24 {
-        for label in ["追加のみ", "内容を見直す（追加・変更・削除）", "教材案を作成"] {
-            if visible_label(&output, label, screen) { reached.insert(label); }
+        for label in [
+            "追加のみ",
+            "内容を見直す（追加・変更・削除）",
+            "教材案を作成",
+        ] {
+            if visible_label(&output, label, screen) {
+                reached.insert(label);
+            }
         }
-        if reached.len() == 3 { break; }
-        let dialog = ctx.memory(|m| m.area_rect(egui::Id::new("教材の根拠と差分を確認")))
+        if reached.len() == 3 {
+            break;
+        }
+        let dialog = ctx
+            .memory(|m| m.area_rect(egui::Id::new("教材の根拠と差分を確認")))
             .expect("material dialog must remain open");
-        let body_point = dialog.left_top() + egui::vec2(dialog.width() * 0.5,
-            dialog.height() * 0.7);
-        render(vec![egui::Event::PointerMoved(body_point),
-            egui::Event::MouseWheel { unit: egui::MouseWheelUnit::Point,
-                delta: egui::vec2(0.0, -95.0), modifiers: egui::Modifiers::NONE }], &mut app);
+        let body_point =
+            dialog.left_top() + egui::vec2(dialog.width() * 0.5, dialog.height() * 0.7);
+        render(
+            vec![
+                egui::Event::PointerMoved(body_point),
+                egui::Event::MouseWheel {
+                    unit: egui::MouseWheelUnit::Point,
+                    delta: egui::vec2(0.0, -95.0),
+                    modifiers: egui::Modifiers::NONE,
+                },
+            ],
+            &mut app,
+        );
         output = render(vec![], &mut app);
     }
-    assert_eq!(reached.len(), 3,
-        "narrow dialog must scroll to mode choices and create action; reached {reached:?}");
+    assert_eq!(
+        reached.len(),
+        3,
+        "narrow dialog must scroll to mode choices and create action; reached {reached:?}"
+    );
     assert_eq!(serde_json::to_vec(&app.progress).unwrap(), before);
     drop(app);
     std::fs::remove_dir_all(root).unwrap();

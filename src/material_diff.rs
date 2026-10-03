@@ -33,11 +33,18 @@ pub fn reason_path_label(path: &str) -> Option<String> {
         return Some(label.into());
     }
     let mut parts = path.split('/');
-    let (Some(""), Some(array), Some(index), Some(field), None) =
-        (parts.next(), parts.next(), parts.next(), parts.next(), parts.next()) else {
+    let (Some(""), Some(array), Some(index), Some(field), None) = (
+        parts.next(),
+        parts.next(),
+        parts.next(),
+        parts.next(),
+        parts.next(),
+    ) else {
         return None;
     };
-    if !(index == "0" || (!index.starts_with('0') && index.bytes().all(|byte| byte.is_ascii_digit()))) {
+    if !(index == "0"
+        || (!index.starts_with('0') && index.bytes().all(|byte| byte.is_ascii_digit())))
+    {
         return None;
     }
     let number = index.parse::<usize>().ok()?.checked_add(1)?;
@@ -215,8 +222,19 @@ mod tests {
         ] {
             assert_eq!(reason_path_label(path).as_deref(), Some(label), "{path}");
         }
-        for path in ["/id", "/examples/01/note", "/examples/-1/note", "/examples/0", "/examples/0/unknown", "/replacements/0/unknown", "/examples/184467440737095516160/note"] {
-            assert!(reason_path_label(path).is_none(), "unknown path named as a real item: {path}");
+        for path in [
+            "/id",
+            "/examples/01/note",
+            "/examples/-1/note",
+            "/examples/0",
+            "/examples/0/unknown",
+            "/replacements/0/unknown",
+            "/examples/184467440737095516160/note",
+        ] {
+            assert!(
+                reason_path_label(path).is_none(),
+                "unknown path named as a real item: {path}"
+            );
         }
     }
     #[test]

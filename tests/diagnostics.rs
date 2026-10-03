@@ -1,10 +1,17 @@
-use std::{fs, time::{Duration, Instant}};
+use std::{
+    fs,
+    time::{Duration, Instant},
+};
 use wordweave5::diagnostics::{self, EntryPoint, ErrorClass, Event, Operation, Stage};
 
 // A separate test process owns the global sink. It never initializes the live data path.
 #[test]
 fn diagnostic_api_keeps_operation_identity_and_reports_failures_without_panicking() {
-    let root = std::env::temp_dir().join(format!("ww-diagnostic-api-{}-{}", std::process::id(), chrono::Utc::now().timestamp_nanos_opt().unwrap()));
+    let root = std::env::temp_dir().join(format!(
+        "ww-diagnostic-api-{}-{}",
+        std::process::id(),
+        chrono::Utc::now().timestamp_nanos_opt().unwrap()
+    ));
     fs::create_dir(&root).unwrap();
     let logs = root.join("logs");
     diagnostics::initialize(&logs);
@@ -13,15 +20,24 @@ fn diagnostic_api_keeps_operation_identity_and_reports_failures_without_panickin
 
     let op = Operation::begin(EntryPoint::Recording);
     let start = Instant::now();
-    while start.elapsed() < Duration::from_millis(2) { std::thread::yield_now(); }
+    while start.elapsed() < Duration::from_millis(2) {
+        std::thread::yield_now();
+    }
     op.event(Stage::Record, Event::Paused);
     op.event(Stage::Record, Event::Resumed);
     op.fail(Stage::Save, ErrorClass::Io);
     let text = diagnostics::export().unwrap();
-    let events: Vec<serde_json::Value> = text.lines().map(|line| serde_json::from_str(line).unwrap()).collect();
+    let events: Vec<serde_json::Value> = text
+        .lines()
+        .map(|line| serde_json::from_str(line).unwrap())
+        .collect();
     assert_eq!(events.len(), 4);
-    assert!(events.iter().all(|event| event["run_id"] == events[0]["run_id"]));
-    assert!(events.iter().all(|event| event["entry_point"] == "recording"));
+    assert!(events
+        .iter()
+        .all(|event| event["run_id"] == events[0]["run_id"]));
+    assert!(events
+        .iter()
+        .all(|event| event["entry_point"] == "recording"));
     assert_eq!(events[0]["event"], "started");
     assert_eq!(events[3]["error"], "io");
     assert!(events[3]["elapsed_ms"].as_u64().unwrap() >= 2);

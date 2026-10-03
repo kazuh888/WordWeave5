@@ -3,13 +3,13 @@
 #[cfg(windows)]
 mod ai;
 #[cfg(windows)]
+mod annotation;
+#[cfg(windows)]
 mod app;
 #[cfg(windows)]
 mod ink;
 #[cfg(windows)]
 mod media;
-#[cfg(windows)]
-mod annotation;
 
 #[cfg(windows)]
 fn main() -> eframe::Result<()> {

@@ -1,8 +1,8 @@
 //! Host-owned reading practice. No teaching data, recordings, or results are persisted here.
 use qwen_audio::{
-    evaluate, ApiKey, AudioInfo, AudioInput, Connection, CredentialStore, ErrorCode,
+    evaluate, ApiHost, ApiKey, AudioInfo, AudioInput, Connection, CredentialStore, ErrorCode,
     EvaluationResult, EvaluationSnapshot, ProviderRequest, ReferenceText, SafeError,
-    SendDisposition, ApiHost, Transport, TransportFailure, TransportFuture, REQUESTED_EFFORT,
+    SendDisposition, Transport, TransportFailure, TransportFuture, REQUESTED_EFFORT,
     REQUESTED_MODEL,
 };
 use std::sync::{

@@ -43,17 +43,33 @@ mod tests {
         let (ctx, mut app, root) = super::super::harness_tests::fixture();
         for position in [12.1234567, 7.1234567, 17.1234567, 7.1234567] {
             for _ in 0..3 {
-                let _ = ctx.run(egui::RawInput {
-                    screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(1150.0, 950.0))),
-                    ..Default::default()
-                }, |ctx| {
-                    let actions = app.speech_panel(ctx, &media::PlaybackSnapshot {
-                        loaded: true, can_seek: true, playing: true,
-                        position_seconds: position, duration_seconds: 30.1234567,
+                let _ = ctx.run(
+                    egui::RawInput {
+                        screen_rect: Some(egui::Rect::from_min_size(
+                            egui::Pos2::ZERO,
+                            egui::vec2(1150.0, 950.0),
+                        )),
                         ..Default::default()
-                    });
-                    assert!(actions.seek.is_none(), "rendering {position} submitted an unintended seek: {:?}", actions.seek);
-                });
+                    },
+                    |ctx| {
+                        let actions = app.speech_panel(
+                            ctx,
+                            &media::PlaybackSnapshot {
+                                loaded: true,
+                                can_seek: true,
+                                playing: true,
+                                position_seconds: position,
+                                duration_seconds: 30.1234567,
+                                ..Default::default()
+                            },
+                        );
+                        assert!(
+                            actions.seek.is_none(),
+                            "rendering {position} submitted an unintended seek: {:?}",
+                            actions.seek
+                        );
+                    },
+                );
             }
         }
         drop(app);
@@ -456,8 +472,15 @@ impl WordApp {
             self.speech_selected,
             if self.settings_editor.preview_speech {
                 self.settings_editor.draft.speech_rate.unwrap_or(
-                    if self.settings_editor.draft.slow_speech { 0.8 } else { 1.0 })
-            } else { self.speech_rate() },
+                    if self.settings_editor.draft.slow_speech {
+                        0.8
+                    } else {
+                        1.0
+                    },
+                )
+            } else {
+                self.speech_rate()
+            },
             self.fatal.is_none(),
         );
         self.speech_selected = selected_speech_button(
@@ -580,8 +603,10 @@ impl WordApp {
             recorder.elapsed().as_secs_f32()
         ));
         ui.label("入力音量");
-        ui.add(egui::ProgressBar::new(if paused { 0.0 } else { recorder.level() })
-            .desired_height(22.0));
+        ui.add(
+            egui::ProgressBar::new(if paused { 0.0 } else { recorder.level() })
+                .desired_height(22.0),
+        );
         let (mut toggle, mut finish) = (false, false);
         ui.horizontal_wrapped(|ui| {
             toggle = ui
@@ -617,12 +642,14 @@ impl WordApp {
                         operation.fail(DiagnosticStage::Record, DiagnosticError::Unavailable);
                     }
                 }
-                self.notify_result(result.map(|()| if paused {
+                self.notify_result(result.map(|()| {
+                    if paused {
                         "録音を再開した。"
                     } else {
                         "録音を一時停止した。停止時間は録音に含めない。"
                     }
-                    .into()));
+                    .into()
+                }));
             }
         }
         if finish {

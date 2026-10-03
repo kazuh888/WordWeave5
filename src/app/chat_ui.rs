@@ -30,45 +30,48 @@ impl WordApp {
         let short_page = ui.available_height() < 430.0;
         if ui.available_width() < 820.0 {
             if !short_page {
-            egui::Frame::new()
-                .fill(Color32::WHITE)
-                .stroke(egui::Stroke::new(1.0_f32, home_art::BORDER))
-                .corner_radius(10)
-                .inner_margin(if short_page { 6 } else { 10 })
-                .show(ui, |ui| {
-                    if short_page {
-                        ui.spacing_mut().button_padding = egui::vec2(9.0, 5.0);
-                    }
-                    ui.horizontal(|ui| {
-                        home_art::badge(
-                            ui,
-                            home_art::Icon::Chat,
-                            home_art::BLUE,
-                            if short_page { 30.0 } else { 40.0 },
-                        );
-                        ui.vertical(|ui| {
-                            home_art::title(
+                egui::Frame::new()
+                    .fill(Color32::WHITE)
+                    .stroke(egui::Stroke::new(1.0_f32, home_art::BORDER))
+                    .corner_radius(10)
+                    .inner_margin(if short_page { 6 } else { 10 })
+                    .show(ui, |ui| {
+                        if short_page {
+                            ui.spacing_mut().button_padding = egui::vec2(9.0, 5.0);
+                        }
+                        ui.horizontal(|ui| {
+                            home_art::badge(
                                 ui,
-                                "英語チャット",
-                                if short_page { 20.0 } else { 24.0 },
+                                home_art::Icon::Chat,
+                                home_art::BLUE,
+                                if short_page { 30.0 } else { 40.0 },
                             );
-                            if !short_page {
-                                ui.label(
-                                    RichText::new("質問・会話練習・教材づくり")
-                                        .size(15.0)
-                                        .color(home_art::MUTED),
+                            ui.vertical(|ui| {
+                                home_art::title(
+                                    ui,
+                                    "英語チャット",
+                                    if short_page { 20.0 } else { 24.0 },
                                 );
-                            }
-                        });
-                        ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                            ui.ww_menu_button("会話を選ぶ", |ui| {
-                                ui.set_width(340.0);
-                                self.chat_thread_picker(ui, idle, true);
+                                if !short_page {
+                                    ui.label(
+                                        RichText::new("質問・会話練習・教材づくり")
+                                            .size(15.0)
+                                            .color(home_art::MUTED),
+                                    );
+                                }
                             });
+                            ui.with_layout(
+                                egui::Layout::right_to_left(egui::Align::Center),
+                                |ui| {
+                                    ui.ww_menu_button("会話を選ぶ", |ui| {
+                                        ui.set_width(340.0);
+                                        self.chat_thread_picker(ui, idle, true);
+                                    });
+                                },
+                            );
                         });
                     });
-                });
-            ui.add_space(10.0);
+                ui.add_space(10.0);
             }
         } else {
             let max_width = (ui.available_width() * 0.42).max(280.0);
@@ -299,34 +302,52 @@ impl WordApp {
 
     fn offer_dropped_chat_files(&mut self, id: &str, files: &[egui::DroppedFile], idle: bool) {
         if !idle || self.pending_chat_file_send.is_some() {
-            self.notify_warning("処理中は添付できません。処理完了後、もう一度ドロップしてください。");
+            self.notify_warning(
+                "処理中は添付できません。処理完了後、もう一度ドロップしてください。",
+            );
             return;
         }
         if self.pending_chat_drop.is_some() {
-            self.notify_warning("先のファイル添付を確認またはキャンセルしてから、もう一度ドロップしてください。");
+            self.notify_warning(
+                "先のファイル添付を確認またはキャンセルしてから、もう一度ドロップしてください。",
+            );
             return;
         }
         let paths: Vec<_> = files.iter().filter_map(|file| file.path.clone()).collect();
         let unsupported = files.len() - paths.len();
         if paths.is_empty() {
-            self.notify_warning("ファイルのパスを取得できません。ファイル選択から添付してください。");
+            self.notify_warning(
+                "ファイルのパスを取得できません。ファイル選択から添付してください。",
+            );
             return;
         }
-        let existing = self.progress.chats.iter().find(|chat| chat.id == id)
+        let existing = self
+            .progress
+            .chats
+            .iter()
+            .find(|chat| chat.id == id)
             .map_or(0, |chat| chat.draft_attachments.len());
         if existing + paths.len() > 8 {
             self.notify_warning(format!("添付は一つの発言につき8件までです。現在{existing}件あるため、{}件をまとめて追加できません。今回のドロップは保存していません。", paths.len()));
             return;
         }
         self.pending_chat_drop = Some(ChatDropProposal {
-            chat_id: id.to_owned(), files: paths, unsupported,
+            chat_id: id.to_owned(),
+            files: paths,
+            unsupported,
         });
     }
 
     fn chat_drop_confirmation(&mut self, ctx: &egui::Context) {
-        let Some(proposal) = self.pending_chat_drop.as_ref() else { return; };
-        let Some(chat) = self.progress.chats.get(self.chat_selected)
-            .filter(|chat| chat.deleted_at.is_none() && chat.id == proposal.chat_id) else {
+        let Some(proposal) = self.pending_chat_drop.as_ref() else {
+            return;
+        };
+        let Some(chat) = self
+            .progress
+            .chats
+            .get(self.chat_selected)
+            .filter(|chat| chat.deleted_at.is_none() && chat.id == proposal.chat_id)
+        else {
             self.pending_chat_drop = None;
             self.notify_warning("会話が切り替わったため、ドロップしたファイルは添付していません。");
             return;
@@ -369,17 +390,27 @@ impl WordApp {
     }
 
     fn confirm_chat_drop(&mut self) {
-        let Some(proposal) = self.pending_chat_drop.take() else { return; };
-        let can_edit = self.pending.is_none() && self.pending_chat_file_send.is_none()
+        let Some(proposal) = self.pending_chat_drop.take() else {
+            return;
+        };
+        let can_edit = self.pending.is_none()
+            && self.pending_chat_file_send.is_none()
             && !self.batch_running
-            && self.session.is_none() && self.recorder.is_none() && self.fatal.is_none()
-            && self.progress.chats.get(self.chat_selected)
+            && self.session.is_none()
+            && self.recorder.is_none()
+            && self.fatal.is_none()
+            && self
+                .progress
+                .chats
+                .get(self.chat_selected)
                 .is_some_and(|chat| chat.deleted_at.is_none() && chat.id == proposal.chat_id);
         if !can_edit {
             self.notify_warning("会話が切り替わったか処理中のため、ファイルは添付していません。");
             return;
         }
-        let existing = self.progress.chats[self.chat_selected].draft_attachments.len();
+        let existing = self.progress.chats[self.chat_selected]
+            .draft_attachments
+            .len();
         if existing + proposal.files.len() > 8 {
             self.notify_warning(format!("確認中に添付数が変わった。上限は8件で、現在{existing}件あるため今回は保存していません。"));
             return;
@@ -387,7 +418,12 @@ impl WordApp {
         self.attach_dropped_chat_files(&proposal.chat_id, &proposal.files, proposal.unsupported);
     }
 
-    fn attach_dropped_chat_files(&mut self, id: &str, files: &[std::path::PathBuf], unsupported: usize) {
+    fn attach_dropped_chat_files(
+        &mut self,
+        id: &str,
+        files: &[std::path::PathBuf],
+        unsupported: usize,
+    ) {
         let mut attached = 0;
         let mut failed = unsupported;
         let mut first_error = None;
@@ -396,8 +432,12 @@ impl WordApp {
             match self.attach_chat_file(id, path) {
                 Ok(()) => {
                     attached += 1;
-                    first_name.get_or_insert_with(|| path.file_name()
-                        .and_then(|name| name.to_str()).unwrap_or("ファイル").to_owned());
+                    first_name.get_or_insert_with(|| {
+                        path.file_name()
+                            .and_then(|name| name.to_str())
+                            .unwrap_or("ファイル")
+                            .to_owned()
+                    });
                 }
                 Err(error) => {
                     failed += 1;
@@ -406,18 +446,28 @@ impl WordApp {
             }
         }
         if failed > 0 && first_error.is_none() {
-            first_error = Some("このファイルのパスを取得できません。ファイル選択から添付してください。".into());
+            first_error = Some(
+                "このファイルのパスを取得できません。ファイル選択から添付してください。".into(),
+            );
         }
         self.message = match (attached, failed) {
-            (1, 0) => format!("{}をメッセージに添付した。送信前に内容を確認できる。",
-                first_name.as_deref().unwrap_or("ファイル")),
+            (1, 0) => format!(
+                "{}をメッセージに添付した。送信前に内容を確認できる。",
+                first_name.as_deref().unwrap_or("ファイル")
+            ),
             (count, 0) => format!("{count}件をメッセージに添付した。送信前に内容を確認できる。"),
-            (0, count) => format!("{count}件を添付できなかった：{}",
-                first_error.as_deref().unwrap_or("不明なエラー")),
-            (ok, ng) => format!("{ok}件をメッセージに添付した。{ng}件は添付できなかった：{}",
-                first_error.as_deref().unwrap_or("不明なエラー")),
+            (0, count) => format!(
+                "{count}件を添付できなかった：{}",
+                first_error.as_deref().unwrap_or("不明なエラー")
+            ),
+            (ok, ng) => format!(
+                "{ok}件をメッセージに添付した。{ng}件は添付できなかった：{}",
+                first_error.as_deref().unwrap_or("不明なエラー")
+            ),
         };
-        if failed > 0 { self.notify_warning(self.message.clone()); }
+        if failed > 0 {
+            self.notify_warning(self.message.clone());
+        }
     }
 
     fn chat_header(
@@ -580,7 +630,10 @@ impl WordApp {
                 });
             #[cfg(test)]
             ui.ctx().data_mut(|data| {
-                data.insert_temp(egui::Id::new("chat-thread-footer-rect"), footer.response.rect)
+                data.insert_temp(
+                    egui::Id::new("chat-thread-footer-rect"),
+                    footer.response.rect,
+                )
             });
             #[cfg(not(test))]
             let _ = footer;
@@ -726,11 +779,14 @@ impl WordApp {
                     ux::dialog_body(ui);
                     ui.spacing_mut().button_padding = egui::vec2(18.0, 8.0);
                     ui.label("会話一覧とチャット上部に表示するタイトルを入力する。");
-                    let response = color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| {
-                        ui.add(egui::TextEdit::singleline(&mut draft)
-                            .desired_width(f32::INFINITY)
-                            .char_limit(100))
-                    });
+                    let response =
+                        color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| {
+                            ui.add(
+                                egui::TextEdit::singleline(&mut draft)
+                                    .desired_width(f32::INFINITY)
+                                    .char_limit(100),
+                            )
+                        });
                     response.on_hover_text("1〜100文字。改行は入力できない。");
                     let count = draft.chars().count();
                     ui.label(
@@ -807,14 +863,10 @@ impl WordApp {
             .map(|state| state.rect.top())
             .filter(|top| *top > viewport.top() && *top <= viewport.bottom())
             .unwrap_or(viewport.bottom());
-        let work_rect = egui::Rect::from_min_max(
-            viewport.min,
-            egui::pos2(viewport.right(), status_top),
-        );
+        let work_rect =
+            egui::Rect::from_min_max(viewport.min, egui::pos2(viewport.right(), status_top));
         let frame_width = egui::Frame::window(&ctx.style()).total_margin().sum().x;
-        let material_window_width = (work_rect.width() - 8.0 - frame_width)
-            .max(1.0)
-            .min(1100.0);
+        let material_window_width = (work_rect.width() - 8.0 - frame_width).max(1.0).min(1100.0);
         let material_window_height = (work_rect.height() - 24.0).max(1.0).min(760.0);
         egui::Window::new("教材の根拠と差分を確認")
             .open(&mut open)
@@ -832,20 +884,40 @@ impl WordApp {
                 if self.progress.material_draft.is_none() {
                     ui.label(
                         RichText::new("根拠を選ぶ → 案を作る → 差分を確認")
-                            .strong().color(ux::ACCENT),
+                            .strong()
+                            .color(ux::ACCENT),
                     );
                     egui::ScrollArea::vertical()
                         .id_salt("material-request-body")
-                        .scroll_bar_visibility(egui::scroll_area::ScrollBarVisibility::AlwaysVisible)
+                        .scroll_bar_visibility(
+                            egui::scroll_area::ScrollBarVisibility::AlwaysVisible,
+                        )
                         .max_height(ui.available_height())
                         .show(ui, |ui| {
-                            if let Some(chat) = self.progress.chats.get_mut(self.chat_selected)
-                                .filter(|chat| chat.deleted_at.is_none()) {
+                            if let Some(chat) = self
+                                .progress
+                                .chats
+                                .get_mut(self.chat_selected)
+                                .filter(|chat| chat.deleted_at.is_none())
+                            {
                                 for (i, exchange) in chat.exchanges.iter_mut().enumerate() {
-                                    self.dirty |= ui.add_enabled(idle, egui::Checkbox::new(
-                                        &mut exchange.for_material,
-                                        format!("{}：{}", i + 1,
-                                            exchange.question.chars().take(60).collect::<String>()))).changed();
+                                    self.dirty |= ui
+                                        .add_enabled(
+                                            idle,
+                                            egui::Checkbox::new(
+                                                &mut exchange.for_material,
+                                                format!(
+                                                    "{}：{}",
+                                                    i + 1,
+                                                    exchange
+                                                        .question
+                                                        .chars()
+                                                        .take(60)
+                                                        .collect::<String>()
+                                                ),
+                                            ),
+                                        )
+                                        .changed();
                                 }
                             }
                             self.material_panel(ui);
@@ -989,7 +1061,9 @@ impl WordApp {
                 true
             }
             Err(error) => {
-                self.notify_error(format!("保存に失敗したため削除・復元を反映していない：{error}"));
+                self.notify_error(format!(
+                    "保存に失敗したため削除・復元を反映していない：{error}"
+                ));
                 false
             }
         }
@@ -1012,7 +1086,10 @@ fn compact_text(text: &str, limit: usize) -> String {
 fn fit_thread_line(ui: &egui::Ui, text: &str, font: egui::FontId, max_width: f32) -> String {
     let normalized = text.split_whitespace().collect::<Vec<_>>().join(" ");
     let width = |value: &str| {
-        ui.painter().layout_no_wrap(value.to_owned(), font.clone(), Color32::WHITE).size().x
+        ui.painter()
+            .layout_no_wrap(value.to_owned(), font.clone(), Color32::WHITE)
+            .size()
+            .x
     };
     if width(&normalized) <= max_width {
         return normalized;
@@ -1064,12 +1141,23 @@ fn chat_thread_row(
     let left = rect.left() + 12.0;
     let title_font = home_art::home_font(17.0);
     let preview_font = home_art::home_font(14.0);
-    let date_width = ui.painter().layout_no_wrap(date.to_owned(), home_art::home_font(13.0),
-        home_art::MUTED).size().x;
-    let display_title = fit_thread_line(ui, title, title_font.clone(),
-        (rect.width() - 22.0 - date_width - 8.0).max(0.0));
-    let preview = fit_thread_line(ui, preview, preview_font.clone(),
-        (rect.width() - 24.0).max(0.0));
+    let date_width = ui
+        .painter()
+        .layout_no_wrap(date.to_owned(), home_art::home_font(13.0), home_art::MUTED)
+        .size()
+        .x;
+    let display_title = fit_thread_line(
+        ui,
+        title,
+        title_font.clone(),
+        (rect.width() - 22.0 - date_width - 8.0).max(0.0),
+    );
+    let preview = fit_thread_line(
+        ui,
+        preview,
+        preview_font.clone(),
+        (rect.width() - 24.0).max(0.0),
+    );
     let painter = ui.painter().with_clip_rect(rect.shrink(2.0));
     painter.text(
         egui::pos2(left, rect.top() + 10.0),
@@ -1243,16 +1331,25 @@ fn bubble_with_attachments(
                         if user {
                             ui.add(egui::Label::new(text).wrap().selectable(true));
                         } else {
-                            super::notifications::show_markdown(ui, _copy_id.with("markdown"), text);
+                            super::notifications::show_markdown(
+                                ui,
+                                _copy_id.with("markdown"),
+                                text,
+                            );
                         }
                         if !attachments.is_empty() {
                             ui.add_space(8.0);
                             ui.separator();
-                            ui.label(RichText::new(format!("添付 {}件", attachments.len()))
-                                .size(15.0).color(home_art::MUTED));
+                            ui.label(
+                                RichText::new(format!("添付 {}件", attachments.len()))
+                                    .size(15.0)
+                                    .color(home_art::MUTED),
+                            );
                             ui.horizontal_wrapped(|ui| {
                                 for (index, attachment) in attachments.iter().enumerate() {
-                                    if let Some(action) = super::chat_media::attachment_button(ui, attachment, index) {
+                                    if let Some(action) =
+                                        super::chat_media::attachment_button(ui, attachment, index)
+                                    {
                                         *opened = Some(action);
                                     }
                                 }
@@ -1346,45 +1443,81 @@ mod input_tests {
         std::fs::write(&text_path, "An example in context.").unwrap();
         image::RgbImage::new(1, 1).save(&image_path).unwrap();
         app.progress.chats[0].draft = "Explain this phrase.".into();
-        let _ = ctx.run(egui::RawInput {
-            screen_rect: Some(egui::Rect::from_min_size(
-                egui::Pos2::ZERO, egui::vec2(1120.0, 850.0))),
-            dropped_files: vec![text_path, image_path].into_iter()
-                .map(|path| egui::DroppedFile { path: Some(path), ..Default::default() })
-                .collect(),
-            ..Default::default()
-        }, |ctx| {
-            egui::CentralPanel::default().show(ctx, |ui| app.chat_page(ui));
-        });
-        let output = ctx.run(egui::RawInput {
-            screen_rect: Some(egui::Rect::from_min_size(
-                egui::Pos2::ZERO, egui::vec2(1120.0, 850.0))),
-            ..Default::default()
-        }, |ctx| {
-            egui::CentralPanel::default().show(ctx, |ui| app.chat_page(ui));
-        });
+        let _ = ctx.run(
+            egui::RawInput {
+                screen_rect: Some(egui::Rect::from_min_size(
+                    egui::Pos2::ZERO,
+                    egui::vec2(1120.0, 850.0),
+                )),
+                dropped_files: vec![text_path, image_path]
+                    .into_iter()
+                    .map(|path| egui::DroppedFile {
+                        path: Some(path),
+                        ..Default::default()
+                    })
+                    .collect(),
+                ..Default::default()
+            },
+            |ctx| {
+                egui::CentralPanel::default().show(ctx, |ui| app.chat_page(ui));
+            },
+        );
+        let output = ctx.run(
+            egui::RawInput {
+                screen_rect: Some(egui::Rect::from_min_size(
+                    egui::Pos2::ZERO,
+                    egui::vec2(1120.0, 850.0),
+                )),
+                ..Default::default()
+            },
+            |ctx| {
+                egui::CentralPanel::default().show(ctx, |ui| app.chat_page(ui));
+            },
+        );
         let mut dialog_text = String::new();
         for shape in output.shapes {
             super::super::harness_tests::shape_text(&shape.shape, &mut dialog_text);
         }
-        assert!(dialog_text.contains("ファイル添付を確認")
-            && dialog_text.contains("reading-note.txt") && dialog_text.contains("picture.png"),
-            "{dialog_text}");
+        assert!(
+            dialog_text.contains("ファイル添付を確認")
+                && dialog_text.contains("reading-note.txt")
+                && dialog_text.contains("picture.png"),
+            "{dialog_text}"
+        );
         assert_eq!(app.pending_chat_drop.as_ref().unwrap().files.len(), 2);
         assert!(app.progress.chats[0].draft_attachments.is_empty());
-        assert!(app.storage.as_ref().unwrap().load().unwrap().chats[0].draft_attachments.is_empty());
+        assert!(app.storage.as_ref().unwrap().load().unwrap().chats[0]
+            .draft_attachments
+            .is_empty());
         app.confirm_chat_drop();
         let chat = &app.progress.chats[0];
         assert_eq!(chat.draft, "Explain this phrase.");
         assert!(chat.exchanges.is_empty());
         assert_eq!(chat.draft_attachments.len(), 2);
-        assert_eq!(chat.draft_attachments[0].file_name.as_deref(), Some("reading-note.txt"));
-        assert_eq!(chat.draft_attachments[1].file_name.as_deref(), Some("picture.png"));
-        assert_eq!(chat.draft_attachments[0].original.kind, wordweave5::assets::AssetKind::FileBlob);
-        assert_eq!(chat.draft_attachments[1].original.kind, wordweave5::assets::AssetKind::ImagePng);
+        assert_eq!(
+            chat.draft_attachments[0].file_name.as_deref(),
+            Some("reading-note.txt")
+        );
+        assert_eq!(
+            chat.draft_attachments[1].file_name.as_deref(),
+            Some("picture.png")
+        );
+        assert_eq!(
+            chat.draft_attachments[0].original.kind,
+            wordweave5::assets::AssetKind::FileBlob
+        );
+        assert_eq!(
+            chat.draft_attachments[1].original.kind,
+            wordweave5::assets::AssetKind::ImagePng
+        );
         assert!(app.pending.is_none() && app.pending_chat_file_send.is_none());
         assert!(app.pending_chat_drop.is_none());
-        assert_eq!(app.storage.as_ref().unwrap().load().unwrap().chats[0].draft_attachments.len(), 2);
+        assert_eq!(
+            app.storage.as_ref().unwrap().load().unwrap().chats[0]
+                .draft_attachments
+                .len(),
+            2
+        );
         assert!(app.message.contains("2件をメッセージに添付した"));
         drop(app);
         std::fs::remove_dir_all(root).unwrap();
@@ -1396,16 +1529,30 @@ mod input_tests {
         let valid = root.join("valid.txt");
         let oversized = root.join("oversized.txt");
         std::fs::write(&valid, "keep this").unwrap();
-        std::fs::File::create(&oversized).unwrap()
-            .set_len(wordweave5::assets::MAX_ASSET_BYTES as u64 + 1).unwrap();
+        std::fs::File::create(&oversized)
+            .unwrap()
+            .set_len(wordweave5::assets::MAX_ASSET_BYTES as u64 + 1)
+            .unwrap();
         app.progress.chats[0].draft = "Original draft".into();
         let raw = egui::RawInput {
             screen_rect: Some(egui::Rect::from_min_size(
-                egui::Pos2::ZERO, egui::vec2(1120.0, 850.0))),
+                egui::Pos2::ZERO,
+                egui::vec2(1120.0, 850.0),
+            )),
             dropped_files: vec![
-                egui::DroppedFile { path: Some(oversized), ..Default::default() },
-                egui::DroppedFile { path: None, name: "no-path.txt".into(), ..Default::default() },
-                egui::DroppedFile { path: Some(valid.clone()), ..Default::default() },
+                egui::DroppedFile {
+                    path: Some(oversized),
+                    ..Default::default()
+                },
+                egui::DroppedFile {
+                    path: None,
+                    name: "no-path.txt".into(),
+                    ..Default::default()
+                },
+                egui::DroppedFile {
+                    path: Some(valid.clone()),
+                    ..Default::default()
+                },
             ],
             ..Default::default()
         };
@@ -1417,23 +1564,47 @@ mod input_tests {
         assert_eq!(app.pending_chat_drop.as_ref().unwrap().unsupported, 1);
         app.confirm_chat_drop();
         assert_eq!(app.progress.chats[0].draft_attachments.len(), 1);
-        assert_eq!(app.progress.chats[0].draft_attachments[0].file_name.as_deref(), Some("valid.txt"));
-        assert_eq!(app.storage.as_ref().unwrap().load().unwrap().chats[0].draft_attachments.len(), 1);
-        assert!(app.message.contains("1件をメッセージに添付した") && app.message.contains("2件は添付できなかった"));
+        assert_eq!(
+            app.progress.chats[0].draft_attachments[0]
+                .file_name
+                .as_deref(),
+            Some("valid.txt")
+        );
+        assert_eq!(
+            app.storage.as_ref().unwrap().load().unwrap().chats[0]
+                .draft_attachments
+                .len(),
+            1
+        );
+        assert!(
+            app.message.contains("1件をメッセージに添付した")
+                && app.message.contains("2件は添付できなかった")
+        );
         assert!(app.message.contains("12MiB"));
         let before = serde_json::to_vec(&app.progress).unwrap();
         let (_tx, rx) = std::sync::mpsc::channel();
         app.pending = Some(Pending {
-            key: String::new(), rx, cancel: None, kind: activity::Activity::Chat,
+            key: String::new(),
+            rx,
+            cancel: None,
+            kind: activity::Activity::Chat,
         });
-        let _ = ctx.run(egui::RawInput {
-            screen_rect: Some(egui::Rect::from_min_size(
-                egui::Pos2::ZERO, egui::vec2(1120.0, 850.0))),
-            dropped_files: vec![egui::DroppedFile { path: Some(valid), ..Default::default() }],
-            ..Default::default()
-        }, |ctx| {
-            egui::CentralPanel::default().show(ctx, |ui| app.chat_page(ui));
-        });
+        let _ = ctx.run(
+            egui::RawInput {
+                screen_rect: Some(egui::Rect::from_min_size(
+                    egui::Pos2::ZERO,
+                    egui::vec2(1120.0, 850.0),
+                )),
+                dropped_files: vec![egui::DroppedFile {
+                    path: Some(valid),
+                    ..Default::default()
+                }],
+                ..Default::default()
+            },
+            |ctx| {
+                egui::CentralPanel::default().show(ctx, |ui| app.chat_page(ui));
+            },
+        );
         assert_eq!(serde_json::to_vec(&app.progress).unwrap(), before);
         assert!(app.message.contains("処理中は添付できません"));
         assert!(app.pending_chat_drop.is_none());
@@ -1447,16 +1618,22 @@ mod input_tests {
         let path = root.join("private.txt");
         std::fs::write(&path, "not attached").unwrap();
         let before = serde_json::to_vec(&app.progress).unwrap();
-        let _ = ctx.run(egui::RawInput {
-            screen_rect: Some(egui::Rect::from_min_size(
-                egui::Pos2::ZERO, egui::vec2(1120.0, 850.0))),
-            dropped_files: vec![egui::DroppedFile {
-                path: Some(path), ..Default::default()
-            }],
-            ..Default::default()
-        }, |ctx| {
-            egui::CentralPanel::default().show(ctx, |ui| app.chat_page(ui));
-        });
+        let _ = ctx.run(
+            egui::RawInput {
+                screen_rect: Some(egui::Rect::from_min_size(
+                    egui::Pos2::ZERO,
+                    egui::vec2(1120.0, 850.0),
+                )),
+                dropped_files: vec![egui::DroppedFile {
+                    path: Some(path),
+                    ..Default::default()
+                }],
+                ..Default::default()
+            },
+            |ctx| {
+                egui::CentralPanel::default().show(ctx, |ui| app.chat_page(ui));
+            },
+        );
         assert!(app.pending_chat_drop.is_some());
         assert_eq!(serde_json::to_vec(&app.progress).unwrap(), before);
         app.pending_chat_drop = None;
@@ -1475,7 +1652,10 @@ mod input_tests {
         for _ in 0..7 {
             app.attach_chat_file(&id, &path).unwrap();
         }
-        let dropped = egui::DroppedFile { path: Some(path.clone()), ..Default::default() };
+        let dropped = egui::DroppedFile {
+            path: Some(path.clone()),
+            ..Default::default()
+        };
         app.offer_dropped_chat_files(&id, &[dropped.clone(), dropped.clone()], true);
         assert!(app.pending_chat_drop.is_none());
         assert_eq!(app.progress.chats[0].draft_attachments.len(), 7);
@@ -1487,7 +1667,12 @@ mod input_tests {
         app.confirm_chat_drop();
         assert!(app.pending_chat_drop.is_none());
         assert_eq!(app.progress.chats[0].draft_attachments.len(), 8);
-        assert_eq!(app.storage.as_ref().unwrap().load().unwrap().chats[0].draft_attachments.len(), 8);
+        assert_eq!(
+            app.storage.as_ref().unwrap().load().unwrap().chats[0]
+                .draft_attachments
+                .len(),
+            8
+        );
         assert!(app.message.contains("確認中に添付数が変わった"));
         drop(app);
         std::fs::remove_dir_all(root).unwrap();
@@ -1498,21 +1683,27 @@ mod input_tests {
         let (ctx, mut app, root) = super::super::harness_tests::fixture();
         let before = serde_json::to_vec(&app.progress).unwrap();
         for size in [egui::vec2(1120.0, 850.0), egui::vec2(512.0, 420.0)] {
-            let output = ctx.run(egui::RawInput {
-                screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, size)),
-                hovered_files: vec![egui::HoveredFile {
-                    path: Some(root.join("hovered.txt")), ..Default::default()
-                }],
-                ..Default::default()
-            }, |ctx| {
-                egui::CentralPanel::default().show(ctx, |ui| app.chat_page(ui));
-            });
+            let output = ctx.run(
+                egui::RawInput {
+                    screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, size)),
+                    hovered_files: vec![egui::HoveredFile {
+                        path: Some(root.join("hovered.txt")),
+                        ..Default::default()
+                    }],
+                    ..Default::default()
+                },
+                |ctx| {
+                    egui::CentralPanel::default().show(ctx, |ui| app.chat_page(ui));
+                },
+            );
             let mut text = String::new();
             for shape in output.shapes {
                 super::super::harness_tests::shape_text(&shape.shape, &mut text);
             }
-            assert!(text.contains("ファイルをドロップしてメッセージに添付"),
-                "size={size:?}\n{text}");
+            assert!(
+                text.contains("ファイルをドロップしてメッセージに添付"),
+                "size={size:?}\n{text}"
+            );
         }
         assert_eq!(serde_json::to_vec(&app.progress).unwrap(), before);
         drop(app);
@@ -1524,37 +1715,71 @@ mod input_tests {
         let (ctx, mut app, root) = super::super::harness_tests::fixture();
         let id = app.progress.chats[0].id.clone();
         let make_ref = |kind| wordweave5::assets::AssetRef {
-            id: "a".repeat(64), kind, bytes: 12,
+            id: "a".repeat(64),
+            kind,
+            bytes: 12,
         };
         let chat = &mut app.progress.chats[0];
         chat.title = "テスト会話".into();
         chat.title_manual = true;
         chat.draft_attachments = vec![
-            wordweave5::chat::Attachment { original: make_ref(wordweave5::assets::AssetKind::ImagePng),
-                image: Some(make_ref(wordweave5::assets::AssetKind::ImagePng)), background: None,
-                file_name: Some("photo.png".into()), source_text: "photo.png".into(), transcript: None },
-            wordweave5::chat::Attachment { original: make_ref(wordweave5::assets::AssetKind::AudioWav),
-                image: None, background: None, file_name: Some("voice.wav".into()),
-                source_text: "voice.wav".into(), transcript: None },
-            wordweave5::chat::Attachment { original: make_ref(wordweave5::assets::AssetKind::FileBlob),
-                image: None, background: None, file_name: Some("note.txt".into()),
-                source_text: "note.txt".into(), transcript: None },
+            wordweave5::chat::Attachment {
+                original: make_ref(wordweave5::assets::AssetKind::ImagePng),
+                image: Some(make_ref(wordweave5::assets::AssetKind::ImagePng)),
+                background: None,
+                file_name: Some("photo.png".into()),
+                source_text: "photo.png".into(),
+                transcript: None,
+            },
+            wordweave5::chat::Attachment {
+                original: make_ref(wordweave5::assets::AssetKind::AudioWav),
+                image: None,
+                background: None,
+                file_name: Some("voice.wav".into()),
+                source_text: "voice.wav".into(),
+                transcript: None,
+            },
+            wordweave5::chat::Attachment {
+                original: make_ref(wordweave5::assets::AssetKind::FileBlob),
+                image: None,
+                background: None,
+                file_name: Some("note.txt".into()),
+                source_text: "note.txt".into(),
+                transcript: None,
+            },
         ];
-        chat.complete("添付を確認".into(), "会話を続けます。".into(),
-            wordweave5::execution::Execution::default()).unwrap();
+        chat.complete(
+            "添付を確認".into(),
+            "会話を続けます。".into(),
+            wordweave5::execution::Execution::default(),
+        )
+        .unwrap();
         let mut visible_text = String::new();
         for _ in 0..3 {
-            let output = ctx.run(egui::RawInput {
-                screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(512.0, 420.0))),
-                ..Default::default()
-            }, |ctx| { egui::CentralPanel::default().show(ctx, |ui| app.chat_page(ui)); });
+            let output = ctx.run(
+                egui::RawInput {
+                    screen_rect: Some(egui::Rect::from_min_size(
+                        egui::Pos2::ZERO,
+                        egui::vec2(512.0, 420.0),
+                    )),
+                    ..Default::default()
+                },
+                |ctx| {
+                    egui::CentralPanel::default().show(ctx, |ui| app.chat_page(ui));
+                },
+            );
             visible_text.clear();
-            for shape in output.shapes { super::super::harness_tests::shape_text(&shape.shape, &mut visible_text); }
+            for shape in output.shapes {
+                super::super::harness_tests::shape_text(&shape.shape, &mut visible_text);
+            }
         }
         let copy_id = egui::Id::new(("chat-copy-question", &id, 0));
         let bubble = ctx.data(|data| data.get_temp::<egui::Rect>(copy_id.with("bubble")));
-        assert!(visible_text.contains("あなた") && bubble.is_some_and(|rect| rect.top() < 420.0 && rect.bottom() > 0.0),
-            "bubble={bubble:?}\n{visible_text}");
+        assert!(
+            visible_text.contains("あなた")
+                && bubble.is_some_and(|rect| rect.top() < 420.0 && rect.bottom() > 0.0),
+            "bubble={bubble:?}\n{visible_text}"
+        );
         drop(app);
         std::fs::remove_dir_all(root).unwrap();
     }
@@ -1959,10 +2184,17 @@ mod input_tests {
                     },
                     |ctx| {
                         egui::CentralPanel::default().show(ctx, |ui| {
-                            egui::ScrollArea::vertical().max_height(180.0).show(ui, |ui| {
-                                bubble(ui, copy_id, if user { "あなた" } else { "Codex" },
-                                    &"Long English sentence and 長い日本語の発言。".repeat(12), user);
-                            });
+                            egui::ScrollArea::vertical()
+                                .max_height(180.0)
+                                .show(ui, |ui| {
+                                    bubble(
+                                        ui,
+                                        copy_id,
+                                        if user { "あなた" } else { "Codex" },
+                                        &"Long English sentence and 長い日本語の発言。".repeat(12),
+                                        user,
+                                    );
+                                });
                         });
                     },
                 );
@@ -1974,12 +2206,18 @@ mod input_tests {
                     data.get_temp::<egui::Rect>(copy_id.with("clip")).unwrap(),
                 )
             });
-            assert!(bubble_rect.right() <= clip_rect.right() + 1.0,
-                "bubble={bubble_rect:?}, clip={clip_rect:?}, width={width}");
-            assert!(copy_rect.right() <= clip_rect.right() + 1.0,
-                "copy={copy_rect:?}, clip={clip_rect:?}, width={width}");
-            assert!(bubble_rect.contains(copy_rect.min) && bubble_rect.contains(copy_rect.max),
-                "bubble={bubble_rect:?}, copy={copy_rect:?}, width={width}");
+            assert!(
+                bubble_rect.right() <= clip_rect.right() + 1.0,
+                "bubble={bubble_rect:?}, clip={clip_rect:?}, width={width}"
+            );
+            assert!(
+                copy_rect.right() <= clip_rect.right() + 1.0,
+                "copy={copy_rect:?}, clip={clip_rect:?}, width={width}"
+            );
+            assert!(
+                bubble_rect.contains(copy_rect.min) && bubble_rect.contains(copy_rect.max),
+                "bubble={bubble_rect:?}, copy={copy_rect:?}, width={width}"
+            );
         }
     }
 
@@ -2017,8 +2255,10 @@ mod input_tests {
             drop(app);
             std::fs::remove_dir_all(root).unwrap();
         }
-        assert!((footer_tops[0] - footer_tops[1]).abs() <= 1.0,
-            "footer moved with thread count: {footer_tops:?}");
+        assert!(
+            (footer_tops[0] - footer_tops[1]).abs() <= 1.0,
+            "footer moved with thread count: {footer_tops:?}"
+        );
     }
 
     #[test]

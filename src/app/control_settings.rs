@@ -162,6 +162,8 @@ impl WordApp {
                 }
             }
         });
-        if let Some(result) = export_result { self.notify_result(result); }
+        if let Some(result) = export_result {
+            self.notify_result(result);
+        }
     }
 }

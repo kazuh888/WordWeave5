@@ -1,4 +1,7 @@
-use wordweave5::{chat::{self, Conversation}, store::Progress};
+use wordweave5::{
+    chat::{self, Conversation},
+    store::Progress,
+};
 
 fn deleted(mut chat: Conversation) -> Conversation {
     chat.draft = "Explain this word".into();

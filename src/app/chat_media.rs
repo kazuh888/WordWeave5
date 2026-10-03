@@ -14,16 +14,17 @@ fn image_display_png(kind: AssetKind, bytes: &[u8]) -> Result<Vec<u8>, String> {
         AssetKind::ImageJpeg => image::ImageFormat::Jpeg,
         _ => return Err("表示用画像に変換できない形式です。".into()),
     };
-    let (width, height) = image::ImageReader::with_format(
-        std::io::Cursor::new(bytes), format,
-    ).into_dimensions().map_err(|e| format!("画像の寸法を読めません：{e}"))?;
+    let (width, height) = image::ImageReader::with_format(std::io::Cursor::new(bytes), format)
+        .into_dimensions()
+        .map_err(|e| format!("画像の寸法を読めません：{e}"))?;
     if width == 0 || height == 0 || width as u64 * height as u64 > 4_000_000 {
         return Err("画像の寸法が上限を超えています（最大400万画素）。".into());
     }
     let frame = image::load_from_memory_with_format(bytes, format)
         .map_err(|e| format!("画像を読み取れません：{e}"))?;
     let mut png = std::io::Cursor::new(Vec::new());
-    frame.write_to(&mut png, image::ImageFormat::Png)
+    frame
+        .write_to(&mut png, image::ImageFormat::Png)
         .map_err(|e| format!("表示用画像を作れません：{e}"))?;
     Ok(png.into_inner())
 }
@@ -36,7 +37,9 @@ fn chat_media_dialog_style(ui: &mut egui::Ui) {
         (egui::TextStyle::Small, 16.0),
         (egui::TextStyle::Button, 18.0),
     ] {
-        style.text_styles.insert(text_style, super::home_art::home_font(size));
+        style
+            .text_styles
+            .insert(text_style, super::home_art::home_font(size));
     }
     if let Some(heading) = style.text_styles.get_mut(&egui::TextStyle::Heading) {
         heading.size = (heading.size - 2.0).max(1.0);
@@ -44,22 +47,52 @@ fn chat_media_dialog_style(ui: &mut egui::Ui) {
 }
 
 fn text_preview(bytes: &[u8]) -> Option<(String, bool)> {
-    if [b"%PDF-".as_slice(), b"PK\x03\x04", b"MZ", b"GIF8", b"\x89PNG\r\n\x1a\n",
-        b"\xFF\xD8\xFF", b"BM", b"RIFF"].iter().any(|magic| bytes.starts_with(magic)) {
+    if [
+        b"%PDF-".as_slice(),
+        b"PK\x03\x04",
+        b"MZ",
+        b"GIF8",
+        b"\x89PNG\r\n\x1a\n",
+        b"\xFF\xD8\xFF",
+        b"BM",
+        b"RIFF",
+    ]
+    .iter()
+    .any(|magic| bytes.starts_with(magic))
+    {
         return None;
     }
     let decoded = if let Some(raw) = bytes.strip_prefix(&[0xFF, 0xFE]) {
         let words = raw.chunks_exact(2);
-        if !words.remainder().is_empty() { return None; }
-        String::from_utf16(&words.map(|pair| u16::from_le_bytes([pair[0], pair[1]])).collect::<Vec<_>>()).ok()?
+        if !words.remainder().is_empty() {
+            return None;
+        }
+        String::from_utf16(
+            &words
+                .map(|pair| u16::from_le_bytes([pair[0], pair[1]]))
+                .collect::<Vec<_>>(),
+        )
+        .ok()?
     } else if let Some(raw) = bytes.strip_prefix(&[0xFE, 0xFF]) {
         let words = raw.chunks_exact(2);
-        if !words.remainder().is_empty() { return None; }
-        String::from_utf16(&words.map(|pair| u16::from_be_bytes([pair[0], pair[1]])).collect::<Vec<_>>()).ok()?
+        if !words.remainder().is_empty() {
+            return None;
+        }
+        String::from_utf16(
+            &words
+                .map(|pair| u16::from_be_bytes([pair[0], pair[1]]))
+                .collect::<Vec<_>>(),
+        )
+        .ok()?
     } else {
-        std::str::from_utf8(bytes.strip_prefix(&[0xEF, 0xBB, 0xBF]).unwrap_or(bytes)).ok()?.to_owned()
+        std::str::from_utf8(bytes.strip_prefix(&[0xEF, 0xBB, 0xBF]).unwrap_or(bytes))
+            .ok()?
+            .to_owned()
     };
-    if decoded.chars().any(|c| c.is_control() && !matches!(c, '\n' | '\r' | '\t')) {
+    if decoded
+        .chars()
+        .any(|c| c.is_control() && !matches!(c, '\n' | '\r' | '\t'))
+    {
         return None;
     }
     let mut chars = decoded.chars();
@@ -73,33 +106,55 @@ pub(super) enum AttachmentOpen {
     File(AssetRef, String),
 }
 
-pub(super) fn attachment_button(ui: &mut egui::Ui, attachment: &Attachment, index: usize) -> Option<AttachmentOpen> {
+pub(super) fn attachment_button(
+    ui: &mut egui::Ui,
+    attachment: &Attachment,
+    index: usize,
+) -> Option<AttachmentOpen> {
     let (kind, action) = if let Some(image) = &attachment.image {
         ("画像", AttachmentOpen::Image(image.clone()))
     } else if attachment.original.kind == AssetKind::AudioWav {
         ("音声", AttachmentOpen::Audio(attachment.original.clone()))
     } else if attachment.original.kind == AssetKind::FileBlob {
-        ("ファイル", AttachmentOpen::File(
-            attachment.original.clone(),
-            attachment.file_name.clone().unwrap_or_else(|| "ファイル".into()),
-        ))
+        (
+            "ファイル",
+            AttachmentOpen::File(
+                attachment.original.clone(),
+                attachment
+                    .file_name
+                    .clone()
+                    .unwrap_or_else(|| "ファイル".into()),
+            ),
+        )
     } else {
         return None;
     };
     let name = attachment.file_name.as_deref().unwrap_or("");
     let short_name: String = name.chars().take(18).collect();
-    let short_name = if name.chars().count() > 18 { format!("{short_name}…") } else { short_name };
+    let short_name = if name.chars().count() > 18 {
+        format!("{short_name}…")
+    } else {
+        short_name
+    };
     let label = if short_name.is_empty() {
         format!("{kind} {}", index + 1)
     } else {
         format!("{kind} {} · {short_name}", index + 1)
     };
-    let response = ui.add(crate::app::controls::Button::new(label)
-        .min_size(egui::vec2(112.0, 38.0)))
-        .on_hover_text(if name.is_empty() { format!("{kind}を開く") } else { format!("{kind}：{name}") });
+    let response = ui
+        .add(crate::app::controls::Button::new(label).min_size(egui::vec2(112.0, 38.0)))
+        .on_hover_text(if name.is_empty() {
+            format!("{kind}を開く")
+        } else {
+            format!("{kind}：{name}")
+        });
     #[cfg(test)]
-    ui.ctx().data_mut(|data| data.insert_temp(
-        egui::Id::new(("chat-attachment-button", kind, index)), response.rect));
+    ui.ctx().data_mut(|data| {
+        data.insert_temp(
+            egui::Id::new(("chat-attachment-button", kind, index)),
+            response.rect,
+        )
+    });
     response.clicked().then_some(action)
 }
 
@@ -143,20 +198,33 @@ impl WordApp {
         }
         Ok(images)
     }
-    pub(super) fn attachment_texts(&self, attachments: &[Attachment]) -> Result<Vec<(String, String)>, String> {
+    pub(super) fn attachment_texts(
+        &self,
+        attachments: &[Attachment],
+    ) -> Result<Vec<(String, String)>, String> {
         let store = self.asset_store()?;
         let mut texts = Vec::new();
         let mut total = 0;
         for attachment in attachments {
-            if attachment.original.kind != AssetKind::FileBlob { continue; }
+            if attachment.original.kind != AssetKind::FileBlob {
+                continue;
+            }
             attachment.validate()?;
             let bytes = store.read(&attachment.original)?;
-            let Some((text, truncated)) = text_preview(&bytes) else { continue; };
+            let Some((text, truncated)) = text_preview(&bytes) else {
+                continue;
+            };
             total += text.as_bytes().len();
             if truncated || total > MAX_CHAT_TEXT_BYTES {
                 return Err("Codexへ送る添付テキストは合計32KB以下にしてください。大きいファイルはアプリ内で表示できます。".into());
             }
-            texts.push((attachment.file_name.clone().unwrap_or_else(|| "ファイル".into()), text));
+            texts.push((
+                attachment
+                    .file_name
+                    .clone()
+                    .unwrap_or_else(|| "ファイル".into()),
+                text,
+            ));
         }
         Ok(texts)
     }
@@ -248,8 +316,12 @@ impl WordApp {
         }
         match self.asset_store().and_then(|store| store.read(reference)) {
             Ok(bytes) => match text_preview(&bytes) {
-                Some((text, truncated)) => self.file_preview = Some((name.to_owned(), text, truncated)),
-                None => self.notify_blocked(format!("{name}はテキストファイルではないため、内容を表示しません。")),
+                Some((text, truncated)) => {
+                    self.file_preview = Some((name.to_owned(), text, truncated))
+                }
+                None => self.notify_blocked(format!(
+                    "{name}はテキストファイルではないため、内容を表示しません。"
+                )),
             },
             Err(error) => self.notify_error(error),
         }
@@ -268,17 +340,22 @@ impl WordApp {
             return;
         }
         let rate = self.speech_rate();
-        let result = self.asset_store().and_then(|s| s.read(reference))
+        let result = self
+            .asset_store()
+            .and_then(|s| s.read(reference))
             .and_then(|bytes| self.speaker.play_wav(&bytes, rate));
         match result {
             Ok(()) => {
-                if let Some(previous) = self.speech_operation.replace(
-                    DiagnosticOperation::begin(DiagnosticEntry::Playback)) {
+                if let Some(previous) = self
+                    .speech_operation
+                    .replace(DiagnosticOperation::begin(DiagnosticEntry::Playback))
+                {
                     previous.event(DiagnosticStage::Play, DiagnosticEvent::Stopped);
                 }
                 self.speech_visible = true;
                 self.speech_selected = None;
-                self.message = "保存した音声を再生中。読み上げパネルで一時停止・再生位置を操作できる。".into();
+                self.message =
+                    "保存した音声を再生中。読み上げパネルで一時停止・再生位置を操作できる。".into();
             }
             Err(e) => self.notify_error(e),
         }
@@ -376,12 +453,16 @@ impl WordApp {
                     egui::ScrollArea::both().max_height(ui.available_height().max(200.0))
                         .show(ui, |ui| { ui.add(egui::Label::new(text.as_str()).selectable(true)); });
                 });
-            if !open { self.file_preview = None; }
+            if !open {
+                self.file_preview = None;
+            }
         }
     }
 
     pub(super) fn chat_file_send_confirmation(&mut self, ctx: &egui::Context) {
-        let Some(pending) = self.pending_chat_file_send.as_ref() else { return; };
+        let Some(pending) = self.pending_chat_file_send.as_ref() else {
+            return;
+        };
         let mut open = true;
         let mut approve = false;
         let mut cancel = false;
@@ -404,36 +485,68 @@ impl WordApp {
                     cancel = ui.ww_button("キャンセル").clicked();
                 });
             });
-        if !open || cancel { self.pending_chat_file_send = None; return; }
+        if !open || cancel {
+            self.pending_chat_file_send = None;
+            return;
+        }
         if approve {
             let pending = self.pending_chat_file_send.take().unwrap();
-            let unchanged = self.progress.chats.get(self.chat_selected)
+            let unchanged = self
+                .progress
+                .chats
+                .get(self.chat_selected)
                 .is_some_and(|chat| pending.matches(chat));
             if unchanged {
                 self.launch_chat_with_file_consent(true);
             } else {
-                self.notify_warning("確認中に質問または添付が変更された。内容を確認し、もう一度送信してください。");
+                self.notify_warning(
+                    "確認中に質問または添付が変更された。内容を確認し、もう一度送信してください。",
+                );
             }
         }
     }
 
-    pub(super) fn attach_chat_file(&mut self, id: &str, path: &std::path::Path) -> Result<(), String> {
+    pub(super) fn attach_chat_file(
+        &mut self,
+        id: &str,
+        path: &std::path::Path,
+    ) -> Result<(), String> {
         use std::io::Read;
-        let name = path.file_name().and_then(|s| s.to_str())
-            .ok_or("ファイル名を読み取れません。")?.to_owned();
+        let name = path
+            .file_name()
+            .and_then(|s| s.to_str())
+            .ok_or("ファイル名を読み取れません。")?
+            .to_owned();
         Attachment::validate_file_name(&name)?;
-        let chat = self.progress.chats.iter().find(|chat| chat.id == id)
+        let chat = self
+            .progress
+            .chats
+            .iter()
+            .find(|chat| chat.id == id)
             .ok_or("保存先の会話がありません。")?;
-        if chat.deleted_at.is_some() { return Err("ごみ箱の会話には添付できません。".into()); }
-        if chat.draft_attachments.len() >= 8 { return Err("一つの発言の添付は8件までです。".into()); }
+        if chat.deleted_at.is_some() {
+            return Err("ごみ箱の会話には添付できません。".into());
+        }
+        if chat.draft_attachments.len() >= 8 {
+            return Err("一つの発言の添付は8件までです。".into());
+        }
         let file = std::fs::File::open(path).map_err(|e| e.to_string())?;
         if file.metadata().map_err(|e| e.to_string())?.len() > MAX_ASSET_BYTES as u64 {
             return Err("添付ファイルは12MiB以下にしてください。".into());
         }
         let mut bytes = Vec::new();
-        file.take(MAX_ASSET_BYTES as u64 + 1).read_to_end(&mut bytes).map_err(|e| e.to_string())?;
-        if bytes.len() > MAX_ASSET_BYTES { return Err("添付ファイルは12MiB以下にしてください。".into()); }
-        let kind = match path.extension().and_then(|s| s.to_str()).map(str::to_ascii_lowercase).as_deref() {
+        file.take(MAX_ASSET_BYTES as u64 + 1)
+            .read_to_end(&mut bytes)
+            .map_err(|e| e.to_string())?;
+        if bytes.len() > MAX_ASSET_BYTES {
+            return Err("添付ファイルは12MiB以下にしてください。".into());
+        }
+        let kind = match path
+            .extension()
+            .and_then(|s| s.to_str())
+            .map(str::to_ascii_lowercase)
+            .as_deref()
+        {
             Some("png") => AssetKind::ImagePng,
             Some("bmp") => AssetKind::ImageBmp,
             Some("gif") => AssetKind::ImageGif,
@@ -444,8 +557,9 @@ impl WordApp {
         // Keep the selected bytes as the original; Codex and the preview use a
         // bounded PNG of the first frame for formats other than PNG.
         let display_png = match kind {
-            AssetKind::ImageBmp | AssetKind::ImageGif | AssetKind::ImageJpeg =>
-                Some(image_display_png(kind, &bytes)?),
+            AssetKind::ImageBmp | AssetKind::ImageGif | AssetKind::ImageJpeg => {
+                Some(image_display_png(kind, &bytes)?)
+            }
             _ => None,
         };
         let store = self.asset_store()?;
@@ -455,10 +569,17 @@ impl WordApp {
         } else {
             (kind == AssetKind::ImagePng).then(|| original.clone())
         };
-        self.add_chat_attachment(id, Attachment {
-            original, image, background: None, source_text: name.clone(), transcript: None,
-            file_name: Some(name),
-        })
+        self.add_chat_attachment(
+            id,
+            Attachment {
+                original,
+                image,
+                background: None,
+                source_text: name.clone(),
+                transcript: None,
+                file_name: Some(name),
+            },
+        )
     }
     pub(super) fn export_unsaved_chat_audio(
         &mut self,
@@ -536,16 +657,23 @@ impl WordApp {
         }
         let mut confirmed = false;
         let mut cancelled = false;
-        let response = egui::Modal::new(egui::Id::new("chat-annotation-discard-confirm"))
-            .show(ctx, |ui| {
+        let response =
+            egui::Modal::new(egui::Id::new("chat-annotation-discard-confirm")).show(ctx, |ui| {
                 chat_media_dialog_style(ui);
                 ui.set_max_width(ctx.available_rect().width().min(500.0) - 24.0);
                 ui.heading("未添付の注釈を破棄");
-                ui.label("入力した原文・筆跡・背景を保存せずに削除します。この操作は取り消せません。");
+                ui.label(
+                    "入力した原文・筆跡・背景を保存せずに削除します。この操作は取り消せません。",
+                );
                 ui.horizontal_wrapped(|ui| {
-                    confirmed = ui.add(crate::app::controls::Button::new(
-                        RichText::new("OK（破棄する）").color(Color32::WHITE))
-                        .fill(Color32::from_rgb(164, 49, 49))).clicked();
+                    confirmed = ui
+                        .add(
+                            crate::app::controls::Button::new(
+                                RichText::new("OK（破棄する）").color(Color32::WHITE),
+                            )
+                            .fill(Color32::from_rgb(164, 49, 49)),
+                        )
+                        .clicked();
                     cancelled = ui.ww_button("キャンセル").clicked();
                 });
             });
@@ -573,16 +701,24 @@ impl WordApp {
             ui.label("下の欄に英文を入力・貼り付け、その英文を固定してから上に書き込みます。");
             ui.add_enabled_ui(can_edit, |ui| {
                 color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| {
-                    ui.add(egui::TextEdit::multiline(&mut self.annotation.text)
-                        .hint_text("手書きの下地にする英文（任意）")
-                        .desired_rows(3).desired_width(f32::INFINITY).char_limit(2000))
+                    ui.add(
+                        egui::TextEdit::multiline(&mut self.annotation.text)
+                            .hint_text("手書きの下地にする英文（任意）")
+                            .desired_rows(3)
+                            .desired_width(f32::INFINITY)
+                            .char_limit(2000),
+                    )
                 })
             });
             if !self.annotation.text.is_empty() {
                 export_text = ui.ww_button("原文をTXTへ退避（添付登録とは別）").clicked();
             }
-            if ui.add_enabled(can_edit && !self.annotation.text.trim().is_empty(),
-                crate::app::controls::Button::new("英文を下地にして手書きを始める")).clicked()
+            if ui
+                .add_enabled(
+                    can_edit && !self.annotation.text.trim().is_empty(),
+                    crate::app::controls::Button::new("英文を下地にして手書きを始める"),
+                )
+                .clicked()
             {
                 match self.annotation.freeze(ctx) {
                     Ok(()) => self.chat_media_focus_ink = true,
@@ -617,9 +753,15 @@ impl WordApp {
                 self.chat_media_focus_ink = false;
             }
             ui.label("下の画像をドラッグして書き、確認後にメッセージへ添付してください。");
-            attach = ui.add_enabled(can_edit,
-                crate::app::controls::Button::new("手書き画像をメッセージに添付")).clicked();
-            export_annotation = ui.ww_button("筆跡・背景・送信画像を新しいフォルダーへ退避").clicked();
+            attach = ui
+                .add_enabled(
+                    can_edit,
+                    crate::app::controls::Button::new("手書き画像をメッセージに添付"),
+                )
+                .clicked();
+            export_annotation = ui
+                .ww_button("筆跡・背景・送信画像を新しいフォルダーへ退避")
+                .clicked();
         }
         if !self.exit_media_requested {
             self.chat_annotation_discard_controls(ui);
@@ -941,9 +1083,20 @@ impl WordApp {
             return;
         }
         if let Some(id) = import_file {
-            if let Some(path) = rfd::FileDialog::new().set_title("チャットに添付するファイルを選択").pick_file() {
-                let result = self.attach_chat_file(&id, &path)
-                    .map(|_| format!("{}を添付した。送信前に内容を確認できる。", path.file_name().and_then(|s| s.to_str()).unwrap_or("ファイル")))
+            if let Some(path) = rfd::FileDialog::new()
+                .set_title("チャットに添付するファイルを選択")
+                .pick_file()
+            {
+                let result = self
+                    .attach_chat_file(&id, &path)
+                    .map(|_| {
+                        format!(
+                            "{}を添付した。送信前に内容を確認できる。",
+                            path.file_name()
+                                .and_then(|s| s.to_str())
+                                .unwrap_or("ファイル")
+                        )
+                    })
                     .map_err(|e| format!("ファイルを添付できなかった：{e}"));
                 self.notify_result(result);
             }
@@ -965,9 +1118,7 @@ impl WordApp {
                             path.display()
                         )
                     })
-                    .map_err(|e| {
-                        format!("WAV退避に失敗した。未保存の録音は保持している：{e}")
-                    });
+                    .map_err(|e| format!("WAV退避に失敗した。未保存の録音は保持している：{e}"));
                 self.notify_result(result);
             }
         }
@@ -1095,7 +1246,9 @@ impl WordApp {
             match result {
                 Ok(()) => {
                     self.annotation = Default::default();
-                    self.message = "注釈画像と原本を保存した。質問を入力し、添付を確認してから送信する。".into();
+                    self.message =
+                        "注釈画像と原本を保存した。質問を入力し、添付を確認してから送信する。"
+                            .into();
                 }
                 Err(e) => self.notify_error(e),
             };
@@ -1139,8 +1292,14 @@ mod attachment_tests {
 
     #[test]
     fn text_preview_accepts_utf8_and_utf16_but_rejects_binary() {
-        assert_eq!(text_preview(b"hello\nworld"), Some(("hello\nworld".into(), false)));
-        assert_eq!(text_preview(&[0xFF, 0xFE, b'A', 0, b'B', 0]), Some(("AB".into(), false)));
+        assert_eq!(
+            text_preview(b"hello\nworld"),
+            Some(("hello\nworld".into(), false))
+        );
+        assert_eq!(
+            text_preview(&[0xFF, 0xFE, b'A', 0, b'B', 0]),
+            Some(("AB".into(), false))
+        );
         assert!(text_preview(b"PDF\0binary").is_none());
         assert!(text_preview(b"%PDF-1.4\n1 0 obj\nendobj").is_none());
         assert!(text_preview(&[0xFF, 0xFE, b'A']).is_none());
@@ -1157,7 +1316,10 @@ mod attachment_tests {
         assert_eq!(attachment.original.kind, AssetKind::FileBlob);
         assert_eq!(attachment.file_name.as_deref(), Some("sample.txt"));
         app.preview_file_asset(&attachment.original, "sample.txt");
-        assert_eq!(app.file_preview.as_ref().map(|(_, text, _)| text.as_str()), Some("添付テキスト\nsecond line"));
+        assert_eq!(
+            app.file_preview.as_ref().map(|(_, text, _)| text.as_str()),
+            Some("添付テキスト\nsecond line")
+        );
 
         let binary_path = root.join("sample.pdf");
         std::fs::write(&binary_path, b"PDF\0binary").unwrap();
@@ -1166,8 +1328,13 @@ mod attachment_tests {
         app.preview_file_asset(&binary.original, "sample.pdf");
         assert!(app.file_preview.is_none());
         assert!(app.message.contains("表示しません"));
-        let _ = ctx.run(egui::RawInput::default(), |ctx| app.notification_window(ctx));
-        assert!(app.notification_open, "unsupported preview must explain why it cannot open");
+        let _ = ctx.run(egui::RawInput::default(), |ctx| {
+            app.notification_window(ctx)
+        });
+        assert!(
+            app.notification_open,
+            "unsupported preview must explain why it cannot open"
+        );
         let reloaded = app.storage.as_ref().unwrap().load().unwrap();
         assert_eq!(reloaded.chats[0].draft_attachments.len(), 2);
         drop(app);
@@ -1179,7 +1346,10 @@ mod attachment_tests {
         let (_ctx, mut app, root) = super::super::harness_tests::fixture();
         let id = app.progress.chats[0].id.clone();
         let source = image::DynamicImage::ImageRgb8(image::RgbImage::from_pixel(
-            2, 2, image::Rgb([22, 88, 190])));
+            2,
+            2,
+            image::Rgb([22, 88, 190]),
+        ));
         let store = app.asset_store().unwrap();
         for (extension, kind, format) in [
             ("bmp", AssetKind::ImageBmp, image::ImageFormat::Bmp),
@@ -1193,17 +1363,33 @@ mod attachment_tests {
             let path = root.join(format!("picture.{extension}"));
             std::fs::write(&path, &bytes).unwrap();
             app.attach_chat_file(&id, &path).unwrap();
-            let attachment = app.progress.chats[0].draft_attachments.last().unwrap().clone();
+            let attachment = app.progress.chats[0]
+                .draft_attachments
+                .last()
+                .unwrap()
+                .clone();
             assert_eq!(attachment.original.kind, kind);
-            assert_eq!(attachment.file_name.as_deref(), Some(path.file_name().unwrap().to_str().unwrap()));
+            assert_eq!(
+                attachment.file_name.as_deref(),
+                Some(path.file_name().unwrap().to_str().unwrap())
+            );
             assert_eq!(store.read(&attachment.original).unwrap(), bytes);
             let preview = attachment.image.as_ref().expect("display PNG");
             assert_eq!(preview.kind, AssetKind::ImagePng);
-            assert!(store.read(preview).unwrap().starts_with(b"\x89PNG\r\n\x1a\n"));
+            assert!(store
+                .read(preview)
+                .unwrap()
+                .starts_with(b"\x89PNG\r\n\x1a\n"));
             app.preview_pixels = None;
             app.preview_asset(preview);
-            assert_eq!(app.preview_pixels.as_ref().map(|(name, _)| name.as_str()), Some(preview.id.as_str()));
-            assert!(app.attachment_texts(&[attachment.clone()]).unwrap().is_empty());
+            assert_eq!(
+                app.preview_pixels.as_ref().map(|(name, _)| name.as_str()),
+                Some(preview.id.as_str())
+            );
+            assert!(app
+                .attachment_texts(&[attachment.clone()])
+                .unwrap()
+                .is_empty());
             assert_eq!(app.attachment_images(&[attachment]).unwrap().len(), 1);
         }
         let prior = serde_json::to_value(&app.progress).unwrap();
@@ -1213,7 +1399,12 @@ mod attachment_tests {
         assert!(app.attach_chat_file(&id, &corrupt).is_err());
         assert_eq!(serde_json::to_value(&app.progress).unwrap(), prior);
         assert_eq!(store.inventory().unwrap().len(), assets_before);
-        assert_eq!(app.storage.as_ref().unwrap().load().unwrap().chats[0].draft_attachments.len(), 4);
+        assert_eq!(
+            app.storage.as_ref().unwrap().load().unwrap().chats[0]
+                .draft_attachments
+                .len(),
+            4
+        );
         drop(app);
         std::fs::remove_dir_all(root).unwrap();
     }
@@ -1225,17 +1416,39 @@ mod attachment_tests {
         let path = root.join("reading-note.txt");
         std::fs::write(&path, "Please explain this phrase.").unwrap();
         app.attach_chat_file(&id, &path).unwrap();
-        let audio = app.asset_store().unwrap().put(AssetKind::AudioWav,
-            b"RIFF\x04\x00\x00\x00WAVE").unwrap();
-        app.add_chat_attachment(&id, Attachment { original: audio, image: None,
-            background: None, file_name: None, source_text: "録音".into(), transcript: None }).unwrap();
+        let audio = app
+            .asset_store()
+            .unwrap()
+            .put(AssetKind::AudioWav, b"RIFF\x04\x00\x00\x00WAVE")
+            .unwrap();
+        app.add_chat_attachment(
+            &id,
+            Attachment {
+                original: audio,
+                image: None,
+                background: None,
+                file_name: None,
+                source_text: "録音".into(),
+                transcript: None,
+            },
+        )
+        .unwrap();
         app.progress.chats[0].draft = "この文章を解説して".into();
         let progress_before = serde_json::to_value(&app.progress).unwrap();
         app.launch_chat();
-        let consent = app.pending_chat_file_send.as_ref().expect("send requires consent");
+        let consent = app
+            .pending_chat_file_send
+            .as_ref()
+            .expect("send requires consent");
         assert_eq!(consent.text_names, ["reading-note.txt"]);
-        assert!(consent.labels.iter().any(|line| line.contains("reading-note.txt")));
-        assert!(consent.matches(&app.progress.chats[0]), "mixed named/unnamed attachments remain approvable");
+        assert!(consent
+            .labels
+            .iter()
+            .any(|line| line.contains("reading-note.txt")));
+        assert!(
+            consent.matches(&app.progress.chats[0]),
+            "mixed named/unnamed attachments remain approvable"
+        );
         let mut changed = app.progress.chats[0].clone();
         changed.draft.push('!');
         assert!(!consent.matches(&changed));
@@ -1249,7 +1462,10 @@ mod attachment_tests {
         changed.id = "different-chat".into();
         assert!(!consent.matches(&changed));
         assert!(app.pending.is_none(), "Codex must not start before consent");
-        assert_eq!(serde_json::to_value(&app.progress).unwrap(), progress_before);
+        assert_eq!(
+            serde_json::to_value(&app.progress).unwrap(),
+            progress_before
+        );
         drop(app);
         std::fs::remove_dir_all(root).unwrap();
     }
@@ -1258,53 +1474,111 @@ mod attachment_tests {
     fn approved_text_payload_has_named_content_and_respects_context_limit() {
         let mut payload = serde_json::json!({"current_question": "Explain this."});
         assert!(payload.get("current_text_files").is_none());
-        super::super::add_chat_text_files(&mut payload,
-            &[("reading-note.txt".into(), "a phrase in context".into())]).unwrap();
+        super::super::add_chat_text_files(
+            &mut payload,
+            &[("reading-note.txt".into(), "a phrase in context".into())],
+        )
+        .unwrap();
         assert_eq!(payload["current_text_files"][0]["name"], "reading-note.txt");
-        assert_eq!(payload["current_text_files"][0]["content"], "a phrase in context");
-        let mut oversized = serde_json::json!({"current_question": "x".repeat(wordweave5::chat::CONTEXT_BYTES)});
-        assert!(super::super::add_chat_text_files(&mut oversized,
-            &[("reading-note.txt".into(), "text".into())]).is_err());
+        assert_eq!(
+            payload["current_text_files"][0]["content"],
+            "a phrase in context"
+        );
+        let mut oversized =
+            serde_json::json!({"current_question": "x".repeat(wordweave5::chat::CONTEXT_BYTES)});
+        assert!(super::super::add_chat_text_files(
+            &mut oversized,
+            &[("reading-note.txt".into(), "text".into())]
+        )
+        .is_err());
     }
 
     #[test]
     fn attachment_button_identifies_each_kind_and_file_click_opens_the_file_action() {
-        let make_ref = |kind| AssetRef { id: "a".repeat(64), kind, bytes: 16 };
+        let make_ref = |kind| AssetRef {
+            id: "a".repeat(64),
+            kind,
+            bytes: 16,
+        };
         let image = make_ref(AssetKind::ImagePng);
         let items = [
-            Attachment { original: image.clone(), image: Some(image), background: None,
-                source_text: "画像".into(), transcript: None, file_name: Some("photo.png".into()) },
-            Attachment { original: make_ref(AssetKind::AudioWav), image: None, background: None,
-                source_text: "録音".into(), transcript: None, file_name: Some("voice.wav".into()) },
-            Attachment { original: make_ref(AssetKind::FileBlob), image: None, background: None,
-                source_text: "資料".into(), transcript: None, file_name: Some("notes.txt".into()) },
+            Attachment {
+                original: image.clone(),
+                image: Some(image),
+                background: None,
+                source_text: "画像".into(),
+                transcript: None,
+                file_name: Some("photo.png".into()),
+            },
+            Attachment {
+                original: make_ref(AssetKind::AudioWav),
+                image: None,
+                background: None,
+                source_text: "録音".into(),
+                transcript: None,
+                file_name: Some("voice.wav".into()),
+            },
+            Attachment {
+                original: make_ref(AssetKind::FileBlob),
+                image: None,
+                background: None,
+                source_text: "資料".into(),
+                transcript: None,
+                file_name: Some("notes.txt".into()),
+            },
         ];
         let ctx = egui::Context::default();
         let frame = |events| {
             let mut opened = None;
-            let output = ctx.run(egui::RawInput {
-                screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(900.0, 300.0))),
-                events, ..Default::default()
-            }, |ctx| {
-                egui::CentralPanel::default().show(ctx, |ui| {
-                    ui.horizontal_wrapped(|ui| {
-                        for (index, attachment) in items.iter().enumerate() {
-                            if let Some(action) = attachment_button(ui, attachment, index) { opened = Some(action); }
-                        }
+            let output = ctx.run(
+                egui::RawInput {
+                    screen_rect: Some(egui::Rect::from_min_size(
+                        egui::Pos2::ZERO,
+                        egui::vec2(900.0, 300.0),
+                    )),
+                    events,
+                    ..Default::default()
+                },
+                |ctx| {
+                    egui::CentralPanel::default().show(ctx, |ui| {
+                        ui.horizontal_wrapped(|ui| {
+                            for (index, attachment) in items.iter().enumerate() {
+                                if let Some(action) = attachment_button(ui, attachment, index) {
+                                    opened = Some(action);
+                                }
+                            }
+                        });
                     });
-                });
-            });
+                },
+            );
             (output, opened)
         };
-        for _ in 0..2 { frame(vec![]); }
-        let pos = ctx.data(|data| data.get_temp::<egui::Rect>(
-            egui::Id::new(("chat-attachment-button", "ファイル", 2)))).unwrap().center();
-        frame(vec![egui::Event::PointerMoved(pos), egui::Event::PointerButton {
-            pos, button: egui::PointerButton::Primary, pressed: true,
-            modifiers: egui::Modifiers::NONE,
-        }]);
+        for _ in 0..2 {
+            frame(vec![]);
+        }
+        let pos = ctx
+            .data(|data| {
+                data.get_temp::<egui::Rect>(egui::Id::new((
+                    "chat-attachment-button",
+                    "ファイル",
+                    2,
+                )))
+            })
+            .unwrap()
+            .center();
+        frame(vec![
+            egui::Event::PointerMoved(pos),
+            egui::Event::PointerButton {
+                pos,
+                button: egui::PointerButton::Primary,
+                pressed: true,
+                modifiers: egui::Modifiers::NONE,
+            },
+        ]);
         let (output, opened) = frame(vec![egui::Event::PointerButton {
-            pos, button: egui::PointerButton::Primary, pressed: false,
+            pos,
+            button: egui::PointerButton::Primary,
+            pressed: false,
             modifiers: egui::Modifiers::NONE,
         }]);
         assert!(matches!(opened, Some(AttachmentOpen::File(_, name)) if name == "notes.txt"));
@@ -1312,6 +1586,9 @@ mod attachment_tests {
         for shape in output.shapes {
             super::super::harness_tests::shape_text(&shape.shape, &mut text);
         }
-        assert!(text.contains("画像 1") && text.contains("音声 2") && text.contains("ファイル 3"), "{text}");
+        assert!(
+            text.contains("画像 1") && text.contains("音声 2") && text.contains("ファイル 3"),
+            "{text}"
+        );
     }
 }

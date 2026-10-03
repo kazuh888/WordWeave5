@@ -25,14 +25,22 @@ impl WordApp {
             .corner_radius(8)
             .inner_margin(12)
             .show(ui, |ui| {
-                color_theme::editable_input(ui, input_tint, Color32::from_rgb(248, 251, 255), |ui| ui.add(
-                    egui::TextEdit::multiline(&mut self.answer)
-                        .frame(false)
-                        .id(id)
-                        .desired_rows(if multiline { 3 } else { 2 })
-                        .desired_width(f32::INFINITY)
-                        .hint_text("回答を入力 / 認識結果を確認・修正"),
-                )).has_focus()
+                color_theme::editable_input(
+                    ui,
+                    input_tint,
+                    Color32::from_rgb(248, 251, 255),
+                    |ui| {
+                        ui.add(
+                            egui::TextEdit::multiline(&mut self.answer)
+                                .frame(false)
+                                .id(id)
+                                .desired_rows(if multiline { 3 } else { 2 })
+                                .desired_width(f32::INFINITY)
+                                .hint_text("回答を入力 / 認識結果を確認・修正"),
+                        )
+                    },
+                )
+                .has_focus()
             });
         color_theme::input_focus_outline(ui, frame.response.rect, frame.inner);
         ui.small(if multiline {

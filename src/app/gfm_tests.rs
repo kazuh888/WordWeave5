@@ -620,10 +620,8 @@ fn gfm_registration_receipt_follows_real_approval_and_survives_dialog_close() {
     app.chat_material_open = false;
     // egui keeps a closing Window interactive during its fade. Advance the
     // headless frames until that layer no longer covers the transcript.
-    let material_layer = egui::LayerId::new(
-        egui::Order::Middle,
-        egui::Id::new("教材の根拠と差分を確認"),
-    );
+    let material_layer =
+        egui::LayerId::new(egui::Order::Middle, egui::Id::new("教材の根拠と差分を確認"));
     for _ in 0..16 {
         output = draw(&ctx, &mut app, vec![]);
         let copy_id = egui::Id::new(("chat-copy-answer", &chat_id, 0));
@@ -1225,8 +1223,14 @@ fn review_detail_narrow_footer_stays_visible_when_an_edit_invalidates_ready() {
         });
     }
     draft.generated = Some(draft.candidate.clone());
-    assert!(draft.ready(&app.deck, true).is_ok(), "fixture must start ready");
-    assert!(draft.ready(&app.deck, false).is_err(), "the same-base checkbox controls readiness");
+    assert!(
+        draft.ready(&app.deck, true).is_ok(),
+        "fixture must start ready"
+    );
+    assert!(
+        draft.ready(&app.deck, false).is_err(),
+        "the same-base checkbox controls readiness"
+    );
     app.material_same_base = true;
     app.progress.material_draft = Some(draft);
     let original_progress = serde_json::to_vec(&app.progress).unwrap();
@@ -1234,12 +1238,18 @@ fn review_detail_narrow_footer_stays_visible_when_an_edit_invalidates_ready() {
     let screen = egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(820.0, 650.0) / 1.6);
     let render = |app: &mut WordApp, events| {
         ctx.run(
-            egui::RawInput { screen_rect: Some(screen), events, ..Default::default() },
+            egui::RawInput {
+                screen_rect: Some(screen),
+                events,
+                ..Default::default()
+            },
             |ctx| app.update_ui(ctx),
         )
     };
     let mut output = render(&mut app, vec![]);
-    for _ in 0..4 { output = render(&mut app, vec![]); }
+    for _ in 0..4 {
+        output = render(&mut app, vec![]);
+    }
     let helper_point = visible_label(&output, "元の会話を表示")
         .expect("proposal helper must have a visible source button")
         .center();
@@ -1248,16 +1258,23 @@ fn review_detail_narrow_footer_stays_visible_when_an_edit_invalidates_ready() {
 
     let checkbox_label = "同じ基本語の別用法として新規登録する";
     for _ in 0..8 {
-        if visible_label(&output, checkbox_label).is_some() { break; }
-        render(&mut app, vec![
-            egui::Event::PointerMoved(helper_point),
-            egui::Event::MouseWheel {
-                unit: egui::MouseWheelUnit::Point,
-                delta: egui::vec2(0.0, -35.0),
-                modifiers: egui::Modifiers::NONE,
-            },
-        ]);
-        for _ in 0..30 { output = render(&mut app, vec![]); }
+        if visible_label(&output, checkbox_label).is_some() {
+            break;
+        }
+        render(
+            &mut app,
+            vec![
+                egui::Event::PointerMoved(helper_point),
+                egui::Event::MouseWheel {
+                    unit: egui::MouseWheelUnit::Point,
+                    delta: egui::vec2(0.0, -35.0),
+                    modifiers: egui::Modifiers::NONE,
+                },
+            ],
+        );
+        for _ in 0..30 {
+            output = render(&mut app, vec![]);
+        }
     }
     let checkbox = visible_label(&output, checkbox_label)
         .expect("same-base checkbox must be reachable by scrolling the helper pane");
@@ -1268,10 +1285,16 @@ fn review_detail_narrow_footer_stays_visible_when_an_edit_invalidates_ready() {
         pressed,
         modifiers: egui::Modifiers::NONE,
     };
-    render(&mut app, vec![egui::Event::PointerMoved(point), button(true)]);
+    render(
+        &mut app,
+        vec![egui::Event::PointerMoved(point), button(true)],
+    );
     output = render(&mut app, vec![button(false)]);
 
-    assert!(!app.material_same_base, "real checkbox click must invalidate this proposal");
+    assert!(
+        !app.material_same_base,
+        "real checkbox click must invalidate this proposal"
+    );
     let reason = visible_glyph_position(&output, "登録済み")
         .expect("the newly invalid reason must be visible in the same frame");
     let explain = visible_label(&output, "理由を詳しく確認")
@@ -1281,14 +1304,26 @@ fn review_detail_narrow_footer_stays_visible_when_an_edit_invalidates_ready() {
     let discard = visible_label(&output, "教材案を破棄")
         .expect("discard must remain visible after invalidation");
     for rect in [explain, register, discard] {
-        assert!(screen.contains_rect(rect), "footer action left the narrow screen: {rect:?}");
+        assert!(
+            screen.contains_rect(rect),
+            "footer action left the narrow screen: {rect:?}"
+        );
     }
-    assert!(screen.contains(reason), "new rejection reason left the narrow screen");
-    assert!(reason.y < register.top() && explain.bottom() <= register.top()
-        && !explain.contains(reason),
-        "reason and explanation may share a row but must stay separate from registration");
-    assert_eq!(serde_json::to_vec(&app.progress).unwrap(), original_progress,
-        "a readiness edit must preserve the unregistered proposal and learning state");
+    assert!(
+        screen.contains(reason),
+        "new rejection reason left the narrow screen"
+    );
+    assert!(
+        reason.y < register.top()
+            && explain.bottom() <= register.top()
+            && !explain.contains(reason),
+        "reason and explanation may share a row but must stay separate from registration"
+    );
+    assert_eq!(
+        serde_json::to_vec(&app.progress).unwrap(),
+        original_progress,
+        "a readiness edit must preserve the unregistered proposal and learning state"
+    );
     assert_eq!(wordweave5::model::deck_text(&app.deck), original_deck);
     drop(app);
     std::fs::remove_dir_all(root).unwrap();

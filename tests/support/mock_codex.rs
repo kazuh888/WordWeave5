@@ -20,14 +20,24 @@ fn send(value: Value) {
 
 fn main() {
     // For the copied Windows wrapper fixture only. This records no user data.
-    let probe = std::env::current_exe().ok().filter(|p| p.file_name().is_some_and(|n| n == "mock.exe" || n.eq_ignore_ascii_case("volta.exe")))
+    let probe = std::env::current_exe()
+        .ok()
+        .filter(|p| {
+            p.file_name()
+                .is_some_and(|n| n == "mock.exe" || n.eq_ignore_ascii_case("volta.exe"))
+        })
         .and_then(|p| p.parent().map(|dir| dir.join("mock-stage.txt")));
     let mark = |stage: &str| {
-        if let Some(path) = &probe { fs::write(path, stage).unwrap(); }
+        if let Some(path) = &probe {
+            fs::write(path, stage).unwrap();
+        }
     };
     mark("mock.exe開始");
     let args = std::env::args().skip(1).collect::<Vec<_>>();
-    let is_volta_probe = std::env::current_exe().ok().is_some_and(|p| p.file_name().is_some_and(|n| n.eq_ignore_ascii_case("volta.exe")));
+    let is_volta_probe = std::env::current_exe().ok().is_some_and(|p| {
+        p.file_name()
+            .is_some_and(|n| n.eq_ignore_ascii_case("volta.exe"))
+    });
     if is_volta_probe {
         assert_eq!(args, ["run", "codex", "app-server"]);
     } else {
@@ -48,7 +58,10 @@ fn main() {
         }
     }
     mark("作業ディレクトリ確認済み");
-    let mode = fs::read_to_string("mode.txt").expect("Run through cargo test; missing fixture mode").trim().to_owned();
+    let mode = fs::read_to_string("mode.txt")
+        .expect("Run through cargo test; missing fixture mode")
+        .trim()
+        .to_owned();
     mark("mode.txt読み取り済み");
     if mode == "early_exit" || mode == "bad_json" {
         // Wait for initialize, so this tests receive/EOF rather than a spawn race.
@@ -64,11 +77,18 @@ fn main() {
         return;
     }
     let process_lock = OpenOptions::new()
-        .read(true).write(true).create(true).truncate(false)
-        .open("process.lock").unwrap();
+        .read(true)
+        .write(true)
+        .create(true)
+        .truncate(false)
+        .open("process.lock")
+        .unwrap();
     process_lock.lock_exclusive().unwrap();
-    let mut requests = OpenOptions::new().create(true).append(true)
-        .open("requests.log").unwrap();
+    let mut requests = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open("requests.log")
+        .unwrap();
     for line in io::stdin().lock().lines() {
         let v: Value = serde_json::from_str(&line.unwrap()).unwrap();
         let method = v["method"].as_str().unwrap();
@@ -77,14 +97,20 @@ fn main() {
         requests.flush().unwrap();
         match method {
             "initialize" => send(json!({"id":v["id"],"result":{"userAgent":"mock"}})),
-            "initialized" => {},
-            "account/read" if mode == "noauth" => send(json!({"id":v["id"],"result":{"account":null,"requiresOpenaiAuth":true}})),
+            "initialized" => {}
+            "account/read" if mode == "noauth" => {
+                send(json!({"id":v["id"],"result":{"account":null,"requiresOpenaiAuth":true}}))
+            }
             "account/read" => send(json!({"id":v["id"],"result":{"account":{
                 "type": if mode == "paid" { "apiKey" } else { "chatgpt" },
                 "planType":"test"
             }}})),
             "thread/start" => {
-                fs::write("thread-start.json", serde_json::to_vec(&v["params"]).unwrap()).unwrap();
+                fs::write(
+                    "thread-start.json",
+                    serde_json::to_vec(&v["params"]).unwrap(),
+                )
+                .unwrap();
                 assert_eq!(v["params"]["ephemeral"], false);
                 assert_eq!(v["params"]["sandbox"], "read-only");
                 assert_eq!(v["params"]["modelProvider"], "openai");
@@ -96,31 +122,42 @@ fn main() {
                     result["model"] = json!("returned-model");
                     result["reasoningEffort"] = json!("high");
                 }
-                if mode == "null_effort" { result["reasoningEffort"] = Value::Null; }
-                if mode == "effort" { result["reasoningEffort"] = json!("low"); }
-                if mode == "effort_rerouted" { result["model"] = json!("other"); }
+                if mode == "null_effort" {
+                    result["reasoningEffort"] = Value::Null;
+                }
+                if mode == "effort" {
+                    result["reasoningEffort"] = json!("low");
+                }
+                if mode == "effort_rerouted" {
+                    result["model"] = json!("other");
+                }
                 send(json!({"id":v["id"],"result":result}));
-            },
+            }
             "thread/read" => {
                 assert_eq!(v["params"]["threadId"], "t");
                 assert_eq!(v["params"]["includeTurns"], true);
-                if mode=="large_lost_result" {
-                    let input:Value=serde_json::from_slice(&fs::read("media-input.json").unwrap()).unwrap();
-                    send(json!({"id":v["id"],"result":{"thread":{"id":"t","turns":[{"id":"u","status":"completed","items":[{"id":"user","type":"userMessage","content":input},{"id":"answer","type":"agentMessage","text":"large recovered"}]}]}}}));
+                if mode == "large_lost_result" {
+                    let input: Value =
+                        serde_json::from_slice(&fs::read("media-input.json").unwrap()).unwrap();
+                    send(
+                        json!({"id":v["id"],"result":{"thread":{"id":"t","turns":[{"id":"u","status":"completed","items":[{"id":"user","type":"userMessage","content":input},{"id":"answer","type":"agentMessage","text":"large recovered"}]}]}}}),
+                    );
                     continue;
                 }
                 send(json!({"id":v["id"],"result":{"thread":{"id":"t","turns":[{
                     "id": if mode=="wrong_turn" {"other"} else {"u"}, "status":"completed",
                     "items":[{"id":"a","type":"agentMessage","phase":"final_answer","text":"recovered"}]
                 }]}}}));
-            },
+            }
             "model/list" if mode.starts_with("effort") => {
                 if mode == "effort_unavailable" {
                     send(json!({"id":v["id"],"error":{"code":-1,"message":"unavailable"}}));
                 } else if mode == "effort_cycle" {
                     send(json!({"id":v["id"],"result":{"data":[],"nextCursor":"repeat"}}));
                 } else if mode == "effort_missing" {
-                    send(json!({"id":v["id"],"result":{"data":[{"model":"test"}],"nextCursor":null}}));
+                    send(
+                        json!({"id":v["id"],"result":{"data":[{"model":"test"}],"nextCursor":null}}),
+                    );
                 } else if v["params"]["cursor"].is_null() {
                     send(json!({"id":v["id"],"result":{"data":[{
                         "model":"other","displayName":"Other model","isDefault":true,
@@ -135,7 +172,7 @@ fn main() {
                         "defaultReasoningEffort":"high"
                     },{"model":"no-capabilities"}],"nextCursor":null}}));
                 }
-            },
+            }
             "model/list" => send(json!({"id":v["id"],"result":{
                 "data":[{"model":"test","inputModalities":
                     if mode == "audio" { vec!["text", "audio"] } else if mode == "image" || mode=="large_lost_result" { vec!["text", "image"] } else { vec!["text"] }}],
@@ -143,32 +180,56 @@ fn main() {
             }})),
             "turn/start" => {
                 if mode == "structured_material" {
-                    fs::write("material-turn-start.json", serde_json::to_vec(&v["params"]).unwrap()).unwrap();
+                    fs::write(
+                        "material-turn-start.json",
+                        serde_json::to_vec(&v["params"]).unwrap(),
+                    )
+                    .unwrap();
                 }
-                if mode=="lost_id" { return; }
-                if mode=="lost_result" || mode=="large_lost_result" {
-                    if mode=="large_lost_result" {fs::write("media-input.json",serde_json::to_vec(&v["params"]["input"]).unwrap()).unwrap();}
+                if mode == "lost_id" {
+                    return;
+                }
+                if mode == "lost_result" || mode == "large_lost_result" {
+                    if mode == "large_lost_result" {
+                        fs::write(
+                            "media-input.json",
+                            serde_json::to_vec(&v["params"]["input"]).unwrap(),
+                        )
+                        .unwrap();
+                    }
                     send(json!({"id":v["id"],"result":{"turn":{"id":"u"}}}));
                     return;
                 }
                 if mode == "chat" {
-                    let expected: Value = serde_json::from_str(&fs::read_to_string("expected-input.json").unwrap()).unwrap();
-                    let actual: Value = serde_json::from_str(v["params"]["input"][0]["text"].as_str().unwrap()).unwrap();
+                    let expected: Value =
+                        serde_json::from_str(&fs::read_to_string("expected-input.json").unwrap())
+                            .unwrap();
+                    let actual: Value =
+                        serde_json::from_str(v["params"]["input"][0]["text"].as_str().unwrap())
+                            .unwrap();
                     assert_eq!(actual, expected, "Chat context was not transmitted intact");
                 }
                 if mode == "cancel" {
                     fs::write("waiting", b"ready").unwrap();
                     // Keep the process alive even if stdin closes. The test must kill it.
-                    loop { std::thread::park(); }
+                    loop {
+                        std::thread::park();
+                    }
                 }
                 let response = if mode == "structured_material" {
                     fs::read_to_string("material-response.json").unwrap()
                 } else if mode == "structured_chat" {
-                    assert_eq!(v["params"]["outputSchema"], wordweave5::chat_action::schema());
+                    assert_eq!(
+                        v["params"]["outputSchema"],
+                        wordweave5::chat_action::schema()
+                    );
                     json!({"answer":"apologize for を新規登録する案を確認してください。",
                         "title":"apologize for の登録", "action":{"operation":"new",
-                        "base":"apologize for", "entry_id":null}}).to_string()
-                } else { "{\"answer\":\"ok\"}".into() };
+                        "base":"apologize for", "entry_id":null}})
+                    .to_string()
+                } else {
+                    "{\"answer\":\"ok\"}".into()
+                };
                 send(json!({"method":"item/completed","params":{
                     "threadId":"t","turnId":"u","item":{
                         "id":"a","type":"agentMessage","phase":"final_answer",
@@ -183,7 +244,7 @@ fn main() {
                 }}));
                 // Deliberately deliver the start response after completion events.
                 send(json!({"id":v["id"],"result":{"turn":{"id":"u"}}}));
-            },
+            }
             other => panic!("Unexpected method: {other}"),
         }
     }

@@ -1,5 +1,7 @@
 use super::*;
-use wordweave5::material::{DiagnosticStage as MaterialStage, EvidenceCause, MaterialDiagnostic, MaterialFailure};
+use wordweave5::material::{
+    DiagnosticStage as MaterialStage, EvidenceCause, MaterialDiagnostic, MaterialFailure,
+};
 mod markdown;
 
 pub(super) fn show_markdown(ui: &mut egui::Ui, id: egui::Id, source: &str) {
@@ -33,7 +35,11 @@ fn material_reason(cause: EvidenceCause) -> &'static str {
 fn excerpt(text: &str) -> String {
     let mut chars = text.chars();
     let start: String = chars.by_ref().take(240).collect();
-    if chars.next().is_some() { format!("{start}…（省略）") } else { start }
+    if chars.next().is_some() {
+        format!("{start}…（省略）")
+    } else {
+        start
+    }
 }
 
 pub(super) fn diagnostic_copy_text(diagnostic: &MaterialDiagnostic) -> String {
@@ -41,16 +47,31 @@ pub(super) fn diagnostic_copy_text(diagnostic: &MaterialDiagnostic) -> String {
         "結果: {}。教材には登録していない。既存教材は変更していない。\n理由: {}\n次にできること: 元の発言と対象項目を確認し、必要なら教材案の作成を明示的に再試行する。\n原因詳細: {}",
         material_title(diagnostic.stage), material_reason(diagnostic.cause), diagnostic.cause_detail,
     );
-    if let Some(number) = diagnostic.reason_number { text.push_str(&format!("\n変更理由番号: {number}")); }
-    if let Some(path) = &diagnostic.path { text.push_str(&format!("\npath: {path}")); }
-    if let Some(label) = &diagnostic.target_label { text.push_str(&format!("\n対象項目: {label}")); }
+    if let Some(number) = diagnostic.reason_number {
+        text.push_str(&format!("\n変更理由番号: {number}"));
+    }
+    if let Some(path) = &diagnostic.path {
+        text.push_str(&format!("\npath: {path}"));
+    }
+    if let Some(label) = &diagnostic.target_label {
+        text.push_str(&format!("\n対象項目: {label}"));
+    }
     if let Some(evidence) = &diagnostic.evidence {
-        text.push_str(&format!("\nexchange_index: {}\nrole: {}\nAI引用（先頭240文字の抜粋）: {}",
-            evidence.exchange_index, evidence.role, excerpt(&evidence.quote)));
+        text.push_str(&format!(
+            "\nexchange_index: {}\nrole: {}\nAI引用（先頭240文字の抜粋）: {}",
+            evidence.exchange_index,
+            evidence.role,
+            excerpt(&evidence.quote)
+        ));
         if let Some(original) = &evidence.original {
-            text.push_str(&format!("\n固定元発言（先頭240文字の抜粋）: {}", excerpt(original)));
+            text.push_str(&format!(
+                "\n固定元発言（先頭240文字の抜粋）: {}",
+                excerpt(original)
+            ));
         } else {
-            text.push_str("\n固定元発言: 取得できない（固定版の往復番号または話者を確認してください）");
+            text.push_str(
+                "\n固定元発言: 取得できない（固定版の往復番号または話者を確認してください）",
+            );
         }
     } else {
         text.push_str("\nAI引用・固定元発言: 引用照合前に止まったため取得していない");
@@ -98,18 +119,31 @@ impl WordApp {
     }
 
     pub(super) fn show_material_registration_receipt(&mut self, ui: &mut egui::Ui) {
-        let Some(target_base) = self.material_registration_receipt.as_ref()
-            .map(|receipt| receipt.target_base.clone()) else { return; };
-        egui::Frame::new().fill(Color32::from_rgb(235, 249, 239))
-            .inner_margin(8.0).show(ui, |ui| {
+        let Some(target_base) = self
+            .material_registration_receipt
+            .as_ref()
+            .map(|receipt| receipt.target_base.clone())
+        else {
+            return;
+        };
+        egui::Frame::new()
+            .fill(Color32::from_rgb(235, 249, 239))
+            .inner_margin(8.0)
+            .show(ui, |ui| {
                 ui.set_max_width(ui.available_width().max(1.0));
                 ui.label("教材の登録結果");
-                egui::ScrollArea::vertical().id_salt("material-registration-receipt")
-                    .max_height(64.0).show(ui, |ui| {
-                        ui.add(egui::Label::new(format!(
-                            "{} の教材を登録した。元の会話への参照も保存した。",
-                            target_base
-                        )).wrap().selectable(true));
+                egui::ScrollArea::vertical()
+                    .id_salt("material-registration-receipt")
+                    .max_height(64.0)
+                    .show(ui, |ui| {
+                        ui.add(
+                            egui::Label::new(format!(
+                                "{} の教材を登録した。元の会話への参照も保存した。",
+                                target_base
+                            ))
+                            .wrap()
+                            .selectable(true),
+                        );
                     });
                 if ui.ww_button("登録結果を閉じる").clicked() {
                     self.material_registration_receipt = None;
@@ -118,8 +152,12 @@ impl WordApp {
     }
 
     fn expire_material_notice_if_replaced(&mut self) {
-        if self.fatal.is_some() || self.material_notice.as_ref().is_some_and(|notice|
-            self.message != notice.diagnostic.legacy_text) {
+        if self.fatal.is_some()
+            || self
+                .material_notice
+                .as_ref()
+                .is_some_and(|notice| self.message != notice.diagnostic.legacy_text)
+        {
             self.material_notice = None;
         }
     }
@@ -181,22 +219,33 @@ impl WordApp {
     pub(super) fn notify_material_diagnostic(&mut self, diagnostic: MaterialDiagnostic) {
         self.notify_error(MaterialFailure::Evidence(diagnostic.clone()).legacy_message());
         self.material_notice = Some(MaterialNotice {
-            diagnostic, comparison_open: false, technical_open: false, raw_mode: false,
+            diagnostic,
+            comparison_open: false,
+            technical_open: false,
+            raw_mode: false,
         });
     }
 
     fn daily_limit_action_applies(&self) -> bool {
-        let Some(notice) = &self.daily_limit_notice else { return false; };
+        let Some(notice) = &self.daily_limit_notice else {
+            return false;
+        };
         let day = today();
         let count = self.progress.ai_calls.get(&day).copied().unwrap_or(0);
         let limit = self.progress.settings.ai_daily_limit;
-        notice.day == day && notice.text == self.message
+        notice.day == day
+            && notice.text == self.message
             && self.notification_attention == self.message
-            && self.fatal.is_none() && limit < 1000 && count < 1000 && count >= limit
+            && self.fatal.is_none()
+            && limit < 1000
+            && count < 1000
+            && count >= limit
     }
 
     fn open_daily_limit_guidance(&mut self) {
-        if self.qwen_settings.is_some() || !self.daily_limit_action_applies() { return; }
+        if self.qwen_settings.is_some() || !self.daily_limit_action_applies() {
+            return;
+        }
         self.page = Page::Settings;
         self.settings_section = settings_ui::SettingsSection::Connection;
         self.codex_path_guidance = false;
@@ -207,7 +256,9 @@ impl WordApp {
     }
 
     pub(super) fn open_codex_path_guidance(&mut self) {
-        if self.qwen_settings.is_some() { return; }
+        if self.qwen_settings.is_some() {
+            return;
+        }
         self.page = Page::Settings;
         self.daily_limit_guidance = false;
         self.daily_limit_focus_pending = false;
@@ -233,11 +284,21 @@ impl WordApp {
                 RichText::new(label)
             };
             let summary = if let Some(notice) = &self.material_notice {
-                format!("{}。{}", material_title(notice.diagnostic.stage), material_reason(notice.diagnostic.cause))
+                format!(
+                    "{}。{}",
+                    material_title(notice.diagnostic.stage),
+                    material_reason(notice.diagnostic.cause)
+                )
             } else if detail.is_empty() {
                 "通知はない".to_owned()
             } else {
-                detail.lines().next().unwrap_or_default().chars().take(180).collect()
+                detail
+                    .lines()
+                    .next()
+                    .unwrap_or_default()
+                    .chars()
+                    .take(180)
+                    .collect()
             };
             if ui
                 .add(crate::app::controls::Button::new(label).min_size(egui::vec2(80.0, 30.0)))
@@ -278,17 +339,23 @@ impl WordApp {
         let alerts = [
             self.fatal.as_deref().unwrap_or_default(),
             if missing_codex_path(&self.message)
-                || (!self.message.is_empty() && (self.message == self.notification_error
-                    || self.message == self.notification_attention)) {
+                || (!self.message.is_empty()
+                    && (self.message == self.notification_error
+                        || self.message == self.notification_attention))
+            {
                 self.message.as_str()
-            } else { "" },
+            } else {
+                ""
+            },
             self.font_notice.as_str(),
         ];
         if self.pending.is_none() && !self.batch_running {
             // Removing a warning (e.g. by copying text) is not a new alert.
             for (alert, seen) in alerts.into_iter().zip(&mut self.last_notification_alerts) {
                 if alert != seen {
-                    if !alert.is_empty() { self.notification_open = true; }
+                    if !alert.is_empty() {
+                        self.notification_open = true;
+                    }
                     *seen = alert.to_owned();
                 }
             }
@@ -519,10 +586,16 @@ impl WordApp {
                     let pos =
                         egui::pos2(rect.left(), rect.center().y - galley.mesh_bounds.center().y);
                     ui.painter().galley(pos, galley, ui.visuals().text_color());
-                    if ui.add_enabled(self.qwen_settings.is_none(),
-                        crate::app::controls::Button::new("設定の実行ファイル欄へ"))
-                        .on_disabled_hover_text("先にQwen接続を保存するか、Qwen編集をキャンセルしてください。")
-                        .clicked() {
+                    if ui
+                        .add_enabled(
+                            self.qwen_settings.is_none(),
+                            crate::app::controls::Button::new("設定の実行ファイル欄へ"),
+                        )
+                        .on_disabled_hover_text(
+                            "先にQwen接続を保存するか、Qwen編集をキャンセルしてください。",
+                        )
+                        .clicked()
+                    {
                         self.open_codex_path_guidance();
                     }
                 });
@@ -562,20 +635,27 @@ mod tests {
     use wordweave5::run_journal::{Outcome, RunRecord};
 
     fn feedback_ui_draw(
-        ctx: &egui::Context, app: &mut WordApp, size: egui::Vec2, events: Vec<egui::Event>,
+        ctx: &egui::Context,
+        app: &mut WordApp,
+        size: egui::Vec2,
+        events: Vec<egui::Event>,
     ) -> egui::FullOutput {
-        ctx.run(egui::RawInput {
-            screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, size)),
-            events,
-            ..Default::default()
-        }, |ctx| app.update_ui(ctx))
+        ctx.run(
+            egui::RawInput {
+                screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, size)),
+                events,
+                ..Default::default()
+            },
+            |ctx| app.update_ui(ctx),
+        )
     }
 
     fn feedback_ui_visible_text(output: &egui::FullOutput, label: &str) -> Option<egui::Rect> {
         fn find(shape: &egui::Shape, label: &str) -> Option<egui::Rect> {
             match shape {
-                egui::Shape::Text(text) if text.galley.text() == label =>
-                    Some(egui::Rect::from_min_size(text.pos, text.galley.size())),
+                egui::Shape::Text(text) if text.galley.text() == label => {
+                    Some(egui::Rect::from_min_size(text.pos, text.galley.size()))
+                }
                 egui::Shape::Vec(parts) => parts.iter().find_map(|part| find(part, label)),
                 _ => None,
             }
@@ -586,27 +666,60 @@ mod tests {
         })
     }
 
-    fn feedback_ui_click(ctx: &egui::Context, app: &mut WordApp, size: egui::Vec2, pos: egui::Pos2) -> egui::FullOutput {
-        feedback_ui_draw(ctx, app, size, vec![egui::Event::PointerMoved(pos), egui::Event::PointerButton {
-            pos, button: egui::PointerButton::Primary, pressed: true, modifiers: egui::Modifiers::NONE,
-        }]);
-        feedback_ui_draw(ctx, app, size, vec![egui::Event::PointerMoved(pos), egui::Event::PointerButton {
-            pos, button: egui::PointerButton::Primary, pressed: false, modifiers: egui::Modifiers::NONE,
-        }])
+    fn feedback_ui_click(
+        ctx: &egui::Context,
+        app: &mut WordApp,
+        size: egui::Vec2,
+        pos: egui::Pos2,
+    ) -> egui::FullOutput {
+        feedback_ui_draw(
+            ctx,
+            app,
+            size,
+            vec![
+                egui::Event::PointerMoved(pos),
+                egui::Event::PointerButton {
+                    pos,
+                    button: egui::PointerButton::Primary,
+                    pressed: true,
+                    modifiers: egui::Modifiers::NONE,
+                },
+            ],
+        );
+        feedback_ui_draw(
+            ctx,
+            app,
+            size,
+            vec![
+                egui::Event::PointerMoved(pos),
+                egui::Event::PointerButton {
+                    pos,
+                    button: egui::PointerButton::Primary,
+                    pressed: false,
+                    modifiers: egui::Modifiers::NONE,
+                },
+            ],
+        )
     }
 
     fn feedback_ui_diagnostic_line_visible(output: &egui::FullOutput, marker: &str) -> bool {
         fn found(shape: &egui::Shape, clip: egui::Rect, marker: &str) -> bool {
             match shape {
-                egui::Shape::Text(text) if text.galley.text().contains("結果") => text.galley.rows.iter().any(|row| {
-                    let row_text: String = row.glyphs.iter().map(|glyph| glyph.chr).collect();
-                    row_text.contains(marker) && clip.contains_rect(row.rect.translate(text.pos.to_vec2()))
-                }),
+                egui::Shape::Text(text) if text.galley.text().contains("結果") => {
+                    text.galley.rows.iter().any(|row| {
+                        let row_text: String = row.glyphs.iter().map(|glyph| glyph.chr).collect();
+                        row_text.contains(marker)
+                            && clip.contains_rect(row.rect.translate(text.pos.to_vec2()))
+                    })
+                }
                 egui::Shape::Vec(parts) => parts.iter().any(|part| found(part, clip, marker)),
                 _ => false,
             }
         }
-        output.shapes.iter().any(|shape| found(&shape.shape, shape.clip_rect, marker))
+        output
+            .shapes
+            .iter()
+            .any(|shape| found(&shape.shape, shape.clip_rect, marker))
     }
 
     #[test]
@@ -621,23 +734,48 @@ mod tests {
         let size = egui::vec2(820.0 / 1.6, 650.0 / 1.6);
         let screen = egui::Rect::from_min_size(egui::Pos2::ZERO, size);
         let mut output = feedback_ui_draw(&ctx, &mut app, size, vec![]);
-        for _ in 0..4 { output = feedback_ui_draw(&ctx, &mut app, size, vec![]); }
+        for _ in 0..4 {
+            output = feedback_ui_draw(&ctx, &mut app, size, vec![]);
+        }
         let window_id = egui::Id::new("notification-details-v2");
-        let window = ctx.memory(|memory| memory.area_rect(window_id)).expect("notification window");
-        assert!(screen.contains_rect(window), "whole quote Window escapes narrow screen: {window:?}");
-        let footer = feedback_ui_visible_text(&output, "詳細をコピー").expect("copy footer initially visible");
+        let window = ctx
+            .memory(|memory| memory.area_rect(window_id))
+            .expect("notification window");
+        assert!(
+            screen.contains_rect(window),
+            "whole quote Window escapes narrow screen: {window:?}"
+        );
+        let footer = feedback_ui_visible_text(&output, "詳細をコピー")
+            .expect("copy footer initially visible");
         assert!(window.contains_rect(footer) && screen.contains_rect(footer));
         let pointer = window.left_top() + egui::vec2(window.width() * 0.55, window.height() * 0.45);
         let mut reached_remedy = feedback_ui_diagnostic_line_visible(&output, "対処");
         for _ in 0..12 {
-            output = feedback_ui_draw(&ctx, &mut app, size, vec![egui::Event::PointerMoved(pointer), egui::Event::MouseWheel {
-                unit: egui::MouseWheelUnit::Point, delta: egui::vec2(0.0, -120.0), modifiers: egui::Modifiers::NONE,
-            }]);
+            output = feedback_ui_draw(
+                &ctx,
+                &mut app,
+                size,
+                vec![
+                    egui::Event::PointerMoved(pointer),
+                    egui::Event::MouseWheel {
+                        unit: egui::MouseWheelUnit::Point,
+                        delta: egui::vec2(0.0, -120.0),
+                        modifiers: egui::Modifiers::NONE,
+                    },
+                ],
+            );
             reached_remedy |= feedback_ui_diagnostic_line_visible(&output, "対処");
             let current = ctx.memory(|memory| memory.area_rect(window_id)).unwrap();
-            assert!(screen.contains_rect(current), "scroll moved whole quote Window offscreen: {current:?}");
-            let footer = feedback_ui_visible_text(&output, "詳細をコピー").expect("copy footer lost during scroll");
-            assert!(current.contains_rect(footer) && screen.contains_rect(footer), "copy footer clipped during scroll");
+            assert!(
+                screen.contains_rect(current),
+                "scroll moved whole quote Window offscreen: {current:?}"
+            );
+            let footer = feedback_ui_visible_text(&output, "詳細をコピー")
+                .expect("copy footer lost during scroll");
+            assert!(
+                current.contains_rect(footer) && screen.contains_rect(footer),
+                "copy footer clipped during scroll"
+            );
         }
         assert!(reached_remedy, "real scroll never exposed the remedy line");
         let footer = feedback_ui_visible_text(&output, "詳細をコピー").unwrap();
@@ -645,7 +783,10 @@ mod tests {
         assert!(copied.platform_output.commands.iter().any(|command|
             matches!(command, egui::OutputCommand::CopyText(text) if text == &diagnostic)),
             "copy action did not emit the exact diagnostic");
-        assert_eq!(serde_json::to_value(&app.progress).unwrap(), before_progress);
+        assert_eq!(
+            serde_json::to_value(&app.progress).unwrap(),
+            before_progress
+        );
         assert_eq!(serde_json::to_value(&app.deck).unwrap(), before_deck);
         assert!(app.pending.is_none());
         drop(app);
@@ -654,7 +795,10 @@ mod tests {
 
     #[test]
     fn feedback_ui_daily_limit_real_click_reaches_visible_slider_once_at_both_scales() {
-        for size in [egui::vec2(1120.0, 850.0), egui::vec2(820.0 / 1.6, 650.0 / 1.6)] {
+        for size in [
+            egui::vec2(1120.0, 850.0),
+            egui::vec2(820.0 / 1.6, 650.0 / 1.6),
+        ] {
             let (ctx, mut app, root) = super::super::harness_tests::fixture();
             app.progress.settings.ai_daily_limit = 1;
             app.progress.ai_calls.insert(today(), 1);
@@ -666,26 +810,46 @@ mod tests {
             let before = serde_json::to_value(&app.progress).unwrap();
             assert!(!app.reserve_generation());
             let mut output = feedback_ui_draw(&ctx, &mut app, size, vec![]);
-            for _ in 0..8 { output = feedback_ui_draw(&ctx, &mut app, size, vec![]); }
+            for _ in 0..8 {
+                output = feedback_ui_draw(&ctx, &mut app, size, vec![]);
+            }
             let action = feedback_ui_visible_text(&output, "生成・添削の上限設定へ")
                 .expect("eligible refusal action is visible");
             feedback_ui_click(&ctx, &mut app, size, action.center());
             assert!(app.page == Page::Settings);
-            assert_eq!(app.settings_section, settings_ui::SettingsSection::Connection);
+            assert_eq!(
+                app.settings_section,
+                settings_ui::SettingsSection::Connection
+            );
             assert!(app.daily_limit_guidance && !app.notification_open);
             assert_eq!(serde_json::to_value(&app.progress).unwrap(), before);
             assert_eq!(app.answer, "未送信の学習回答");
             assert_eq!(app.progress.chats[0].draft, "未送信の会話入力");
             assert_eq!(app.settings_editor.draft.ai_daily_limit, 800);
-            for _ in 0..8 { feedback_ui_draw(&ctx, &mut app, size, vec![]); }
-            let (rect, id, clip, enabled): (egui::Rect, egui::Id, egui::Rect, bool) = ctx.data(|data|
-                data.get_temp(egui::Id::new("feedback-ui-daily-limit-slider")).expect("limit slider drawn"));
-            assert!(enabled && clip.contains(rect.center()), "limit slider is offscreen or disabled: {rect:?} {clip:?}");
-            assert!(!app.daily_limit_focus_pending, "one-time focus remains pending after visible slider");
+            for _ in 0..8 {
+                feedback_ui_draw(&ctx, &mut app, size, vec![]);
+            }
+            let (rect, id, clip, enabled): (egui::Rect, egui::Id, egui::Rect, bool) =
+                ctx.data(|data| {
+                    data.get_temp(egui::Id::new("feedback-ui-daily-limit-slider"))
+                        .expect("limit slider drawn")
+                });
+            assert!(
+                enabled && clip.contains(rect.center()),
+                "limit slider is offscreen or disabled: {rect:?} {clip:?}"
+            );
+            assert!(
+                !app.daily_limit_focus_pending,
+                "one-time focus remains pending after visible slider"
+            );
             assert_eq!(ctx.memory(|memory| memory.focused()), Some(id));
             ctx.memory_mut(|memory| memory.surrender_focus(id));
             feedback_ui_draw(&ctx, &mut app, size, vec![]);
-            assert_ne!(ctx.memory(|memory| memory.focused()), Some(id), "guidance stole focus twice");
+            assert_ne!(
+                ctx.memory(|memory| memory.focused()),
+                Some(id),
+                "guidance stole focus twice"
+            );
             assert_eq!(serde_json::to_value(&app.progress).unwrap(), before);
             drop(app);
             std::fs::remove_dir_all(root).unwrap();
@@ -702,19 +866,28 @@ mod tests {
         app.progress.chats[0].draft = "会話下書き".into();
         let before = serde_json::to_value(&app.progress).unwrap();
         app.launch_ai(0);
-        assert!(app.daily_limit_notice.is_some(), "learning refusal did not use daily-limit notice");
+        assert!(
+            app.daily_limit_notice.is_some(),
+            "learning refusal did not use daily-limit notice"
+        );
         assert_eq!(serde_json::to_value(&app.progress).unwrap(), before);
         assert_eq!(app.answer, "学習解答の下書き");
         assert_eq!(app.progress.chats[0].draft, "会話下書き");
         assert!(app.pending.is_none());
         let size = egui::vec2(1120.0, 850.0);
         let mut output = feedback_ui_draw(&ctx, &mut app, size, vec![]);
-        for _ in 0..8 { output = feedback_ui_draw(&ctx, &mut app, size, vec![]); }
+        for _ in 0..8 {
+            output = feedback_ui_draw(&ctx, &mut app, size, vec![]);
+        }
         let stale_action = feedback_ui_visible_text(&output, "生成・添削の上限設定へ")
-            .expect("learning refusal action visible").center();
+            .expect("learning refusal action visible")
+            .center();
         app.progress.ai_calls.insert(today(), 0);
         feedback_ui_click(&ctx, &mut app, size, stale_action);
-        assert!(!app.daily_limit_guidance, "stale click navigated after count changed");
+        assert!(
+            !app.daily_limit_guidance,
+            "stale click navigated after count changed"
+        );
         assert!(app.page == Page::Study);
         assert_eq!(app.progress.ai_calls[&today()], 0);
         assert_eq!(app.answer, "学習解答の下書き");
@@ -730,23 +903,39 @@ mod tests {
         app.progress.ai_calls.insert(today(), 1);
         app.begin_color_editor();
         app.color_editor.as_mut().unwrap().draft.page = wordweave5::store::TintChoice {
-            rgb: [0, 0, 255], depth: 100,
+            rgb: [0, 0, 255],
+            depth: 100,
         };
         let before = serde_json::to_value(&app.progress).unwrap();
         assert!(!app.reserve_generation());
         app.open_daily_limit_guidance();
         assert!(app.daily_limit_guidance && app.daily_limit_focus_pending);
         let size = egui::vec2(1120.0, 850.0);
-        for _ in 0..8 { feedback_ui_draw(&ctx, &mut app, size, vec![]); }
-        let (_, _, clip, enabled): (egui::Rect, egui::Id, egui::Rect, bool) = ctx.data(|data|
-            data.get_temp(egui::Id::new("feedback-ui-daily-limit-slider")).expect("guided slider drawn"));
-        assert!(!enabled && clip.is_positive(), "palette preview must disable the limit editor");
-        assert!(app.daily_limit_focus_pending, "disabled slider consumed the one-time focus");
+        for _ in 0..8 {
+            feedback_ui_draw(&ctx, &mut app, size, vec![]);
+        }
+        let (_, _, clip, enabled): (egui::Rect, egui::Id, egui::Rect, bool) = ctx.data(|data| {
+            data.get_temp(egui::Id::new("feedback-ui-daily-limit-slider"))
+                .expect("guided slider drawn")
+        });
+        assert!(
+            !enabled && clip.is_positive(),
+            "palette preview must disable the limit editor"
+        );
+        assert!(
+            app.daily_limit_focus_pending,
+            "disabled slider consumed the one-time focus"
+        );
         assert_eq!(serde_json::to_value(&app.progress).unwrap(), before);
         app.cancel_color_editor();
-        for _ in 0..8 { feedback_ui_draw(&ctx, &mut app, size, vec![]); }
-        let (rect, id, clip, enabled): (egui::Rect, egui::Id, egui::Rect, bool) = ctx.data(|data|
-            data.get_temp(egui::Id::new("feedback-ui-daily-limit-slider")).unwrap());
+        for _ in 0..8 {
+            feedback_ui_draw(&ctx, &mut app, size, vec![]);
+        }
+        let (rect, id, clip, enabled): (egui::Rect, egui::Id, egui::Rect, bool) =
+            ctx.data(|data| {
+                data.get_temp(egui::Id::new("feedback-ui-daily-limit-slider"))
+                    .unwrap()
+            });
         assert!(enabled && clip.contains(rect.center()));
         assert!(!app.daily_limit_focus_pending);
         assert_eq!(ctx.memory(|memory| memory.focused()), Some(id));
@@ -773,7 +962,10 @@ mod tests {
         for shape in &output.shapes {
             super::super::harness_tests::shape_text(&shape.shape, &mut drawn);
         }
-        assert!(drawn.contains("生成・添削の上限設定へ"), "eligible daily refusal needs a visible action: {drawn}");
+        assert!(
+            drawn.contains("生成・添削の上限設定へ"),
+            "eligible daily refusal needs a visible action: {drawn}"
+        );
         assert_eq!(serde_json::to_value(&app.progress).unwrap(), before);
         assert_eq!(app.answer, "未送信の学習回答");
         assert_eq!(app.progress.chats[0].draft, "未送信の会話入力");
@@ -807,7 +999,10 @@ mod tests {
             for shape in &output.shapes {
                 super::super::harness_tests::shape_text(&shape.shape, &mut drawn);
             }
-            assert!(!drawn.contains("生成・添削の上限設定へ"), "stale notice gained action: {drawn}");
+            assert!(
+                !drawn.contains("生成・添削の上限設定へ"),
+                "stale notice gained action: {drawn}"
+            );
         }
         drop(app);
         std::fs::remove_dir_all(root).unwrap();
@@ -840,7 +1035,9 @@ mod tests {
         .unwrap();
         app.tick(ctx);
         assert!(app.pending.is_none(), "recovery result must be consumed");
-        let _ = ctx.run(egui::RawInput::default(), |ctx| app.notification_window(ctx));
+        let _ = ctx.run(egui::RawInput::default(), |ctx| {
+            app.notification_window(ctx)
+        });
     }
 
     #[test]
@@ -866,27 +1063,68 @@ mod tests {
 
                 deliver_recovery(&ctx, &mut app, outcome, response);
                 let detail = app.notification_text();
-                assert!(detail.contains(outcome.label()), "{outcome:?} {response:?}: {detail}");
-                assert!(detail.contains("教材・会話には自動反映していない"), "{detail}");
-                assert!(!detail.contains("合成の秘密本文"), "response must not be copied into notification: {detail}");
-                assert_eq!(app.notification_open, !completed_with_body, "{outcome:?} {response:?}: {detail}");
-                assert!(!app.notification_is_error(), "a recovery result is not a red error: {detail}");
+                assert!(
+                    detail.contains(outcome.label()),
+                    "{outcome:?} {response:?}: {detail}"
+                );
+                assert!(
+                    detail.contains("教材・会話には自動反映していない"),
+                    "{detail}"
+                );
+                assert!(
+                    !detail.contains("合成の秘密本文"),
+                    "response must not be copied into notification: {detail}"
+                );
+                assert_eq!(
+                    app.notification_open, !completed_with_body,
+                    "{outcome:?} {response:?}: {detail}"
+                );
+                assert!(
+                    !app.notification_is_error(),
+                    "a recovery result is not a red error: {detail}"
+                );
                 if has_body {
-                    assert!(detail.contains("実行記録で確認できる"), "{outcome:?}: {detail}");
+                    assert!(
+                        detail.contains("実行記録で確認できる"),
+                        "{outcome:?}: {detail}"
+                    );
                     if outcome != Outcome::Completed {
-                        assert!(detail.contains("完了") && detail.contains("確認できていない"), "{outcome:?}: {detail}");
+                        assert!(
+                            detail.contains("完了") && detail.contains("確認できていない"),
+                            "{outcome:?}: {detail}"
+                        );
                     }
                 } else {
-                    assert!(detail.contains("本文") && detail.contains("取得できていない"), "{outcome:?}: {detail}");
-                    assert!(!detail.contains("本文は実行記録で確認できる"), "{outcome:?}: {detail}");
+                    assert!(
+                        detail.contains("本文") && detail.contains("取得できていない"),
+                        "{outcome:?}: {detail}"
+                    );
+                    assert!(
+                        !detail.contains("本文は実行記録で確認できる"),
+                        "{outcome:?}: {detail}"
+                    );
                     if outcome == Outcome::Interrupted {
-                        assert!(detail.contains("中断") && detail.contains("完成した本文"), "{detail}");
+                        assert!(
+                            detail.contains("中断") && detail.contains("完成した本文"),
+                            "{detail}"
+                        );
                     }
                 }
-                assert_eq!(serde_json::to_value(&app.progress).unwrap(), progress, "learning and chat data changed");
-                assert_eq!(serde_json::to_value(&app.deck).unwrap(), deck, "registered material changed");
+                assert_eq!(
+                    serde_json::to_value(&app.progress).unwrap(),
+                    progress,
+                    "learning and chat data changed"
+                );
+                assert_eq!(
+                    serde_json::to_value(&app.deck).unwrap(),
+                    deck,
+                    "registered material changed"
+                );
                 assert_eq!(app.answer, "未完了の回答");
-                assert!(!app.batch_running && app.pending.is_none(), "recovery must not start generation");
+                assert!(
+                    !app.batch_running && app.pending.is_none(),
+                    "recovery must not start generation"
+                );
                 drop(app);
                 std::fs::remove_dir_all(root).unwrap();
             }
@@ -900,15 +1138,26 @@ mod tests {
         assert!(app.notification_open);
         assert!(!app.notification_attention.is_empty());
         app.notification_open = false;
-        let _ = ctx.run(egui::RawInput::default(), |ctx| app.notification_window(ctx));
-        assert!(!app.notification_open, "dismissal must hold without a new recovery");
+        let _ = ctx.run(egui::RawInput::default(), |ctx| {
+            app.notification_window(ctx)
+        });
+        assert!(
+            !app.notification_open,
+            "dismissal must hold without a new recovery"
+        );
         deliver_recovery(&ctx, &mut app, Outcome::Interrupted, None);
-        assert!(app.notification_open, "the same interrupted result is a new alert");
+        assert!(
+            app.notification_open,
+            "the same interrupted result is a new alert"
+        );
 
         app.notification_open = false;
         app.notify_error("以前の失敗".into());
         deliver_recovery(&ctx, &mut app, Outcome::Completed, Some("保存済み本文"));
-        assert!(!app.notification_open, "successful recovery must not open a new alert");
+        assert!(
+            !app.notification_open,
+            "successful recovery must not open a new alert"
+        );
         assert!(app.notification_error.is_empty());
         assert!(app.notification_attention.is_empty());
         assert!(!app.notification_is_error());
@@ -927,10 +1176,15 @@ mod tests {
         let (ctx, mut app, root) = super::super::harness_tests::fixture();
         app.storage = None;
         deliver_recovery(&ctx, &mut app, Outcome::Completed, Some("保存済み本文"));
-        assert!(app.notification_is_error(), "later scan error must be visible");
+        assert!(
+            app.notification_is_error(),
+            "later scan error must be visible"
+        );
         assert!(app.notification_open);
         assert!(app.notification_text().contains("保存先がありません"));
-        assert!(!app.notification_text().contains("本文は実行記録で確認できる"));
+        assert!(!app
+            .notification_text()
+            .contains("本文は実行記録で確認できる"));
         drop(app);
         std::fs::remove_dir_all(root).unwrap();
     }
@@ -944,17 +1198,29 @@ mod tests {
         for _ in 0..2 {
             assert!(!app.reserve_generation());
             assert!(app.message.contains("本日の生成上限"));
-            let _ = ctx.run(egui::RawInput::default(), |ctx| app.notification_window(ctx));
+            let _ = ctx.run(egui::RawInput::default(), |ctx| {
+                app.notification_window(ctx)
+            });
             assert!(app.notification_open, "a rejected request must explain why");
-            assert!(!app.notification_is_error(), "a quota limit is not an error");
+            assert!(
+                !app.notification_is_error(),
+                "a quota limit is not an error"
+            );
             app.notification_open = false;
-            let _ = ctx.run(egui::RawInput::default(), |ctx| app.notification_window(ctx));
-            assert!(!app.notification_open, "dismissal lasts until another attempt");
+            let _ = ctx.run(egui::RawInput::default(), |ctx| {
+                app.notification_window(ctx)
+            });
+            assert!(
+                !app.notification_open,
+                "dismissal lasts until another attempt"
+            );
         }
         assert_eq!(serde_json::to_value(&app.progress).unwrap(), before);
         assert!(app.pending.is_none());
         app.message = "発言をコピーした。".into();
-        let _ = ctx.run(egui::RawInput::default(), |ctx| app.notification_window(ctx));
+        let _ = ctx.run(egui::RawInput::default(), |ctx| {
+            app.notification_window(ctx)
+        });
         assert!(!app.notification_open);
         drop(app);
         std::fs::remove_dir_all(root).unwrap();
@@ -965,7 +1231,9 @@ mod tests {
         let (ctx, mut app, root) = super::super::harness_tests::fixture();
         app.begin_batch(vec![]);
         assert!(app.message.contains("すべて自動生成・登録済み"));
-        let _ = ctx.run(egui::RawInput::default(), |ctx| app.notification_window(ctx));
+        let _ = ctx.run(egui::RawInput::default(), |ctx| {
+            app.notification_window(ctx)
+        });
         assert!(app.notification_open);
         assert!(!app.batch_running && app.pending.is_none());
         assert!(!app.notification_is_error());
@@ -976,33 +1244,60 @@ mod tests {
     #[test]
     fn notification_information_does_not_open_but_errors_do() {
         let (ctx, mut app, root) = super::super::harness_tests::fixture();
-        for message in ["発言をクリップボードへコピーした。", "設定を保存した。", "接続成功"] {
+        for message in [
+            "発言をクリップボードへコピーした。",
+            "設定を保存した。",
+            "接続成功",
+        ] {
             app.message = message.into();
-            let _ = ctx.run(egui::RawInput::default(), |ctx| app.notification_window(ctx));
-            assert!(!app.notification_open, "information must not interrupt: {message}");
+            let _ = ctx.run(egui::RawInput::default(), |ctx| {
+                app.notification_window(ctx)
+            });
+            assert!(
+                !app.notification_open,
+                "information must not interrupt: {message}"
+            );
         }
         app.message = "接続に失敗した。".into();
         app.notification_error = app.message.clone();
-        let _ = ctx.run(egui::RawInput::default(), |ctx| app.notification_window(ctx));
+        let _ = ctx.run(egui::RawInput::default(), |ctx| {
+            app.notification_window(ctx)
+        });
         assert!(app.notification_open);
         app.notification_open = false;
-        let _ = ctx.run(egui::RawInput::default(), |ctx| app.notification_window(ctx));
-        assert!(!app.notification_open, "dismissed alert must stay dismissed");
+        let _ = ctx.run(egui::RawInput::default(), |ctx| {
+            app.notification_window(ctx)
+        });
+        assert!(
+            !app.notification_open,
+            "dismissed alert must stay dismissed"
+        );
         app.notify_error("接続に失敗した。".into());
-        let _ = ctx.run(egui::RawInput::default(), |ctx| app.notification_window(ctx));
-        assert!(app.notification_open, "a new failure must reopen even with the same text");
+        let _ = ctx.run(egui::RawInput::default(), |ctx| {
+            app.notification_window(ctx)
+        });
+        assert!(
+            app.notification_open,
+            "a new failure must reopen even with the same text"
+        );
         app.notification_open = false;
         app.notify_warning("実行記録の一部を読み込めなかった。");
-        let _ = ctx.run(egui::RawInput::default(), |ctx| app.notification_window(ctx));
+        let _ = ctx.run(egui::RawInput::default(), |ctx| {
+            app.notification_window(ctx)
+        });
         assert!(app.notification_open);
         assert!(!app.notification_is_error());
         app.notification_open = false;
-        let _ = ctx.run(egui::RawInput::default(), |ctx| app.notification_window(ctx));
+        let _ = ctx.run(egui::RawInput::default(), |ctx| {
+            app.notification_window(ctx)
+        });
         assert!(!app.notification_open);
         // Informational details remain available when explicitly opened.
         app.message = "発言をクリップボードへコピーした。".into();
         app.notification_open = true;
-        let _ = ctx.run(egui::RawInput::default(), |ctx| app.notification_window(ctx));
+        let _ = ctx.run(egui::RawInput::default(), |ctx| {
+            app.notification_window(ctx)
+        });
         assert!(app.notification_open);
         drop(app);
         std::fs::remove_dir_all(root).unwrap();
@@ -1012,7 +1307,9 @@ mod tests {
     fn notification_failure_warning_and_fatal_are_not_lost_or_reopened_by_copy() {
         let (ctx, mut app, root) = super::super::harness_tests::fixture();
         let frame = |app: &mut WordApp| {
-            let _ = ctx.run(egui::RawInput::default(), |ctx| app.notification_window(ctx));
+            let _ = ctx.run(egui::RawInput::default(), |ctx| {
+                app.notification_window(ctx)
+            });
         };
         app.notify_result(Err("保存に失敗した。".into()));
         app.batch_running = true;
@@ -1035,7 +1332,10 @@ mod tests {
         app.notification_open = false;
         app.message = "発言をコピーした。".into();
         frame(&mut app);
-        assert!(!app.notification_open, "a copy must not reopen the same fatal alert");
+        assert!(
+            !app.notification_open,
+            "a copy must not reopen the same fatal alert"
+        );
         app.fatal = None;
         app.font_notice = "フォントを代替した。".into();
         frame(&mut app);
@@ -1253,70 +1553,146 @@ mod tests {
 
     #[test]
     fn material_quote_failure_opens_actual_notice_without_replacing_draft_or_learning_data() {
-        use wordweave5::{chat::Conversation, execution::Execution, material::{Mode, Request}};
+        use wordweave5::{
+            chat::Conversation,
+            execution::Execution,
+            material::{Mode, Request},
+        };
         for retain_existing_draft in [false, true] {
             let (ctx, mut app, root) = super::super::harness_tests::fixture();
             let old = app.deck[0].clone();
             let mut conversation = Conversation::new();
-            conversation.complete("Could this be clearer?".into(), "Use **improve clarity** in the answer.".into(), Execution::default()).unwrap();
+            conversation
+                .complete(
+                    "Could this be clearer?".into(),
+                    "Use **improve clarity** in the answer.".into(),
+                    Execution::default(),
+                )
+                .unwrap();
             conversation.exchanges[0].for_material = true;
-            let request = Request::new(&conversation, &old.base, Mode::Correct, Some(old.clone())).unwrap();
+            let request =
+                Request::new(&conversation, &old.base, Mode::Correct, Some(old.clone())).unwrap();
             let mut candidate = old;
             candidate.usage = "合成の訂正案".into();
-            let response = |quote: &str| serde_json::json!({"entry":candidate,"reasons":[{
+            let response = |quote: &str| {
+                serde_json::json!({"entry":candidate,"reasons":[{
                 "path":"/usage","reason":"合成回答に基づく訂正", "quotes":[{"exchange_index":0,"role":"assistant","quote":quote}]
-            }]}).to_string();
+            }]}).to_string()
+            };
             app.progress.material_draft = if retain_existing_draft {
-                Some(request.build_response(&response("**improve clarity**")).unwrap())
-            } else { None };
-            let error = request.build_response(&response("Use improve clarity in the answer.")).unwrap_err();
+                Some(
+                    request
+                        .build_response(&response("**improve clarity**"))
+                        .unwrap(),
+                )
+            } else {
+                None
+            };
+            let error = request
+                .build_response(&response("Use improve clarity in the answer."))
+                .unwrap_err();
             let before_progress = serde_json::to_value(&app.progress).unwrap();
             let before_deck = serde_json::to_value(&app.deck).unwrap();
             let before_open = app.chat_material_open;
             let before_same_base = app.material_same_base;
             let (tx, rx) = std::sync::mpsc::channel();
-            app.pending = Some(Pending { kind: Activity::Material, key: app.key(), rx, cancel: None });
+            app.pending = Some(Pending {
+                kind: Activity::Material,
+                key: app.key(),
+                rx,
+                cancel: None,
+            });
             tx.send(Err(error.clone())).unwrap();
             app.tick(&ctx);
             assert!(app.pending.is_none());
             assert_eq!(app.message, error);
             assert!(app.notification_is_error());
-            let _ = ctx.run(egui::RawInput::default(), |ctx| app.notification_window(ctx));
+            let _ = ctx.run(egui::RawInput::default(), |ctx| {
+                app.notification_window(ctx)
+            });
             assert!(app.notification_open, "教材案の拒否理由が自動表示される");
-            for expected in ["往復 1", "Codex（AIの回答）", "AIが返した引用", "作成要求時の元発言"] {
-                assert!(app.notification_text().contains(expected), "{expected}: {}", app.notification_text());
+            for expected in [
+                "往復 1",
+                "Codex（AIの回答）",
+                "AIが返した引用",
+                "作成要求時の元発言",
+            ] {
+                assert!(
+                    app.notification_text().contains(expected),
+                    "{expected}: {}",
+                    app.notification_text()
+                );
             }
-            assert_eq!(serde_json::to_value(&app.progress).unwrap(), before_progress, "教材案・学習記録・会話の保持");
-            assert_eq!(serde_json::to_value(&app.deck).unwrap(), before_deck, "既存教材の保持");
-            assert_eq!(app.chat_material_open, before_open, "案成功の表示状態にしない");
-            assert_eq!(app.material_same_base, before_same_base, "登録選択を変更しない");
+            assert_eq!(
+                serde_json::to_value(&app.progress).unwrap(),
+                before_progress,
+                "教材案・学習記録・会話の保持"
+            );
+            assert_eq!(
+                serde_json::to_value(&app.deck).unwrap(),
+                before_deck,
+                "既存教材の保持"
+            );
+            assert_eq!(
+                app.chat_material_open, before_open,
+                "案成功の表示状態にしない"
+            );
+            assert_eq!(
+                app.material_same_base, before_same_base,
+                "登録選択を変更しない"
+            );
             drop(app);
             std::fs::remove_dir_all(root).unwrap();
         }
     }
 
     fn u5_diagnostic(
-        baseline: &wordweave5::model::Entry, original: &str, quote: &str,
+        baseline: &wordweave5::model::Entry,
+        original: &str,
+        quote: &str,
     ) -> MaterialDiagnostic {
-        use wordweave5::{chat::Conversation, execution::Execution, material::{Mode, Request}};
+        use wordweave5::{
+            chat::Conversation,
+            execution::Execution,
+            material::{Mode, Request},
+        };
         let mut conversation = Conversation::new();
-        conversation.complete("合成の質問".into(), original.into(), Execution::default()).unwrap();
+        conversation
+            .complete("合成の質問".into(), original.into(), Execution::default())
+            .unwrap();
         conversation.exchanges[0].for_material = true;
-        let request = Request::new(&conversation, &baseline.base, Mode::Correct, Some(baseline.clone())).unwrap();
+        let request = Request::new(
+            &conversation,
+            &baseline.base,
+            Mode::Correct,
+            Some(baseline.clone()),
+        )
+        .unwrap();
         let mut candidate = baseline.clone();
         candidate.usage = "合成の変更".into();
         let response = serde_json::json!({"entry":candidate,"reasons":[{"path":"/usage",
-            "reason":"合成理由","quotes":[{"exchange_index":0,"role":"assistant","quote":quote}]}]}).to_string();
+            "reason":"合成理由","quotes":[{"exchange_index":0,"role":"assistant","quote":quote}]}]})
+        .to_string();
         match request.build_response_detailed(&response).unwrap_err() {
             MaterialFailure::Evidence(detail) => detail,
             other => panic!("expected evidence failure, got {other:?}"),
         }
     }
 
-    fn u5_draw_notice(ctx: &egui::Context, app: &mut WordApp, size: egui::Vec2,
-        events: Vec<egui::Event>) -> egui::FullOutput {
-        ctx.run(egui::RawInput { screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, size)),
-            events, ..Default::default() }, |ctx| app.notification_window(ctx))
+    fn u5_draw_notice(
+        ctx: &egui::Context,
+        app: &mut WordApp,
+        size: egui::Vec2,
+        events: Vec<egui::Event>,
+    ) -> egui::FullOutput {
+        ctx.run(
+            egui::RawInput {
+                screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, size)),
+                events,
+                ..Default::default()
+            },
+            |ctx| app.notification_window(ctx),
+        )
     }
 
     fn u5_notice_text(output: &egui::FullOutput) -> String {
@@ -1327,12 +1703,30 @@ mod tests {
         text
     }
 
-    fn u5_click_notice(ctx: &egui::Context, app: &mut WordApp, size: egui::Vec2,
-        pos: egui::Pos2) -> egui::FullOutput {
-        let event = |pressed| egui::Event::PointerButton { pos,
-            button: egui::PointerButton::Primary, pressed, modifiers: egui::Modifiers::NONE };
-        u5_draw_notice(ctx, app, size, vec![egui::Event::PointerMoved(pos), event(true)]);
-        u5_draw_notice(ctx, app, size, vec![egui::Event::PointerMoved(pos), event(false)])
+    fn u5_click_notice(
+        ctx: &egui::Context,
+        app: &mut WordApp,
+        size: egui::Vec2,
+        pos: egui::Pos2,
+    ) -> egui::FullOutput {
+        let event = |pressed| egui::Event::PointerButton {
+            pos,
+            button: egui::PointerButton::Primary,
+            pressed,
+            modifiers: egui::Modifiers::NONE,
+        };
+        u5_draw_notice(
+            ctx,
+            app,
+            size,
+            vec![egui::Event::PointerMoved(pos), event(true)],
+        );
+        u5_draw_notice(
+            ctx,
+            app,
+            size,
+            vec![egui::Event::PointerMoved(pos), event(false)],
+        )
     }
 
     fn u5_visible_row(output: &egui::FullOutput, marker: &str) -> bool {
@@ -1340,46 +1734,85 @@ mod tests {
             match shape {
                 egui::Shape::Text(text) => text.galley.rows.iter().any(|row| {
                     let row_text: String = row.glyphs.iter().map(|glyph| glyph.chr).collect();
-                    row_text.contains(marker) && clip.contains(row.rect.translate(text.pos.to_vec2()).center())
+                    row_text.contains(marker)
+                        && clip.contains(row.rect.translate(text.pos.to_vec2()).center())
                 }),
                 egui::Shape::Vec(parts) => parts.iter().any(|part| found(part, clip, marker)),
                 _ => false,
             }
         }
-        output.shapes.iter().any(|shape| found(&shape.shape, shape.clip_rect, marker))
+        output
+            .shapes
+            .iter()
+            .any(|shape| found(&shape.shape, shape.clip_rect, marker))
     }
 
-    fn u5_find_action(ctx: &egui::Context, app: &mut WordApp, size: egui::Vec2,
-        label: &str) -> egui::Rect {
+    fn u5_find_action(
+        ctx: &egui::Context,
+        app: &mut WordApp,
+        size: egui::Vec2,
+        label: &str,
+    ) -> egui::Rect {
         for _ in 0..30 {
             let output = u5_draw_notice(ctx, app, size, vec![]);
             if feedback_ui_visible_text(&output, label).is_some() {
                 // ScrollArea may still animate after the wheel event; click the settled position.
                 let mut settled = output;
-                for _ in 0..5 { settled = u5_draw_notice(ctx, app, size, vec![]); }
-                if let Some(rect) = feedback_ui_visible_text(&settled, label) { return rect; }
+                for _ in 0..5 {
+                    settled = u5_draw_notice(ctx, app, size, vec![]);
+                }
+                if let Some(rect) = feedback_ui_visible_text(&settled, label) {
+                    return rect;
+                }
             }
-            let window = ctx.memory(|memory| memory.area_rect(egui::Id::new("notification-details-material-v1")))
+            let window = ctx
+                .memory(|memory| {
+                    memory.area_rect(egui::Id::new("notification-details-material-v1"))
+                })
                 .expect("notice window");
-            let pointer = window.left_top() + egui::vec2(window.width() * 0.55, window.height() * 0.45);
-            u5_draw_notice(ctx, app, size, vec![egui::Event::PointerMoved(pointer),
-                egui::Event::MouseWheel { unit: egui::MouseWheelUnit::Point,
-                    delta: egui::vec2(0.0, -120.0), modifiers: egui::Modifiers::NONE }]);
+            let pointer =
+                window.left_top() + egui::vec2(window.width() * 0.55, window.height() * 0.45);
+            u5_draw_notice(
+                ctx,
+                app,
+                size,
+                vec![
+                    egui::Event::PointerMoved(pointer),
+                    egui::Event::MouseWheel {
+                        unit: egui::MouseWheelUnit::Point,
+                        delta: egui::vec2(0.0, -120.0),
+                        modifiers: egui::Modifiers::NONE,
+                    },
+                ],
+            );
         }
         panic!("notice action {label:?} did not become visible");
     }
 
     #[test]
     fn u5_typed_material_failure_through_pending_tick_preserves_draft_deck_and_ai_count() {
-        use wordweave5::{chat::Conversation, execution::Execution, material::{Mode, Request}};
+        use wordweave5::{
+            chat::Conversation,
+            execution::Execution,
+            material::{Mode, Request},
+        };
         let (ctx, mut app, root) = super::super::harness_tests::fixture();
         let original = "Use **improve clarity** in the answer.";
-        let diagnostic = u5_diagnostic(&app.deck[0], original, "Use improve clarity in the answer.");
+        let diagnostic =
+            u5_diagnostic(&app.deck[0], original, "Use improve clarity in the answer.");
         let mut conversation = Conversation::new();
-        conversation.complete("合成の質問".into(), original.into(), Execution::default()).unwrap();
+        conversation
+            .complete("合成の質問".into(), original.into(), Execution::default())
+            .unwrap();
         conversation.exchanges[0].for_material = true;
         let baseline = app.deck[0].clone();
-        let request = Request::new(&conversation, &baseline.base, Mode::Correct, Some(baseline.clone())).unwrap();
+        let request = Request::new(
+            &conversation,
+            &baseline.base,
+            Mode::Correct,
+            Some(baseline.clone()),
+        )
+        .unwrap();
         let mut candidate = baseline;
         candidate.usage = "保存済みの合成案".into();
         app.progress.material_draft = Some(request.build(candidate).unwrap());
@@ -1387,18 +1820,35 @@ mod tests {
         let before_deck = serde_json::to_value(&app.deck).unwrap();
         let before_calls = app.progress.ai_calls.clone();
         let (tx, rx) = std::sync::mpsc::channel();
-        app.pending = Some(Pending { kind: Activity::Material, key: app.key(), rx, cancel: None });
-        tx.send(Ok(AiResult::MaterialFailure(MaterialFailure::Evidence(diagnostic)))).unwrap();
+        app.pending = Some(Pending {
+            kind: Activity::Material,
+            key: app.key(),
+            rx,
+            cancel: None,
+        });
+        tx.send(Ok(AiResult::MaterialFailure(MaterialFailure::Evidence(
+            diagnostic,
+        ))))
+        .unwrap();
         app.tick(&ctx);
         assert!(app.pending.is_none());
         assert!(!app.chat_material_open && !app.material_same_base);
         assert!(app.material_notice.is_some());
         let mut output = u5_draw_notice(&ctx, &mut app, egui::vec2(1120.0, 850.0), vec![]);
-        for _ in 0..4 { output = u5_draw_notice(&ctx, &mut app, egui::vec2(1120.0, 850.0), vec![]); }
-        assert!(app.notification_open && u5_notice_text(&output).contains("教材案を作成できなかった"),
-            "open={}, payload={}, painted={:?}", app.notification_open,
-            app.material_notice.is_some(), u5_notice_text(&output));
-        assert_eq!(serde_json::to_value(&app.progress).unwrap(), before_progress);
+        for _ in 0..4 {
+            output = u5_draw_notice(&ctx, &mut app, egui::vec2(1120.0, 850.0), vec![]);
+        }
+        assert!(
+            app.notification_open && u5_notice_text(&output).contains("教材案を作成できなかった"),
+            "open={}, payload={}, painted={:?}",
+            app.notification_open,
+            app.material_notice.is_some(),
+            u5_notice_text(&output)
+        );
+        assert_eq!(
+            serde_json::to_value(&app.progress).unwrap(),
+            before_progress
+        );
         assert_eq!(serde_json::to_value(&app.deck).unwrap(), before_deck);
         assert_eq!(app.progress.ai_calls, before_calls);
         drop(app);
@@ -1411,8 +1861,16 @@ mod tests {
         let diagnostic = u5_diagnostic(&app.deck[0], "fixed **source**", "fixed source");
         let before = serde_json::to_value(&app.progress).unwrap();
         let (tx, rx) = std::sync::mpsc::channel();
-        app.pending = Some(Pending { kind: Activity::Material, key: "different selection".into(), rx, cancel: None });
-        tx.send(Ok(AiResult::MaterialFailure(MaterialFailure::Evidence(diagnostic)))).unwrap();
+        app.pending = Some(Pending {
+            kind: Activity::Material,
+            key: "different selection".into(),
+            rx,
+            cancel: None,
+        });
+        tx.send(Ok(AiResult::MaterialFailure(MaterialFailure::Evidence(
+            diagnostic,
+        ))))
+        .unwrap();
         app.tick(&ctx);
         assert!(app.pending.is_none() && app.material_notice.is_none());
         assert_eq!(serde_json::to_value(&app.progress).unwrap(), before);
@@ -1432,35 +1890,62 @@ mod tests {
         app.material_notice.as_mut().unwrap().raw_mode = true;
         app.notify_material_diagnostic(diagnostic.clone());
         let fresh = app.material_notice.as_ref().unwrap();
-        assert!(!fresh.comparison_open && !fresh.technical_open && !fresh.raw_mode,
-            "same-text re-notification must start collapsed in readable mode");
+        assert!(
+            !fresh.comparison_open && !fresh.technical_open && !fresh.raw_mode,
+            "same-text re-notification must start collapsed in readable mode"
+        );
         app.font_notice = "合成フォント警告".into();
         let mut output = u5_draw_notice(&ctx, &mut app, size, vec![]);
         let mut font_seen = false;
         for _ in 0..30 {
             output = u5_draw_notice(&ctx, &mut app, size, vec![]);
             font_seen |= u5_notice_text(&output).contains("合成フォント警告");
-            if font_seen { break; }
-            let window = ctx.memory(|m| m.area_rect(egui::Id::new("notification-details-material-v1"))).unwrap();
+            if font_seen {
+                break;
+            }
+            let window = ctx
+                .memory(|m| m.area_rect(egui::Id::new("notification-details-material-v1")))
+                .unwrap();
             let pointer = window.center();
-            u5_draw_notice(&ctx, &mut app, size, vec![egui::Event::PointerMoved(pointer),
-                egui::Event::MouseWheel { unit: egui::MouseWheelUnit::Point,
-                    delta: egui::vec2(0.0, -120.0), modifiers: egui::Modifiers::NONE }]);
+            u5_draw_notice(
+                &ctx,
+                &mut app,
+                size,
+                vec![
+                    egui::Event::PointerMoved(pointer),
+                    egui::Event::MouseWheel {
+                        unit: egui::MouseWheelUnit::Point,
+                        delta: egui::vec2(0.0, -120.0),
+                        modifiers: egui::Modifiers::NONE,
+                    },
+                ],
+            );
         }
-        assert!(font_seen, "font warning hidden by structured notice: {:?}", u5_notice_text(&output));
+        assert!(
+            font_seen,
+            "font warning hidden by structured notice: {:?}",
+            u5_notice_text(&output)
+        );
         app.message = "合成操作が完了した。".into();
         let mut output = u5_draw_notice(&ctx, &mut app, size, vec![]);
-        for _ in 0..3 { output = u5_draw_notice(&ctx, &mut app, size, vec![]); }
+        for _ in 0..3 {
+            output = u5_draw_notice(&ctx, &mut app, size, vec![]);
+        }
         assert!(app.material_notice.is_none());
         assert!(u5_notice_text(&output).contains("合成操作が完了した。"));
         assert!(!u5_notice_text(&output).contains("AIが示した引用"));
         app.message = diagnostic.legacy_text.clone();
         u5_draw_notice(&ctx, &mut app, size, vec![]);
-        assert!(app.material_notice.is_none(), "restoring old text must not revive the payload");
+        assert!(
+            app.material_notice.is_none(),
+            "restoring old text must not revive the payload"
+        );
         app.notify_material_diagnostic(diagnostic);
         app.fatal = Some("合成の保存停止".into());
         let mut output = u5_draw_notice(&ctx, &mut app, size, vec![]);
-        for _ in 0..3 { output = u5_draw_notice(&ctx, &mut app, size, vec![]); }
+        for _ in 0..3 {
+            output = u5_draw_notice(&ctx, &mut app, size, vec![]);
+        }
         assert!(app.material_notice.is_none());
         assert!(u5_notice_text(&output).contains("合成の保存停止"));
         drop(app);
@@ -1478,11 +1963,18 @@ mod tests {
         app.notify_material_diagnostic(diagnostic);
         app.notification_open = true;
         let mut output = u5_draw_notice(&ctx, &mut app, size, vec![]);
-        for _ in 0..3 { output = u5_draw_notice(&ctx, &mut app, size, vec![]); }
+        for _ in 0..3 {
+            output = u5_draw_notice(&ctx, &mut app, size, vec![]);
+        }
         assert!(u5_notice_text(&output).contains("教材案を作成できなかった"));
-        assert!(!u5_notice_text(&output).contains(" # 見出し"), "comparison starts collapsed");
-        assert!(feedback_ui_visible_text(&output, "引用と元の回答を確認").is_some(),
-            "comparison entry must be visible without scrolling at standard size");
+        assert!(
+            !u5_notice_text(&output).contains(" # 見出し"),
+            "comparison starts collapsed"
+        );
+        assert!(
+            feedback_ui_visible_text(&output, "引用と元の回答を確認").is_some(),
+            "comparison entry must be visible without scrolling at standard size"
+        );
         let footer = u5_find_action(&ctx, &mut app, size, "診断情報をコピー");
         let copied = u5_click_notice(&ctx, &mut app, size, footer.center());
         assert!(copied.platform_output.commands.iter().any(|command|
@@ -1492,54 +1984,90 @@ mod tests {
         assert!(app.material_notice.as_ref().unwrap().comparison_open);
         let raw = u5_find_action(&ctx, &mut app, size, "原文を表示");
         output = u5_draw_notice(&ctx, &mut app, size, vec![]);
-        assert!(feedback_ui_visible_text(&output, "読みやすい表示").is_some(),
-            "mode label must be visible beside its switch");
+        assert!(
+            feedback_ui_visible_text(&output, "読みやすい表示").is_some(),
+            "mode label must be visible beside its switch"
+        );
         output = u5_click_notice(&ctx, &mut app, size, raw.center());
-        assert!(app.material_notice.as_ref().unwrap().raw_mode,
-            "raw switch click missed at {raw:?}, painted={:?}", u5_notice_text(&output));
+        assert!(
+            app.material_notice.as_ref().unwrap().raw_mode,
+            "raw switch click missed at {raw:?}, painted={:?}",
+            u5_notice_text(&output)
+        );
         assert!(feedback_ui_visible_text(&output, "原文表示").is_some());
         let quote_copy = u5_find_action(&ctx, &mut app, size, "AI引用の原文をコピー");
         let copied = u5_click_notice(&ctx, &mut app, size, quote_copy.center());
-        assert!(copied.platform_output.commands.iter().any(|command|
-            matches!(command, egui::OutputCommand::CopyText(text) if text == quote)));
+        assert!(copied.platform_output.commands.iter().any(
+            |command| matches!(command, egui::OutputCommand::CopyText(text) if text == quote)
+        ));
         let source_copy = u5_find_action(&ctx, &mut app, size, "元の発言の原文をコピー");
         let copied = u5_click_notice(&ctx, &mut app, size, source_copy.center());
-        assert!(copied.platform_output.commands.iter().any(|command|
-            matches!(command, egui::OutputCommand::CopyText(text) if text == original)));
-        assert_eq!(diagnostic_copy_text(&app.material_notice.as_ref().unwrap().diagnostic), expected_copy);
+        assert!(copied.platform_output.commands.iter().any(
+            |command| matches!(command, egui::OutputCommand::CopyText(text) if text == original)
+        ));
+        assert_eq!(
+            diagnostic_copy_text(&app.material_notice.as_ref().unwrap().diagnostic),
+            expected_copy
+        );
         drop(app);
         std::fs::remove_dir_all(root).unwrap();
     }
 
     #[test]
     fn u5_long_comparison_scroll_reaches_tail_and_keeps_copy_footer_at_both_sizes() {
-        for size in [egui::vec2(1150.0 / 0.8, 950.0 / 0.8),
-            egui::vec2(820.0 / 1.6, 650.0 / 1.6)] {
+        for size in [
+            egui::vec2(1150.0 / 0.8, 950.0 / 0.8),
+            egui::vec2(820.0 / 1.6, 650.0 / 1.6),
+        ] {
             let (ctx, mut app, root) = super::super::harness_tests::fixture();
-            let original = format!("# 合成回答\n- provide infrastructure\n- run safely\n- power on\n{}\n終端MARKER🦊",
-                "固定した長文の説明。\n".repeat(75));
+            let original = format!(
+                "# 合成回答\n- provide infrastructure\n- run safely\n- power on\n{}\n終端MARKER🦊",
+                "固定した長文の説明。\n".repeat(75)
+            );
             let quote = format!("{}引用末尾🐺", "合成引用".repeat(90));
             app.notify_material_diagnostic(u5_diagnostic(&app.deck[0], &original, &quote));
             app.notification_open = true;
             app.material_notice.as_mut().unwrap().comparison_open = true;
             let screen = egui::Rect::from_min_size(egui::Pos2::ZERO, size);
             let mut output = u5_draw_notice(&ctx, &mut app, size, vec![]);
-            for _ in 0..5 { output = u5_draw_notice(&ctx, &mut app, size, vec![]); }
+            for _ in 0..5 {
+                output = u5_draw_notice(&ctx, &mut app, size, vec![]);
+            }
             let window_id = egui::Id::new("notification-details-material-v1");
             let window = ctx.memory(|m| m.area_rect(window_id)).unwrap();
-            assert!(screen.contains_rect(window), "window left screen: {window:?}");
-            let pointer = window.left_top() + egui::vec2(window.width() * 0.55, window.height() * 0.45);
+            assert!(
+                screen.contains_rect(window),
+                "window left screen: {window:?}"
+            );
+            let pointer =
+                window.left_top() + egui::vec2(window.width() * 0.55, window.height() * 0.45);
             let mut reached = u5_visible_row(&output, "終端MARKER🦊");
             for _ in 0..60 {
-                output = u5_draw_notice(&ctx, &mut app, size, vec![egui::Event::PointerMoved(pointer),
-                    egui::Event::MouseWheel { unit: egui::MouseWheelUnit::Point,
-                        delta: egui::vec2(0.0, -240.0), modifiers: egui::Modifiers::NONE }]);
+                output = u5_draw_notice(
+                    &ctx,
+                    &mut app,
+                    size,
+                    vec![
+                        egui::Event::PointerMoved(pointer),
+                        egui::Event::MouseWheel {
+                            unit: egui::MouseWheelUnit::Point,
+                            delta: egui::vec2(0.0, -240.0),
+                            modifiers: egui::Modifiers::NONE,
+                        },
+                    ],
+                );
                 reached |= u5_visible_row(&output, "終端MARKER🦊");
-                let footer = feedback_ui_visible_text(&output, "診断情報をコピー").expect("fixed copy footer");
+                let footer = feedback_ui_visible_text(&output, "診断情報をコピー")
+                    .expect("fixed copy footer");
                 assert!(screen.contains_rect(footer), "footer offscreen: {footer:?}");
-                if reached { break; }
+                if reached {
+                    break;
+                }
             }
-            assert!(reached, "long fixed answer tail was never visible at {size:?}");
+            assert!(
+                reached,
+                "long fixed answer tail was never visible at {size:?}"
+            );
             drop(app);
             std::fs::remove_dir_all(root).unwrap();
         }
@@ -1547,13 +2075,29 @@ mod tests {
 
     #[test]
     fn u5_saved_draft_detail_click_uses_saved_source_and_keeps_proposal() {
-        use wordweave5::{chat::Conversation, execution::Execution, material::{Mode, Request}};
+        use wordweave5::{
+            chat::Conversation,
+            execution::Execution,
+            material::{Mode, Request},
+        };
         let (ctx, mut app, root) = super::super::harness_tests::fixture();
         let baseline = app.deck[0].clone();
         let mut conversation = Conversation::new();
-        conversation.complete("保存時の合成質問".into(), "保存時の **固定回答** 🦊".into(), Execution::default()).unwrap();
+        conversation
+            .complete(
+                "保存時の合成質問".into(),
+                "保存時の **固定回答** 🦊".into(),
+                Execution::default(),
+            )
+            .unwrap();
         conversation.exchanges[0].for_material = true;
-        let request = Request::new(&conversation, &baseline.base, Mode::Correct, Some(baseline.clone())).unwrap();
+        let request = Request::new(
+            &conversation,
+            &baseline.base,
+            Mode::Correct,
+            Some(baseline.clone()),
+        )
+        .unwrap();
         let mut candidate = baseline;
         candidate.usage = "保存案の合成変更".into();
         let response = serde_json::json!({"entry":candidate,"reasons":[{"path":"/usage",
@@ -1567,13 +2111,27 @@ mod tests {
         let deck = serde_json::to_value(&app.deck).unwrap();
         let size = egui::vec2(1120.0, 850.0);
         let mut output = feedback_ui_draw(&ctx, &mut app, size, vec![]);
-        for _ in 0..4 { output = feedback_ui_draw(&ctx, &mut app, size, vec![]); }
-        let detail = feedback_ui_visible_text(&output, "理由を詳しく確認").expect("saved-draft detail action");
+        for _ in 0..4 {
+            output = feedback_ui_draw(&ctx, &mut app, size, vec![]);
+        }
+        let detail = feedback_ui_visible_text(&output, "理由を詳しく確認")
+            .expect("saved-draft detail action");
         feedback_ui_click(&ctx, &mut app, size, detail.center());
-        let notice = app.material_notice.as_ref().expect("typed saved-draft diagnostic");
+        let notice = app
+            .material_notice
+            .as_ref()
+            .expect("typed saved-draft diagnostic");
         assert_eq!(notice.diagnostic.stage, MaterialStage::SavedDraft);
-        assert_eq!(notice.diagnostic.evidence.as_ref().unwrap().original.as_deref(),
-            Some("保存時の **固定回答** 🦊"));
+        assert_eq!(
+            notice
+                .diagnostic
+                .evidence
+                .as_ref()
+                .unwrap()
+                .original
+                .as_deref(),
+            Some("保存時の **固定回答** 🦊")
+        );
         assert_eq!(serde_json::to_value(&app.progress).unwrap(), before);
         assert_eq!(serde_json::to_value(&app.deck).unwrap(), deck);
         drop(app);
@@ -1585,42 +2143,74 @@ mod tests {
         fn text_size(output: &egui::FullOutput, label: &str) -> Option<f32> {
             fn find(shape: &egui::Shape, label: &str) -> Option<f32> {
                 match shape {
-                    egui::Shape::Text(text) if text.galley.text() == label =>
-                        text.galley.job.sections.first().map(|section| section.format.font_id.size),
+                    egui::Shape::Text(text) if text.galley.text() == label => text
+                        .galley
+                        .job
+                        .sections
+                        .first()
+                        .map(|section| section.format.font_id.size),
                     egui::Shape::Vec(parts) => parts.iter().find_map(|part| find(part, label)),
                     _ => None,
                 }
             }
-            output.shapes.iter().find_map(|shape| find(&shape.shape, label))
+            output
+                .shapes
+                .iter()
+                .find_map(|shape| find(&shape.shape, label))
         }
         let (ctx, mut app, root) = super::super::harness_tests::fixture();
-        let diagnostic = u5_diagnostic(&app.deck[0], "Use **fixed** source 🦊", "Use fixed source 🐺");
+        let diagnostic = u5_diagnostic(
+            &app.deck[0],
+            "Use **fixed** source 🦊",
+            "Use fixed source 🐺",
+        );
         app.notify_material_diagnostic(diagnostic);
         app.notification_open = true;
         let size = egui::vec2(1120.0, 850.0);
         let mut output = u5_draw_notice(&ctx, &mut app, size, vec![]);
-        for _ in 0..4 { output = u5_draw_notice(&ctx, &mut app, size, vec![]); }
+        for _ in 0..4 {
+            output = u5_draw_notice(&ctx, &mut app, size, vec![]);
+        }
         let title_size = text_size(&output, "教材案を作成できなかった").expect("painted title");
-        let body_size = text_size(&output, "教材には登録していない。既存教材も変更していない。")
-            .expect("painted body");
-        assert!(title_size > body_size, "title {title_size} must exceed body {body_size}");
+        let body_size = text_size(
+            &output,
+            "教材には登録していない。既存教材も変更していない。",
+        )
+        .expect("painted body");
+        assert!(
+            title_size > body_size,
+            "title {title_size} must exceed body {body_size}"
+        );
         let notice = app.material_notice.as_mut().unwrap();
         notice.comparison_open = true;
         notice.raw_mode = true;
         notice.technical_open = true;
         let close = u5_find_action(&ctx, &mut app, size, "閉じる");
         u5_click_notice(&ctx, &mut app, size, close.center());
-        assert!(!app.notification_open, "footer close must dismiss the notice");
-        assert!(app.material_notice.is_some(), "dismissal retains the current payload for status reopen");
+        assert!(
+            !app.notification_open,
+            "footer close must dismiss the notice"
+        );
+        assert!(
+            app.material_notice.is_some(),
+            "dismissal retains the current payload for status reopen"
+        );
 
         let mut output = feedback_ui_draw(&ctx, &mut app, size, vec![]);
-        for _ in 0..4 { output = feedback_ui_draw(&ctx, &mut app, size, vec![]); }
+        for _ in 0..4 {
+            output = feedback_ui_draw(&ctx, &mut app, size, vec![]);
+        }
         let status = feedback_ui_visible_text(&output, "● 通知").expect("status reopen button");
         feedback_ui_click(&ctx, &mut app, size, status.center());
-        assert!(app.notification_open, "status button must reopen the notice");
+        assert!(
+            app.notification_open,
+            "status button must reopen the notice"
+        );
         let notice = app.material_notice.as_ref().unwrap();
-        assert!(!notice.comparison_open && !notice.raw_mode && !notice.technical_open,
-            "reopened notice starts collapsed in readable mode");
+        assert!(
+            !notice.comparison_open && !notice.raw_mode && !notice.technical_open,
+            "reopened notice starts collapsed in readable mode"
+        );
         drop(app);
         std::fs::remove_dir_all(root).unwrap();
     }

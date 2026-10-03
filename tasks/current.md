@@ -1,5 +1,7 @@
 # 現在の状態（2026-10-03）
 
+- PUBLISH-20261003：蓄積修正を`3bf9f39`でブランチ`codex/development-agent-team`へpush済み。その後39Rustファイルを標準整形し、本体/単独Qwen fmt成功、全470件成功、release成功、独立整形比較39一致を確認した。第二commitは書式と検証記録のみ。EXE23:25:03 JST、SHA256 `9B888E9FC923823C59B4C3B0AB1A4DAD2051CA6139DE153B6DE6CA213DD387D3`。PR/mainマージなし。ローカル生成物は公開対象外。下記全体fmt未合格は整形前の履歴である。[結果](PUBLISH-20261003/results.md)。
+
 - QWEN-STOP-001 U2色差再改善完了：無効■を#C8CFD6、有効円枠を#0064BE/2.0へ変更。全470件成功、合成native4比較・独立レビュー確定欠陥0。型明示のみの同値修正を照合し最終release成功、対象fmt成功・指定5入力hash一致。EXE22:48:40 JST、SHA256 `8BA9C64E1893A1D247FD8916037D89DB068E06BBD6170C93FAD748241E421DE6`。全体fmt既存39ファイル不一致・実音声/DPI未検証は保持する。次は利用者の色差目視受入、commit/pushなし。[結果](QWEN-STOP-001/results.md)。下記U1は履歴である。
 
 - QWEN-STOP-001実装・自動検証・release更新完了：音読評価の停止を共有円＋■へ変更し、常時描画・実再生中のみ有効とした。全469件（追加4件）成功、合成native5画像確認。実音声の停止/自然終了は未検証、狭幅拡大は既存本文スクロールが必要。全体fmtは既存39ファイル差分でFAIL、対象3ファイルは成功。EXEは2026-10-03 21:53:46 JST、SHA256 `7E5E931752A5F14FBA722CD0798BC0ACCF57AE35AB97242030322D64890D6B97`。音響解析・commit/pushは未実施。正本は[結果](QWEN-STOP-001/results.md)。

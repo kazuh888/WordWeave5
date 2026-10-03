@@ -6,16 +6,24 @@ mod tests {
     use crate::app::harness_tests::fixture;
 
     fn render(ctx: &egui::Context, app: &mut WordApp, size: egui::Vec2, events: Vec<egui::Event>) {
-        let _ = ctx.run(egui::RawInput {
-            screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, size)),
-            events, ..Default::default()
-        }, |ctx| {
-            egui::CentralPanel::default().show(ctx, |ui| {
-                let right = ui.max_rect().right();
-                app.settings(ui, ctx);
-                assert!(ui.min_rect().right() <= right + 1.0, "settings overflow: {:?}", ui.min_rect());
-            });
-        });
+        let _ = ctx.run(
+            egui::RawInput {
+                screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, size)),
+                events,
+                ..Default::default()
+            },
+            |ctx| {
+                egui::CentralPanel::default().show(ctx, |ui| {
+                    let right = ui.max_rect().right();
+                    app.settings(ui, ctx);
+                    assert!(
+                        ui.min_rect().right() <= right + 1.0,
+                        "settings overflow: {:?}",
+                        ui.min_rect()
+                    );
+                });
+            },
+        );
     }
 
     #[test]
@@ -27,17 +35,33 @@ mod tests {
         for zoom in [0.5, 0.8, 1.0, 1.6, 0.8] {
             ctx.set_zoom_factor(zoom);
             for _ in 0..3 {
-                let _ = ctx.run(egui::RawInput {
-                    screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO,
-                        egui::vec2(1150.0, 950.0) / zoom)), ..Default::default()
-                }, |ctx| app.settings_zoom_panel(ctx));
+                let _ = ctx.run(
+                    egui::RawInput {
+                        screen_rect: Some(egui::Rect::from_min_size(
+                            egui::Pos2::ZERO,
+                            egui::vec2(1150.0, 950.0) / zoom,
+                        )),
+                        ..Default::default()
+                    },
+                    |ctx| app.settings_zoom_panel(ctx),
+                );
             }
-            let logical = ctx.data(|data| data.get_temp::<egui::Rect>(egui::Id::new("settings-zoom"))).unwrap();
+            let logical = ctx
+                .data(|data| data.get_temp::<egui::Rect>(egui::Id::new("settings-zoom")))
+                .unwrap();
             let physical = egui::Rect::from_min_max(logical.min * zoom, logical.max * zoom);
             if let Some(first) = baseline {
-                assert!((physical.min - first.min).length() < 2.0, "{physical:?} vs {first:?}");
-                assert!((physical.size() - first.size()).length() < 2.0, "{physical:?} vs {first:?}");
-            } else { baseline = Some(physical); }
+                assert!(
+                    (physical.min - first.min).length() < 2.0,
+                    "{physical:?} vs {first:?}"
+                );
+                assert!(
+                    (physical.size() - first.size()).length() < 2.0,
+                    "{physical:?} vs {first:?}"
+                );
+            } else {
+                baseline = Some(physical);
+            }
         }
         drop(app);
         std::fs::remove_dir_all(root).unwrap();
@@ -52,46 +76,103 @@ mod tests {
             app.progress.chats[0].draft = "unfinished message".into();
             let before = serde_json::to_value(&app.progress).unwrap();
             app.dirty = false;
-            for _ in 0..2 { render(&ctx, &mut app, size, vec![]); }
+            for _ in 0..2 {
+                render(&ctx, &mut app, size, vec![]);
+            }
             for section in SettingsSection::ALL {
                 render(&ctx, &mut app, size, vec![]);
                 if size.x < 650.0 {
-                    let menu = ctx.data(|data| data.get_temp::<egui::Rect>(
-                        egui::Id::new("settings-category-menu"))).unwrap();
+                    let menu = ctx
+                        .data(|data| {
+                            data.get_temp::<egui::Rect>(egui::Id::new("settings-category-menu"))
+                        })
+                        .unwrap();
                     for pressed in [true, false] {
-                        render(&ctx, &mut app, size, vec![egui::Event::PointerMoved(menu.center()),
-                            egui::Event::PointerButton { pos: menu.center(), button: egui::PointerButton::Primary,
-                                pressed, modifiers: egui::Modifiers::NONE }]);
+                        render(
+                            &ctx,
+                            &mut app,
+                            size,
+                            vec![
+                                egui::Event::PointerMoved(menu.center()),
+                                egui::Event::PointerButton {
+                                    pos: menu.center(),
+                                    button: egui::PointerButton::Primary,
+                                    pressed,
+                                    modifiers: egui::Modifiers::NONE,
+                                },
+                            ],
+                        );
                     }
                     render(&ctx, &mut app, size, vec![]);
                 }
-                let tab = ctx.data(|data| data.get_temp::<egui::Rect>(
-                    egui::Id::new(("settings-tab", section as u8)))).unwrap();
+                let tab = ctx
+                    .data(|data| {
+                        data.get_temp::<egui::Rect>(egui::Id::new(("settings-tab", section as u8)))
+                    })
+                    .unwrap();
                 assert!(tab.bottom() < size.y, "category must remain accessible");
                 for pressed in [true, false] {
-                    render(&ctx, &mut app, size, vec![egui::Event::PointerMoved(tab.center()),
-                        egui::Event::PointerButton { pos: tab.center(), button: egui::PointerButton::Primary,
-                            pressed, modifiers: egui::Modifiers::NONE }]);
+                    render(
+                        &ctx,
+                        &mut app,
+                        size,
+                        vec![
+                            egui::Event::PointerMoved(tab.center()),
+                            egui::Event::PointerButton {
+                                pos: tab.center(),
+                                button: egui::PointerButton::Primary,
+                                pressed,
+                                modifiers: egui::Modifiers::NONE,
+                            },
+                        ],
+                    );
                 }
                 assert_eq!(app.settings_section, section);
                 render(&ctx, &mut app, size, vec![]);
-                let save = ctx.data(|data| data.get_temp::<egui::Rect>(egui::Id::new("settings-save-button"))).unwrap();
-                let viewport = ctx.data(|data| data.get_temp::<egui::Rect>(egui::Id::new("settings-content-viewport"))).unwrap();
-                assert!(save.bottom() <= size.y
-                    && (save.top() >= viewport.bottom() || save.bottom() <= viewport.top()),
-                    "save={save:?}, viewport={viewport:?}");
-                assert!(viewport.height() >= 90.0, "retain usable form height: {viewport:?}");
-                render(&ctx, &mut app, size, vec![
-                    egui::Event::PointerMoved(viewport.center()),
-                    egui::Event::MouseWheel { unit: egui::MouseWheelUnit::Point,
-                        delta: egui::vec2(0.0, -180.0), modifiers: egui::Modifiers::NONE },
-                ]);
-                let after_scroll = ctx.data(|data| data.get_temp::<egui::Rect>(
-                    egui::Id::new("settings-save-button"))).unwrap();
-                assert_eq!(after_scroll, save, "scrolling must not move the save action");
+                let save = ctx
+                    .data(|data| data.get_temp::<egui::Rect>(egui::Id::new("settings-save-button")))
+                    .unwrap();
+                let viewport = ctx
+                    .data(|data| {
+                        data.get_temp::<egui::Rect>(egui::Id::new("settings-content-viewport"))
+                    })
+                    .unwrap();
+                assert!(
+                    save.bottom() <= size.y
+                        && (save.top() >= viewport.bottom() || save.bottom() <= viewport.top()),
+                    "save={save:?}, viewport={viewport:?}"
+                );
+                assert!(
+                    viewport.height() >= 90.0,
+                    "retain usable form height: {viewport:?}"
+                );
+                render(
+                    &ctx,
+                    &mut app,
+                    size,
+                    vec![
+                        egui::Event::PointerMoved(viewport.center()),
+                        egui::Event::MouseWheel {
+                            unit: egui::MouseWheelUnit::Point,
+                            delta: egui::vec2(0.0, -180.0),
+                            modifiers: egui::Modifiers::NONE,
+                        },
+                    ],
+                );
+                let after_scroll = ctx
+                    .data(|data| data.get_temp::<egui::Rect>(egui::Id::new("settings-save-button")))
+                    .unwrap();
+                assert_eq!(
+                    after_scroll, save,
+                    "scrolling must not move the save action"
+                );
                 assert_eq!(serde_json::to_value(&app.progress).unwrap(), before);
                 assert!(!app.dirty, "navigation must not change saved settings");
-                assert!(app.pending.is_none() && app.pending_import.is_none() && app.pending_restore.is_none());
+                assert!(
+                    app.pending.is_none()
+                        && app.pending_import.is_none()
+                        && app.pending_restore.is_none()
+                );
             }
             drop(app);
             std::fs::remove_dir_all(root).unwrap();
@@ -106,18 +187,36 @@ mod tests {
         for section in SettingsSection::ALL {
             app.settings_section = section;
             for _ in 0..4 {
-                let _ = ctx.run(egui::RawInput {
-                    screen_rect: Some(egui::Rect::from_min_size(
-                        egui::Pos2::ZERO, egui::vec2(512.5, 406.25))),
-                    ..Default::default()
-                }, |ctx| app.update_ui(ctx));
+                let _ = ctx.run(
+                    egui::RawInput {
+                        screen_rect: Some(egui::Rect::from_min_size(
+                            egui::Pos2::ZERO,
+                            egui::vec2(512.5, 406.25),
+                        )),
+                        ..Default::default()
+                    },
+                    |ctx| app.update_ui(ctx),
+                );
             }
-            let save = ctx.data(|data| data.get_temp::<egui::Rect>(egui::Id::new("settings-save-button"))).unwrap();
-            let viewport = ctx.data(|data| data.get_temp::<egui::Rect>(egui::Id::new("settings-content-viewport"))).unwrap();
-            let menu = ctx.data(|data| data.get_temp::<egui::Rect>(egui::Id::new("settings-category-menu"))).unwrap();
-            assert!(viewport.height() >= 80.0, "retain form space with app chrome: {viewport:?}");
-            assert!(menu.bottom() < viewport.top() && save.bottom() <= viewport.top(),
-                "controls must not overlap: {menu:?}, {viewport:?}, {save:?}");
+            let save = ctx
+                .data(|data| data.get_temp::<egui::Rect>(egui::Id::new("settings-save-button")))
+                .unwrap();
+            let viewport = ctx
+                .data(|data| {
+                    data.get_temp::<egui::Rect>(egui::Id::new("settings-content-viewport"))
+                })
+                .unwrap();
+            let menu = ctx
+                .data(|data| data.get_temp::<egui::Rect>(egui::Id::new("settings-category-menu")))
+                .unwrap();
+            assert!(
+                viewport.height() >= 80.0,
+                "retain form space with app chrome: {viewport:?}"
+            );
+            assert!(
+                menu.bottom() < viewport.top() && save.bottom() <= viewport.top(),
+                "controls must not overlap: {menu:?}, {viewport:?}, {save:?}"
+            );
             assert!(save.bottom() < 406.25);
         }
         drop(app);
@@ -137,12 +236,21 @@ mod tests {
         for _ in 0..8 {
             render(&ctx, &mut app, egui::vec2(512.5, 406.25), vec![]);
         }
-        let (id, rect, clip) = ctx.data(|data| data.get_temp::<(egui::Id, egui::Rect, egui::Rect)>(
-            egui::Id::new("settings-path-input"))).unwrap();
+        let (id, rect, clip) = ctx
+            .data(|data| {
+                data.get_temp::<(egui::Id, egui::Rect, egui::Rect)>(egui::Id::new(
+                    "settings-path-input",
+                ))
+            })
+            .unwrap();
         assert!(clip.contains(rect.center()), "path={rect:?}, clip={clip:?}");
         assert!(ctx.memory(|memory| memory.has_focus(id)));
         assert!(!app.codex_path_focus_pending);
-        assert_eq!(app.settings_section, SettingsSection::Data, "recovery must not reset category state");
+        assert_eq!(
+            app.settings_section,
+            SettingsSection::Data,
+            "recovery must not reset category state"
+        );
         drop(app);
         std::fs::remove_dir_all(root).unwrap();
     }
@@ -159,7 +267,11 @@ pub(super) enum SettingsSection {
 
 impl SettingsSection {
     pub(super) const ALL: [Self; 5] = [
-        Self::Learning, Self::Voice, Self::Connection, Self::Data, Self::Help,
+        Self::Learning,
+        Self::Voice,
+        Self::Connection,
+        Self::Data,
+        Self::Help,
     ];
 
     fn label(self) -> &'static str {
@@ -329,20 +441,31 @@ impl WordApp {
     }
 
     fn settings_save_button(&mut self, ui: &mut egui::Ui) {
-        let save = ui.add_enabled(self.fatal.is_none() && self.color_editor.is_none() && self.qwen_settings.is_none() && self.settings_changed(),
-            crate::app::controls::Button::new(
-                RichText::new("保存").color(Color32::WHITE))
-                .fill(home_art::BLUE).min_size(egui::vec2(72.0, 44.0)));
+        let save = ui.add_enabled(
+            self.fatal.is_none()
+                && self.color_editor.is_none()
+                && self.qwen_settings.is_none()
+                && self.settings_changed(),
+            crate::app::controls::Button::new(RichText::new("保存").color(Color32::WHITE))
+                .fill(home_art::BLUE)
+                .min_size(egui::vec2(72.0, 44.0)),
+        );
         #[cfg(test)]
-        ui.ctx().data_mut(|data| data.insert_temp(
-            egui::Id::new("settings-save-button"), save.rect));
+        ui.ctx()
+            .data_mut(|data| data.insert_temp(egui::Id::new("settings-save-button"), save.rect));
         if save.clicked() {
             if let Err(error) = self.save_settings(ui.ctx()) {
                 self.notify_error(error.clone());
                 self.settings_editor.error = Some(error);
             }
         }
-        if ui.add_enabled(self.color_editor.is_none() && self.qwen_settings.is_none(), crate::app::controls::Button::new("キャンセル")).clicked() {
+        if ui
+            .add_enabled(
+                self.color_editor.is_none() && self.qwen_settings.is_none(),
+                crate::app::controls::Button::new("キャンセル"),
+            )
+            .clicked()
+        {
             self.cancel_settings(ui.ctx());
         }
         if let Some(error) = &self.settings_editor.error {
@@ -361,17 +484,20 @@ impl WordApp {
             ))
         });
         #[cfg(test)]
-        ui.ctx().data_mut(|data| data.insert_temp(
-            egui::Id::new("feedback-ui-daily-limit-slider"),
-            (limit.rect, limit.id, ui.clip_rect(), limit.enabled()),
-        ));
+        ui.ctx().data_mut(|data| {
+            data.insert_temp(
+                egui::Id::new("feedback-ui-daily-limit-slider"),
+                (limit.rect, limit.id, ui.clip_rect(), limit.enabled()),
+            )
+        });
         if self.daily_limit_focus_pending {
             limit.scroll_to_me_animation(
                 Some(egui::Align::Center),
                 egui::style::ScrollAnimation::none(),
             );
             if ui.clip_rect().contains(limit.rect.center())
-                && !ui.ctx().will_discard() && self.color_editor.is_none()
+                && !ui.ctx().will_discard()
+                && self.color_editor.is_none()
             {
                 limit.request_focus();
                 self.daily_limit_focus_pending = false;
@@ -385,11 +511,15 @@ impl WordApp {
                 egui::StrokeKind::Outside,
             );
             if self.color_editor.is_some() {
-                ui.colored_label(Color32::from_rgb(165, 75, 15),
-                    "上限を変更するには、先に配色を保存またはキャンセルする。");
+                ui.colored_label(
+                    Color32::from_rgb(165, 75, 15),
+                    "上限を変更するには、先に配色を保存またはキャンセルする。",
+                );
             } else {
-                ui.colored_label(Color32::from_rgb(165, 75, 15),
-                    "上限を変更して保存する。保存後の次の操作から有効になる。");
+                ui.colored_label(
+                    Color32::from_rgb(165, 75, 15),
+                    "上限を変更して保存する。保存後の次の操作から有効になる。",
+                );
             }
         }
         ui.label("1回に生成する例文数");
@@ -461,14 +591,24 @@ impl WordApp {
                     ui.ww_selectable_value(&mut self.settings_editor.draft.topic, tag.clone(), tag);
                 }
             });
-        topic.response.clone().on_hover_text(&self.settings_editor.draft.topic);
+        topic
+            .response
+            .clone()
+            .on_hover_text(&self.settings_editor.draft.topic);
         #[cfg(test)]
-        ui.ctx().data_mut(|data| data.insert_temp(
-            egui::Id::new("settings-topic"), topic.response.rect));
+        ui.ctx().data_mut(|data| {
+            data.insert_temp(egui::Id::new("settings-topic"), topic.response.rect)
+        });
         ui.small("出題の設定は次のセッションから反映する。");
         ui.add_space(8.0);
         ui.label("画面の拡大率");
-        if ui.ww_button(format!("{:.0}% — 倍率を調整", self.settings_editor.draft.font_scale * 100.0)).clicked() {
+        if ui
+            .ww_button(format!(
+                "{:.0}% — 倍率を調整",
+                self.settings_editor.draft.font_scale * 100.0
+            ))
+            .clicked()
+        {
             self.settings_editor.zoom_open = true;
         }
         ui.small("固定位置の操作パネルで連続プレビューする。保存で確定、キャンセルで元に戻る。起動時は標準の80%。");
@@ -496,16 +636,25 @@ impl WordApp {
                     "英語の音声を自動選択",
                 );
                 for (id, name) in &self.speaker.voices {
-                    ui.ww_selectable_value(&mut self.settings_editor.draft.voice_id, id.clone(), name);
+                    ui.ww_selectable_value(
+                        &mut self.settings_editor.draft.voice_id,
+                        id.clone(),
+                        name,
+                    );
                 }
             });
         ui.label("読み上げ速度（倍）");
         let mut rate = self.settings_editor.draft.speech_rate.unwrap_or(
-            if self.settings_editor.draft.slow_speech { 0.8 } else { 1.0 });
+            if self.settings_editor.draft.slow_speech {
+                0.8
+            } else {
+                1.0
+            },
+        );
         if color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| {
             ui.add(egui::Slider::new(&mut rate, 0.5..=4.0).step_by(0.1))
         })
-            .changed()
+        .changed()
         {
             self.settings_editor.draft.speech_rate = Some(rate);
         }
@@ -529,14 +678,20 @@ impl WordApp {
         ui.add_space(8.0);
         ui.label("Codex実行ファイル");
         let response = color_theme::editable_input(ui, input_tint, ux::TINT, |ui| {
-            ui.add(egui::TextEdit::singleline(&mut self.settings_editor.draft.codex_path)
-                .id_salt("codex-executable-input")
-                .background_color(input_fill)
-                .desired_width(ui.available_width().min(720.0)))
+            ui.add(
+                egui::TextEdit::singleline(&mut self.settings_editor.draft.codex_path)
+                    .id_salt("codex-executable-input")
+                    .background_color(input_fill)
+                    .desired_width(ui.available_width().min(720.0)),
+            )
         });
         #[cfg(test)]
-        ui.ctx().data_mut(|data| data.insert_temp(
-            egui::Id::new("settings-path-input"), (response.id, response.rect, ui.clip_rect())));
+        ui.ctx().data_mut(|data| {
+            data.insert_temp(
+                egui::Id::new("settings-path-input"),
+                (response.id, response.rect, ui.clip_rect()),
+            )
+        });
         if self.codex_path_guidance {
             ui.painter().rect_stroke(
                 response.rect.expand(3.0),
@@ -576,9 +731,11 @@ impl WordApp {
         ui.add_space(8.0);
         ui.label("要求するモデル（空欄はCodexの既定値）");
         color_theme::editable_input(ui, input_tint, ux::TINT, |ui| {
-            ui.add(egui::TextEdit::singleline(&mut self.settings_editor.draft.codex_model)
-                .background_color(input_fill)
-                .desired_width(ui.available_width().min(440.0)))
+            ui.add(
+                egui::TextEdit::singleline(&mut self.settings_editor.draft.codex_model)
+                    .background_color(input_fill)
+                    .desired_width(ui.available_width().min(440.0)),
+            )
         });
         self.effort_settings(ui);
         ui.small(
@@ -611,8 +768,14 @@ impl WordApp {
                     .add_filter("TSV", &["tsv"])
                     .save_file()
                 {
-                    self.notify_result(store::atomic_write(&path, model::deck_text(&self.deck).as_bytes())
-                        .map(|_| "教材TSVを書き出した。「語彙を追加」の③から追加・更新できる。".into()));
+                    self.notify_result(
+                        store::atomic_write(&path, model::deck_text(&self.deck).as_bytes()).map(
+                            |_| {
+                                "教材TSVを書き出した。「語彙を追加」の③から追加・更新できる。"
+                                    .into()
+                            },
+                        ),
+                    );
                 }
             }
             if ui

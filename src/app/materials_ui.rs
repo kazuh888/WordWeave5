@@ -43,12 +43,15 @@ impl WordApp {
             .inner_margin(10)
             .corner_radius(8)
             .show(ui, |ui| {
-                color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| ui.add(
-                    egui::TextEdit::singleline(&mut self.search)
-                        .frame(false)
-                        .hint_text("基本語・表現・日本語で検索")
-                        .desired_width(f32::INFINITY),
-                )).has_focus()
+                color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| {
+                    ui.add(
+                        egui::TextEdit::singleline(&mut self.search)
+                            .frame(false)
+                            .hint_text("基本語・表現・日本語で検索")
+                            .desired_width(f32::INFINITY),
+                    )
+                })
+                .has_focus()
             });
         color_theme::input_focus_outline(ui, search.response.rect, search.inner);
         let query = self.search.trim().to_lowercase();
@@ -178,8 +181,13 @@ impl WordApp {
                     {
                         self.say(&entry.completed());
                     }
-                    if ui.add(crate::app::controls::Button::new("読んで発音を確認")
-                        .min_size(egui::vec2(180.0, 44.0))).clicked() {
+                    if ui
+                        .add(
+                            crate::app::controls::Button::new("読んで発音を確認")
+                                .min_size(egui::vec2(180.0, 44.0)),
+                        )
+                        .clicked()
+                    {
                         self.open_qwen_reading(&entry);
                     }
                 });
@@ -335,21 +343,27 @@ impl WordApp {
         let input_tint = self.effective_tint().input;
         ui.ww_collapsing("言い換えを手動登録", |ui| {
             ui.label("置き換えの語句");
-            color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| ui.add(
-                egui::TextEdit::singleline(&mut self.replacement_phrase)
-                    .desired_width(f32::INFINITY),
-            ));
+            color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| {
+                ui.add(
+                    egui::TextEdit::singleline(&mut self.replacement_phrase)
+                        .desired_width(f32::INFINITY),
+                )
+            });
             ui.label("日本語の意味");
-            color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| ui.add(
-                egui::TextEdit::singleline(&mut self.replacement_meaning)
-                    .desired_width(f32::INFINITY),
-            ));
+            color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| {
+                ui.add(
+                    egui::TextEdit::singleline(&mut self.replacement_meaning)
+                        .desired_width(f32::INFINITY),
+                )
+            });
             ui.label("使える条件・意味の違い");
-            color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| ui.add(
-                egui::TextEdit::multiline(&mut self.replacement_conditions)
-                    .desired_rows(3)
-                    .desired_width(f32::INFINITY),
-            ));
+            color_theme::editable_input(ui, input_tint, Color32::WHITE, |ui| {
+                ui.add(
+                    egui::TextEdit::multiline(&mut self.replacement_conditions)
+                        .desired_rows(3)
+                        .desired_width(f32::INFINITY),
+                )
+            });
             if ui.ww_button("言い換えを追加").clicked() {
                 let mut changed = entry.clone();
                 changed.replacements.push(model::Replacement {

@@ -4,65 +4,115 @@ use super::*;
 pub(super) fn synthetic_quote_diagnostic(baseline: &wordweave5::model::Entry) -> String {
     use wordweave5::material::{ChangeReason, Mode, Quote, Request};
     let mut conversation = wordweave5::chat::Conversation::new();
-    let original = format!("固定原文：利用者が選択した回答です。**強調**、改行と絵文字🦊を含む。\n{}",
-        "根拠を一字ずつ比較するための合成回答。".repeat(16));
-    conversation.complete("長文診断用の合成質問".into(), original,
-        wordweave5::execution::Execution::default()).expect("synthetic quote exchange");
+    let original = format!(
+        "固定原文：利用者が選択した回答です。**強調**、改行と絵文字🦊を含む。\n{}",
+        "根拠を一字ずつ比較するための合成回答。".repeat(16)
+    );
+    conversation
+        .complete(
+            "長文診断用の合成質問".into(),
+            original,
+            wordweave5::execution::Execution::default(),
+        )
+        .expect("synthetic quote exchange");
     conversation.exchanges[0].for_material = true;
-    let request = Request::new(&conversation, &baseline.base, Mode::Correct, Some(baseline.clone()))
-        .expect("synthetic quote request");
+    let request = Request::new(
+        &conversation,
+        &baseline.base,
+        Mode::Correct,
+        Some(baseline.clone()),
+    )
+    .expect("synthetic quote request");
     let mut candidate = baseline.clone();
     candidate.usage = "合成会話に沿った訂正案".into();
-    let reason = ChangeReason { path: "/usage".into(), reason: "合成の説明".into(),
-        quotes: vec![Quote { exchange_index: 0, role: "assistant".into(),
-            quote: "原文に存在しない強調抜粋".into() }] };
-    let error = request.build_response(&serde_json::json!({"entry":candidate,"reasons":[reason]}).to_string())
+    let reason = ChangeReason {
+        path: "/usage".into(),
+        reason: "合成の説明".into(),
+        quotes: vec![Quote {
+            exchange_index: 0,
+            role: "assistant".into(),
+            quote: "原文に存在しない強調抜粋".into(),
+        }],
+    };
+    let error = request
+        .build_response(&serde_json::json!({"entry":candidate,"reasons":[reason]}).to_string())
         .expect_err("synthetic quote must fail verification");
-    assert!(error.contains("対処"), "fixture did not produce a user diagnostic");
+    assert!(
+        error.contains("対処"),
+        "fixture did not produce a user diagnostic"
+    );
     error
 }
 
 // The native preview uses only a constructed conversation and the real evidence validator.
-fn synthetic_structured_notice(baseline: &wordweave5::model::Entry)
-    -> wordweave5::material::MaterialDiagnostic {
+fn synthetic_structured_notice(
+    baseline: &wordweave5::model::Entry,
+) -> wordweave5::material::MaterialDiagnostic {
     use wordweave5::material::{MaterialFailure, Mode, Request};
     let mut conversation = wordweave5::chat::Conversation::new();
     let original = format!("# provide infrastructure\n- run the synthetic setup\n- check power safely\n実改行とliteral \\nを区別する。**強調** 🦊\n{}\n固定元発言の終端MARKER🦊",
         "合成の手順を確認する。\n".repeat(48));
-    conversation.complete("合成の確認質問".into(), original,
-        wordweave5::execution::Execution::default()).expect("synthetic notice exchange");
+    conversation
+        .complete(
+            "合成の確認質問".into(),
+            original,
+            wordweave5::execution::Execution::default(),
+        )
+        .expect("synthetic notice exchange");
     conversation.exchanges[0].for_material = true;
-    let request = Request::new(&conversation, &baseline.base, Mode::Correct, Some(baseline.clone()))
-        .expect("synthetic notice request");
+    let request = Request::new(
+        &conversation,
+        &baseline.base,
+        Mode::Correct,
+        Some(baseline.clone()),
+    )
+    .expect("synthetic notice request");
     let mut candidate = baseline.clone();
     candidate.usage = "合成の説明更新".into();
     let quote = format!("# provide infrastructure\n- run the synthetic setup\n- check power safely\n{}\n引用の終端MARKER🐺",
         "合成の誤引用。\n".repeat(24));
     let response = serde_json::json!({"entry":candidate,"reasons":[{"path":"/usage",
         "reason":"合成の変更理由","quotes":[{"exchange_index":0,"role":"assistant","quote":quote}]}]}).to_string();
-    match request.build_response_detailed(&response).expect_err("synthetic quote mismatch") {
+    match request
+        .build_response_detailed(&response)
+        .expect_err("synthetic quote mismatch")
+    {
         MaterialFailure::Evidence(detail) => detail,
         other => panic!("expected synthetic evidence, got {other:?}"),
     }
 }
 
 // U6: fixed, synthetic GFM in both evidence strings; strict quote mismatch opens comparison.
-fn synthetic_gfm_notice(baseline: &wordweave5::model::Entry)
-    -> wordweave5::material::MaterialDiagnostic {
+fn synthetic_gfm_notice(
+    baseline: &wordweave5::model::Entry,
+) -> wordweave5::material::MaterialDiagnostic {
     use wordweave5::material::{MaterialFailure, Mode, Request};
     let mut conversation = wordweave5::chat::Conversation::new();
     let original = "通常の重要と **重要**。\n\n| 番号 | 日本語 | English | コード | 補足 | 最終列 |\n| --- | --- | --- | --- | --- | --- |\n| 一 | 長い日本語の合成セルを繰り返して折返しを確認する | supercalifragilisticexpialidocious | `a\\|b` | 合成の補足説明を折り返す | 横スクロール終端① |\n| 二 | 末尾まで到達するための合成行 | synthetic ending | `tail` | 二行目の補足 | 横スクロール終端② |\n\n原文末尾GFM🦊";
-    conversation.complete("合成の表を確認する質問".into(), original.into(),
-        wordweave5::execution::Execution::default()).expect("synthetic GFM exchange");
+    conversation
+        .complete(
+            "合成の表を確認する質問".into(),
+            original.into(),
+            wordweave5::execution::Execution::default(),
+        )
+        .expect("synthetic GFM exchange");
     conversation.exchanges[0].for_material = true;
-    let request = Request::new(&conversation, &baseline.base, Mode::Correct, Some(baseline.clone()))
-        .expect("synthetic GFM request");
+    let request = Request::new(
+        &conversation,
+        &baseline.base,
+        Mode::Correct,
+        Some(baseline.clone()),
+    )
+    .expect("synthetic GFM request");
     let mut candidate = baseline.clone();
     candidate.usage = "GFMの合成訂正案".into();
     let quote = original.replace("原文末尾GFM🦊", "誤引用末尾GFM🐺");
     let response = serde_json::json!({"entry":candidate,"reasons":[{"path":"/usage",
         "reason":"合成の変更理由","quotes":[{"exchange_index":0,"role":"assistant","quote":quote}]}]}).to_string();
-    match request.build_response_detailed(&response).expect_err("synthetic GFM quote mismatch") {
+    match request
+        .build_response_detailed(&response)
+        .expect_err("synthetic GFM quote mismatch")
+    {
         MaterialFailure::Evidence(detail) => detail,
         other => panic!("expected GFM evidence mismatch, got {other:?}"),
     }
@@ -73,31 +123,45 @@ fn visible_notice_button(ctx: &egui::Context, label: &str, full: bool) -> Option
         match shape {
             egui::Shape::Text(text) if text.galley.text() == label => {
                 let rect = egui::Rect::from_min_size(text.pos, text.galley.size());
-                (if full { clip.contains_rect(rect) } else { clip.contains(rect.center()) })
-                    .then_some(rect.center())
+                (if full {
+                    clip.contains_rect(rect)
+                } else {
+                    clip.contains(rect.center())
+                })
+                .then_some(rect.center())
             }
             egui::Shape::Vec(parts) => parts.iter().find_map(|part| find(part, clip, label, full)),
             _ => None,
         }
     }
     let layers: Vec<_> = if full {
-        vec![egui::LayerId::new(egui::Order::Middle,
-            egui::Id::new("教材の根拠と差分を確認"))]
+        vec![egui::LayerId::new(
+            egui::Order::Middle,
+            egui::Id::new("教材の根拠と差分を確認"),
+        )]
     } else {
         ctx.memory(|memory| memory.layer_ids().collect())
     };
-    ctx.graphics(|graphics| layers.into_iter().find_map(|layer| {
-        graphics.get(layer)?.all_entries().find_map(|entry| find(&entry.shape, entry.clip_rect, label, full))
-    }))
+    ctx.graphics(|graphics| {
+        layers.into_iter().find_map(|layer| {
+            graphics
+                .get(layer)?
+                .all_entries()
+                .find_map(|entry| find(&entry.shape, entry.clip_rect, label, full))
+        })
+    })
 }
 
 fn gfm_visible_area(ctx: &egui::Context, app: &WordApp) -> egui::Rect {
     let screen = ctx.screen_rect();
-    if app.page != Page::Chat { return screen; }
+    if app.page != Page::Chat {
+        return screen;
+    }
     let id = &app.progress.chats[app.chat_selected].id;
     let answer_id = egui::Id::new(("chat-copy-answer", id, 0));
     ctx.data(|data| data.get_temp::<egui::Rect>(answer_id.with("clip")))
-        .unwrap_or(egui::Rect::NOTHING).intersect(screen)
+        .unwrap_or(egui::Rect::NOTHING)
+        .intersect(screen)
 }
 
 fn visible_gfm_header(ctx: &egui::Context, viewport: egui::Rect) -> Option<egui::Pos2> {
@@ -112,21 +176,33 @@ fn visible_gfm_header(ctx: &egui::Context, viewport: egui::Rect) -> Option<egui:
         }
     }
     let layers: Vec<_> = ctx.memory(|memory| memory.layer_ids().collect());
-    ctx.graphics(|graphics| layers.into_iter().find_map(|layer| {
-        graphics.get(layer)?.all_entries().find_map(|entry| {
-            find(&entry.shape, entry.clip_rect.intersect(viewport))
+    ctx.graphics(|graphics| {
+        layers.into_iter().find_map(|layer| {
+            graphics
+                .get(layer)?
+                .all_entries()
+                .find_map(|entry| find(&entry.shape, entry.clip_rect.intersect(viewport)))
         })
-    }))
+    })
 }
 
 fn visible_notice_glyphs(ctx: &egui::Context, marker: &str, viewport: egui::Rect) -> Vec<bool> {
     visible_notice_glyphs_in_layer(ctx, marker, viewport, None)
 }
 
-fn visible_notice_glyphs_in_layer(ctx: &egui::Context, marker: &str,
-    viewport: egui::Rect, layer: Option<egui::LayerId>) -> Vec<bool> {
-    fn found(shape: &egui::Shape, clip: egui::Rect, marker: &str,
-        seen: &mut [bool], pixels_per_point: f32) {
+fn visible_notice_glyphs_in_layer(
+    ctx: &egui::Context,
+    marker: &str,
+    viewport: egui::Rect,
+    layer: Option<egui::LayerId>,
+) -> Vec<bool> {
+    fn found(
+        shape: &egui::Shape,
+        clip: egui::Rect,
+        marker: &str,
+        seen: &mut [bool],
+        pixels_per_point: f32,
+    ) {
         match shape {
             egui::Shape::Text(text) => {
                 let mut content = String::new();
@@ -135,43 +211,50 @@ fn visible_notice_glyphs_in_layer(ctx: &egui::Context, marker: &str,
                     for glyph in &row.glyphs {
                         content.push(glyph.chr);
                         let local_left_top = glyph.pos.to_vec2() + glyph.uv_rect.offset;
-                        let left_top = text.pos + egui::vec2(
-                            (local_left_top.x * pixels_per_point).round() / pixels_per_point,
-                            (local_left_top.y * pixels_per_point).round() / pixels_per_point,
-                        );
-                        let glyph_rect = egui::Rect::from_min_size(
-                            left_top,
-                            glyph.uv_rect.size,
-                        );
-                        visible.push(!glyph.uv_rect.is_nothing()
-                            && clip.contains_rect(glyph_rect));
+                        let left_top = text.pos
+                            + egui::vec2(
+                                (local_left_top.x * pixels_per_point).round() / pixels_per_point,
+                                (local_left_top.y * pixels_per_point).round() / pixels_per_point,
+                            );
+                        let glyph_rect = egui::Rect::from_min_size(left_top, glyph.uv_rect.size);
+                        visible.push(!glyph.uv_rect.is_nothing() && clip.contains_rect(glyph_rect));
                     }
                 }
                 for (byte_index, _) in content.match_indices(marker) {
                     let start = content[..byte_index].chars().count();
                     let count = seen.len();
-                    for (stored, visible_now) in seen.iter_mut()
-                        .zip(&visible[start..start + count]) {
+                    for (stored, visible_now) in seen.iter_mut().zip(&visible[start..start + count])
+                    {
                         *stored |= *visible_now;
                     }
                 }
             }
             egui::Shape::Vec(parts) => {
-                for part in parts { found(part, clip, marker, seen, pixels_per_point); }
+                for part in parts {
+                    found(part, clip, marker, seen, pixels_per_point);
+                }
             }
             _ => {}
         }
     }
     let mut seen = vec![false; marker.chars().count()];
-    let layers: Vec<_> = if let Some(layer) = layer { vec![layer] }
-        else { ctx.memory(|memory| memory.layer_ids().collect()) };
+    let layers: Vec<_> = if let Some(layer) = layer {
+        vec![layer]
+    } else {
+        ctx.memory(|memory| memory.layer_ids().collect())
+    };
     let pixels_per_point = ctx.pixels_per_point();
     ctx.graphics(|graphics| {
         for layer in layers {
             if let Some(list) = graphics.get(layer) {
                 for entry in list.all_entries() {
-                    found(&entry.shape, entry.clip_rect.intersect(viewport), marker,
-                        &mut seen, pixels_per_point);
+                    found(
+                        &entry.shape,
+                        entry.clip_rect.intersect(viewport),
+                        marker,
+                        &mut seen,
+                        pixels_per_point,
+                    );
                 }
             }
         }
@@ -180,7 +263,9 @@ fn visible_notice_glyphs_in_layer(ctx: &egui::Context, marker: &str,
 }
 
 fn visible_notice_row(ctx: &egui::Context, marker: &str) -> bool {
-    visible_notice_glyphs(ctx, marker, ctx.screen_rect()).into_iter().all(|seen| seen)
+    visible_notice_glyphs(ctx, marker, ctx.screen_rect())
+        .into_iter()
+        .all(|seen| seen)
 }
 
 pub(crate) fn run() -> eframe::Result<()> {
@@ -192,10 +277,53 @@ pub(crate) fn run() -> eframe::Result<()> {
         .map(PathBuf::from)
         .expect("--ui-check PNG_PATH");
     let small = args.iter().any(|s| s == "--small");
-    let qwen_state = args.iter().position(|s| s == "--qwen-reading").and_then(|i| args.get(i + 1)).cloned();
-    if let Some(state) = &qwen_state { assert!(["input", "confirm", "running", "result", "failed", "settings", "connections", "mismatch", "unassessable", "jsonfailed", "fieldsfailed", "responsefailed", "unconfigured", "probe-running", "probe-success", "probe-auth", "probe-permission", "probe-unsupported", "probe-missing", "probe-cancelled", "probe-timeout", "probe-invalid", "probe-network", "probe-rate-limit"].contains(&state.as_str()), "unknown Qwen preview state"); }
-    let qwen_scale = args.iter().position(|s| s == "--qwen-scale").and_then(|i| args.get(i + 1)).and_then(|s| s.parse::<f32>().ok()).unwrap_or(1.0);
-    assert!([0.8, 1.0, 1.25, 1.5, 1.6, 2.0].contains(&qwen_scale), "unsupported Qwen preview scale");
+    let qwen_state = args
+        .iter()
+        .position(|s| s == "--qwen-reading")
+        .and_then(|i| args.get(i + 1))
+        .cloned();
+    if let Some(state) = &qwen_state {
+        assert!(
+            [
+                "input",
+                "confirm",
+                "running",
+                "result",
+                "failed",
+                "settings",
+                "connections",
+                "mismatch",
+                "unassessable",
+                "jsonfailed",
+                "fieldsfailed",
+                "responsefailed",
+                "unconfigured",
+                "probe-running",
+                "probe-success",
+                "probe-auth",
+                "probe-permission",
+                "probe-unsupported",
+                "probe-missing",
+                "probe-cancelled",
+                "probe-timeout",
+                "probe-invalid",
+                "probe-network",
+                "probe-rate-limit"
+            ]
+            .contains(&state.as_str()),
+            "unknown Qwen preview state"
+        );
+    }
+    let qwen_scale = args
+        .iter()
+        .position(|s| s == "--qwen-scale")
+        .and_then(|i| args.get(i + 1))
+        .and_then(|s| s.parse::<f32>().ok())
+        .unwrap_or(1.0);
+    assert!(
+        [0.8, 1.0, 1.25, 1.5, 1.6, 2.0].contains(&qwen_scale),
+        "unsupported Qwen preview scale"
+    );
     let empty = args.iter().any(|s| s == "--empty");
     let study = args.iter().any(|s| s == "--study");
     let active = args.iter().any(|s| s == "--active");
@@ -222,35 +350,53 @@ pub(crate) fn run() -> eframe::Result<()> {
     let chat_media_preview_file = args.iter().any(|s| s == "--chat-media-preview-file");
     let chat_media_resize = args.iter().any(|s| s == "--chat-media-resize");
     let chat_media_table = chat_media_table_tall
-        || chat_media_preview_image || chat_media_preview_file || chat_media_resize
+        || chat_media_preview_image
+        || chat_media_preview_file
+        || chat_media_resize
         || args.iter().any(|s| s == "--chat-media-table");
     let material_review = args.iter().any(|s| s == "--material-review");
     let material_context = args.iter().any(|s| s == "--material-context");
     let material_context_tail = args.iter().any(|s| s == "--material-context-tail");
-    assert!(!material_context_tail || material_context,
-        "--material-context-tail requires --material-context");
-    assert!(!material_context || material_review,
-        "--material-context requires --material-review");
+    assert!(
+        !material_context_tail || material_context,
+        "--material-context-tail requires --material-context"
+    );
+    assert!(
+        !material_context || material_review,
+        "--material-context requires --material-review"
+    );
     let material_detail = args.iter().any(|s| s == "--material-detail");
     let material_mode = args.iter().any(|s| s == "--material-mode");
     let material_scroll = args.iter().any(|s| s == "--material-scroll");
     let palette_preview = args.iter().any(|s| s == "--palette-preview");
     let palette_saved = args.iter().any(|s| s == "--palette-saved");
-    let daily_limit = args.iter().any(|s| s == "--daily-limit" || s == "--daily-limit-after-jump");
+    let daily_limit = args
+        .iter()
+        .any(|s| s == "--daily-limit" || s == "--daily-limit-after-jump");
     let daily_limit_after_jump = args.iter().any(|s| s == "--daily-limit-after-jump");
-    let quote_long = args.iter().any(|s| s == "--quote-long" || s == "--quote-long-scroll");
+    let quote_long = args
+        .iter()
+        .any(|s| s == "--quote-long" || s == "--quote-long-scroll");
     let quote_long_scroll = args.iter().any(|s| s == "--quote-long-scroll");
     let notice_structured = args.iter().any(|s| s == "--notice-structured");
-    let notice_compare = args.iter().any(|s| s == "--notice-compare" || s == "--notice-raw" || s == "--notice-end");
-    let notice_raw = args.iter().any(|s| s == "--notice-raw" || s == "--notice-end");
+    let notice_compare = args
+        .iter()
+        .any(|s| s == "--notice-compare" || s == "--notice-raw" || s == "--notice-end");
+    let notice_raw = args
+        .iter()
+        .any(|s| s == "--notice-raw" || s == "--notice-end");
     let notice_end = args.iter().any(|s| s == "--notice-end");
-    let gfm_notice = args.iter().any(|s| s == "--gfm-notice" || s == "--gfm-notice-end");
+    let gfm_notice = args
+        .iter()
+        .any(|s| s == "--gfm-notice" || s == "--gfm-notice-end");
     let gfm_notice_end = args.iter().any(|s| s == "--gfm-notice-end");
     let gfm_chat = args.iter().any(|s| s == "--gfm-chat");
     let gfm_receipt = args.iter().any(|s| s == "--gfm-receipt");
     let gfm_table_right = args.iter().any(|s| s == "--gfm-table-right");
-    assert!(!gfm_table_right || gfm_notice || gfm_chat,
-        "--gfm-table-right requires --gfm-notice or --gfm-chat");
+    assert!(
+        !gfm_table_right || gfm_notice || gfm_chat,
+        "--gfm-table-right requires --gfm-notice or --gfm-chat"
+    );
     // create_dir (not create_dir_all) refuses an existing destination.
     let root = std::env::temp_dir().join(format!(
         "ww-visual-{}-{}",
@@ -265,8 +411,11 @@ pub(crate) fn run() -> eframe::Result<()> {
             .with_inner_size(if args.iter().any(|s| s == "--qwen-minimum") {
                 // Reading preview at the real minimum, retaining --small's 480px stress fixture.
                 [820.0, 650.0]
-            } else if small && qwen_state.as_deref().is_some_and(|state|
-                state == "settings" || state == "connections" || state.starts_with("probe-")) {
+            } else if small
+                && qwen_state.as_deref().is_some_and(|state| {
+                    state == "settings" || state == "connections" || state.starts_with("probe-")
+                })
+            {
                 // Match main.rs: the actual application cannot shrink below this.
                 [820.0, 650.0]
             } else if small && qwen_state.is_some() {
@@ -309,8 +458,11 @@ pub(crate) fn run() -> eframe::Result<()> {
                     _ => Page::Home,
                 };
             }
-            if let Some(section) = args.iter().position(|s| s == "--settings-section")
-                .and_then(|index| args.get(index + 1)) {
+            if let Some(section) = args
+                .iter()
+                .position(|s| s == "--settings-section")
+                .and_then(|index| args.get(index + 1))
+            {
                 app.page = Page::Settings;
                 app.settings_section = match section.as_str() {
                     "voice" => settings_ui::SettingsSection::Voice,
@@ -322,7 +474,8 @@ pub(crate) fn run() -> eframe::Result<()> {
             }
             if args.iter().any(|s| s == "--vocabulary-file") {
                 app.page = Page::Words;
-                cc.egui_ctx.data_mut(|d| d.insert_temp(egui::Id::new("preview-vocabulary-file"), true));
+                cc.egui_ctx
+                    .data_mut(|d| d.insert_temp(egui::Id::new("preview-vocabulary-file"), true));
             }
             if args.iter().any(|s| s == "--settings-zoom") {
                 app.page = Page::Settings;
@@ -337,9 +490,17 @@ pub(crate) fn run() -> eframe::Result<()> {
                 added.base = "preview phrase".into();
                 app.pending_import = Some(vec![changed, added]);
             }
-            if chat_empty || chat_filled || chat_rename || chat_attachments || chat_consent
-                || chat_drop_confirm || chat_media_entry || chat_media_ink || chat_media_exit
-                || chat_media_table {
+            if chat_empty
+                || chat_filled
+                || chat_rename
+                || chat_attachments
+                || chat_consent
+                || chat_drop_confirm
+                || chat_media_entry
+                || chat_media_ink
+                || chat_media_exit
+                || chat_media_table
+            {
                 if app.progress.chats.is_empty() {
                     app.progress
                         .chats
@@ -355,9 +516,15 @@ pub(crate) fn run() -> eframe::Result<()> {
                     for index in 0..seconds / 60 {
                         app.progress.reviews.push(wordweave5::store::Review {
                             key: format!("sample-{}:recall", index % 4),
-                            at: 0, date: date.clone(), grade: Grade::Good,
-                            assisted: false, method: "keyboard".into(), first: offset == 5,
-                            elapsed_days: 1.0, seconds: 60, self_assessed: true,
+                            at: 0,
+                            date: date.clone(),
+                            grade: Grade::Good,
+                            assisted: false,
+                            method: "keyboard".into(),
+                            first: offset == 5,
+                            elapsed_days: 1.0,
+                            seconds: 60,
+                            self_assessed: true,
                         });
                     }
                 }
@@ -393,9 +560,15 @@ pub(crate) fn run() -> eframe::Result<()> {
                 );
                 let mut png = std::io::Cursor::new(Vec::new());
                 image::DynamicImage::ImageRgba8(image::RgbaImage::from_pixel(
-                    16, 12, image::Rgba([130, 193, 238, 255]),
-                )).write_to(&mut png, image::ImageFormat::Png).unwrap();
-                let image = store.put(wordweave5::assets::AssetKind::ImagePng, &png.into_inner()).unwrap();
+                    16,
+                    12,
+                    image::Rgba([130, 193, 238, 255]),
+                ))
+                .write_to(&mut png, image::ImageFormat::Png)
+                .unwrap();
+                let image = store
+                    .put(wordweave5::assets::AssetKind::ImagePng, &png.into_inner())
+                    .unwrap();
                 let mut wav = Vec::new();
                 wav.extend_from_slice(b"RIFF");
                 wav.extend_from_slice(&38u32.to_le_bytes());
@@ -410,35 +583,76 @@ pub(crate) fn run() -> eframe::Result<()> {
                 wav.extend_from_slice(b"data");
                 wav.extend_from_slice(&2u32.to_le_bytes());
                 wav.extend_from_slice(&0i16.to_le_bytes());
-                let audio = store.put(wordweave5::assets::AssetKind::AudioWav, &wav).unwrap();
-                let file = store.put(wordweave5::assets::AssetKind::FileBlob,
-                    "旅先での挨拶を練習する。\nPlease help me practice.".as_bytes()).unwrap();
-                if chat_media_preview_image { app.preview_asset(&image); }
-                if chat_media_preview_file { app.preview_file_asset(&file, "trip-notes.txt"); }
+                let audio = store
+                    .put(wordweave5::assets::AssetKind::AudioWav, &wav)
+                    .unwrap();
+                let file = store
+                    .put(
+                        wordweave5::assets::AssetKind::FileBlob,
+                        "旅先での挨拶を練習する。\nPlease help me practice.".as_bytes(),
+                    )
+                    .unwrap();
+                if chat_media_preview_image {
+                    app.preview_asset(&image);
+                }
+                if chat_media_preview_file {
+                    app.preview_file_asset(&file, "trip-notes.txt");
+                }
                 let items = vec![
-                    wordweave5::chat::Attachment { original: image.clone(), image: Some(image),
-                        background: None, file_name: Some("airport.png".into()),
-                        source_text: "airport.png".into(), transcript: None },
-                    wordweave5::chat::Attachment { original: audio, image: None,
-                        background: None, file_name: Some("greeting.wav".into()),
-                        source_text: "greeting.wav".into(), transcript: None },
-                    wordweave5::chat::Attachment { original: file, image: None,
-                        background: None, file_name: Some("trip-notes.txt".into()),
-                        source_text: "trip-notes.txt".into(), transcript: None },
+                    wordweave5::chat::Attachment {
+                        original: image.clone(),
+                        image: Some(image),
+                        background: None,
+                        file_name: Some("airport.png".into()),
+                        source_text: "airport.png".into(),
+                        transcript: None,
+                    },
+                    wordweave5::chat::Attachment {
+                        original: audio,
+                        image: None,
+                        background: None,
+                        file_name: Some("greeting.wav".into()),
+                        source_text: "greeting.wav".into(),
+                        transcript: None,
+                    },
+                    wordweave5::chat::Attachment {
+                        original: file,
+                        image: None,
+                        background: None,
+                        file_name: Some("trip-notes.txt".into()),
+                        source_text: "trip-notes.txt".into(),
+                        transcript: None,
+                    },
                 ];
                 let chat = &mut app.progress.chats[0];
                 chat.draft = "添付の内容を使って旅行英語を練習したい。".into();
                 chat.draft_attachments = items;
                 if chat_attachments {
-                    chat.complete(chat.draft.clone(), "空港での挨拶から始めましょう。".into(),
-                        wordweave5::execution::Execution::default()).unwrap();
+                    chat.complete(
+                        chat.draft.clone(),
+                        "空港での挨拶から始めましょう。".into(),
+                        wordweave5::execution::Execution::default(),
+                    )
+                    .unwrap();
                 } else if chat_consent {
                     app.pending_chat_file_send = Some(ChatFileConsent {
-                        chat_id: chat.id.clone(), question: chat.draft.clone(),
-                        attachment_ids: chat.draft_attachments.iter().map(|a| a.original.id.clone()).collect(),
-                        attachment_names: chat.draft_attachments.iter().map(|a| a.file_name.clone()).collect(),
-                        labels: vec!["画像：airport.png".into(), "音声：greeting.wav".into(),
-                            "ファイル：trip-notes.txt".into()],
+                        chat_id: chat.id.clone(),
+                        question: chat.draft.clone(),
+                        attachment_ids: chat
+                            .draft_attachments
+                            .iter()
+                            .map(|a| a.original.id.clone())
+                            .collect(),
+                        attachment_names: chat
+                            .draft_attachments
+                            .iter()
+                            .map(|a| a.file_name.clone())
+                            .collect(),
+                        labels: vec![
+                            "画像：airport.png".into(),
+                            "音声：greeting.wav".into(),
+                            "ファイル：trip-notes.txt".into(),
+                        ],
                         text_names: vec!["trip-notes.txt".into()],
                     });
                 }
@@ -482,7 +696,9 @@ pub(crate) fn run() -> eframe::Result<()> {
                 app.page = Page::Chat;
                 app.chat_material_open = true;
                 if app.progress.chats.is_empty() {
-                    app.progress.chats.push(wordweave5::chat::Conversation::new());
+                    app.progress
+                        .chats
+                        .push(wordweave5::chat::Conversation::new());
                 }
                 app.chat_selected = 0;
                 app.material_base = app.deck[0].base.clone();
@@ -498,7 +714,8 @@ pub(crate) fn run() -> eframe::Result<()> {
                     let baseline = app.deck[0].clone();
                     let mut candidate = baseline.clone();
                     candidate.meaning = "合成教材の更新後の意味。長い日本語とEnglish wordsを交え、比較画面の折返しを確認する。".repeat(3);
-                    candidate.usage = "In a client email, explain the next action precisely. ".repeat(7);
+                    candidate.usage =
+                        "In a client email, explain the next action precisely. ".repeat(7);
                     candidate.replacements.push(wordweave5::model::Replacement {
                         phrase: "strengthen".into(),
                         meaning: "合成の強化する意味".into(),
@@ -509,22 +726,36 @@ pub(crate) fn run() -> eframe::Result<()> {
                         baseline: Some(baseline),
                         candidate: candidate.clone(),
                         source: Source {
-                            entry_id: candidate.id.clone(), conversation_id: chat.id.clone(),
-                            exchange_indices: vec![0], at: 123, mode: Mode::Correct,
+                            entry_id: candidate.id.clone(),
+                            conversation_id: chat.id.clone(),
+                            exchange_indices: vec![0],
+                            at: 123,
+                            mode: Mode::Correct,
                             snapshots: vec![Snapshot {
-                                exchange_index: 0, exchange: chat.exchanges[0].clone(),
+                                exchange_index: 0,
+                                exchange: chat.exchanges[0].clone(),
                             }],
                         },
                         notices: vec!["合成案：実教材・実会話は使用していない。".into()],
                         reasons: vec![
-                            ChangeReason { path: "/meaning".into(),
+                            ChangeReason {
+                                path: "/meaning".into(),
                                 reason: "顧客向けに意味を詳しくした合成理由".into(),
-                                quotes: vec![Quote { exchange_index: 0, role: "user".into(),
-                                    quote: "client email".into() }] },
-                            ChangeReason { path: "/usage".into(),
+                                quotes: vec![Quote {
+                                    exchange_index: 0,
+                                    role: "user".into(),
+                                    quote: "client email".into(),
+                                }],
+                            },
+                            ChangeReason {
+                                path: "/usage".into(),
                                 reason: "使い方を明確にした合成理由".into(),
-                                quotes: vec![Quote { exchange_index: 0, role: "assistant".into(),
-                                    quote: "clear phrase".into() }] },
+                                quotes: vec![Quote {
+                                    exchange_index: 0,
+                                    role: "assistant".into(),
+                                    quote: "clear phrase".into(),
+                                }],
+                            },
                         ],
                         generated: Some(candidate),
                     });
@@ -586,17 +817,26 @@ pub(crate) fn run() -> eframe::Result<()> {
                 app.open_codex_path_guidance();
             }
             if palette_preview || palette_saved {
-                if page.is_none() { app.page = Page::Settings; }
+                if page.is_none() {
+                    app.page = Page::Settings;
+                }
                 app.begin_color_editor();
                 let editor = app.color_editor.as_mut().expect("synthetic palette editor");
-                editor.draft.page = wordweave5::store::TintChoice { rgb: [0, 0, 255], depth: 100 };
-                editor.draft.input = wordweave5::store::TintChoice { rgb: [255, 0, 0], depth: 100 };
+                editor.draft.page = wordweave5::store::TintChoice {
+                    rgb: [0, 0, 255],
+                    depth: 100,
+                };
+                editor.draft.input = wordweave5::store::TintChoice {
+                    rgb: [255, 0, 0],
+                    depth: 100,
+                };
                 editor.page_hex = "#0000FF".into();
                 editor.input_hex = "#FF0000".into();
                 editor.page_depth_text = "100".into();
                 editor.input_depth_text = "100".into();
                 if palette_saved {
-                    app.save_color_editor().expect("save only synthetic palette");
+                    app.save_color_editor()
+                        .expect("save only synthetic palette");
                     app.notification_open = true;
                     app.message = "合成データの配色を保存した。".into();
                 }
@@ -604,7 +844,10 @@ pub(crate) fn run() -> eframe::Result<()> {
             if daily_limit {
                 app.progress.settings.ai_daily_limit = 1;
                 app.progress.ai_calls.insert(today(), 1);
-                assert!(!app.reserve_generation(), "synthetic daily limit must reject");
+                assert!(
+                    !app.reserve_generation(),
+                    "synthetic daily limit must reject"
+                );
                 if daily_limit_after_jump {
                     // The actual click/recheck path is exercised in the headless UI test.
                     // Capture only its resulting view with isolated synthetic state.
@@ -631,7 +874,9 @@ pub(crate) fn run() -> eframe::Result<()> {
             if gfm_chat {
                 app.page = Page::Chat;
                 if app.progress.chats.is_empty() {
-                    app.progress.chats.push(wordweave5::chat::Conversation::new());
+                    app.progress
+                        .chats
+                        .push(wordweave5::chat::Conversation::new());
                 }
                 app.chat_selected = 0;
                 app.progress.chats[0].complete(
@@ -643,7 +888,9 @@ pub(crate) fn run() -> eframe::Result<()> {
             if gfm_receipt {
                 app.page = Page::Chat;
                 if app.progress.chats.is_empty() {
-                    app.progress.chats.push(wordweave5::chat::Conversation::new());
+                    app.progress
+                        .chats
+                        .push(wordweave5::chat::Conversation::new());
                 }
                 app.chat_selected = 0;
                 app.notify_material_registered("clarity".into());
@@ -661,24 +908,35 @@ pub(crate) fn run() -> eframe::Result<()> {
                     app.settings_section = super::settings_ui::SettingsSection::Connection;
                     app.qwen_settings_focus = state == "settings";
                 } else {
-                    app.qwen_dialog = Some(super::qwen_reading_ui::synthetic_dialog(&app.deck[0], state, args.iter().any(|s| s == "--qwen-tail")));
+                    app.qwen_dialog = Some(super::qwen_reading_ui::synthetic_dialog(
+                        &app.deck[0],
+                        state,
+                        args.iter().any(|s| s == "--qwen-tail"),
+                    ));
                 }
                 cc.egui_ctx.set_zoom_factor(qwen_scale);
-            } else { cc.egui_ctx.set_zoom_factor(if small { 1.6 } else { 0.8 }); }
+            } else {
+                cc.egui_ctx.set_zoom_factor(if small { 1.6 } else { 0.8 });
+            }
             Ok(Box::new(Capture {
                 app,
                 output,
                 frames: 0,
                 qwen_zoom: qwen_state.as_ref().map(|_| qwen_scale),
                 qwen_navigate: qwen_state.as_deref() == Some("connections"),
-                qwen_editor_preview: qwen_state.as_ref()
+                qwen_editor_preview: qwen_state
+                    .as_ref()
                     .filter(|state| state.as_str() == "settings" || state.starts_with("probe-"))
                     .map(|state| (state.clone(), args.iter().any(|s| s == "--qwen-tail"))),
                 speech: args.iter().any(|s| s == "--speech"),
                 speech_playing: args.iter().any(|s| s == "--speech-selected"),
                 word_file_help: args.iter().any(|s| s == "--word-file-help"),
-                media_check: chat_media_entry || chat_media_ink || chat_media_exit || chat_media_table,
-                material_scroll: material_scroll && (material_review || material_detail || material_mode),
+                media_check: chat_media_entry
+                    || chat_media_ink
+                    || chat_media_exit
+                    || chat_media_table,
+                material_scroll: material_scroll
+                    && (material_review || material_detail || material_mode),
                 material_context,
                 material_context_tail,
                 notice_scroll: quote_long_scroll,
@@ -688,7 +946,9 @@ pub(crate) fn run() -> eframe::Result<()> {
                     vec!["引用と元の回答を確認", "原文を表示"]
                 } else if notice_structured && notice_compare {
                     vec!["引用と元の回答を確認"]
-                } else { vec![] },
+                } else {
+                    vec![]
+                },
                 notice_button_index: 0,
                 notice_button_position: None,
                 notice_button_pressed: false,
@@ -696,8 +956,11 @@ pub(crate) fn run() -> eframe::Result<()> {
                 notice_body_scroll: notice_structured && notice_compare,
                 notice_end_scroll: notice_structured && notice_end || gfm_notice_end,
                 notice_tail_visible: false,
-                notice_tail_marker: if gfm_notice_end { "原文末尾GFM🦊" }
-                    else { "固定元発言の終端MARKER🦊" },
+                notice_tail_marker: if gfm_notice_end {
+                    "原文末尾GFM🦊"
+                } else {
+                    "固定元発言の終端MARKER🦊"
+                },
                 gfm_table_right,
                 gfm_table_reached: false,
                 gfm_table_pointer: None,
@@ -710,7 +973,9 @@ pub(crate) fn run() -> eframe::Result<()> {
                 palette_preview,
                 media_resize: chat_media_resize.then_some(MediaResizeCheck {
                     drag_distance: if small { 80.0 } else { 300.0 },
-                    start: egui::Pos2::ZERO, initial_width: 0.0, released_width: None,
+                    start: egui::Pos2::ZERO,
+                    initial_width: 0.0,
+                    released_width: None,
                 }),
             }))
         }),
@@ -768,41 +1033,67 @@ impl eframe::App for Capture {
             let rect = if self.app.page == Page::Deck {
                 ctx.screen_rect()
             } else {
-                ctx.memory(|memory| memory.area_rect(
-                    egui::Id::new("教材の根拠と差分を確認")))
+                ctx.memory(|memory| memory.area_rect(egui::Id::new("教材の根拠と差分を確認")))
                     .unwrap_or_else(|| ctx.screen_rect())
             };
-            let fallback = rect.left_top() + egui::vec2(
-                rect.width() * if self.app.page == Page::Deck { 0.72 } else { 0.5 },
-                rect.height() * if self.app.page == Page::Deck { 0.72 } else { 0.45 },
-            );
-            let pointer = ctx.data(|data| data.get_temp::<egui::Rect>(
-                egui::Id::new("material-change-list-viewport")))
+            let fallback = rect.left_top()
+                + egui::vec2(
+                    rect.width()
+                        * if self.app.page == Page::Deck {
+                            0.72
+                        } else {
+                            0.5
+                        },
+                    rect.height()
+                        * if self.app.page == Page::Deck {
+                            0.72
+                        } else {
+                            0.45
+                        },
+                );
+            let pointer = ctx
+                .data(|data| {
+                    data.get_temp::<egui::Rect>(egui::Id::new("material-change-list-viewport"))
+                })
                 .filter(|_| self.app.page == Page::Chat)
                 .filter(|pane| pane.is_positive() && ctx.screen_rect().contains(pane.center()))
-                .map(|pane| pane.center()).unwrap_or(fallback);
+                .map(|pane| pane.center())
+                .unwrap_or(fallback);
             input.events.push(egui::Event::PointerMoved(pointer));
             input.events.push(egui::Event::MouseWheel {
                 unit: egui::MouseWheelUnit::Point,
-                delta: egui::vec2(0.0, if self.app.page == Page::Deck { -180.0 } else { -220.0 }),
+                delta: egui::vec2(
+                    0.0,
+                    if self.app.page == Page::Deck {
+                        -180.0
+                    } else {
+                        -220.0
+                    },
+                ),
                 modifiers: egui::Modifiers::NONE,
             });
         }
         if self.notice_scroll && (self.frames == 8 || self.frames == 12) {
-            let rect = ctx.memory(|memory| memory.area_rect(egui::Id::new("notification-details-v2")))
+            let rect = ctx
+                .memory(|memory| memory.area_rect(egui::Id::new("notification-details-v2")))
                 .expect("synthetic quote notification window");
             let pointer = rect.left_top() + egui::vec2(rect.width() * 0.55, rect.height() * 0.45);
             input.events.push(egui::Event::PointerMoved(pointer));
-            input.events.push(egui::Event::MouseWheel { unit: egui::MouseWheelUnit::Point,
-                delta: egui::vec2(0.0, -220.0), modifiers: egui::Modifiers::NONE });
+            input.events.push(egui::Event::MouseWheel {
+                unit: egui::MouseWheelUnit::Point,
+                delta: egui::vec2(0.0, -220.0),
+                modifiers: egui::Modifiers::NONE,
+            });
         }
         if self.notice_button_index < self.notice_buttons.len() {
             if let Some(pos) = self.notice_button_position {
                 input.events.push(egui::Event::PointerMoved(pos));
-                input.events.push(egui::Event::PointerButton { pos,
+                input.events.push(egui::Event::PointerButton {
+                    pos,
                     button: egui::PointerButton::Primary,
                     pressed: !self.notice_button_pressed,
-                    modifiers: egui::Modifiers::NONE });
+                    modifiers: egui::Modifiers::NONE,
+                });
                 if self.notice_button_pressed {
                     self.notice_button_index += 1;
                     self.notice_button_position = None;
@@ -815,11 +1106,15 @@ impl eframe::App for Capture {
                 }
             } else if self.frames > 4 {
                 let area = if self.material_context {
-                    ctx.data(|data| data.get_temp::<egui::Rect>(
-                        egui::Id::new("material-change-detail-viewport")))
+                    ctx.data(|data| {
+                        data.get_temp::<egui::Rect>(egui::Id::new(
+                            "material-change-detail-viewport",
+                        ))
+                    })
                 } else {
-                    ctx.memory(|memory| memory.area_rect(
-                        egui::Id::new("notification-details-material-v1")))
+                    ctx.memory(|memory| {
+                        memory.area_rect(egui::Id::new("notification-details-material-v1"))
+                    })
                 };
                 if let Some(rect) = area {
                     let pointer = rect.center();
@@ -827,50 +1122,82 @@ impl eframe::App for Capture {
                     if !self.material_context || self.frames % 4 == 0 {
                         input.events.push(egui::Event::MouseWheel {
                             unit: egui::MouseWheelUnit::Point,
-                            delta: egui::vec2(0.0, if self.material_context { -12.0 } else { -120.0 }),
-                            modifiers: egui::Modifiers::NONE });
+                            delta: egui::vec2(
+                                0.0,
+                                if self.material_context { -12.0 } else { -120.0 },
+                            ),
+                            modifiers: egui::Modifiers::NONE,
+                        });
                     }
                 }
             }
-        } else if self.notice_end_scroll || self.notice_body_scroll && self.notice_finished_frame
-            .is_some_and(|finished| self.frames <= finished + 4) {
-            if let Some(rect) = ctx.memory(|memory| memory.area_rect(
-                egui::Id::new("notification-details-material-v1"))) {
+        } else if self.notice_end_scroll
+            || self.notice_body_scroll
+                && self
+                    .notice_finished_frame
+                    .is_some_and(|finished| self.frames <= finished + 4)
+        {
+            if let Some(rect) = ctx.memory(|memory| {
+                memory.area_rect(egui::Id::new("notification-details-material-v1"))
+            }) {
                 let pointer = rect.center();
                 input.events.push(egui::Event::PointerMoved(pointer));
                 input.events.push(egui::Event::MouseWheel {
                     unit: egui::MouseWheelUnit::Point,
-                    delta: egui::vec2(0.0, if self.notice_end_scroll { -1800.0 } else { -150.0 }),
-                    modifiers: egui::Modifiers::NONE });
+                    delta: egui::vec2(
+                        0.0,
+                        if self.notice_end_scroll {
+                            -1800.0
+                        } else {
+                            -150.0
+                        },
+                    ),
+                    modifiers: egui::Modifiers::NONE,
+                });
             }
         }
-        if self.material_context && self.notice_finished_frame.is_some()
-            && self.gfm_marker_since.is_none() && self.gfm_capture_target.is_none() {
-            if let Some(rect) = ctx.data(|data| data.get_temp::<egui::Rect>(
-                egui::Id::new("material-change-detail-viewport"))) {
+        if self.material_context
+            && self.notice_finished_frame.is_some()
+            && self.gfm_marker_since.is_none()
+            && self.gfm_capture_target.is_none()
+        {
+            if let Some(rect) = ctx.data(|data| {
+                data.get_temp::<egui::Rect>(egui::Id::new("material-change-detail-viewport"))
+            }) {
                 input.events.push(egui::Event::PointerMoved(rect.center()));
                 if self.frames % 4 == 0 {
                     input.events.push(egui::Event::MouseWheel {
-                        unit: egui::MouseWheelUnit::Point, delta: egui::vec2(0.0, -12.0),
+                        unit: egui::MouseWheelUnit::Point,
+                        delta: egui::vec2(0.0, -12.0),
                         modifiers: egui::Modifiers::NONE,
                     });
                 }
             }
         }
-        if self.gfm_table_right && !self.gfm_table_reached
-            && self.gfm_capture_target.is_none() && (8..=500).contains(&self.frames)
-            && self.gfm_marker_since.is_none() {
+        if self.gfm_table_right
+            && !self.gfm_table_reached
+            && self.gfm_capture_target.is_none()
+            && (8..=500).contains(&self.frames)
+            && self.gfm_marker_since.is_none()
+        {
             let viewport = gfm_visible_area(ctx, &self.app);
-            if self.gfm_table_pointer.is_some_and(|pointer| !viewport.contains(pointer)) {
+            if self
+                .gfm_table_pointer
+                .is_some_and(|pointer| !viewport.contains(pointer))
+            {
                 self.gfm_table_pointer = None;
                 self.gfm_horizontal_hover_frame = None;
             }
             if let Some(pointer) = self.gfm_table_pointer.filter(|_| !self.gfm_horizontal_sent) {
                 input.events.push(egui::Event::PointerMoved(pointer));
-                if self.gfm_horizontal_hover_frame.is_some_and(|frame| self.frames > frame) {
+                if self
+                    .gfm_horizontal_hover_frame
+                    .is_some_and(|frame| self.frames > frame)
+                {
                     input.events.push(egui::Event::MouseWheel {
                         unit: egui::MouseWheelUnit::Point,
-                        delta: egui::vec2(-500.0, 0.0), modifiers: egui::Modifiers::NONE,
+                        delta: egui::vec2(-500.0, 0.0),
+                        modifiers: egui::Modifiers::NONE,
                     });
                     self.gfm_horizontal_sent = true;
                 } else {
@@ -878,47 +1205,68 @@ impl eframe::App for Capture {
                 }
             } else if self.frames % 4 == 0 {
                 let pointer = if self.app.page == Page::Chat {
-                    (viewport.width() > 1.0 && viewport.height() > 1.0)
-                        .then_some(viewport.center())
-                }
-                    else { Some(ctx.memory(|memory| memory.area_rect(
-                        egui::Id::new("notification-details-material-v1")))
-                        .expect("synthetic GFM notification window").center()) };
+                    (viewport.width() > 1.0 && viewport.height() > 1.0).then_some(viewport.center())
+                } else {
+                    Some(
+                        ctx.memory(|memory| {
+                            memory.area_rect(egui::Id::new("notification-details-material-v1"))
+                        })
+                        .expect("synthetic GFM notification window")
+                        .center(),
+                    )
+                };
                 if let Some(pointer) = pointer {
                     input.events.push(egui::Event::PointerMoved(pointer));
                     input.events.push(egui::Event::MouseWheel {
                         unit: egui::MouseWheelUnit::Point,
-                        delta: egui::vec2(0.0, -10.0), modifiers: egui::Modifiers::NONE,
+                        delta: egui::vec2(0.0, -10.0),
+                        modifiers: egui::Modifiers::NONE,
                     });
                 }
             }
         }
-        let Some(check) = &mut self.media_resize else { return };
+        let Some(check) = &mut self.media_resize else {
+            return;
+        };
         // Exercise egui's actual edge-drag path in the isolated native capture.
-        input.events.retain(|event| !matches!(event, egui::Event::PointerMoved(_)
-            | egui::Event::PointerButton { .. } | egui::Event::PointerGone));
+        input.events.retain(|event| {
+            !matches!(
+                event,
+                egui::Event::PointerMoved(_)
+                    | egui::Event::PointerButton { .. }
+                    | egui::Event::PointerGone
+            )
+        });
         if self.frames == 8 {
-            let rect = ctx.memory(|memory| memory.area_rect(
-                egui::Id::new("ファイル・音声・手書きを添付"))).expect("media dialog");
+            let rect = ctx
+                .memory(|memory| memory.area_rect(egui::Id::new("ファイル・音声・手書きを添付")))
+                .expect("media dialog");
             check.initial_width = rect.width();
             check.start = rect.right_center() - egui::vec2(1.0, 0.0);
             input.events.push(egui::Event::PointerMoved(check.start));
         } else if self.frames == 9 || self.frames == 11 {
             let pressed = self.frames == 9;
-            let pos = check.start - egui::vec2(if pressed { 0.0 } else { check.drag_distance }, 0.0);
+            let pos =
+                check.start - egui::vec2(if pressed { 0.0 } else { check.drag_distance }, 0.0);
             input.events.push(egui::Event::PointerButton {
-                pos, button: egui::PointerButton::Primary, pressed,
+                pos,
+                button: egui::PointerButton::Primary,
+                pressed,
                 modifiers: egui::Modifiers::NONE,
             });
         } else if self.frames == 10 {
             input.events.push(egui::Event::PointerMoved(
-                check.start - egui::vec2(check.drag_distance, 0.0)));
+                check.start - egui::vec2(check.drag_distance, 0.0),
+            ));
         }
     }
 
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         if let Some(zoom) = self.qwen_zoom {
-            if ctx.zoom_factor() != zoom { ctx.set_zoom_factor(zoom); ctx.request_repaint(); }
+            if ctx.zoom_factor() != zoom {
+                ctx.set_zoom_factor(zoom);
+                ctx.request_repaint();
+            }
         }
         // Exercise the real navigation after startup zoom/font layout settles.
         if self.qwen_navigate && self.frames == 3 {
@@ -929,7 +1277,9 @@ impl eframe::App for Capture {
         if let Some((state, tail)) = &self.qwen_editor_preview {
             if self.frames == 3 {
                 self.app.qwen_settings = Some(super::qwen_settings::synthetic_editor(
-                    self.app.qwen_store.clone(), state));
+                    self.app.qwen_store.clone(),
+                    state,
+                ));
                 self.app.qwen_settings_focus = false;
             }
             if *tail && (3..=8).contains(&self.frames) {
@@ -961,20 +1311,41 @@ impl eframe::App for Capture {
             self.app.update_ui(ctx);
         }
         if self.notice_button_index < self.notice_buttons.len()
-            && self.notice_button_position.is_none() && !self.notice_button_pressed {
-            self.notice_button_position = visible_notice_button(ctx,
-                self.notice_buttons[self.notice_button_index], self.material_context);
+            && self.notice_button_position.is_none()
+            && !self.notice_button_pressed
+        {
+            self.notice_button_position = visible_notice_button(
+                ctx,
+                self.notice_buttons[self.notice_button_index],
+                self.material_context,
+            );
         }
-        if self.material_context && self.notice_finished_frame.is_some()
-            && self.gfm_capture_target.is_none() {
-            let marker = if self.material_context_tail { "固定回答の末尾。" }
-                else { "明確な表現" };
-            let visible = ctx.data(|data| data.get_temp::<egui::Rect>(
-                egui::Id::new("material-change-detail-viewport")))
-                .is_some_and(|viewport| visible_notice_glyphs_in_layer(ctx, marker, viewport,
-                    Some(egui::LayerId::new(egui::Order::Middle,
-                        egui::Id::new("教材の根拠と差分を確認"))))
-                    .into_iter().all(|seen| seen));
+        if self.material_context
+            && self.notice_finished_frame.is_some()
+            && self.gfm_capture_target.is_none()
+        {
+            let marker = if self.material_context_tail {
+                "固定回答の末尾。"
+            } else {
+                "明確な表現"
+            };
+            let visible = ctx
+                .data(|data| {
+                    data.get_temp::<egui::Rect>(egui::Id::new("material-change-detail-viewport"))
+                })
+                .is_some_and(|viewport| {
+                    visible_notice_glyphs_in_layer(
+                        ctx,
+                        marker,
+                        viewport,
+                        Some(egui::LayerId::new(
+                            egui::Order::Middle,
+                            egui::Id::new("教材の根拠と差分を確認"),
+                        )),
+                    )
+                    .into_iter()
+                    .all(|seen| seen)
+                });
             if visible {
                 self.gfm_marker_since.get_or_insert(self.frames);
             } else {
@@ -990,17 +1361,25 @@ impl eframe::App for Capture {
                 self.gfm_table_pointer = visible_gfm_header(ctx, viewport);
             }
             let visible_now = visible_notice_glyphs(ctx, "横スクロール終端②", viewport);
-            let new_glyph = visible_now.iter().zip(&self.gfm_table_seen)
+            let new_glyph = visible_now
+                .iter()
+                .zip(&self.gfm_table_seen)
                 .any(|(visible, seen)| *visible && !*seen);
             if new_glyph {
                 let since = *self.gfm_marker_since.get_or_insert(self.frames);
                 if self.frames >= since + 3 && self.gfm_capture_target.is_none() {
-                    let complete = visible_now.iter().zip(&self.gfm_table_seen)
+                    let complete = visible_now
+                        .iter()
+                        .zip(&self.gfm_table_seen)
                         .all(|(visible, seen)| *visible || *seen);
-                    let target = if complete { self.output.clone() } else {
-                        self.output.with_file_name(format!("{}-part{}.png",
+                    let target = if complete {
+                        self.output.clone()
+                    } else {
+                        self.output.with_file_name(format!(
+                            "{}-part{}.png",
                             self.output.file_stem().unwrap().to_string_lossy(),
-                            self.gfm_table_seen.iter().filter(|seen| **seen).count() + 1))
+                            self.gfm_table_seen.iter().filter(|seen| **seen).count() + 1
+                        ))
                     };
                     self.gfm_capture_mask = Some(visible_now);
                     self.gfm_capture_target = Some(target);
@@ -1012,16 +1391,28 @@ impl eframe::App for Capture {
         }
         if let Some(check) = &mut self.media_resize {
             if self.frames >= 11 {
-                let width = ctx.memory(|memory| memory.area_rect(
-                    egui::Id::new("ファイル・音声・手書きを添付"))).unwrap().width();
+                let width = ctx
+                    .memory(|memory| {
+                        memory.area_rect(egui::Id::new("ファイル・音声・手書きを添付"))
+                    })
+                    .unwrap()
+                    .width();
                 let released = *check.released_width.get_or_insert(width);
-                assert!(released < check.initial_width - check.drag_distance * 0.5,
-                    "native capture must actually shrink the dialog: {} -> {released}", check.initial_width);
-                assert!((width - released).abs() <= 1.0,
-                    "dialog grew while idle: released={released}, frame={}, width={width}", self.frames);
+                assert!(
+                    released < check.initial_width - check.drag_distance * 0.5,
+                    "native capture must actually shrink the dialog: {} -> {released}",
+                    check.initial_width
+                );
+                assert!(
+                    (width - released).abs() <= 1.0,
+                    "dialog grew while idle: released={released}, frame={}, width={width}",
+                    self.frames
+                );
                 if self.frames == 71 {
-                    eprintln!("native resize verified: {} -> {released}, idle 60 frames, final {width}",
-                        check.initial_width);
+                    eprintln!(
+                        "native resize verified: {} -> {released}, idle 60 frames, final {width}",
+                        check.initial_width
+                    );
                 }
             }
         }
@@ -1029,8 +1420,12 @@ impl eframe::App for Capture {
             if let egui::Event::Screenshot { image, .. } = event {
                 let bytes: Vec<u8> = image.pixels.iter().flat_map(|p| p.to_array()).collect();
                 let target = if self.gfm_table_right {
-                    self.gfm_capture_target.take().unwrap_or_else(|| self.output.clone())
-                } else { self.output.clone() };
+                    self.gfm_capture_target
+                        .take()
+                        .unwrap_or_else(|| self.output.clone())
+                } else {
+                    self.output.clone()
+                };
                 image::save_buffer(
                     &target,
                     &bytes,
@@ -1046,10 +1441,14 @@ impl eframe::App for Capture {
                         }
                         self.gfm_table_reached = self.gfm_table_seen.iter().all(|seen| *seen);
                         self.gfm_marker_since = None;
-                        if !self.gfm_table_reached { continue; }
+                        if !self.gfm_table_reached {
+                            continue;
+                        }
                     }
-                    assert!(self.gfm_table_reached,
-                        "native GFM preview did not reach the table's last column");
+                    assert!(
+                        self.gfm_table_reached,
+                        "native GFM preview did not reach the table's last column"
+                    );
                 }
                 if self.palette_preview {
                     // Screenshot is already saved; discard only this isolated fixture's draft
@@ -1064,30 +1463,57 @@ impl eframe::App for Capture {
             }
         }
         self.frames += 1;
-        if self.material_context && self.gfm_capture_target.is_none()
-            && self.gfm_marker_since.is_some_and(|since| self.frames >= since + 8) {
+        if self.material_context
+            && self.gfm_capture_target.is_none()
+            && self
+                .gfm_marker_since
+                .is_some_and(|since| self.frames >= since + 8)
+        {
             self.gfm_capture_target = Some(self.output.clone());
             ctx.send_viewport_cmd(egui::ViewportCommand::Screenshot(Default::default()));
         }
-        if self.frames == if self.material_context { 512 }
-            else if self.media_resize.is_some() { 72 } else if self.gfm_table_right { 512 }
-            else if self.material_scroll || self.notice_scroll
-            || !self.notice_buttons.is_empty() || self.notice_end_scroll { 24 } else { 8 } {
-            assert_eq!(self.notice_button_index, self.notice_buttons.len(),
-                "native notice preview did not complete comparison/raw click");
+        if self.frames
+            == if self.material_context {
+                512
+            } else if self.media_resize.is_some() {
+                72
+            } else if self.gfm_table_right {
+                512
+            } else if self.material_scroll
+                || self.notice_scroll
+                || !self.notice_buttons.is_empty()
+                || self.notice_end_scroll
+            {
+                24
+            } else {
+                8
+            }
+        {
+            assert_eq!(
+                self.notice_button_index,
+                self.notice_buttons.len(),
+                "native notice preview did not complete comparison/raw click"
+            );
             if self.notice_end_scroll {
-                assert!(self.notice_tail_visible,
-                    "native notice preview did not visibly reach fixed-source tail marker");
+                assert!(
+                    self.notice_tail_visible,
+                    "native notice preview did not visibly reach fixed-source tail marker"
+                );
             }
             if self.material_context {
-                assert!(self.gfm_capture_target.is_some(),
-                    "native fixed conversation did not visibly reach its Markdown marker");
+                assert!(
+                    self.gfm_capture_target.is_some(),
+                    "native fixed conversation did not visibly reach its Markdown marker"
+                );
             } else if !self.gfm_table_right {
                 ctx.send_viewport_cmd(egui::ViewportCommand::Screenshot(Default::default()));
             }
         }
-        if self.gfm_table_right && self.frames >= 512 && !self.gfm_table_reached
-            && self.gfm_capture_target.is_none() {
+        if self.gfm_table_right
+            && self.frames >= 512
+            && !self.gfm_table_reached
+            && self.gfm_capture_target.is_none()
+        {
             self.gfm_capture_target = Some(self.output.clone());
             ctx.send_viewport_cmd(egui::ViewportCommand::Screenshot(Default::default()));
         }

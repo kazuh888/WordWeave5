@@ -108,13 +108,9 @@ fn comparison_list(ui: &mut egui::Ui, rows: &[material_diff::Row], selected: &mu
     ui.strong("変更箇所");
     for row in rows {
         let label = format!("{}：{}", row.kind, row.label);
-        if crate::app::controls::list_row(
-            ui,
-            &label,
-            *selected == row.path,
-        )
-        .on_hover_text(&label)
-        .clicked()
+        if crate::app::controls::list_row(ui, &label, *selected == row.path)
+            .on_hover_text(&label)
+            .clicked()
         {
             *selected = row.path.clone();
         }
@@ -157,7 +153,9 @@ fn comparison_detail(
     let Some(row) = rows.iter().find(|row| row.path == selected) else {
         return (image, audio);
     };
-    if compact { ui.strong("変更理由・該当引用"); }
+    if compact {
+        ui.strong("変更理由・該当引用");
+    }
     ui.strong(format!("{}：{}", row.kind, row.label));
     let (before, after) = material_diff::spans(&row.before, &row.after);
     if ui.available_width() >= 600.0 {
@@ -194,7 +192,9 @@ fn comparison_detail(
         );
     }
     ui.separator();
-    if !compact { ui.strong("変更理由・該当引用"); }
+    if !compact {
+        ui.strong("変更理由・該当引用");
+    }
     let selected_reasons: Vec<_> = reasons
         .iter()
         .filter(|reason| {
@@ -257,8 +257,7 @@ fn comparison_detail(
                                             .selectable(true),
                                     );
                                 });
-                                super::notifications::show_markdown(
-                                    ui, markdown_id, text);
+                                super::notifications::show_markdown(ui, markdown_id, text);
                             } else {
                                 ui.add(
                                     egui::Label::new(quoted_text(text, &quotes))

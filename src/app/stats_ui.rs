@@ -45,10 +45,14 @@ impl WordApp {
                 (egui::TextStyle::Small, 16.0),
                 (egui::TextStyle::Button, 18.0),
             ] {
-                ui.style_mut().text_styles.insert(style, home_art::home_font(size));
+                ui.style_mut()
+                    .text_styles
+                    .insert(style, home_art::home_font(size));
             }
             ui.style_mut().visuals.override_text_color = Some(home_art::INK);
-            egui::Frame::new().inner_margin(16).show(ui, |ui| self.records_content(ui));
+            egui::Frame::new()
+                .inner_margin(16)
+                .show(ui, |ui| self.records_content(ui));
         });
     }
 
@@ -62,11 +66,26 @@ impl WordApp {
         });
         ui.add_space(6.0);
         let total = record_summary(&self.progress, None);
-        record_metrics(ui, &[
-            ("記録した学習時間", ux::duration(total.seconds), "これまでの合計"),
-            ("記録した回答", format!("{}回", total.answers), "同じ項目への再回答を含む"),
-            ("取り組んだ練習項目", format!("{}項目", total.items), "同じ教材でも練習形式ごとに数える"),
-        ]);
+        record_metrics(
+            ui,
+            &[
+                (
+                    "記録した学習時間",
+                    ux::duration(total.seconds),
+                    "これまでの合計",
+                ),
+                (
+                    "記録した回答",
+                    format!("{}回", total.answers),
+                    "同じ項目への再回答を含む",
+                ),
+                (
+                    "取り組んだ練習項目",
+                    format!("{}項目", total.items),
+                    "同じ教材でも練習形式ごとに数える",
+                ),
+            ],
+        );
         ui.add_space(12.0);
         if total.answers == 0 {
             ux::panel(ui, true, |ui| {
@@ -79,10 +98,21 @@ impl WordApp {
         ui.add_space(12.0);
         ux::panel(ui, false, |ui| {
             home_art::title(ui, "回答の内訳", 22.0);
-            record_metrics(ui, &[
-                ("初めての回答", format!("{}回", total.new_answers), "回答時点で初回だった記録"),
-                ("復習としての回答", format!("{}回", total.review_answers), "2回目以降の記録"),
-            ]);
+            record_metrics(
+                ui,
+                &[
+                    (
+                        "初めての回答",
+                        format!("{}回", total.new_answers),
+                        "回答時点で初回だった記録",
+                    ),
+                    (
+                        "復習としての回答",
+                        format!("{}回", total.review_answers),
+                        "2回目以降の記録",
+                    ),
+                ],
+            );
             ui.small("項目数や回答数は学習経験を表す。正解数・習得済み語彙数ではない。削除・編集前の回答履歴も含む。");
         });
         ui.add_space(12.0);
@@ -228,7 +258,13 @@ impl WordApp {
 /// Cards always have a vertical inner layout, even in a horizontal metric row.
 fn record_metrics(ui: &mut egui::Ui, metrics: &[(&str, String, &str)]) {
     let width = ui.available_width();
-    let columns = if width >= 1000.0 { 3 } else if width >= 640.0 { 2 } else { 1 };
+    let columns = if width >= 1000.0 {
+        3
+    } else if width >= 640.0 {
+        2
+    } else {
+        1
+    };
     let columns = columns.min(metrics.len().max(1));
     let card_width = (width - 16.0 * (columns - 1) as f32) / columns as f32;
     for row in metrics.chunks(columns) {
@@ -280,8 +316,9 @@ mod tests {
                     egui::Rect::from_min_size(text.pos, text.galley.size()),
                     text.galley.job.sections[0].format.font_id.size,
                 )),
-                egui::epaint::Shape::Vec(shapes) => shapes.iter()
-                    .find_map(|shape| text_bounds(shape, label)),
+                egui::epaint::Shape::Vec(shapes) => {
+                    shapes.iter().find_map(|shape| text_bounds(shape, label))
+                }
                 _ => None,
             }
         }
@@ -298,31 +335,49 @@ mod tests {
             let history = serde_json::to_value(&app.progress).unwrap();
             for width in [1400.0, 760.0, 420.0] {
                 for _ in 0..3 {
-                    let output = ctx.run(egui::RawInput {
-                        screen_rect: Some(egui::Rect::from_min_size(
-                            egui::Pos2::ZERO, egui::vec2(width, 5000.0))),
-                        ..Default::default()
-                    }, |ctx| {
-                        egui::CentralPanel::default().show(ctx, |ui| {
-                            let right = ui.max_rect().right();
-                            let styles = ui.style().text_styles.clone();
-                            app.stats(ui);
-                            assert!(ui.min_rect().right() <= right + 1.0,
-                                "record screen overflow at {width}: {:?}", ui.min_rect());
-                            assert_eq!(ui.style().text_styles, styles, "page styles must stay local");
-                        });
-                    });
-                    let find = |label| output.shapes.iter()
-                        .find_map(|shape| text_bounds(&shape.shape, label))
-                        .unwrap_or_else(|| panic!("missing visible text: {label}"));
+                    let output = ctx.run(
+                        egui::RawInput {
+                            screen_rect: Some(egui::Rect::from_min_size(
+                                egui::Pos2::ZERO,
+                                egui::vec2(width, 5000.0),
+                            )),
+                            ..Default::default()
+                        },
+                        |ctx| {
+                            egui::CentralPanel::default().show(ctx, |ui| {
+                                let right = ui.max_rect().right();
+                                let styles = ui.style().text_styles.clone();
+                                app.stats(ui);
+                                assert!(
+                                    ui.min_rect().right() <= right + 1.0,
+                                    "record screen overflow at {width}: {:?}",
+                                    ui.min_rect()
+                                );
+                                assert_eq!(
+                                    ui.style().text_styles,
+                                    styles,
+                                    "page styles must stay local"
+                                );
+                            });
+                        },
+                    );
+                    let find = |label| {
+                        output
+                            .shapes
+                            .iter()
+                            .find_map(|shape| text_bounds(&shape.shape, label))
+                            .unwrap_or_else(|| panic!("missing visible text: {label}"))
+                    };
                     let (label, font) = find("記録した学習時間");
                     assert!(font >= 17.0);
                     let (value, font) = find(if filled { "5分0秒" } else { "0分0秒" });
                     assert_eq!(font, 30.0);
                     let (note, font) = find("これまでの合計");
                     assert!(font >= 16.0);
-                    assert!(label.bottom() <= value.top() + 1.0 && value.bottom() <= note.top() + 1.0,
-                        "card text must stack vertically: {label:?} {value:?} {note:?}");
+                    assert!(
+                        label.bottom() <= value.top() + 1.0 && value.bottom() <= note.top() + 1.0,
+                        "card text must stack vertically: {label:?} {value:?} {note:?}"
+                    );
                     assert_eq!(find("学習した時間と、取り組んだ表現を振り返る。").1, 19.0);
                 }
             }
@@ -336,21 +391,37 @@ mod tests {
     fn record_cards_wrap_large_totals_without_expanding_the_page() {
         let (ctx, app, root) = super::super::harness_tests::fixture();
         for width in [1400.0, 760.0, 420.0] {
-            let _ = ctx.run(egui::RawInput {
-                screen_rect: Some(egui::Rect::from_min_size(
-                    egui::Pos2::ZERO, egui::vec2(width, 2000.0))),
-                ..Default::default()
-            }, |ctx| {
-                egui::CentralPanel::default().show(ctx, |ui| {
-                    ui.spacing_mut().item_spacing.x = 16.0;
-                    let right = ui.max_rect().right();
-                    record_metrics(ui, &[
-                        ("記録した学習時間", ux::duration(u64::MAX), "大きな累積値も折り返す"),
-                        ("取り組んだ練習項目", "999999999999項目".into(), "練習形式ごとの項目"),
-                    ]);
-                    assert!(ui.min_rect().right() <= right + 1.0);
-                });
-            });
+            let _ = ctx.run(
+                egui::RawInput {
+                    screen_rect: Some(egui::Rect::from_min_size(
+                        egui::Pos2::ZERO,
+                        egui::vec2(width, 2000.0),
+                    )),
+                    ..Default::default()
+                },
+                |ctx| {
+                    egui::CentralPanel::default().show(ctx, |ui| {
+                        ui.spacing_mut().item_spacing.x = 16.0;
+                        let right = ui.max_rect().right();
+                        record_metrics(
+                            ui,
+                            &[
+                                (
+                                    "記録した学習時間",
+                                    ux::duration(u64::MAX),
+                                    "大きな累積値も折り返す",
+                                ),
+                                (
+                                    "取り組んだ練習項目",
+                                    "999999999999項目".into(),
+                                    "練習形式ごとの項目",
+                                ),
+                            ],
+                        );
+                        assert!(ui.min_rect().right() <= right + 1.0);
+                    });
+                },
+            );
         }
         drop(app);
         std::fs::remove_dir_all(root).unwrap();
