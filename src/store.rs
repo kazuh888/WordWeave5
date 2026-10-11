@@ -48,6 +48,12 @@ pub(crate) struct ProgressWriteGuard {
 }
 
 pub(crate) fn acquire_progress_write() -> Result<ProgressWriteGuard, ProgressGateError> {
+    let guard = acquire_progress_exclusion()?;
+    guard.ensure_writable()?;
+    Ok(guard)
+}
+
+fn acquire_progress_exclusion() -> Result<ProgressWriteGuard, ProgressGateError> {
     if PROGRESS_WRITE_HELD.with(Cell::get) {
         return Err(ProgressGateError::Reentrant);
     }
@@ -55,9 +61,7 @@ pub(crate) fn acquire_progress_write() -> Result<ProgressWriteGuard, ProgressGat
         .lock()
         .map_err(|_| ProgressGateError::Poisoned)?;
     PROGRESS_WRITE_HELD.with(|held| held.set(true));
-    let guard = ProgressWriteGuard { _lock: lock };
-    guard.ensure_writable()?;
-    Ok(guard)
+    Ok(ProgressWriteGuard { _lock: lock })
 }
 
 impl ProgressWriteGuard {
@@ -1331,8 +1335,7 @@ impl Storage {
     }
 
     pub fn open() -> Result<Self, String> {
-        let root = std::env::var_os("LOCALAPPDATA").ok_or("LOCALAPPDATAが見つかりません。")?;
-        Self::at(Path::new(&root).join("WordWeave5"))
+        Self::at(resolve_storage_root()?)
     }
     pub fn at(dir: PathBuf) -> Result<Self, String> {
         fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
@@ -1372,11 +1375,18 @@ impl Storage {
 }
 
 pub fn atomic_write(path: &Path, bytes: &[u8]) -> Result<(), String> {
+    atomic_write_with_temp(path, bytes, &atomic_temp_path(path))
+}
+
+fn atomic_temp_path(path: &Path) -> PathBuf {
     let stamp = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .unwrap_or_default()
         .as_nanos();
-    let temp = path.with_extension(format!("tmp-{}-{stamp}", std::process::id()));
+    path.with_extension(format!("tmp-{}-{stamp}", std::process::id()))
+}
+
+fn atomic_write_with_temp(path: &Path, bytes: &[u8], temp: &Path) -> Result<(), String> {
     let result = (|| {
         let mut f = OpenOptions::new()
             .write(true)
@@ -1393,17 +1403,19 @@ pub fn atomic_write(path: &Path, bytes: &[u8]) -> Result<(), String> {
     result.map_err(|e: std::io::Error| e.to_string())
 }
 
-// I2d-H scaffold: unconnected, side-effect-free entry points for independent RED.
 pub fn resolve_storage_root() -> Result<PathBuf, String> {
-    Err("外部書き出し先の検査は未実装です。".into())
+    let root = std::env::var_os("LOCALAPPDATA").ok_or("LOCALAPPDATAが見つかりません。")?;
+    Ok(Path::new(&root).join("WordWeave5"))
 }
 
-pub fn write_external_file(_root: &Path, _dest: &Path, _bytes: &[u8]) -> Result<(), String> {
-    Err("外部書き出し先の検査は未実装です。".into())
+pub fn write_external_file(root: &Path, dest: &Path, bytes: &[u8]) -> Result<(), String> {
+    let guard = acquire_external_export().map_err(ProgressGateError::message)?;
+    write_external_file_under_guard(root, dest, bytes, &guard)
 }
 
-pub fn create_external_directory(_root: &Path, _dest: &Path) -> Result<(), String> {
-    Err("外部書き出し先の検査は未実装です。".into())
+pub fn create_external_directory(root: &Path, dest: &Path) -> Result<(), String> {
+    let guard = acquire_external_export().map_err(ProgressGateError::message)?;
+    create_external_directory_under_guard(root, dest, &guard).map(|_| ())
 }
 
 #[derive(Debug)]
@@ -1412,26 +1424,35 @@ pub(crate) struct ExternalExportGuard {
 }
 
 pub(crate) fn acquire_external_export() -> Result<ExternalExportGuard, ProgressGateError> {
-    Err(ProgressGateError::Reentrant)
+    Ok(ExternalExportGuard {
+        _guard: acquire_progress_exclusion()?,
+    })
 }
 
 pub(crate) fn write_external_file_under_guard(
-    _root: &Path,
-    _dest: &Path,
-    _bytes: &[u8],
-    _guard: &ExternalExportGuard,
+    root: &Path,
+    dest: &Path,
+    bytes: &[u8],
+    guard: &ExternalExportGuard,
 ) -> Result<(), String> {
-    Err("外部書き出し先の検査は未実装です。".into())
+    let checked = prepare_external_destination(root, dest, ExternalDestinationKind::File, guard)
+        .map_err(ExternalDestinationError::message)?;
+    let temp = atomic_temp_path(&checked.destination);
+    publish_external_file(&checked, bytes, &temp)
 }
 
 pub(crate) fn create_external_directory_under_guard(
-    _root: &Path,
-    _dest: &Path,
-    _guard: &ExternalExportGuard,
+    root: &Path,
+    dest: &Path,
+    guard: &ExternalExportGuard,
 ) -> Result<PathBuf, String> {
-    Err("外部書き出し先の検査は未実装です。".into())
+    let checked =
+        prepare_external_destination(root, dest, ExternalDestinationKind::Directory, guard)
+            .map_err(ExternalDestinationError::message)?;
+    create_checked_external_directory(&checked)
 }
 
+#[derive(Clone, Copy, PartialEq, Eq)]
 enum ExternalDestinationKind {
     File,
     Directory,
@@ -1447,37 +1468,602 @@ enum ExternalDestinationError {
     AlreadyExists,
 }
 
+impl ExternalDestinationError {
+    fn message(self) -> String {
+        match self {
+            Self::Changed => "保存先が変更されました。別の外部保存先を選んでください。",
+            Self::AlreadyExists => "保存先が既に存在します。別の外部保存先を選んでください。",
+            _ => "安全な保存先を確認できません。別の外部保存先を選んでください。",
+        }
+        .into()
+    }
+}
+
 struct CheckedExternalDestination<'g> {
     _guard: &'g ExternalExportGuard,
+    kind: ExternalDestinationKind,
+    destination: PathBuf,
+    #[cfg(windows)]
+    state: external_destination_windows::CheckedState,
 }
 
 fn prepare_external_destination<'g>(
-    _root: &Path,
-    _dest: &Path,
-    _kind: ExternalDestinationKind,
-    _guard: &'g ExternalExportGuard,
+    root: &Path,
+    dest: &Path,
+    kind: ExternalDestinationKind,
+    guard: &'g ExternalExportGuard,
 ) -> Result<CheckedExternalDestination<'g>, ExternalDestinationError> {
-    Err(ExternalDestinationError::Io)
+    #[cfg(windows)]
+    {
+        let cwd = std::env::current_dir().map_err(|_| ExternalDestinationError::Io)?;
+        external_destination_windows::prepare(root, dest, kind, guard, &cwd)
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = (root, dest, kind, guard);
+        Err(ExternalDestinationError::IdentityUnavailable)
+    }
 }
 
 fn recheck_external_destination(
-    _checked: &CheckedExternalDestination<'_>,
+    checked: &CheckedExternalDestination<'_>,
 ) -> Result<(), ExternalDestinationError> {
-    Err(ExternalDestinationError::Io)
+    #[cfg(windows)]
+    {
+        external_destination_windows::recheck(&checked.state)
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = checked;
+        Err(ExternalDestinationError::IdentityUnavailable)
+    }
 }
 
 fn publish_external_file(
-    _checked: &CheckedExternalDestination<'_>,
-    _bytes: &[u8],
-    _temp: &Path,
+    checked: &CheckedExternalDestination<'_>,
+    bytes: &[u8],
+    temp: &Path,
 ) -> Result<(), String> {
-    Err("外部書き出し先の検査は未実装です。".into())
+    if checked.kind != ExternalDestinationKind::File {
+        return Err(ExternalDestinationError::UnsafePath.message());
+    }
+    #[cfg(windows)]
+    {
+        let checked_temp = external_destination_windows::prepare(
+            &checked.state.root,
+            temp,
+            ExternalDestinationKind::File,
+            checked._guard,
+            &checked.state.cwd,
+        )
+        .map_err(ExternalDestinationError::message)?;
+        if checked_temp.state.leaf_present
+            || checked_temp.state.parent_identity != checked.state.parent_identity
+            || external_destination_windows::same_planned_name(
+                checked_temp
+                    .destination
+                    .file_name()
+                    .ok_or_else(|| ExternalDestinationError::UnsafePath.message())?,
+                checked
+                    .destination
+                    .file_name()
+                    .ok_or_else(|| ExternalDestinationError::UnsafePath.message())?,
+            )
+            .map_err(ExternalDestinationError::message)?
+        {
+            return Err(ExternalDestinationError::UnsafePath.message());
+        }
+        recheck_external_destination(&checked_temp).map_err(ExternalDestinationError::message)?;
+        recheck_external_destination(checked).map_err(ExternalDestinationError::message)?;
+        atomic_write_with_temp(&checked.destination, bytes, &checked_temp.destination)
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = (bytes, temp);
+        Err(ExternalDestinationError::IdentityUnavailable.message())
+    }
 }
 
 fn create_checked_external_directory(
-    _checked: &CheckedExternalDestination<'_>,
+    checked: &CheckedExternalDestination<'_>,
 ) -> Result<PathBuf, String> {
-    Err("外部書き出し先の検査は未実装です。".into())
+    if checked.kind != ExternalDestinationKind::Directory {
+        return Err(ExternalDestinationError::UnsafePath.message());
+    }
+    recheck_external_destination(checked).map_err(ExternalDestinationError::message)?;
+    fs::create_dir(&checked.destination).map_err(|error| error.to_string())?;
+    Ok(checked.destination.clone())
+}
+
+#[cfg(windows)]
+mod external_destination_windows {
+    use super::*;
+    use std::{
+        ffi::{c_void, OsStr, OsString},
+        os::windows::{
+            ffi::{OsStrExt, OsStringExt},
+            fs::{MetadataExt, OpenOptionsExt},
+            io::AsRawHandle,
+        },
+        path::{Component, Prefix},
+    };
+
+    type Error = ExternalDestinationError;
+
+    #[repr(C)]
+    #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+    pub(super) struct FileIdentity {
+        volume_serial: u64,
+        file_id: [u8; 16],
+    }
+
+    #[repr(C)]
+    struct HandleInformation {
+        attributes: u32,
+        creation_time: [u32; 2],
+        access_time: [u32; 2],
+        write_time: [u32; 2],
+        volume_serial: u32,
+        size_high: u32,
+        size_low: u32,
+        links: u32,
+        index_high: u32,
+        index_low: u32,
+    }
+
+    const _: () = assert!(std::mem::size_of::<FileIdentity>() == 24);
+    const _: () = assert!(std::mem::align_of::<FileIdentity>() == 8);
+    const _: () = assert!(std::mem::size_of::<HandleInformation>() == 52);
+
+    #[link(name = "kernel32")]
+    extern "system" {
+        fn GetFileInformationByHandleEx(
+            handle: *mut c_void,
+            class: i32,
+            information: *mut c_void,
+            size: u32,
+        ) -> i32;
+        fn GetFileInformationByHandle(
+            handle: *mut c_void,
+            information: *mut HandleInformation,
+        ) -> i32;
+        fn GetFileType(handle: *mut c_void) -> u32;
+        fn GetFinalPathNameByHandleW(
+            handle: *mut c_void,
+            path: *mut u16,
+            capacity: u32,
+            flags: u32,
+        ) -> u32;
+        fn CompareStringOrdinal(
+            first: *const u16,
+            first_length: i32,
+            second: *const u16,
+            second_length: i32,
+            ignore_case: i32,
+        ) -> i32;
+    }
+
+    #[derive(Clone, Copy, PartialEq, Eq)]
+    struct Fingerprint {
+        identity: FileIdentity,
+        directory: bool,
+        links: u32,
+    }
+
+    struct Observation {
+        path: PathBuf,
+        fingerprint: Option<Fingerprint>,
+        // Keeping the handle alive also prevents recycling an observed file ID.
+        handle: Option<File>,
+    }
+
+    enum ProtectedRoot {
+        Existing(FileIdentity),
+        Planned {
+            ancestor: FileIdentity,
+            suffix: Vec<OsString>,
+        },
+    }
+
+    pub(super) struct CheckedState {
+        pub(super) root: PathBuf,
+        pub(super) cwd: PathBuf,
+        pub(super) parent_identity: FileIdentity,
+        pub(super) leaf_present: bool,
+        observations: Vec<Observation>,
+    }
+
+    fn observe(path: &Path) -> Result<Observation, Error> {
+        let metadata = match fs::symlink_metadata(path) {
+            Ok(value) => value,
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+                return Ok(Observation {
+                    path: path.to_owned(),
+                    fingerprint: None,
+                    handle: None,
+                });
+            }
+            Err(_) => return Err(Error::Io),
+        };
+        if metadata.file_attributes() & 0x400 != 0
+            || metadata.file_type().is_symlink()
+            || (!metadata.is_dir() && !metadata.is_file())
+        {
+            return Err(Error::UnsafePath);
+        }
+        let handle = OpenOptions::new()
+            .access_mode(0x80) // FILE_READ_ATTRIBUTES, without a content-read request.
+            .share_mode(7) // READ | WRITE | DELETE, including during replacement.
+            .custom_flags(0x0020_0000 | 0x0200_0000) // OPEN_REPARSE_POINT | BACKUP_SEMANTICS
+            .open(path)
+            .map_err(|_| Error::Io)?;
+        let mut information: HandleInformation = unsafe { std::mem::zeroed() };
+        let mut identity = FileIdentity {
+            volume_serial: 0,
+            file_id: [0; 16],
+        };
+        // SAFETY: the live File owns the handle; both repr(C) output buffers have
+        // the Windows ABI layout/size asserted above. FileIdInfo is class 18.
+        unsafe {
+            if GetFileType(handle.as_raw_handle()) != 1 {
+                return Err(Error::UnsafePath);
+            }
+            if GetFileInformationByHandle(handle.as_raw_handle(), &mut information) == 0
+                || GetFileInformationByHandleEx(
+                    handle.as_raw_handle(),
+                    18,
+                    (&mut identity as *mut FileIdentity).cast(),
+                    std::mem::size_of::<FileIdentity>() as u32,
+                ) == 0
+            {
+                return Err(Error::IdentityUnavailable);
+            }
+        }
+        if information.attributes & 0x400 != 0 {
+            return Err(Error::UnsafePath);
+        }
+        Ok(Observation {
+            path: path.to_owned(),
+            fingerprint: Some(Fingerprint {
+                identity,
+                directory: information.attributes & 0x10 != 0,
+                links: information.links,
+            }),
+            handle: Some(handle),
+        })
+    }
+
+    fn final_path(handle: &File) -> Result<PathBuf, Error> {
+        let mut buffer = vec![0u16; 260];
+        loop {
+            // SAFETY: handle is live and buffer exposes capacity writable u16s.
+            // FILE_NAME_NORMALIZED (0) | VOLUME_NAME_GUID (1) is mandatory.
+            let length = unsafe {
+                GetFinalPathNameByHandleW(
+                    handle.as_raw_handle(),
+                    buffer.as_mut_ptr(),
+                    buffer.len() as u32,
+                    1,
+                )
+            } as usize;
+            if length == 0 || length > 32768 {
+                return Err(Error::IdentityUnavailable);
+            }
+            if length >= buffer.len() {
+                buffer.resize(length + 1, 0);
+                continue;
+            }
+            let path = PathBuf::from(OsString::from_wide(&buffer[..length]));
+            if !matches!(path.components().next(), Some(Component::Prefix(prefix))
+                if matches!(prefix.kind(), Prefix::Verbatim(name) if volume_guid(name)))
+            {
+                return Err(Error::IdentityUnavailable);
+            }
+            return Ok(path);
+        }
+    }
+
+    fn volume_guid(name: &OsStr) -> bool {
+        let Some(name) = name.to_str() else {
+            return false;
+        };
+        let bytes = name.as_bytes();
+        bytes.len() == 44
+            && bytes[..7].eq_ignore_ascii_case(b"Volume{")
+            && bytes[43] == b'}'
+            && bytes[7..43].iter().enumerate().all(|(index, byte)| {
+                if [8, 13, 18, 23].contains(&index) {
+                    *byte == b'-'
+                } else {
+                    byte.is_ascii_hexdigit()
+                }
+            })
+    }
+
+    fn validate_name(name: &OsStr) -> Result<(), Error> {
+        let units: Vec<u16> = name.encode_wide().collect();
+        if units == [46] || units == [46, 46] {
+            return Ok(());
+        }
+        if units.is_empty()
+            || matches!(units.last(), Some(32 | 46))
+            || units.iter().any(|unit| {
+                *unit < 32
+                    || [b':', b'/', b'\\', b'<', b'>', b'"', b'|', b'?', b'*']
+                        .iter()
+                        .any(|byte| *unit == u16::from(*byte))
+            })
+        {
+            return Err(Error::UnsafePath);
+        }
+        let stem: Vec<u16> = units
+            .iter()
+            .take_while(|unit| **unit != 46)
+            .map(|unit| {
+                if (97..=122).contains(unit) {
+                    *unit - 32
+                } else {
+                    *unit
+                }
+            })
+            .collect();
+        let reserved = ["CON", "PRN", "AUX", "NUL", "CONIN$", "CONOUT$"]
+            .iter()
+            .any(|name| stem.iter().copied().eq(name.encode_utf16()));
+        let numbered = stem.len() == 4
+            && (stem[..3] == [67, 79, 77] || stem[..3] == [76, 80, 84])
+            && matches!(stem[3], 49..=57 | 0xb9 | 0xb2 | 0xb3);
+        if reserved || numbered {
+            return Err(Error::UnsafePath);
+        }
+        Ok(())
+    }
+
+    fn validate_path(path: &Path) -> Result<(), Error> {
+        if path.as_os_str().is_empty() || path.as_os_str().encode_wide().any(|unit| unit == 0) {
+            return Err(Error::UnsafePath);
+        }
+        for component in path.components() {
+            match component {
+                Component::Prefix(prefix) => match prefix.kind() {
+                    Prefix::Disk(_) | Prefix::VerbatimDisk(_) if path.has_root() => {}
+                    Prefix::UNC(server, share) | Prefix::VerbatimUNC(server, share) => {
+                        validate_name(server)?;
+                        validate_name(share)?;
+                    }
+                    Prefix::Verbatim(name) if volume_guid(name) && path.has_root() => {}
+                    _ => return Err(Error::UnsafePath),
+                },
+                Component::Normal(name) => validate_name(name)?,
+                _ => {}
+            }
+        }
+        Ok(())
+    }
+
+    // Observe each existing component before processing '..'. Canonicalizing
+    // first would hide a junction in, for example, junction/../safe-output.
+    fn walk(
+        absolute: &Path,
+        leaf_directory: bool,
+        allow_missing: bool,
+        observations: &mut Vec<Observation>,
+    ) -> Result<PathBuf, Error> {
+        let mut path = PathBuf::new();
+        let mut parts = absolute.components().peekable();
+        while let Some(component) = parts.next() {
+            match component {
+                Component::Prefix(prefix) => {
+                    path.push(prefix.as_os_str());
+                    continue;
+                }
+                Component::RootDir => path.push(component.as_os_str()),
+                Component::CurDir => continue,
+                Component::ParentDir => {
+                    // The preceding component was inspected as a directory.
+                    if observations
+                        .last()
+                        .and_then(|value| value.fingerprint)
+                        .is_none()
+                    {
+                        return Err(Error::UnsafePath);
+                    }
+                    path.pop();
+                }
+                Component::Normal(name) if name == OsStr::new(".") => continue,
+                Component::Normal(name) if name == OsStr::new("..") => {
+                    if observations
+                        .last()
+                        .and_then(|value| value.fingerprint)
+                        .is_none()
+                    {
+                        return Err(Error::UnsafePath);
+                    }
+                    path.pop();
+                }
+                Component::Normal(name) => path.push(name),
+            }
+            let observed = observe(&path)?;
+            let require_directory = leaf_directory || parts.peek().is_some();
+            match observed.fingerprint {
+                Some(value) if require_directory && !value.directory => {
+                    return Err(Error::UnsafePath);
+                }
+                None if !allow_missing && parts.peek().is_some() => return Err(Error::Io),
+                _ => {}
+            }
+            observations.push(observed);
+        }
+        Ok(path)
+    }
+
+    pub(super) fn same_planned_name(first: &OsStr, second: &OsStr) -> Result<bool, Error> {
+        let first: Vec<u16> = first.encode_wide().collect();
+        let second: Vec<u16> = second.encode_wide().collect();
+        let first_len = i32::try_from(first.len()).map_err(|_| Error::UnsafePath)?;
+        let second_len = i32::try_from(second.len()).map_err(|_| Error::UnsafePath)?;
+        // SAFETY: these slices remain live for their explicitly supplied lengths.
+        match unsafe {
+            CompareStringOrdinal(first.as_ptr(), first_len, second.as_ptr(), second_len, 1)
+        } {
+            0 => Err(Error::IdentityUnavailable),
+            2 => Ok(true),
+            _ => Ok(false),
+        }
+    }
+
+    fn protected_root(root: &Path, observations: &[Observation]) -> Result<ProtectedRoot, Error> {
+        let mut suffix = Vec::new();
+        for path in root.ancestors() {
+            let observed = observations
+                .iter()
+                .rev()
+                .find(|value| value.path == path)
+                .ok_or(Error::IdentityUnavailable)?;
+            if let Some(value) = observed.fingerprint {
+                // Require GUID support for the protected anchor as well.
+                final_path(observed.handle.as_ref().ok_or(Error::IdentityUnavailable)?)?;
+                if suffix.is_empty() {
+                    return Ok(ProtectedRoot::Existing(value.identity));
+                }
+                suffix.reverse();
+                return Ok(ProtectedRoot::Planned {
+                    ancestor: value.identity,
+                    suffix,
+                });
+            }
+            suffix.push(path.file_name().ok_or(Error::UnsafePath)?.to_owned());
+        }
+        Err(Error::IdentityUnavailable)
+    }
+
+    fn check_region(
+        protected: &ProtectedRoot,
+        destination: &Path,
+        ancestors: &[Observation],
+    ) -> Result<(), Error> {
+        for observed in ancestors {
+            let identity = observed
+                .fingerprint
+                .ok_or(Error::IdentityUnavailable)?
+                .identity;
+            match protected {
+                ProtectedRoot::Existing(root) if identity == *root => {
+                    return Err(Error::ProtectedRoot);
+                }
+                ProtectedRoot::Planned { ancestor, suffix } if identity == *ancestor => {
+                    let relative = destination
+                        .strip_prefix(&observed.path)
+                        .map_err(|_| Error::IdentityUnavailable)?;
+                    let names: Vec<_> =
+                        relative.components().map(|part| part.as_os_str()).collect();
+                    let mut common = true;
+                    for (first, second) in suffix.iter().zip(&names) {
+                        if !same_planned_name(first, second)? {
+                            common = false;
+                            break;
+                        }
+                    }
+                    // Reject both descendants and uncreated ancestors of the planned root.
+                    if common {
+                        return Err(Error::ProtectedRoot);
+                    }
+                }
+                _ => {}
+            }
+        }
+        Ok(())
+    }
+
+    pub(super) fn prepare<'g>(
+        root: &Path,
+        dest: &Path,
+        kind: ExternalDestinationKind,
+        guard: &'g ExternalExportGuard,
+        cwd: &Path,
+    ) -> Result<CheckedExternalDestination<'g>, Error> {
+        validate_path(root)?;
+        validate_path(dest)?;
+        let absolute_root = cwd.join(root);
+        let absolute_dest = cwd.join(dest);
+        validate_path(&absolute_root)?;
+        validate_path(&absolute_dest)?;
+        let mut observations = Vec::new();
+        let normalized_root = walk(&absolute_root, true, true, &mut observations)?;
+        let protected = protected_root(&normalized_root, &observations)?;
+        let normalized_dest = walk(&absolute_dest, false, false, &mut observations)?;
+        let leaf = observations.last().ok_or(Error::UnsafePath)?.fingerprint;
+        match (kind, leaf) {
+            (ExternalDestinationKind::Directory, Some(_)) => return Err(Error::AlreadyExists),
+            (ExternalDestinationKind::File, Some(value)) if value.directory || value.links != 1 => {
+                return Err(Error::UnsafePath);
+            }
+            _ => {}
+        }
+        let parent = normalized_dest.parent().ok_or(Error::UnsafePath)?;
+        let parent_observed = observations
+            .iter()
+            .rev()
+            .find(|value| value.path == parent)
+            .ok_or(Error::IdentityUnavailable)?;
+        let parent_identity = parent_observed
+            .fingerprint
+            .filter(|value| value.directory)
+            .ok_or(Error::Io)?
+            .identity;
+        let resolved_parent = final_path(parent_observed.handle.as_ref().ok_or(Error::Io)?)?;
+        let destination =
+            resolved_parent.join(normalized_dest.file_name().ok_or(Error::UnsafePath)?);
+        let mut resolved_ancestors = Vec::new();
+        for ancestor in resolved_parent.ancestors() {
+            let observed = observe(ancestor)?;
+            if !observed.fingerprint.is_some_and(|value| value.directory) {
+                return Err(Error::IdentityUnavailable);
+            }
+            resolved_ancestors.push(observed);
+        }
+        if resolved_ancestors
+            .first()
+            .and_then(|value| value.fingerprint)
+            .map(|value| value.identity)
+            != Some(parent_identity)
+        {
+            return Err(Error::Changed);
+        }
+        check_region(&protected, &destination, &resolved_ancestors)?;
+        observations.extend(resolved_ancestors);
+        let resolved_leaf = observe(&destination)?;
+        if resolved_leaf.fingerprint != leaf {
+            return Err(Error::Changed);
+        }
+        observations.push(resolved_leaf);
+        Ok(CheckedExternalDestination {
+            _guard: guard,
+            kind,
+            destination,
+            state: CheckedState {
+                // Preserve the original traversal (including '..') for temp preparation.
+                root: absolute_root,
+                cwd: cwd.to_owned(),
+                parent_identity,
+                leaf_present: leaf.is_some(),
+                observations,
+            },
+        })
+    }
+
+    pub(super) fn recheck(state: &CheckedState) -> Result<(), Error> {
+        for prior in &state.observations {
+            let now = observe(&prior.path).map_err(|error| match error {
+                Error::UnsafePath => Error::Changed,
+                other => other,
+            })?;
+            if now.fingerprint != prior.fingerprint {
+                return Err(Error::Changed);
+            }
+        }
+        Ok(())
+    }
 }
 
 #[cfg(all(test, windows))]
@@ -2139,6 +2725,38 @@ mod i2_export_destination_tests {
                 assert!(!planned.exists());
             },
         );
+    }
+    #[test]
+    fn h07_absent_destination_cannot_be_its_own_temp() {
+        isolated("h07_absent_destination_cannot_be_its_own_temp", || {
+            let temp = Temp::new();
+            let (root, outside) = paths(&temp);
+            let dest = outside.join("absent-destination.txt");
+            assert!(matches!(
+                fs::symlink_metadata(&dest),
+                Err(error) if error.kind() == std::io::ErrorKind::NotFound
+            ));
+            let before = tree(&temp.root);
+            assert_eq!(fs::read_dir(&outside).unwrap().count(), 0);
+            let guard = acquire_external_export().unwrap();
+            let checked =
+                prepare_external_destination(&root, &dest, ExternalDestinationKind::File, &guard)
+                    .unwrap();
+            assert_eq!(tree(&temp.root), before, "prepare must not create a temp");
+            println!("WW5_H_TEMP1_PREPARED_ABSENT");
+            assert!(publish_external_file(&checked, PAYLOAD, &dest).is_err());
+            assert!(matches!(
+                fs::symlink_metadata(&dest),
+                Err(error) if error.kind() == std::io::ErrorKind::NotFound
+            ));
+            assert_eq!(tree(&temp.root), before);
+            assert_eq!(
+                fs::read_dir(&outside).unwrap().count(),
+                0,
+                "temp increment must be zero"
+            );
+            println!("WW5_H_TEMP1_REJECTED_UNCHANGED");
+        });
     }
     #[test]
     fn h07_existing_temp_sentinel_is_not_deleted_or_replaced() {
