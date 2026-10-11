@@ -1,0 +1,2 @@
+# Preserve the bytes verified by the pinned acoustic-analysis script hash.
+tools/acoustic-analysis/scripts/pitch.praat text eol=lf

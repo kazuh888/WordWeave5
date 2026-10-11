@@ -1,0 +1,9 @@
+[package]
+name = "practice-history"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+acoustic-analysis = { path = "../acoustic-analysis", default-features = false }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["float_roundtrip"] }

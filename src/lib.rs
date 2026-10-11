@@ -1,4 +1,5 @@
 pub mod assets;
+pub mod audio_history;
 pub mod backup;
 pub mod chat;
 pub mod chat_action;

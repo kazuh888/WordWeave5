@@ -19,6 +19,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "366ffbaa4442f4684d91e2cd7c5ea7c4ed8add41959a31447066e279e432b618"
 
 [[package]]
+name = "acoustic-analysis"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "tokio-util",
+]
+
+[[package]]
 name = "adler2"
 version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2540,6 +2548,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "practice-history"
+version = "0.1.0"
+dependencies = [
+ "acoustic-analysis",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "prettyplease"
 version = "0.2.37"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3302,6 +3319,7 @@ dependencies = [
  "bytes",
  "futures-core",
  "futures-sink",
+ "futures-util",
  "pin-project-lite",
  "tokio",
 ]
@@ -4244,6 +4262,7 @@ checksum = "1ebf944e87a7c253233ad6766e082e3cd714b5d03812acc24c318f549614536e"
 name = "wordweave5"
 version = "0.6.0"
 dependencies = [
+ "acoustic-analysis",
  "base64",
  "chrono",
  "cpal",
@@ -4252,6 +4271,7 @@ dependencies = [
  "futures-util",
  "hound",
  "image",
+ "practice-history",
  "pulldown-cmark",
  "qwen-audio",
  "reqwest",
