@@ -83,3 +83,34 @@ Pre cycle 2は **PASS**。独立reviewerは文書SHA `0E432A55F1DAB3F30B7003AFCE
 - 57実名の集合差0、環境未実証4件を除く53成功、固定source/EXE hash一致、TEMP0、H-TEMP-1維持を確認した。
 
 closure matrixのH-TEMP-1とQ-H-CWDはともにClosedである。ただしsymlink2・別drive・実identity拒否の4件、独立runner/最終Post、consumer接続・I10・製品EXEは未了。実行担当ではないreviewerはbuild/testを代行していない。次は利用者のSol/medium切替後の独立runnerである。
+
+## I2d-H 最終Post cycle 1（2026-10-12）
+
+独立reviewer `export_destination_final_review`（指定gpt-6-astra/high）は **CHANGES_REQUIRED（必須証拠待ち）**。基準HEAD `5d4ab1072158d3c9a3a7875b5f4b4bf1997146ee`、store/integrationと4EXEのhashを独立runner記録と照合し一致を確認した。新57実名・全136実名・初回raw・失敗26件exactの集合差/重複/不一致0、132行動成功/4未実証、旧79全成功を確認。確認済み本体欠陥0。H-TEMP-1/Q-H-CWDの限定Closedは維持する。
+
+| Finding / 原文・位置 | 原因・状態・owner | 必要証拠・残余 |
+| --- | --- | --- |
+| H-SYMLINK-EVIDENCE P2：公開試験438/456のfile/directory symlink拒否を未実証 | error1314でfixture前に終了。承認済みRunAsもartifactなし。Accepted、親/独立runner担当、コード修正なし | 固定公開EXE `95E01D39B0ECB7C018C3D78FFE5D3C1B8FF96A395EC3748644F83345954C36AD` の承認済みexact2だけを実行。各1PASS、UNAVAILABLEなし、ledger oracle到達を確認。利用者へ既存scriptの手動実行を案内した |
+| H-IDENTITY-EVIDENCE P2：設計§5 H06の実metadata/identity取得不能時の拒否が未検証 | store.rs:2713の独立probeが成功し、recheck/publish/不変assert前にreturnする。Accepted、独立test-author所有 | 合成fixtureで実取得失敗を独立probeにより成立させ、productionのIo/IdentityUnavailable、bytes/temp不変、制約解除後の再試行成功を確認する。期待値緩和/fake identityは禁止。方式の実現性を限定probeで調査してからPreへ提出 |
+
+別drive alias不在1件は設計上「利用可能な」環境に限定されるため受入阻止ではないが、成功に数えない。新drive設定を要求しない。共通Mutex/write-block維持/poison・再入/元成分観測/GUID・128-bit identity/予定root双方向保護/直前再検査/temp/atomic互換に追加findingなし。敵対的TOCTOU・電源断・GUID非対応共有・consumer・I10/製品提供は対象外である。
+
+既定依存順によりd-S/B/M本体は未着手を維持する。読取りによる接合準備は許される。修正対象の証拠だけを独立runner/reviewerへ返し、成功済み136件の一律反復は不要である。reviewerは編集/実行/再委任0、runtime metadata/usage counters未取得。次の規範PacketはH-IDENTITY-EVIDENCEに限定し、実装前Preを維持する。
+
+### H-IDENTITY-EVIDENCE 限定Packet（唯一の規範・Pre提出）
+
+- 目的/正本：設計§5 H06の既存契約「実metadata/identity取得不能を不存在へ変換せず、書出しを拒否する」を実証する。製品の仕様/API/error分類は変更しない。
+- 現行証拠：store.rsの該当1caseはshare_mode(0)でも独立FILE_READ_ATTRIBUTES probeが成功し、受入assertに未到達である。Microsoft [CreateFile](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea)では属性要求は共有制限の対象外である。旧fixtureを成立条件の異なる実Windows状態へ置換する。
+- 実現性：独立作者のstd-only `artifacts/export-identity-probe.rs` / `export-identity-run.log` はnative PID9172 exit0、TokenElevation=0/effective_admin=0。prepared相当の属性handleを保持し、別DELETE/share7 handleの[FileDispositionInfo](https://learn.microsoft.com/en-us/windows/win32/api/winbase/ns-winbase-file_disposition_info)をTRUEにすると独立属性openがWin32 5、metadataは成功。close前にFALSEへ解除すると同一path/bytes/file IDへ復帰した。panic unwind時のRAII解除も成功。合成file2個と空owned dirを限定cleanup済み。製品経路の成功証拠には数えない。
+- scope/owner：独立test author（既定gpt-6-astra/high）が `src/store.rs::i2_export_destination_tests::h06_real_identity_denial_is_not_absence_when_fixture_is_available` の本体と同関数内のFFI/fixture helperだけを所有する。製品本体、他case、公開integration、Cargo/依存/OS設定/ACL/権限は変更しない。全57caseの名前・数を維持する。test記録は既存export-destination-tests.mdへ追記する。
+- 入出力/状態：既存合成destと元bytes/独立identityを記録し、既存prepareを成功させる。DELETE/share7 handleでDeleteFile=TRUE（DELETE_ON_CLOSE/POSIX flag不使用）→独立属性openのPermissionDenied/Win32 5をassert→既存recheckとpublishを呼ぶ→FALSE解除/handle close→ledger/identityを比較→guard解放後の通常writeを再試行する。productionの戻りは既定Io又はIdentityUnavailable、publishはErr、固定tempは生成0である。
+- failure model/oracle：通常probeは最初に成功し、拒否中はNotFoundでない実拒否へ到達する。recheck/publish呼出し後、明示解除の成功を確認してから全bytes/ledger/temp不変と同一identityをassertする。最後の通常writeはPAYLOADと一致する。fixture不成立・復元失敗はtest失敗とし、UNAVAILABLEで早期returnして通過させない。RAIIはpanic/unwind時にもclose前のFALSE解除を試みる。解除失敗のログを残し、成功扱いしない。試験のbounded隔離process/timeoutは既存のまま。
+- 安全/依存：所有する合成fileだけを操作する。実データ/外部通信/OS設定/管理者実行なし。現在の公開EXE/hashは利用者のsymlink2確認のため固定し、該当libだけをbuildする。公開EXE不変を前後hashで確認する。Pre PASS前は既存testを編集しない。
+- 検証：新fixtureの該当exact1件、元case差分を除いたsource不変、既存57名維持、format/diff、source/lib/public EXE hash、rawの独立拒否/production拒否/復元/再試行/cleanupを記録する。通過済みsuiteはtest-only変更で反復しない。自己検証後に独立runner（Sol/medium）と独立Post（Astra/high）へ対象1件だけ返す。
+- rollback/stop：本1case差分だけを戻せる。旧未実証ログとprobeは証拠として保持する。新fixtureで製品が成功する、期待値変更が必要になる、別case/本体/依存変更・追加権限が必要になる場合は親へ戻す。H-SYMLINK-EVIDENCE、別drive、consumer、全体Post/製品配布はこのPacketでは閉じない。
+
+Pre snapshotはbranch `codex/development-agent-team`、HEAD `5d4ab1072158d3c9a3a7875b5f4b4bf1997146ee`、store SHA `53843CC8A8DBDB63BB58C82DB3BB42C7E943F1AE00E8EF613DE61BD9E45F42FC`、公開test SHA `176709E152A6D26D6676B3424E673AD5B28987C423A8865C0358F5472D2E0324`。親self-checkは独立probe raw/source、当該case、production observeの属性openを照合済み。現時点ではPlanned/Pre未受領である。
+
+限定Pre cycle 1は **PASS・阻止0**（独立reviewer export_destination_final_review、指定Astra/high）。提出文書SHA `4A516C7F169B8820695CF11B4DF9249E25A5C019354E6D354657F26B8EB55AD8`、source/public test/EXE不変、probe source/raw/hashを照合した。production observeへの接続と戻り値期待は整合する。復元失敗をrawとtest失敗として残せばよく、既存Temp/isolated cleanup変更や合成evidence copy追加は不要と確認。H-IDENTITY-EVIDENCEをPre-gate PASSとし、作者へ指定1caseを返却した。上記規範は判定後に変更していない。製品拒否/ledger/再試行・独立runner/Postは未実証である。
+
+限定コードレビューは **PASS・runner-ready・阻止0**（同独立reviewer）。既存1関数以外のHEAD原文一致を独立比較し、57実名集合差0、FFI ABI/DELETE-share7/FALSE解除後close/panic復元/復元失敗のtest failure、旧UNAVAILABLE早期通過の除去を確認した。作者exactの実Win32 5→recheck Io/publish Err→復元→全ledger/identity/bytes不変/tempなし→retry成功、親子exit0/timeout=false/TEMP0はrawと一致した。store SHA `BB35631D2EF3E42EE8B98B9C6BECC3FEC3310C5CD8D6E96E6F6EF47578745EBC`、lib SHA `68E8DC0504F714EEED8B547228396812089AAE9BFF5310C4BC6BC321454B1314` を現物照合、公開source/EXEは固定hashのままである。現行test規範も更新済み。次はSol/mediumの独立runnerへこのexact1件を返す。H-IDENTITY-EVIDENCEはVerified（作者自己検証）であり、独立runner/最終Post・H全体Closed・symlink2件を代替しない。

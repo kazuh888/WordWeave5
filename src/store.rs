@@ -2650,10 +2650,18 @@ mod i2_export_destination_tests {
             "h06_real_identity_denial_is_not_absence_when_fixture_is_available",
             || {
                 #[repr(C)]
+                #[derive(Debug, PartialEq, Eq)]
                 struct Identity {
                     volume: u64,
                     id: [u8; 16],
                 }
+                #[repr(C)]
+                struct Disposition {
+                    delete_file: u8,
+                }
+                const _: () = assert!(std::mem::size_of::<Identity>() == 24);
+                const _: () = assert!(std::mem::align_of::<Identity>() == 8);
+                const _: () = assert!(std::mem::size_of::<Disposition>() == 1);
                 #[link(name = "kernel32")]
                 extern "system" {
                     fn GetFileInformationByHandleEx(
@@ -2662,13 +2670,22 @@ mod i2_export_destination_tests {
                         buffer: *mut std::ffi::c_void,
                         size: u32,
                     ) -> i32;
+                    fn SetFileInformationByHandle(
+                        handle: *mut std::ffi::c_void,
+                        class: i32,
+                        buffer: *mut std::ffi::c_void,
+                        size: u32,
+                    ) -> i32;
                 }
-                fn probe(path: &Path) -> std::io::Result<()> {
-                    let file = OpenOptions::new()
+                fn open_attributes(path: &Path) -> std::io::Result<File> {
+                    OpenOptions::new()
                         .access_mode(0x80)
                         .share_mode(7)
                         .custom_flags(0x0020_0000)
-                        .open(path)?;
+                        .open(path)
+                }
+                fn probe(path: &Path) -> std::io::Result<Identity> {
+                    let file = open_attributes(path)?;
                     let mut id = Identity {
                         volume: 0,
                         id: [0; 16],
@@ -2685,14 +2702,74 @@ mod i2_export_destination_tests {
                     if ok == 0 {
                         Err(std::io::Error::last_os_error())
                     } else {
+                        Ok(id)
+                    }
+                }
+                struct PendingDeletion {
+                    file: File,
+                    active: bool,
+                }
+                impl PendingDeletion {
+                    fn set(&self, pending: bool) -> std::io::Result<()> {
+                        let mut info = Disposition {
+                            delete_file: u8::from(pending),
+                        };
+                        // SAFETY: live DELETE handle; FileDispositionInfo is class 4,
+                        // with one-byte BOOLEAN storage that outlives this call.
+                        let ok = unsafe {
+                            SetFileInformationByHandle(
+                                self.file.as_raw_handle(),
+                                4,
+                                (&mut info as *mut Disposition).cast(),
+                                std::mem::size_of::<Disposition>() as u32,
+                            )
+                        };
+                        if ok == 0 {
+                            Err(std::io::Error::last_os_error())
+                        } else {
+                            Ok(())
+                        }
+                    }
+                    fn new(path: &Path) -> std::io::Result<Self> {
+                        let file = OpenOptions::new()
+                            .access_mode(0x0001_0000) // DELETE, without DELETE_ON_CLOSE.
+                            .share_mode(7)
+                            .open(path)?;
+                        let mut pending = Self {
+                            file,
+                            active: false,
+                        };
+                        pending.set(true)?;
+                        pending.active = true;
+                        Ok(pending)
+                    }
+                    fn restore(&mut self) -> std::io::Result<()> {
+                        if self.active {
+                            self.set(false)?;
+                            self.active = false;
+                            eprintln!(
+                                "WW5_H_IDENTITY_RESTORED:DeleteFile=FALSE before handle close"
+                            );
+                        }
                         Ok(())
+                    }
+                }
+                impl Drop for PendingDeletion {
+                    fn drop(&mut self) {
+                        if let Err(error) = self.restore() {
+                            eprintln!("FIXTURE_FAILURE:h06 pending deletion restoration:{error}");
+                            // A previous panic already fails the test; avoid a double panic.
+                            if !std::thread::panicking() {
+                                panic!("FIXTURE_FAILURE: pending deletion restoration failed");
+                            }
+                        }
                     }
                 }
                 let temp = Temp::new();
                 let (root, outside) = paths(&temp);
                 let dest = outside.join("target.txt");
                 fs::write(&dest, b"preserved exact target").unwrap();
-                probe(&dest)
+                let original_identity = probe(&dest)
                     .expect("FIXTURE_FAILURE: normal attributes/identity probe must succeed");
                 let guard = acquire_external_export().unwrap();
                 let checked = prepare_external_destination(
@@ -2703,35 +2780,43 @@ mod i2_export_destination_tests {
                 )
                 .unwrap();
                 let before = tree(&temp.root);
-                let exclusive = match OpenOptions::new().read(true).share_mode(0).open(&dest) {
-                    Ok(handle) => handle,
-                    Err(e) => {
-                        eprintln!("WW5_H_FIXTURE_UNAVAILABLE:h06_real_identity_denial:exclusive fixture handle failed:{e}; NOT BEHAVIOR PASS OR RED");
-                        return;
-                    }
-                };
-                if probe(&dest).is_ok() {
-                    drop(exclusive);
-                    eprintln!("WW5_H_FIXTURE_UNAVAILABLE:h06_real_identity_denial:FILE_READ_ATTRIBUTES/FileIdInfo succeeds under share_mode(0); NOT BEHAVIOR PASS OR RED");
-                    return;
-                }
-                eprintln!("WW5_H_FIXTURE_CONFIRMED:h06_real_identity_denial:independent attributes/identity probe failed");
+                let fixed_temp = outside.join("fixed-temp");
+                let mut pending = PendingDeletion::new(&dest)
+                    .expect("FIXTURE_FAILURE: reversible pending deletion must succeed");
+                let denial = open_attributes(&dest)
+                    .expect_err("FIXTURE_FAILURE: independent FILE_READ_ATTRIBUTES must fail");
+                assert_eq!(denial.kind(), std::io::ErrorKind::PermissionDenied);
+                assert_eq!(denial.raw_os_error(), Some(5));
+                eprintln!("WW5_H_FIXTURE_CONFIRMED:h06_real_identity_denial:FILE_READ_ATTRIBUTES win32=5 PermissionDenied");
                 let rechecked = recheck_external_destination(&checked);
-                let published =
-                    publish_external_file(&checked, PAYLOAD, &outside.join("fixed-temp"));
-                drop(exclusive);
+                let published = publish_external_file(&checked, PAYLOAD, &fixed_temp);
+                pending
+                    .restore()
+                    .expect("FIXTURE_FAILURE: clear pending deletion before handle close");
+                drop(pending);
+                eprintln!("WW5_H_IDENTITY_RESULTS:recheck={rechecked:?};publish={published:?}");
                 assert!(matches!(
                     rechecked,
                     Err(ExternalDestinationError::Io
                         | ExternalDestinationError::IdentityUnavailable)
                 ));
                 assert!(published.is_err());
+                assert_eq!(probe(&dest).unwrap(), original_identity);
+                assert_eq!(fs::read(&dest).unwrap(), b"preserved exact target");
                 assert_eq!(tree(&temp.root), before);
+                assert_eq!(
+                    fs::symlink_metadata(&fixed_temp).unwrap_err().kind(),
+                    std::io::ErrorKind::NotFound
+                );
+                eprintln!(
+                    "WW5_H_IDENTITY_UNCHANGED:identity/bytes/ledger matched;fixed-temp absent"
+                );
                 drop(checked);
                 drop(guard);
-                probe(&dest).unwrap();
                 write_external_file(&root, &dest, PAYLOAD).unwrap();
                 assert_eq!(fs::read(&dest).unwrap(), PAYLOAD);
+                assert_eq!(fs::read_dir(&outside).unwrap().count(), 1);
+                eprintln!("WW5_H_IDENTITY_RETRY:exact PAYLOAD;outside entries=1");
             },
         );
     }

@@ -75,14 +75,15 @@ fn create_checked_external_directory(
 
 内部27件すべてとLOCALAPPDATA試験は20秒上限の子processである。意図的write-block/poisonだけでなく、RED assertionのpanicで保持中mutexがpoisonした場合も親へ伝播させない。親はexit・timeout・stdout/stderrとexact case成功markerを記録し、timeout時はkill/reapする。thread順序はchannel開始確認→取得未完了→guard drop→3秒以内完了で確認する。取消token/非同期cancelは設計で非該当であり、新設していない。
 
-環境依存の5件は `WW5_H_FIXTURE_UNAVAILABLE:<case>:<理由>` を出しreturnする。cargoのPASSでも受入成功から必ず除外し、case名/理由を別集計する。
+環境依存の4件（symlink2、short-name、別drive）は `WW5_H_FIXTURE_UNAVAILABLE:<case>:<理由>` を出しreturnする。cargoのPASSでも受入成功から必ず除外し、case名/理由を別集計する。H06実identity拒否は以下の必須fixtureであり、この早期returnの対象ではない。
 
 - h02_leaf_file_symlink / h02_directory_symlink：新しい権限昇格を求めず通常権限で試みる。不可なら親へexact case/EXE/所有fixtureを返す。
 - h02_short_name：GetShortPathNameWの実在別名だけを使う。返却が同じ名なら未実証。
 - h02_alternate_drive：既存driveをread-only照会し所有fixtureの同identityが見える別driveだけを採用する。drive mapping/OS設定を追加しない。部分rootへの既存subst等を全探索するfixtureではない。
-- h06_real_identity_denial：通常のFILE_READ_ATTRIBUTES＋FileIdInfo成功を先に確認し、share_mode(0)保持中の同じ独立OS probeが実際に失敗した場合だけ製品のIo/IdentityUnavailable拒否を評価する。probe成功や独占handle不成立は未実証であり、fake identityや設定変更で補わない。
 
-junction作成失敗、通常identity照会失敗、case-sensitive fixture不成立は明示fixture failureであり行動REDではない。5件を含むすべての動的fixtureは今回未実行である。最後のrecheckからOS作成までの敵対的競争、network GUID非対応、実機電源断、UI/実APIは検証したと扱わない。
+H06実identity拒否は、通常のFILE_READ_ATTRIBUTES＋FileIdInfo成功とprepare後、合成destのDELETE/share7 handleでFileDispositionInfo TRUEを設定する。独立属性openがPermissionDenied/Win32 5となることを必須assertし、製品のIo/IdentityUnavailable拒否・publish失敗を評価する。FALSE解除とhandle close後に同一identity・全bytes/ledger・temp不変を確認し、通常writeの再試行を成功させる。fixture不成立や復元失敗はtest failureとし、UNAVAILABLE早期returnで成功扱いしない。panic/unwind時もRAIIでclose前のFALSE解除を試みる。fake identityやOS設定変更を用いない。
+
+junction作成失敗、通常identity照会失敗、case-sensitive fixture不成立は明示fixture failureであり行動REDではない。初回計画時点では動的fixtureは未実行であり、実施結果は後続の各自己検証記録を参照する。最後のrecheckからOS作成までの敵対的競争、network GUID非対応、実機電源断、UI/実APIは検証したと扱わない。
 
 ## 固定case名
 
@@ -267,4 +268,35 @@ buildは `cargo test --locked --test progress_export_destination --no-run` だ�
 終了integration SHA-256は `176709E152A6D26D6676B3424E673AD5B28987C423A8865C0358F5472D2E0324`。rustfmt checkとgit diff --checkはexit0である。旧成功suiteは反復していない。build生ログは `logs/export-destination-author-cwd-build.{stdout,stderr}.log` に保持した。
 
 **Q-H-CWD作者RED採取完了、source所有返却。** 本体の修正は実装者へ渡す。新6件の期待値を維持し、修正後のGREEN・既定51件・独立Post/runnerは後続責任とする。本作者は既存の未実証環境条件や全体gateを完了へ変更していない。
+
+## H-IDENTITY-EVIDENCE 必須fixtureへの置換
+
+2026-10-12。test-author指定 `gpt-6-astra/high`、TDD作者工程。入力は承認済みH06/I2-T08・AH-AC04/16と、export-destination-review.md末尾の唯一規範Packetである。親から独立Pre PASS・阻止0（提出時文書SHA `4A516C7F169B8820695CF11B4DF9249E25A5C019354E6D354657F26B8EB55AD8`）を受領して編集した。開始/終了ともbranch `codex/development-agent-team`、HEAD `5d4ab1072158d3c9a3a7875b5f4b4bf1997146ee` である。実行model/effort metadataとusage countersは未取得である。
+
+変更は既存 `src/store.rs::i2_export_destination_tests::h06_real_identity_denial_is_not_absence_when_fixture_is_available` 1関数内のみである。FileDispositionInfoのFFI、1-byte BOOLEAN、DELETE/share7 handle、明示解除とDrop復元のhelperはすべて関数内に置いた。`DELETE_ON_CLOSE`は使用していない。既存prepare後に削除保留を設定し、独立属性openのPermissionDenied/Win32 5を必須assertする。recheck/publish結果を保存し、FALSE解除・handle close完了後に、recheckのIo/IdentityUnavailable・publishのErr、元identity/bytes/全ledger一致、fixed-temp不存在、guard解放後の通常write再試行を確認する。UNAVAILABLE早期returnは除去した。復元失敗はログとtest failureに残し、unwind時の二重panicを避ける。既存Temp/isolated cleanupは変更しない。本記録の現行fixture規範も環境依存4件とH06必須fixtureへ更新し、旧実行記録は歴史的証拠として保持した。
+
+旧share_mode(0) fixtureが属性取得を止められないことは前回rawと独立probeで確認済みである。今回のexactは初回からPASSであり、新しいproduction不具合のRED→GREENではなく、未到達だった既存拒否契約の実証である。期待値緩和、本体修正、他case変更は行っていない。
+
+| 検証 | 今回の結果・証拠 |
+| --- | --- |
+| lib-only build | `cargo test --locked --lib --no-run`、cargo PID33892、native/exec exit0、UTC21:45:10.362–21:47:08.290。既存unused/incremental hardlink警告、compile error0。`artifacts/export-identity-author-build.json` と同prefixのstdout/stderr log |
+| exact1件 | `target/debug/deps/wordweave5-b3388a7bbef44bb4.exe store::i2_export_destination_tests::h06_real_identity_denial_is_not_absence_when_fixture_is_available --exact --nocapture --test-threads=1`。PID10832、exit0、1 passed/0 failed/0 ignored/316 filtered、UTC21:47:36.770–21:47:37.491 |
+| 到達oracle | 独立属性open Win32 5/PermissionDenied、`recheck=Err(Io)`、publish Err、FALSE before close、同一identity/bytes/ledger・fixed-temp不在、通常retry exact PAYLOAD/outside entry1。rawは `artifacts/export-identity-author-exact-sandbox.stdout.log` / `.stderr.log`、PID/引数/token/timeoutは `.json` |
+| 隔離/cleanup | 通常sandbox・非管理者（WindowsPrincipal Administrator=False）。親30秒/既存子20秒上限、timeout=false、子exit0/CHILD_OK。TEMP/TMPはprocess限定 `artifacts/export-identity-author-temp`、最終残存0、cleanup/復元失敗0。sandbox外・管理者比較は不要であった |
+| 名前集合 | 固定公開EXE `--list` の29名＋新libの専用module `--list` 28名、旧runner集合との差0、計57名を維持。実名・差集合・exitは `artifacts/export-identity-author-names.json` |
+| source範囲 | `artifacts/export-identity-source-boundary-exact.json`。HEAD原文bytesのhashが着手時hashと一致。変更前/後から該当関数だけを1箇所ずつ除去したhashは両方 `FAAB4CA1A0CDEFE6B41260CC548799A4960DE8AC774AE4A96A2FFE87AD3E7126`。関数外の本体・他testはbytes一致 |
+| format/diff | `rustfmt --edition 2021 --check src/store.rs`、`git diff --check` ともexit0。最初のformat指摘は追加eprintln2箇所の改行だけで修正済み。初回logを保持した |
+
+source範囲確認の初回補助スクリプトはHEAD原文を不要にCRLFへ変換して比較し、不一致となった（`export-identity-source-boundary.json`）。これはsource変更ではなく検査入力の誤りである。次のexact記録ではGitのUTF-8 stdoutを改行変換なしで読み、原文hashを開始時hashへ照合したうえで関数外bytes一致を確認した。失敗した補助記録を上書きしていない。
+
+| 対象 | 終了SHA-256 |
+| --- | --- |
+| src/store.rs | `BB35631D2EF3E42EE8B98B9C6BECC3FEC3310C5CD8D6E96E6F6EF47578745EBC` |
+| lib EXE | `68E8DC0504F714EEED8B547228396812089AAE9BFF5310C4BC6BC321454B1314` |
+| 公開integration source（不変） | `176709E152A6D26D6676B3424E673AD5B28987C423A8865C0358F5472D2E0324` |
+| 公開EXE（不変） | `95E01D39B0ECB7C018C3D78FFE5D3C1B8FF96A395EC3748644F83345954C36AD` |
+
+開始記録は `artifacts/export-identity-source-before.json`、終了branch/HEAD/source/EXE/cleanupは `artifacts/export-identity-source-after.json`。独立fixture probeと通常/unwind復元の先行証拠は `artifacts/export-identity-feasibility.md` / `export-identity-run.log` にある。probe提案の採否は上記唯一規範Packetが優先する。
+
+**作者の自己exact検証完了、source所有返却。** 新しい本体欠陥・fixture不成立・compile失敗は0。既存成功suite・公開symlink2・製品releaseは反復していない。後続の独立runner（指定Sol/medium）と独立Post（指定Astra/high）が未了であり、本作者はH-IDENTITY-EVIDENCEをClosedにしない。symlink2の利用者手動確認・別drive・consumer/I10の残余も維持する。
 

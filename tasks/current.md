@@ -1,6 +1,6 @@
 # 現在のタスク要約
 
-更新：2026-10-12（I2b-B最終Post PASS/Closed。I2d-Hのtemp同名試験と特殊cwd修正は独立限定Post PASS/Closed。独立runnerは新57＋旧79＝136unique中132成功/4環境未実証、行動失敗0。管理者symlink2件は起動未確認のため10分待機後に本人wrapperのみ終了、未実行。次はAstra/highへの切替後の独立最終Post。製品EXE更新は未了）。以後の再開入口は本書である。設計本文・ログ全文は転載せず、必要な箇所だけ [参照インデックス](context-index.md) から読む。旧会話・旧状態記録は証拠確認時だけ参照する。
+更新：2026-10-12（I2d-H最終Postは必須証拠待ち。H06の実属性拒否fixtureを試験1件内で修正、自己exact成功・限定コードレビューPASS/runner-ready。次は利用者のSol/medium切替後に同1件の独立実行。管理者symlink2件は手動確認待ち。後続consumer・製品EXEは未着手/未更新）。以後の再開入口は本書である。設計本文・ログ全文は転載せず、必要な箇所だけ [参照インデックス](context-index.md) から読む。旧会話・旧状態記録は証拠確認時だけ参照する。
 
 ## 現在の目標
 
@@ -39,7 +39,7 @@ ACOUSTIC-HISTORY-001：原音・音響解析結果・Qwen助言を保存し、�
 | 主要アプリ保存接続 | I2b-Aのpersist/import_deck/restoreを接続。[独立20件](ACOUSTIC-HISTORY-001/history-main-consumer-runner.md)成功と[最終Post PASS/Closed](ACOUSTIC-HISTORY-001/history-main-consumer-review.md)。b-Bは[独立76件](ACOUSTIC-HISTORY-001/history-backup-runner.md)成功と[最終Post PASS/Closed](ACOUSTIC-HISTORY-001/history-backup-review.md) |
 | 統合 | Progress・backup・非同期処理・比較・UI・二host統合は未完了。製品EXEは未更新 |
 
-ブランチ：`codex/development-agent-team`。I2d-H本体checkpoint `f60f4be`、Qの独立再現 `6416f32`、修正 `b928834`。独立runner前の途中保存でありmain merge/releaseは範囲外。製品EXEは上記提供段階で更新する。
+ブランチ：`codex/development-agent-team`。I2d-H本体checkpoint `f60f4be`、Q修正 `b928834`、独立runner記録 `5d4ab10`。今回のH06修正はtest-onlyの途中保存でありmain merge/releaseは範囲外。製品EXEは上記提供段階で更新する。
 
 ## 未解決の問題
 
@@ -52,6 +52,6 @@ ACOUSTIC-HISTORY-001：原音・音響解析結果・Qwen助言を保存し、�
 2. [実装計画](ACOUSTIC-HISTORY-001/implementation.md) の依存順に保存回復・既存データ/backup統合・残るPraat障害試験・処理統合・比較UI・二hostを継続し、最後に全体テスト/release検証を行う。
 3. I2は[設計](ACOUSTIC-HISTORY-001/design-i2.md)のG private接合追補も[独立Pre PASS](ACOUSTIC-HISTORY-001/history-commit-design-review.md)。plannerの[逐次所有追補](ACOUSTIC-HISTORY-001/implementation.md)に従う。GはsingleMutex/再入拒否/write-block口/strict pendingまでであり、Progress形式・移行・結果不明判定は後続である。現在、利用者の動作確認待ちはない。
 4. M/S/N/R/T/V/Pは最終Post PASS。Pの[最終判定](ACOUSTIC-HISTORY-001/history-pointer-commit-review.md)、[独立269件](ACOUSTIC-HISTORY-001/history-pointer-commit-runner.md)、[初回失敗の環境比較](ACOUSTIC-HISTORY-001/history-pointer-commit-diagnostic.md)を正とし、成功済みの反復は行わない。
-5. I2b-A/Bは最終Post PASS/Closed。I2d-HのH-TEMP-1とQ-H-CWDは独立限定Post PASS/Closed。[独立runner](ACOUSTIC-HISTORY-001/export-destination-runner.md)で新57＋旧79＝136unique中132成功/4環境未実証・行動失敗0、source/EXE hash不変・TEMP残存0を確認した。source修正commit `b928834`。管理者symlink2件は承認済みだが、今回もRunAs起動artifactがなく10分待機後に本人wrapper3172のみ終了、未実行である。別drive alias不在と実identity拒否fixture不成立も未実証として保持する。次はGPT-6 Astra/highへ利用者切替後の独立最終Postであり、I2d-H全体Closedとは扱わない。consumer接続・I10/製品EXEは未了である。
+5. I2b-A/Bは最終Post PASS/Closed。I2d-HのH-TEMP-1/Q-H-CWDは独立限定Closed。[独立136件](ACOUSTIC-HISTORY-001/export-destination-runner.md)の132成功/4未実証は最終reviewで確認済みだが、[必須証拠2点](ACOUSTIC-HISTORY-001/export-destination-review.md)によりH全体未Closed。H06は限定Pre後に既存1case内で実属性拒否fixtureへ置換し、[作者自己exact](ACOUSTIC-HISTORY-001/export-destination-tests.md#h-identity-evidence-必須fixtureへの置換)成功・コードreview PASS/runner-ready。source SHA `BB35631D2EF3E42EE8B98B9C6BECC3FEC3310C5CD8D6E96E6F6EF47578745EBC`、lib SHA `68E8DC0504F714EEED8B547228396812089AAE9BFF5310C4BC6BC321454B1314`。次は利用者がGPT-6.1 Sol/mediumへ切替後、固定libのH06 exact1件だけを独立実行しPostへ返す。成功済み136件は一律反復しない。管理者symlink2件は固定公開EXE `95E01D39B0ECB7C018C3D78FFE5D3C1B8FF96A395EC3748644F83345954C36AD` の手動scriptを利用者へ案内し、10分以上無応答でも未実行のまま維持。返答後はartifacts/export-destination-elevated-*を確認する。別drive alias不在は条件付き未検証、単独では受入阻止でない。consumer/I10/製品EXEは未了である。
 
 今回の整理は作業用要約から廃案・重複ログ・無関係な履歴・設計本文の転載を除外したものである。根拠資料と旧記録は削除していない。旧版はインデックスに残すが通常再開時には読み込まない。
