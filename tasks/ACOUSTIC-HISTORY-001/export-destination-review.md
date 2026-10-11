@@ -52,3 +52,23 @@ storeの公開prepare経路は実current_dirをprivate prepareへ渡している
 ### 管理者2件の実行待ち
 
 利用者はsymlink2件だけの管理者実行を承認済み。親は固定public EXE SHA `CC53B50FC19DAEBE1EAB5219C7D7EF9F3389EBEF040F99D7290E25AD79548EC1` を指定したRunAsを開始したが、15分以上実行artifact生成なし、起動待機のままだった。session90972のwrapper PID33492（作成21:52:32 JST、コマンドとhash一致を再照合）だけを停止、session exit -1。製品アプリや他のprocessは終了していない。実テストの実行結果はなく、2件は未実証のままである。OS設定変更なし。修正後の確定EXEで再実行を要する。
+
+## Q-H-CWD 限定Packet（Pre提出）
+
+- 目的・正本：設計H2.2の「元の祖先成分を観測してから..を処理する」を、実verbatim cwdと相対入力でも維持する。上記std probeは到達条件のみを実証済み、公開APIの行動REDは作者が先に採取する。
+- 対象snapshot：branch codex/development-agent-team、HEAD `62f932403a232cfad41ffbb11acf3b3206f8ab49`、store SHA `F705AE19635F3C95828B36C60D5CBC8E59D9FB43DE3219A14BC02E73CC28022A`、integration SHA `9A14DCB790E29AC3407A0D47EB46CACA077BB08DFDCB52D1599C272B7968936E`。H-TEMP-1限定Postは完了。製品判断・新API・新依存なし。
+- scope/owner：作者は既存integrationへ公開回帰6件（root/destの相対junction/..拒否×File/Directoryの4件、正常な相対入力のFile/Directory対照2件）だけ追加する。実装者はstore private絶対化処理だけを修正する。既存test・FFI・gate・wire・consumer・manifestは不変。設計/実装/作者/reviewerは既定Astra/high、runnerは後続Sol/medium。
+- oracle：隔離子processで合成fixtureの実junction/identityを確認し、通常cwdとcanonical/verbatim cwdを実set_current_dirで設定する。実current_dirのprefixを記録する。rootまたはdestに相対junction/..を含むと公開APIはErrで全ledger/bytes/temp不変。正常対照2件は同じverbatim cwdで通常相対・rooted-relative・絶対pathそれぞれを使い、正しい外部場所のbytes/新directoryを確認する。相対とrooted-relativeの対照には `/` および混在区切りも含める。一括拒否を修正と認めない。
+- 現行原因と最小実装：cwd.joinがverbatim cwdの場合に相対成分を縮約する。検証済み入力の絶対化は、絶対pathなら元表現をそのまま、rooted-relativeならcwdのdrive/UNC prefix＋元表現、通常相対ならcwd＋区切り＋元表現をOsStringで組み立てる。通常相対/rooted-relativeをverbatim基点へ連結する場合は区切り `/` だけを `\` に変換し、`.`/`..`と元成分の順序は保持する。既にverbatimの絶対入力は変換しない。PathBuf::push/join/canonicalizeで未観測成分を消さない。drive-relative等の既存拒否は維持し、得たpathは従来validate→walk→identity検査へ渡す。
+- failure model：公開APIの型・エラー分類は既存のまま。安全でない入力はI/O前に拒否する。cwd設定は試験の子processだけ、panic時も元cwdを復元してfixtureを除去する。OS設定変更・実データ・管理者実行は行わない。junction作成制限は同EXE限定の非管理者sandbox外で比較し、未成立をRED/PASSへ数えない。
+- 検証・依存：限定Pre後、独立作者のREDを保持してから実装者へ本体を渡す。公開REDが想定と異なる場合は修正を開始せず親へ返す。修正後は新6件と外部境界既存51件を確認し、同一旧本体の広い保存79件は絶対化だけの変更なら反復しない。独立コードPost/runnerを省かない。
+- rollback/artifacts：本Packetのprivate helper変更と新6件だけを戻せる。失敗ログと初回行動REDは保持する。未作成root/既存root保護契約、最終再検査後のTOCTOU限界、環境未実証4件は本Packetで完了扱いしない。
+- 停止：public API/仕様変更、追加file/依存、別不具合、期待値変更が必要になったら親へ返す。authorは本体修正禁止。scope・方式を変更する場合は再Preとする。
+
+Q-H-CWDはPlanned（Pre未受領）。親self-checkは実current_dirの観測とprepareの接合位置を照合済み、H-TEMP-1と副作用範囲を分離した。新たな本体変更・公開再現testはまだ行っていない。
+
+Pre cycle 1はCHANGES_REQUIRED、P2「単純連結ではverbatim基点で通常入力の `/` が区切りでなくなり拒否される」を受領した。根拠は[Rust Prefix](https://doc.rust-lang.org/std/path/enum.Prefix.html)。cycle 2では上記唯一の規範へ区切りだけの変換と正常2件内の `/`・混在対照を追加した。未観測成分の縮約を禁止する契約と6件/2file境界は維持する。旧案を代替規範として残さない。
+
+Pre cycle 2は **PASS**。独立reviewerは文書SHA `0E432A55F1DAB3F30B7003AFCE70C8E3CBD82CB112AC4F61040A771E1B603B31`・HEAD/source/integration不変を確認した。区切りだけの変換と対照追加で前回P2は充足、新矛盾なし。Q-H-CWDをPre-gate PASSとし、独立作者へ公開6件のRED採取を返却した。規範内容は判定後に変更していない。
+
+作者の公開6件では、拒否4件すべてで通常cwdはErr/ledger不変、同じ合成fixtureの実VerbatimDisk cwdはOk/ledger変化/宛先1件作成となり、行動REDを確認した。正常File/Directory2件は各9表記でPASS。これによりQ-H-CWDは単なる条件付き質問ではなく既定祖先観測契約の不具合として確定した。製品の実データ破壊が発生したという意味ではない。最初のsandbox junction error5はfixture失敗として保持し、同EXE exact4件を非管理者sandbox外で再現した。詳細hash・実行記録は作者報告を正とし、既定Preの方式で実装者へ渡す。

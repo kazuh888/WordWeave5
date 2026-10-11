@@ -659,3 +659,194 @@ fn h04_legacy_atomic_write_keeps_new_replace_and_io_failure_contract() {
         "legacy error cleans only its generated temp"
     );
 }
+
+// Q-H-CWD: public regression packet; all process-wide cwd changes stay in children.
+mod q_h_cwd_tests {
+    use super::*;
+    use std::path::{Component, Prefix};
+
+    struct RestoreCwd(PathBuf);
+    impl RestoreCwd {
+        fn capture() -> Self {
+            Self(std::env::current_dir().unwrap())
+        }
+    }
+    impl Drop for RestoreCwd {
+        fn drop(&mut self) {
+            match std::env::set_current_dir(&self.0) {
+                Ok(()) => eprintln!("WW5_Q_CWD_RESTORED"),
+                Err(error) => eprintln!("WW5_Q_CWD_RESTORE_FAILED:{error}"),
+            }
+        }
+    }
+
+    fn set_fixture_cwd(f: &Fixture, verbatim: bool) {
+        let requested = if verbatim {
+            fs::canonicalize(&f.base).unwrap()
+        } else {
+            f.base.clone()
+        };
+        std::env::set_current_dir(&requested).unwrap();
+        let observed = std::env::current_dir().unwrap();
+        let prefix = match observed.components().next() {
+            Some(Component::Prefix(prefix)) => prefix.kind(),
+            other => panic!("FIXTURE_FAILURE: cwd has no Windows prefix: {other:?}"),
+        };
+        eprintln!("WW5_Q_CWD_OBSERVED:verbatim={verbatim}:prefix={prefix:?}:cwd={observed:?}");
+        assert!(
+            if verbatim {
+                matches!(prefix, Prefix::VerbatimDisk(_))
+            } else {
+                matches!(prefix, Prefix::Disk(_))
+            },
+            "FIXTURE_FAILURE: actual cwd prefix differs from requested condition"
+        );
+        assert_eq!(identity(&observed).0, identity(&f.base).0);
+    }
+
+    fn reject_original_junction(root_input: bool, directory: bool) {
+        let f = Fixture::new();
+        // Declared after Fixture: on assertion panic, cwd restores before fixture removal.
+        let restore = RestoreCwd::capture();
+        junction(&f.base.join("cwd-junction"), &f.outside);
+        eprintln!("WW5_Q_JUNCTION_IDENTITY_CONFIRMED");
+        for verbatim in [false, true] {
+            set_fixture_cwd(&f, verbatim);
+            let root = if root_input {
+                PathBuf::from(r"cwd-junction\..\ProtectedHost")
+            } else {
+                f.root.clone()
+            };
+            let dest = if root_input {
+                f.outside.join("must-remain-absent")
+            } else {
+                PathBuf::from(r"cwd-junction\..\external\must-remain-absent")
+            };
+            let before = f.snapshot();
+            let result = if directory {
+                create_external_directory(&root, &dest)
+            } else {
+                write_external_file(&root, &dest, PAYLOAD)
+            };
+            let after = f.snapshot();
+            eprintln!(
+                "WW5_Q_REFUSAL:verbatim={verbatim}:root_input={root_input}:directory={directory}:is_err={}:ledger_unchanged={}:outside_entries={}",
+                result.is_err(), after == before, fs::read_dir(&f.outside).unwrap().count()
+            );
+            assert!(
+                result.is_err(),
+                "Q-H-CWD must observe the original junction before resolving .."
+            );
+            assert_eq!(
+                after, before,
+                "refusal must preserve bytes and the complete directory/temp set"
+            );
+            assert!(!f.outside.join("must-remain-absent").try_exists().unwrap());
+        }
+        drop(restore);
+    }
+
+    fn separator_spelling(path: &Path, style: usize) -> PathBuf {
+        let mut separators = 0;
+        let wide: Vec<u16> = path
+            .as_os_str()
+            .encode_wide()
+            .map(|unit| {
+                if unit != b'\\' as u16 {
+                    return unit;
+                }
+                separators += 1;
+                if style == 1 || (style == 2 && separators % 2 == 1) {
+                    b'/' as u16
+                } else {
+                    unit
+                }
+            })
+            .collect();
+        PathBuf::from(OsString::from_wide(&wide))
+    }
+
+    fn normal_inputs(directory: bool) {
+        let f = Fixture::new();
+        let restore = RestoreCwd::capture();
+        set_fixture_cwd(&f, true);
+        let protected = ledger(&f.root);
+        for form in ["relative", "rooted-relative", "absolute"] {
+            for style in 0..3 {
+                let leaf = format!("{form}-{style}");
+                let expected = f.outside.join(&leaf);
+                let (root, dest) = match form {
+                    "relative" => (
+                        PathBuf::from(r".\ProtectedHost"),
+                        PathBuf::from(format!(r"external\.\{leaf}")),
+                    ),
+                    "rooted-relative" => (
+                        f.root.components().skip(1).collect::<PathBuf>(),
+                        expected.components().skip(1).collect::<PathBuf>(),
+                    ),
+                    "absolute" => (f.root.clone(), expected.clone()),
+                    _ => unreachable!(),
+                };
+                let root = separator_spelling(&root, style);
+                let dest = separator_spelling(&dest, style);
+                let result = if directory {
+                    create_external_directory(&root, &dest)
+                } else {
+                    write_external_file(&root, &dest, PAYLOAD)
+                };
+                eprintln!("WW5_Q_NORMAL:directory={directory}:form={form}:separator_style={style}:is_ok={}", result.is_ok());
+                result.unwrap();
+                if directory {
+                    assert!(expected.is_dir());
+                    assert_eq!(fs::read_dir(&expected).unwrap().count(), 0);
+                } else {
+                    assert_eq!(fs::read(&expected).unwrap(), PAYLOAD);
+                }
+                assert_eq!(ledger(&f.root), protected);
+            }
+        }
+        assert_eq!(
+            fs::read_dir(&f.outside).unwrap().count(),
+            9,
+            "only the nine requested destinations, no temps"
+        );
+        drop(restore);
+    }
+
+    #[test]
+    fn relative_root_junction_dotdot_refuses_file_with_real_verbatim_cwd() {
+        isolated(
+            "q_h_cwd_tests::relative_root_junction_dotdot_refuses_file_with_real_verbatim_cwd",
+            || reject_original_junction(true, false),
+        );
+    }
+    #[test]
+    fn relative_root_junction_dotdot_refuses_directory_with_real_verbatim_cwd() {
+        isolated(
+            "q_h_cwd_tests::relative_root_junction_dotdot_refuses_directory_with_real_verbatim_cwd",
+            || reject_original_junction(true, true),
+        );
+    }
+    #[test]
+    fn relative_destination_junction_dotdot_refuses_file_with_real_verbatim_cwd() {
+        isolated("q_h_cwd_tests::relative_destination_junction_dotdot_refuses_file_with_real_verbatim_cwd", || reject_original_junction(false, false));
+    }
+    #[test]
+    fn relative_destination_junction_dotdot_refuses_directory_with_real_verbatim_cwd() {
+        isolated("q_h_cwd_tests::relative_destination_junction_dotdot_refuses_directory_with_real_verbatim_cwd", || reject_original_junction(false, true));
+    }
+    #[test]
+    fn normal_file_path_forms_and_separators_work_with_real_verbatim_cwd() {
+        isolated(
+            "q_h_cwd_tests::normal_file_path_forms_and_separators_work_with_real_verbatim_cwd",
+            || normal_inputs(false),
+        );
+    }
+    #[test]
+    fn normal_directory_path_forms_and_separators_work_with_real_verbatim_cwd() {
+        isolated(
+            "q_h_cwd_tests::normal_directory_path_forms_and_separators_work_with_real_verbatim_cwd",
+            || normal_inputs(true),
+        );
+    }
+}

@@ -1,6 +1,6 @@
 # I2d-H 独立テスト作者 handoff
 
-現状（2026-10-11追記）：H-TEMP-1限定追加1件がexact実行で成功した。source所有を親へ返却する。過去のscaffold RED記録は保持し、今回の測定結果は末尾「H-TEMP-1限定追加」を正とする。
+現状（2026-10-11追記）：Q-H-CWD公開回帰6件を追加し、4件の行動REDと2件の正常対照PASSを採取した。source所有を親へ返却する。過去の記録は保持し、今回の測定結果は末尾「Q-H-CWD公開回帰6件」を正とする。
 
 2026-10-11 / ACOUSTIC-HISTORY-001。指定 `gpt-6-astra/high`、実行model/effort metadata・開始/終了usage counterは未取得である。TDD Skillの作者工程を適用した。今回の完了境界は期待値固定とscaffold要求までである。
 
@@ -236,4 +236,35 @@ listのPIDは公開32588・内部5904、exitは双方0であり、上記固定50
 TEMP/TMPはprocess限定の `artifacts/i2d-h-temp1-author-temp`。通常sandboxの合成fixtureで実行でき、権限昇格・OS設定変更はない。Drop後の直下残存0、cleanup失敗0を確認した。生ログは `logs/export-destination-author-temp1-build.{stdout,stderr}.log` と `logs/export-destination-author-temp1-exact.{stdout,stderr}.log` に保持した。独立Post判定は親へ渡し、本作者はClosedへ変更しない。
 
 **H-TEMP-1作者検証完了、source所有返却。** 本体失敗・fixture不成立・compile失敗は0であり、追加assertionの緩和や他者差分の変更は行っていない。
+
+## Q-H-CWD公開回帰6件
+
+2026-10-11、test-author指定 `gpt-6-astra/high`、TDD作者工程。親から限定Pre cycle2 PASSを受領したPacket（export-destination-review.md SHA-256 `0E432A55F1DAB3F30B7003AFCE70C8E3CBD82CB112AC4F61040A771E1B603B31`）とHEAD `62f932403a232cfad41ffbb11acf3b3206f8ab49` を入力とした。実行model/effort metadata・usage counterは未取得である。
+
+変更はintegration末尾 `q_h_cwd_tests` の6件と本記録だけである。既存isolated/Fixture/ledger/junction/独立OS identityを再利用し、cwd復元RAII・実prefix観測・case内の区切り表記生成を追加した。旧test部分のbytes SHA-256は `9A14DCB790E29AC3407A0D47EB46CACA077BB08DFDCB52D1599C272B7968936E` と一致した。本体storeは着手/終了とも `F705AE19635F3C95828B36C60D5CBC8E59D9FB43DE3219A14BC02E73CC28022A` で不変である。
+
+buildは `cargo test --locked --test progress_export_destination --no-run` だけを実施した。exec session47565、cargo native PID33096、native/exec exit0、UTC13:19:20.665–13:21:14.974。compile失敗0である。終了を確認後、同一の新public EXE `target/debug/deps/progress_export_destination-b4a366b351b447cc.exe`（SHA-256 `59399F1DB2322F47AF04BE983D062FEB7C8CF7CCF6014E048FECA9993F8023CD`）で各caseを `--exact --nocapture --test-threads=1` により個別実行した。
+
+下表のcase名には `q_h_cwd_tests::` を付ける。生ログは `logs/export-destination-author-cwd-<log名>.{stdout,stderr}.log` に保存した。
+
+| case | log名 / native PID / exit | 結果 |
+| --- | --- | --- |
+| relative_root_junction_dotdot_refuses_file_with_real_verbatim_cwd | q1-outside / 14668 / 101 | 行動RED |
+| relative_root_junction_dotdot_refuses_directory_with_real_verbatim_cwd | q2-outside / 30796 / 101 | 行動RED |
+| relative_destination_junction_dotdot_refuses_file_with_real_verbatim_cwd | q3-outside / 27608 / 101 | 行動RED |
+| relative_destination_junction_dotdot_refuses_directory_with_real_verbatim_cwd | q4-outside / 23940 / 101 | 行動RED |
+| normal_file_path_forms_and_separators_work_with_real_verbatim_cwd | q5-sandbox / 21028 / 0 | 1 PASS、9表記成功 |
+| normal_directory_path_forms_and_separators_work_with_real_verbatim_cwd | q6-sandbox / 29896 / 0 | 1 PASS、9表記成功 |
+
+拒否4件は、所有fixture内のjunction作成・独立identity照合を通過後、実 `set_current_dir` → `current_dir` を使った。すべて通常cwdではprefix `Disk(70)`、Err=true、ledger_unchanged=true、outside_entries=0である。同じfixtureをcanonicalizeしたpathへcwdを移すと、実prefixは `VerbatimDisk(70)` となり、4件すべてErr=false、ledger_unchanged=false、outside_entries=1になった。公開APIが元のjunction/..を見落としてfile/directoryを作成した実動作のREDであり、private注入やcompile失敗ではない。
+
+正常対照2件は同じ実VerbatimDisk cwdで、通常相対/rooted-relative/絶対の3形×backslash/forward slash/混在の3表記、各9行を実行した。Fileは期待した外部pathのexact PAYLOAD、Directoryは期待した新規directory・空内容、両方とも保護rootのledger不変と外部9宛先以外のtempなしを確認した。したがって相対入力の一括拒否を修正完了とするoracleではない。
+
+最初のq1通常sandbox試行はnative PID27992/exit101でjunction作成error5となった。これはfixture失敗であり行動REDへ数えていない。生ログ `q1-sandbox` を保持し、既定の許可とツール審査を経て同EXEの拒否4件だけを非管理者sandbox外で確認した。正常対照2件は通常sandboxで実行した。新UAC・管理者実行・OS設定変更はない。
+
+全7試行で `WW5_Q_CWD_RESTORED` を確認した。4行動REDのpanic時もcwd復元がFixture Dropに先行する。TEMP/TMPはprocess限定の `artifacts/i2d-h-cwd-author-temp`、最終残存0、復元/cleanup失敗0、親30秒/子20秒のtimeout0である。各親/子はexact1件を実行し、拒否4件は子exit101、正常2件は子exit0とCHILD_OKを記録した。期待値またはfixtureの想定外結果はなかった。
+
+終了integration SHA-256は `176709E152A6D26D6676B3424E673AD5B28987C423A8865C0358F5472D2E0324`。rustfmt checkとgit diff --checkはexit0である。旧成功suiteは反復していない。build生ログは `logs/export-destination-author-cwd-build.{stdout,stderr}.log` に保持した。
+
+**Q-H-CWD作者RED採取完了、source所有返却。** 本体の修正は実装者へ渡す。新6件の期待値を維持し、修正後のGREEN・既定51件・独立Post/runnerは後続責任とする。本作者は既存の未実証環境条件や全体gateを完了へ変更していない。
 
