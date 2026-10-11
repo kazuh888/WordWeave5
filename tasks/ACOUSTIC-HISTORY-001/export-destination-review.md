@@ -72,3 +72,14 @@ Pre cycle 1はCHANGES_REQUIRED、P2「単純連結ではverbatim基点で通常�
 Pre cycle 2は **PASS**。独立reviewerは文書SHA `0E432A55F1DAB3F30B7003AFCE70C8E3CBD82CB112AC4F61040A771E1B603B31`・HEAD/source/integration不変を確認した。区切りだけの変換と対照追加で前回P2は充足、新矛盾なし。Q-H-CWDをPre-gate PASSとし、独立作者へ公開6件のRED採取を返却した。規範内容は判定後に変更していない。
 
 作者の公開6件では、拒否4件すべてで通常cwdはErr/ledger不変、同じ合成fixtureの実VerbatimDisk cwdはOk/ledger変化/宛先1件作成となり、行動REDを確認した。正常File/Directory2件は各9表記でPASS。これによりQ-H-CWDは単なる条件付き質問ではなく既定祖先観測契約の不具合として確定した。製品の実データ破壊が発生したという意味ではない。最初のsandbox junction error5はfixture失敗として保持し、同EXE exact4件を非管理者sandbox外で再現した。詳細hash・実行記録は作者報告を正とし、既定Preの方式で実装者へ渡す。
+
+## Q-H-CWD限定Post・コード引継ぎ判定
+
+独立reviewer backup_consumer_pre（指定gpt-6-astra/high）は **Q-H-CWD PASS/Closed、I2d-Hコードrunner-ready、追加finding0** と判定した。対象store SHA `53843CC8A8DBDB63BB58C82DB3BB42C7E943F1AE00E8EF613DE61BD9E45F42FC`、integration SHA `176709E152A6D26D6676B3424E673AD5B28987C423A8865C0358F5472D2E0324`。修正はcommit `b92883411d7c3736466b15f2fa39a8c0f45747e8`、事前契約/独立oracleは `6416f32` へ分離した。
+
+- private絶対化と2呼出し以外を戻した全文が旧source hashと一致し、期待値・FFI・gate等に変更なし。
+- 未観測成分の保持、区切り変換、絶対入力の非変換はPre契約に適合する。
+- 公開4行動RED→GREEN、実両cwdの拒否/ledger不変と正常2件×9表記成功をrawで独立確認した。
+- 57実名の集合差0、環境未実証4件を除く53成功、固定source/EXE hash一致、TEMP0、H-TEMP-1維持を確認した。
+
+closure matrixのH-TEMP-1とQ-H-CWDはともにClosedである。ただしsymlink2・別drive・実identity拒否の4件、独立runner/最終Post、consumer接続・I10・製品EXEは未了。実行担当ではないreviewerはbuild/testを代行していない。次は利用者のSol/medium切替後の独立runnerである。

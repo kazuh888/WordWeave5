@@ -77,3 +77,43 @@ tempも同じ宛先検査を通し、既存temp・別親・保護領域・最終
 H06実identity拒否は独立OS probeがshare_mode(0)下でも成功する場合、caseが0終了しても受入成功から除外する。symlink2件・別drive・8.3も環境依存markerで区別する。管理者symlink exact2件は親が調整する。既存のalias権限を新しいOS設定や広い管理者実行へ拡張しない。
 
 最後の再検査からOS操作までの敵対的TOCTOU、電源断、GUIDを提供できないnetwork share、UI/実APIは未実証である。d-S/B/Mのconsumer接続とI2-D2閉鎖、I10全体gateはこの実装単位の完了から推定しない。
+
+## Q-H-CWD 本体修正・focused結果
+
+2026-10-11、指定implementer `gpt-6-astra/high`。実行model/effort metadata・開始/終了usage counterは未取得である。入力HEAD `6416f32`、store SHA `F705AE19635F3C95828B36C60D5CBC8E59D9FB43DE3219A14BC02E73CC28022A`、integration SHA `176709E152A6D26D6676B3424E673AD5B28987C423A8865C0358F5472D2E0324`。export-destination-review.md「Q-H-CWD限定Packet」の規範全文、独立Pre cycle2 PASS、作者の公開4行動RED＋正常2PASSを確認して着手した。`wordweave-change` をprivate絶対化修正の範囲で適用した。
+
+変更はstore Windows module内 `absolute_unobserved` の追加と、prepareの `cwd.join` 2箇所の置換のみである。絶対入力は元表現を保持し、rooted-relativeはcwd prefix＋入力、通常相対はcwd＋区切り＋入力をOsStringで構成する。verbatim基点へ通常入力を連結するときだけ `/` を `\` へ置換し、`.`/`..`と成分順序を保持する。既存verbatim絶対入力は変換せず、従来のvalidate→walkへ渡す。Packetの方式変更はない。
+
+新helper範囲を除去し2呼出しを元へ戻した全文SHAが入力store SHAと一致した。FFI・gate・wire・既存/新規testを含む他範囲は不変である。integrationも入力SHAと一致する。rustfmt checkとgit diff --checkはexit0である。他担当のmeasurements変更には触れていない。
+
+| 固定対象 | 最終SHA-256 |
+| --- | --- |
+| src/store.rs | 53843CC8A8DBDB63BB58C82DB3BB42C7E943F1AE00E8EF613DE61BD9E45F42FC |
+| tests/progress_export_destination.rs（不変） | 176709E152A6D26D6676B3424E673AD5B28987C423A8865C0358F5472D2E0324 |
+| target/debug/deps/progress_export_destination-b4a366b351b447cc.exe | 2924D49F774E270CB4C919BCA48710DD3A5DF5C8D96A7E6AAA4802204A9CDE6C |
+| target/debug/deps/wordweave5-b3388a7bbef44bb4.exe | FE33CB97384A989E749250D6FB4AC2AA7061E632C151FBB6B85097DEEB2971AB |
+
+buildは `cargo test --locked --lib --test progress_export_destination --no-run` に集約した。exec session77291、cargo PID9332、開始UTC13:26:25.0845349、終了13:28:42.2524173、native/exec exit0。既存unused/incremental hardlink→copy警告があり、compile errorは0である。生ログは `logs/export-destination-impl-cwd-build.{stdout,stderr}.log`。build完了後の固定EXEだけを実行し、以後sourceを変更していない。
+
+`--list` はpublic29・private28（store::i2_export_destination_tests filter）、合計57件と一致した。list logは `export-destination-impl-cwd-{public,private}-list.log`。通常sandbox実行は同EXEの `--nocapture --test-threads=1`、privateのみ同module filterを付けた。public PID24408は20 passed/9 failed/exit101、private PID2364は27 passed/1 failed/exit101。10失敗はいずれも既知junction/hardlink fixture作成error5である。最初のログを `export-destination-impl-cwd-{public,private}.{stdout,stderr}.log` に保持した。
+
+SHA一致・非管理者tokenを確認し、同EXE・合成専用TEMPで失敗exact10件だけをsandbox外実行した。各1 passed/0 failed/exit0。新UAC・管理者実行・OS設定変更はない。`export-destination-impl-cwd-exact-<番号>.{stdout,stderr}.log` に記録した。
+
+| 番号 | exact case（prefixは明記） | PID |
+| --- | --- | ---: |
+| 1 | h02_external_hardlink_to_protected_file_is_rejected | 20856 |
+| 2 | h02_external_hardlinks_are_rejected_even_when_both_names_are_outside | 34692 |
+| 3 | h02_junction_ancestors_and_junction_dotdot_are_rejected | 4936 |
+| 4 | h02_junction_to_safe_outside_is_still_rejected | 28692 |
+| 5 | h03_planned_root_with_junction_ancestor_refuses | 31020 |
+| 6 | q_h_cwd_tests::relative_root_junction_dotdot_refuses_file_with_real_verbatim_cwd | 10820 |
+| 7 | q_h_cwd_tests::relative_root_junction_dotdot_refuses_directory_with_real_verbatim_cwd | 15256 |
+| 8 | q_h_cwd_tests::relative_destination_junction_dotdot_refuses_file_with_real_verbatim_cwd | 7872 |
+| 9 | q_h_cwd_tests::relative_destination_junction_dotdot_refuses_directory_with_real_verbatim_cwd | 31148 |
+| 10 | store::i2_export_destination_tests::h06_file_hardlink_added_is_changed | 31588 |
+
+Q-H-CWD新6件は **6成功**。拒否4件は実 `Disk(70)` / `VerbatimDisk(70)` の両cwdで `is_err=true / ledger_unchanged=true / outside_entries=0` を記録した。正常File/Directory対照2件は各9表記すべて `is_ok=true`、保護領域不変である。相対入力を一括拒否する修正ではない。成功6件の子exit0・CHILD_OKとcwd復元markerを確認した。
+
+旧境界51件は **47成功・4環境未実証**。合計は **57件中53成功・4未実証・行動失敗0**、exact再試行の重複集計なし。未実証はsymlink2のerror1314、別drive alias不在、H06実identity拒否probeがshare_mode(0)下でも成功の4件である。caseの0終了と受入成功を区別した。H-TEMP-1の独立追加1件も成功した。保存79件はprivate絶対化以外の本体が不変なので、指示どおり反復していない。
+
+build/fixture processのTEMP/TMPは `artifacts/i2d-h-cwd-impl-temp` のみに限定した。終了時残存0、timeout/復元失敗marker0、source/integration/EXE SHA不変を確認した。実データ・外部通信・再委譲・commit/pushなし。Q限定Postと独立runnerは親へ返す。既存4環境未実証、consumer接続・I10・実機受入の残余境界は維持し、本体source所有を返却する。
