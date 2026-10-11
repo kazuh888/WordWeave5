@@ -2,6 +2,12 @@
 
 ## ACOUSTIC-HISTORY-001 実装再開（2026-10-07）
 
+- 2026-10-11 I2b-A切替前。main_consumer_impl（指定Astra/high）は本体3hunkのみ修正、同一EXEで新16件/旧4件の自己20PASS、fmt/diff成功、source/test不変照合・専用temp0を記録した。main_consumer_review（指定Astra/high）はread-onlyで本体/期待値/原ログ/hashを確認し阻止0、独立runnerへ進行可とした。最終Postではない。親は別checkpointで保存し、利用者指定どおりSol/medium独立runner前で停止する。初回fixture環境問題を再試行せず既知の実行条件を共有した。実装compile1分48秒/new16件2.35秒は実測、総elapsedと使用量・runtime metadata・親子包含は未取得で推計しない。製品EXE/I10は未実施。
+
+- 同checkpoint後のI2b-A作者結果。main_consumer_tests（指定Astra/high）は16関数を追加し、実行16件で6行動RED/10防御PASSを取得した。初回16件のharness初期化失敗、次の無出力native起動は成功に数えない。最終はprocess限定workspace TEMP/TMPとHidden/Wait起動で2.40秒、fixture作成16/削除16/retained0。未保存教材案sentinelの追加と再compileを記録し、本体未変更を元hash復元で確認した。main_consumer_impl（同指定）へ3関数本体だけ移譲した。保存先/起動方法の環境条件を後段へ渡すことで同じ切分けを反復しない。開始終了counter/runtime metadata/親子包含は未取得。
+
+- 2026-10-11 保存checkpoint完了。source45件を `e9bdc15`、docs121件を `21c304a` に分け既存開発ブランチへ通常pushし、remote HEAD一致とclean treeを確認した。秘密形式の限定scan該当0・生成物混入0、root/acoustic-analysis/practice-historyのfmt checkとdiff check成功。既に通ったP関連suiteは反復せず、checkpointを製品releaseと扱わない。続くb-Aはdesigner照合済み、独立作者main_consumer_tests（指定Astra/high）がapp.rs専用testを所有する。終了counter/runtime metadata/親子包含は未取得。166件蓄積から小単位完了時の定期checkpointへ移行するが、回復時間・節約量の実測はない。
+
 - 2026-10-11 P完了後のcheckpoint/続行開始。利用者が適度なpushと後続実装を承認。親は既存開発ブランチへの保存checkpointを作成し、designer main_consumer_design（既定Astra/high）が非交差read-onlyでI2b-Aを照合する。検証済み小単位完了時と長い中断前をpushの目安とし、未完了checkpointと製品releaseを区別する。開始counter/runtime metadata/親子包含は未取得、推計なし。
 
 - 2026-10-11 P最終Post結果。pointer_post_review（指定Astra/high）が本体P01–08・22oracle・原stdout/jobsを独立確認し、269対象の重複0/欠落0、現物25hash一致、baseline逆除去一致を確認。受入阻止0でP限定PASS/Closedとした。親は計画P/current/indexへ完了を反映し、1の範囲を終了する。成功suiteの再実行・source変更なし。初回4失敗/環境比較/再開と欠測を保持する。code-review Skillの五軸と保存整合性確認を適用、read-only制約によりmutation実行は行わず既存RED→GREENと区別した。最終応答前までの開始/終了counter/runtime metadata/親子包含は未取得、消費や削減量を推計しない。製品EXE/I10/nativeは未完了のままである。

@@ -620,13 +620,17 @@ impl WordApp {
         }
         if let Some(storage) = &self.storage {
             let operation = DiagnosticOperation::begin(DiagnosticEntry::Storage);
-            if let Err(e) = storage.save(&self.progress) {
-                operation.fail(DiagnosticStage::Save, DiagnosticError::Io);
-                self.fatal=Some(format!("保存に失敗しました。これ以上の学習記録は変更しません。アプリを閉じる前に、設定画面から現在の記録をエクスポートしてください。原因: {e}"));
-            } else {
-                operation.event(DiagnosticStage::Save, DiagnosticEvent::Completed);
-                self.dirty = false;
-                self.last_save = Instant::now();
+            match storage.save_progress(&self.progress) {
+                Ok(saved) => {
+                    self.progress = saved;
+                    operation.event(DiagnosticStage::Save, DiagnosticEvent::Completed);
+                    self.dirty = false;
+                    self.last_save = Instant::now();
+                }
+                Err(e) => {
+                    operation.fail(DiagnosticStage::Save, DiagnosticError::Io);
+                    self.fatal=Some(format!("保存に失敗しました。これ以上の学習記録は変更しません。アプリを閉じる前に、設定画面から現在の記録をエクスポートしてください。原因: {e}"));
+                }
             }
         }
     }
@@ -2278,15 +2282,18 @@ impl WordApp {
         model::parse_deck(&text)?;
         let mut next = self.progress.clone();
         let changed = next.reconcile_deck(&merged);
-        if let Err(e) = wordweave5::commit::save(&storage.dir, &text, &next) {
-            if wordweave5::commit::pending(&storage.dir) {
-                self.fatal = Some(format!(
-                    "教材保存が途中で停止した。再起動時に復旧する。原因：{e}"
-                ));
+        let saved = match wordweave5::commit::save_progress(&storage.dir, &text, &next) {
+            Ok(saved) => saved,
+            Err(e) => {
+                if wordweave5::commit::pending(&storage.dir) {
+                    self.fatal = Some(format!(
+                        "教材保存が途中で停止した。再起動時に復旧する。原因：{e}"
+                    ));
+                }
+                return Err(e);
             }
-            return Err(e);
-        }
-        self.progress = next;
+        };
+        self.progress = saved;
         self.deck = merged;
         self.dirty = false;
         self.message = format!("教材を取り込んだ。{changed}項目の復習状態を更新した。");
@@ -2318,8 +2325,7 @@ impl WordApp {
         let restored = progress.ai_calls.entry(today()).or_default();
         *restored = (*restored).max(used);
         progress.reconcile_deck(&self.deck);
-        storage.save(&progress)?;
-        self.progress = progress;
+        self.progress = storage.save_progress(&progress)?;
         self.material_selection_epoch = self.material_selection_epoch.wrapping_add(1);
         self.reset_chat_view_after_restore();
         self.fatal = None;
@@ -2737,4 +2743,437 @@ fn read_limited(path: &std::path::Path, max: u64) -> Result<String, String> {
         return Err("ファイルが大きすぎます。".into());
     }
     std::fs::read_to_string(path).map_err(|e| format!("UTF-8のファイルを読み取れません: {e}"))
+}
+
+#[cfg(test)]
+mod i2_history_main_consumer {
+    use super::*;
+    use std::{collections::BTreeMap, fs, path::Path};
+    use wordweave5::audio_history::{BlobRef, HistoryReader, RootRef, Sha256};
+
+    const ROOT_A: &[u8] =
+        br#"{"schema_version":1,"revision":0,"next_save_sequence":1,"trials":{},"receipts":{}}"#;
+    const SHA_A: &str = "ad4eb5ad867a175c2c85b92de9486ce9a68e76af08b36e1a5e44433670f7f7f0";
+    const SHA_B: &str = "7852cc9a55f3f85fdfba7b2edb9ecdf814cf35787df7fe13fd6ac2b85b73af97";
+    const PENDING: &str = "pending-material-commit.json";
+
+    // Drop releases the real Storage lock and cleans up even when a RED assertion unwinds.
+    struct Fixture {
+        app: WordApp,
+        root: PathBuf,
+    }
+
+    impl Fixture {
+        fn new() -> Self {
+            let (_, mut app, root) = harness_tests::fixture();
+            eprintln!("I2b-A fixture-created: {}", root.display());
+            let dir = root.join("data");
+            fs::create_dir_all(dir.join("audio-history/assets")).unwrap();
+            fs::write(
+                dir.join(format!("audio-history/assets/{SHA_A}.bin")),
+                ROOT_A,
+            )
+            .unwrap();
+            let mut disk = app.progress.clone();
+            disk.audio_history = Some(history(SHA_A));
+            disk.settings.topic = "disk-settings".into();
+            disk.chats[0].draft = "disk-draft".into();
+            fs::write(
+                dir.join("progress.json"),
+                serde_json::to_vec(&disk).unwrap(),
+            )
+            .unwrap();
+            fs::write(dir.join("custom.tsv"), model::deck_text(&app.deck)).unwrap();
+            let closure = HistoryReader::new(app.storage.as_ref().unwrap())
+                .verify_closure(&history(SHA_A))
+                .expect(
+                    "the handwritten A fixture must be a valid closure before testing consumers",
+                );
+            assert_eq!(closure.total_bytes, 82);
+            assert_eq!(closure.objects, vec![history(SHA_A).as_blob().clone()]);
+            app.progress.settings.topic = "unsaved-current-settings".into();
+            app.progress.chats[0].draft = "未保存の現在の下書き".into();
+            app.progress
+                .japanese_drafts
+                .insert("i2-preserved".into(), "未保存の日本語".into());
+            app.progress.material_draft = Some(harness_tests::material_ui_draft(&app));
+            app.progress
+                .validate()
+                .expect("synthetic unsaved candidate is valid");
+            app.dirty = true;
+            app.message = "operation-not-completed".into();
+            app.last_save = Instant::now() - Duration::from_secs(60);
+            Self { app, root }
+        }
+
+        fn dir(&self) -> PathBuf {
+            self.root.join("data")
+        }
+    }
+
+    impl Drop for Fixture {
+        fn drop(&mut self) {
+            drop(self.app.storage.take());
+            match fs::remove_dir_all(&self.root) {
+                Ok(()) => eprintln!("I2b-A fixture-removed: {}", self.root.display()),
+                Err(error) if std::thread::panicking() => {
+                    eprintln!("I2b-A fixture-retained: {}: {error}", self.root.display());
+                }
+                Err(error) => panic!("owned fixture cleanup failed: {error}"),
+            }
+        }
+    }
+
+    #[derive(Clone, Copy, Debug)]
+    enum Route {
+        Persist,
+        Import,
+        Restore,
+    }
+
+    fn history(sha: &str) -> RootRef {
+        RootRef::new(BlobRef {
+            sha256: Sha256::parse(sha).unwrap(),
+            bytes: 82,
+        })
+    }
+
+    fn imported(app: &WordApp) -> Entry {
+        let mut entry = app.deck[0].clone();
+        entry.id = "i2-main-consumer-import".into();
+        entry.meaning = "隔離した追加教材".into();
+        entry
+    }
+
+    fn restore_candidate(app: &WordApp) -> Progress {
+        let mut candidate = app.progress.clone();
+        candidate.settings.topic = "restored-settings".into();
+        candidate.chats[0].draft = "復元する下書き".into();
+        candidate
+            .japanese_drafts
+            .insert("i2-preserved".into(), "復元する日本語".into());
+        candidate.ai_calls.insert(today(), 1);
+        candidate
+    }
+
+    fn invoke(app: &mut WordApp, route: Route, candidate: Progress) -> Result<(), String> {
+        match route {
+            Route::Persist => {
+                app.persist();
+                app.fatal.clone().map_or(Ok(()), Err)
+            }
+            Route::Import => app.import_deck(vec![imported(app)]),
+            Route::Restore => app.restore(candidate),
+        }
+    }
+
+    fn value(progress: &Progress) -> serde_json::Value {
+        serde_json::to_value(progress).unwrap()
+    }
+
+    fn tree(dir: &Path) -> BTreeMap<PathBuf, Vec<u8>> {
+        fn walk(base: &Path, dir: &Path, out: &mut BTreeMap<PathBuf, Vec<u8>>) {
+            for entry in fs::read_dir(dir).unwrap() {
+                let path = entry.unwrap().path();
+                if path.file_name().unwrap() == "app.lock" {
+                    continue;
+                }
+                let relative = path.strip_prefix(base).unwrap().to_owned();
+                if path.is_dir() {
+                    out.insert(relative, Vec::new());
+                    walk(base, &path, out);
+                } else {
+                    out.insert(relative, fs::read(path).unwrap());
+                }
+            }
+        }
+        let mut out = BTreeMap::new();
+        walk(dir, dir, &mut out);
+        out
+    }
+
+    fn success(route: Route, stale: Option<RootRef>) {
+        let mut fixture = Fixture::new();
+        let dir = fixture.dir();
+        let app = &mut fixture.app;
+        app.progress.audio_history = stale;
+        app.progress.ai_calls.insert(today(), 7);
+        let current = app.progress.clone();
+        let candidate = restore_candidate(app);
+        let mut expected = match route {
+            Route::Restore => candidate.clone(),
+            _ => current.clone(),
+        };
+        expected.audio_history = Some(history(SHA_A));
+        expected.ai_calls.insert(today(), 7);
+        if matches!(route, Route::Import) {
+            let entry = imported(app);
+            expected
+                .deck_versions
+                .insert(entry.id.clone(), entry.fingerprint());
+        }
+        let old_epoch = app.material_selection_epoch;
+        let old_save = app.last_save;
+        let history_before = tree(&dir.join("audio-history"));
+
+        invoke(app, route, candidate).expect("the healthy root permits the requested save");
+
+        let disk = app.storage.as_ref().unwrap().read_progress().unwrap();
+        assert_eq!(
+            value(&disk),
+            value(&expected),
+            "{route:?}: disk keeps A and candidate fields"
+        );
+        assert!(!app.dirty);
+        assert!(app.fatal.is_none());
+        assert!(!dir.join(PENDING).exists());
+        assert_eq!(tree(&dir.join("audio-history")), history_before);
+        match route {
+            Route::Persist => assert!(app.last_save > old_save),
+            Route::Import => {
+                assert!(app
+                    .deck
+                    .iter()
+                    .any(|entry| entry.id == "i2-main-consumer-import"));
+                assert_eq!(app.material_selection_epoch, old_epoch);
+            }
+            Route::Restore => {
+                assert_eq!(app.material_selection_epoch, old_epoch.wrapping_add(1));
+                let snapshots: Vec<_> = fs::read_dir(dir.join("backups"))
+                    .unwrap()
+                    .map(|entry| entry.unwrap().path())
+                    .filter(|path| {
+                        path.file_name()
+                            .unwrap()
+                            .to_string_lossy()
+                            .starts_with("progress-memory-before-restore-")
+                    })
+                    .collect();
+                assert_eq!(snapshots.len(), 1);
+                let backup: Progress =
+                    serde_json::from_slice(&fs::read(&snapshots[0]).unwrap()).unwrap();
+                // b-B owns backup root normalization; b-A requires preservation of the unsaved fields.
+                assert_eq!(backup.chats[0].draft, current.chats[0].draft);
+                assert_eq!(backup.settings.topic, current.settings.topic);
+                assert_eq!(backup.japanese_drafts, current.japanese_drafts);
+            }
+        }
+        assert_eq!(
+            value(&app.progress),
+            value(&expected),
+            "{route:?}: UI must adopt the persisted A, not its stale candidate"
+        );
+    }
+
+    #[test]
+    fn t02_persist_stale_none_adopts_a_and_preserves_drafts() {
+        success(Route::Persist, None);
+    }
+    #[test]
+    fn t02_persist_stale_b_adopts_a_and_preserves_drafts() {
+        success(Route::Persist, Some(history(SHA_B)));
+    }
+    #[test]
+    fn t02_import_stale_none_adopts_a_and_preserves_drafts() {
+        success(Route::Import, None);
+    }
+    #[test]
+    fn t02_import_stale_b_adopts_a_and_preserves_drafts() {
+        success(Route::Import, Some(history(SHA_B)));
+    }
+    #[test]
+    fn t02_restore_stale_none_adopts_a_and_snapshots_unsaved_drafts() {
+        success(Route::Restore, None);
+    }
+    #[test]
+    fn t02_restore_stale_b_adopts_a_and_snapshots_unsaved_drafts() {
+        success(Route::Restore, Some(history(SHA_B)));
+    }
+
+    #[derive(Clone, Copy)]
+    enum Refusal {
+        CorruptRoot,
+        UnknownRoot,
+        Pending,
+    }
+
+    fn refuse(route: Route, refusal: Refusal) {
+        let mut fixture = Fixture::new();
+        let dir = fixture.dir();
+        let app = &mut fixture.app;
+        let candidate = restore_candidate(app);
+        candidate
+            .validate()
+            .expect("refusal is not caused by an invalid candidate");
+        match refusal {
+            Refusal::CorruptRoot => {
+                fs::write(
+                    dir.join(format!("audio-history/assets/{SHA_A}.bin")),
+                    b"corrupt-history-root",
+                )
+                .unwrap();
+            }
+            Refusal::UnknownRoot => {
+                let unknown = br#"{"schema_version":999,"revision":0,"next_save_sequence":1,"trials":{},"receipts":{}}"#;
+                let sha = wordweave5::assets::sha256(unknown).unwrap();
+                fs::write(dir.join(format!("audio-history/assets/{sha}.bin")), unknown).unwrap();
+                let mut disk = app.storage.as_ref().unwrap().read_progress().unwrap();
+                disk.audio_history = Some(RootRef::new(BlobRef {
+                    sha256: Sha256::parse(&sha).unwrap(),
+                    bytes: unknown.len() as u64,
+                }));
+                fs::write(
+                    dir.join("progress.json"),
+                    serde_json::to_vec(&disk).unwrap(),
+                )
+                .unwrap();
+            }
+            Refusal::Pending => {
+                let mut recovered = app.storage.as_ref().unwrap().read_progress().unwrap();
+                recovered.settings.topic = "pending-must-not-be-recovered-by-consumer".into();
+                let mut next_deck = app.deck.clone();
+                next_deck.push(imported(app));
+                let pending = serde_json::json!({
+                    "old_deck": fs::read_to_string(dir.join("custom.tsv")).unwrap(),
+                    "old_progress": fs::read_to_string(dir.join("progress.json")).unwrap(),
+                    "deck": model::deck_text(&next_deck),
+                    "progress": serde_json::to_string(&recovered).unwrap(),
+                });
+                fs::write(dir.join(PENDING), serde_json::to_vec(&pending).unwrap()).unwrap();
+            }
+        }
+        let before = tree(&dir);
+        let old_ui = value(&app.progress);
+        let old_deck = model::deck_text(&app.deck);
+        let old_epoch = app.material_selection_epoch;
+        let old_save = app.last_save;
+        let old_message = app.message.clone();
+
+        assert!(
+            invoke(app, route, candidate).is_err(),
+            "{route:?}: unsafe disk state must refuse the save"
+        );
+
+        assert_eq!(value(&app.progress), old_ui);
+        assert_eq!(model::deck_text(&app.deck), old_deck);
+        assert_eq!(app.material_selection_epoch, old_epoch);
+        assert_eq!(app.last_save, old_save);
+        assert_eq!(app.message, old_message);
+        assert!(app.dirty);
+        let after = tree(&dir);
+        for (path, bytes) in &before {
+            assert_eq!(
+                after.get(path),
+                Some(bytes),
+                "{route:?}: existing {} must be preserved",
+                path.display()
+            );
+        }
+        for path in after.keys().filter(|path| !before.contains_key(*path)) {
+            let name = path.file_name().unwrap().to_string_lossy();
+            assert!(
+                matches!(route, Route::Restore)
+                    && (path == Path::new("backups")
+                        || (path.parent() == Some(Path::new("backups"))
+                            && name.starts_with("progress-memory-before-restore-")
+                            && name.ends_with(".json"))
+                        || (path.parent() == Some(Path::new(""))
+                            && name.starts_with("progress-before-restore-")
+                            && name.ends_with(".json"))),
+                "unexpected save artifact: {}",
+                path.display()
+            );
+        }
+        if matches!(refusal, Refusal::Pending) {
+            assert!(dir.join(PENDING).exists());
+        }
+    }
+
+    #[test]
+    fn t02_persist_corrupt_root_preserves_state() {
+        refuse(Route::Persist, Refusal::CorruptRoot);
+    }
+    #[test]
+    fn t02_import_corrupt_root_preserves_state() {
+        refuse(Route::Import, Refusal::CorruptRoot);
+    }
+    #[test]
+    fn t02_restore_corrupt_root_preserves_state() {
+        refuse(Route::Restore, Refusal::CorruptRoot);
+    }
+    #[test]
+    fn t02_persist_unknown_root_preserves_state() {
+        refuse(Route::Persist, Refusal::UnknownRoot);
+    }
+    #[test]
+    fn t02_import_unknown_root_preserves_state() {
+        refuse(Route::Import, Refusal::UnknownRoot);
+    }
+    #[test]
+    fn t02_restore_unknown_root_preserves_state() {
+        refuse(Route::Restore, Refusal::UnknownRoot);
+    }
+    #[test]
+    fn t02_persist_pending_refuses_without_recovery() {
+        refuse(Route::Persist, Refusal::Pending);
+    }
+    #[test]
+    fn t02_import_pending_refuses_without_recovery() {
+        refuse(Route::Import, Refusal::Pending);
+    }
+    #[test]
+    fn t02_restore_pending_refuses_without_recovery() {
+        refuse(Route::Restore, Refusal::Pending);
+    }
+
+    #[test]
+    fn t02_import_pending_creation_failure_and_later_persist_never_rollback() {
+        let mut fixture = Fixture::new();
+        let dir = fixture.dir();
+        let app = &mut fixture.app;
+        fs::write(dir.join("backups"), b"synthetic archive-directory blocker").unwrap();
+        let before = tree(&dir);
+        let old_ui = value(&app.progress);
+        let old_deck = model::deck_text(&app.deck);
+        let old_message = app.message.clone();
+        let old_save = app.last_save;
+
+        assert!(app.import_deck(vec![imported(app)]).is_err());
+
+        // This real I/O failure is after pending publication but BEFORE metadata writes:
+        // recovery preflights the archive directory. It does not simulate a finish checkpoint.
+        assert!(app.fatal.is_some());
+        assert!(app.dirty);
+        assert_eq!(app.message, old_message);
+        assert_eq!(value(&app.progress), old_ui);
+        assert_eq!(model::deck_text(&app.deck), old_deck);
+        let mut after = tree(&dir);
+        let pending = after
+            .remove(Path::new(PENDING))
+            .expect("failed import retains a recovery intent");
+        assert_eq!(after, before);
+        let intent: serde_json::Value = serde_json::from_slice(&pending).unwrap();
+        let next: Progress = serde_json::from_str(intent["progress"].as_str().unwrap()).unwrap();
+        assert_eq!(next.audio_history, Some(history(SHA_A)));
+        assert_eq!(next.chats[0].draft, app.progress.chats[0].draft);
+        assert_eq!(
+            intent["old_progress"].as_str().unwrap().as_bytes(),
+            before[Path::new("progress.json")]
+        );
+        assert!(intent["deck"]
+            .as_str()
+            .unwrap()
+            .contains("i2-main-consumer-import"));
+        let retained = tree(&dir);
+        app.persist();
+        app.persist();
+        assert_eq!(
+            tree(&dir),
+            retained,
+            "later persistence must not roll the pending save back"
+        );
+        assert_eq!(value(&app.progress), old_ui);
+        assert_eq!(app.last_save, old_save);
+        assert!(app.dirty && app.fatal.is_some());
+    }
 }

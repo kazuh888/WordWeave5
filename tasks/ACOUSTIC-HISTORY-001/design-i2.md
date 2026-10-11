@@ -298,6 +298,14 @@ root/Trial/旧revision/原音/resultの期待hash集合はtest作者が手製で
 
 path alias試験の権限不足/非対応は未実行と記録し、通常suite成功へ混ぜない。symlink等の作成に新たな昇格が必要なら親へ戻し、既存I1の特定1件だけの昇格承認を流用しない。本設計修正はOS設定変更や昇格を許可しない。
 
+### I2b-A接合確認（2026-10-11）
+
+P最終Post後、`main_consumer_design`（指定Astra/high、read-only）が既存consumerと完成した保存APIを照合した。新API・新workerは不要である。`src/app.rs` の `persist`、`import_deck`、`restore` だけを対象とし、それぞれ `Storage::save_progress`、`commit::save_progress`、`Storage::save_progress` の成功返却値をUIの `Progress` として採用する。rootだけの先行読取・手動mergeは行わない。成功フラグ・dirty解除は返却値採用後とし、失敗時に古い画面snapshotをdiskへ保存し直さない。
+
+I2-T02の「未知/壊れたAは変更0」は、b-Aでは正本 `progress.json`、教材、pending、履歴objectsの不変とUIへのcandidate未採用を指す。復元前に現在の未保存draftを別snapshotへ退避する既存保護は維持し、その補助退避の追加を許容する。これは復元後UIに古いdraftをmergeする仕様ではない。退避helper内の最新root反映は予定b-Bの所有であり、b-Aに含めない。教材登録失敗時の既存メモリ復元をdisk rollbackと誤認して削除しない。
+
+検証は3経路×stale None/Bの成功、壊れた/未知rootとpendingの拒否、教材pending作成後の保存拒否での旧snapshot非書戻しを対象とする。`backups`をfileにするfixtureは現recoverの退避先事前確認で停止するため、両metadata書込後のfinish失敗と称さない。後半障害注入用seamは追加せず、保存層R/Tの既存証拠とconsumerの実到達境界を区別する。restoreは復元candidate採用、未保存draft別退避、当日生成回数最大値、既存chat resetを維持する。独立作者は `src/app.rs` 内の専用 `i2_history_main_consumer` のみを追加し、作者のRED確認後に3関数本体の所有を実装者へ移す。既存restore/partial-save回帰と新focused試験を実行する。独立runnerは既定Sol/mediumの別工程であり、I10全体gate・製品EXE提供とは区別する。
+
 ## 8. 分割提案とhandoff
 
 以下は親/plannerへ返す所有提案であり、dispatch許可ではない。各行最大5file（独立testを含む）、すべて逐次である。I2担当model/effortと独立Pre/Post、I10全体gateを変更しない。同file内cfg(test)の編集は作者→実装者の所有切替後に行う。
