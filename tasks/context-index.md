@@ -81,6 +81,7 @@
 | I2d-H外部書出し先保護・同Mutexの外部guard・Windows同一性・予定rootとtemp保護（設計Pre PASS） | [設計§5追補](ACOUSTIC-HISTORY-001/design-i2.md)、[独立レビュー](ACOUSTIC-HISTORY-001/export-destination-review.md) |
 | I2d-H独立期待値50件・未接続scaffold要求・環境依存5件・focused回帰 | [独立テスト](ACOUSTIC-HISTORY-001/export-destination-tests.md) |
 | I2d-H本体接合・特殊cwd修正・新57件中53成功/4未実証・旧79成功・固定EXE | [実装引継ぎ](ACOUSTIC-HISTORY-001/export-destination-implementation.md) |
+| I2d-H独立runner・新57＋旧79の136unique中132成功/4環境未実証・固定hash・限定環境比較 | [独立実行報告](ACOUSTIC-HISTORY-001/export-destination-runner.md) |
 
 ソース入口：保存は `src/audio_history/`、共有履歴型は `tools/practice-history/`、音響解析は `tools/acoustic-analysis/`。生ログは各試験記録から辿る。要約へログ本文を複製しない。
 

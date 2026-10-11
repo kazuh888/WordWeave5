@@ -1,6 +1,6 @@
 # 現在のタスク要約
 
-更新：2026-10-11（I2b-B最終Post PASS/Closed。I2d-Hのtemp同名試験と特殊cwd修正は独立限定Post PASS/Closed、コードrunner-ready。新57件中53成功/4環境未実証。次は利用者のGPT-6.1 Sol/medium切替後に独立runnerを実施する。独立最終Post・製品EXE更新は未了）。以後の再開入口は本書である。設計本文・ログ全文は転載せず、必要な箇所だけ [参照インデックス](context-index.md) から読む。旧会話・旧状態記録は証拠確認時だけ参照する。
+更新：2026-10-12（I2b-B最終Post PASS/Closed。I2d-Hのtemp同名試験と特殊cwd修正は独立限定Post PASS/Closed。独立runnerは新57＋旧79＝136unique中132成功/4環境未実証、行動失敗0。管理者symlink2件は起動未確認のため10分待機後に本人wrapperのみ終了、未実行。次はAstra/highへの切替後の独立最終Post。製品EXE更新は未了）。以後の再開入口は本書である。設計本文・ログ全文は転載せず、必要な箇所だけ [参照インデックス](context-index.md) から読む。旧会話・旧状態記録は証拠確認時だけ参照する。
 
 ## 現在の目標
 
@@ -52,6 +52,6 @@ ACOUSTIC-HISTORY-001：原音・音響解析結果・Qwen助言を保存し、�
 2. [実装計画](ACOUSTIC-HISTORY-001/implementation.md) の依存順に保存回復・既存データ/backup統合・残るPraat障害試験・処理統合・比較UI・二hostを継続し、最後に全体テスト/release検証を行う。
 3. I2は[設計](ACOUSTIC-HISTORY-001/design-i2.md)のG private接合追補も[独立Pre PASS](ACOUSTIC-HISTORY-001/history-commit-design-review.md)。plannerの[逐次所有追補](ACOUSTIC-HISTORY-001/implementation.md)に従う。GはsingleMutex/再入拒否/write-block口/strict pendingまでであり、Progress形式・移行・結果不明判定は後続である。現在、利用者の動作確認待ちはない。
 4. M/S/N/R/T/V/Pは最終Post PASS。Pの[最終判定](ACOUSTIC-HISTORY-001/history-pointer-commit-review.md)、[独立269件](ACOUSTIC-HISTORY-001/history-pointer-commit-runner.md)、[初回失敗の環境比較](ACOUSTIC-HISTORY-001/history-pointer-commit-diagnostic.md)を正とし、成功済みの反復は行わない。
-5. I2b-A/Bは最終Post PASS/Closed。I2d-Hは[実装/自己検証](ACOUSTIC-HISTORY-001/export-destination-implementation.md)と[コードレビュー](ACOUSTIC-HISTORY-001/export-destination-review.md)を完了しrunner-ready。H-TEMP-1とQ-H-CWDは独立限定Post PASS/Closed。source SHA `53843CC8A8DBDB63BB58C82DB3BB42C7E943F1AE00E8EF613DE61BD9E45F42FC`、修正commit `b928834`、公開test29/内部28の計57件中53成功/4未実証。旧保存79の成功証拠は保持し、private絶対化修正では反復していない。次はGPT-6.1 Sol/medium切替後の独立runner（新57件・影響する既存focused、実行前に固定EXE/hash確認）である。symlink2は追加承認済みだが前RunAsは起動せずwrapperだけ終了、未実行。別driveと実identity拒否も未実証として保持する。環境条件・実行ログは上記報告を正とする。consumer接続・I10/製品EXEは未了である。
+5. I2b-A/Bは最終Post PASS/Closed。I2d-HのH-TEMP-1とQ-H-CWDは独立限定Post PASS/Closed。[独立runner](ACOUSTIC-HISTORY-001/export-destination-runner.md)で新57＋旧79＝136unique中132成功/4環境未実証・行動失敗0、source/EXE hash不変・TEMP残存0を確認した。source修正commit `b928834`。管理者symlink2件は承認済みだが、今回もRunAs起動artifactがなく10分待機後に本人wrapper3172のみ終了、未実行である。別drive alias不在と実identity拒否fixture不成立も未実証として保持する。次はGPT-6 Astra/highへ利用者切替後の独立最終Postであり、I2d-H全体Closedとは扱わない。consumer接続・I10/製品EXEは未了である。
 
 今回の整理は作業用要約から廃案・重複ログ・無関係な履歴・設計本文の転載を除外したものである。根拠資料と旧記録は削除していない。旧版はインデックスに残すが通常再開時には読み込まない。
