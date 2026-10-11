@@ -1,6 +1,6 @@
 # 現在のタスク要約
 
-更新：2026-10-11（Pまでの保存checkpoint 2commitをpush済み。I2b-A本体3経路の修正・自己20件成功・独立コード確認を終え、独立runner前でモデル切替待ち）。以後の再開入口は本書である。設計本文・ログ全文は転載せず、必要な箇所だけ [参照インデックス](context-index.md) から読む。旧会話・旧状態記録は証拠確認時だけ参照する。
+更新：2026-10-11（I2b-A独立20件成功。Astra/high最終Post前でモデル切替待ち。試用できる区切りでの製品EXE作成依頼を保持）。以後の再開入口は本書である。設計本文・ログ全文は転載せず、必要な箇所だけ [参照インデックス](context-index.md) から読む。旧会話・旧状態記録は証拠確認時だけ参照する。
 
 ## 現在の目標
 
@@ -16,6 +16,7 @@ ACOUSTIC-HISTORY-001：原音・音響解析結果・Qwen助言を保存し、�
 - 利用者は残作業を順に進めることを承認済み。動作確認依頼時は10分待ち、無応答なら確認結果に依存しない作業へ進む。未確認を成功にせず、安全性/データ保護/依存gateは保留する。この指示は実API送信・公開・追加権限の承認ではない。
 - 2026-10-11の最新指示はP完了後の続行と適度なcommit/pushを承認している。小単位の実装・検証・独立レビューが揃った区切りと、長時間作業の中断前をpushの基本とする。中断checkpointは未完了範囲を明記し、秘密・実データ・build/log生成物は含めない。既存開発ブランチへ通常pushし、mainへのmerge・releaseとは区別する。
 - モデル/effort切替が適切な工程では停止して知らせる。次のI2b-A設計/作者/実装/reviewは既定Astra/high、独立runnerはSol/medium。質問や切替がなければ承認済み順に続行する。
+- 2026-10-11の追加依頼により、利用者が動作を試せる区切りで製品EXEを作成する。新履歴機能の本体UI（I8）までの保存・backup・処理依存を満たした段階を候補とし、次のAstra工程で提供範囲を確定する。提供時は必須全体test/release buildと未完成範囲を記録し、現在の部分成功を完成品としない。製品EXE作成の再承認は不要である。
 
 ## 重要な制約
 
@@ -35,10 +36,10 @@ ACOUSTIC-HISTORY-001：原音・音響解析結果・Qwen助言を保存し、�
 | M2・A1 | WAV書込digestとread pin同一性の照合、およびテスト側の同定・後始末・ACK記録競合修正は独立Post PASS/Closed。旧cancel失敗の根本原因が特定されたわけではない |
 | 保存回復 | I1b-2bは独立回復34/writer37/reader37成功・1明示ignored、追加境界2件を含む独立Post PASS。原音等の欠損を捏造せず、同requestで保存だけ再試行するheadless境界まで |
 | 履歴保存確定 | I2a-P本体・新22件・関連269件の成功証拠と独立最終Post PASS/Closed。取消し・既保存・結果不明の判定まで |
-| 主要アプリ保存接続 | I2b-Aのpersist/import_deck/restoreを接続。独立作者の6行動RED/10防御PASSから、実装自己検証で新16件＋旧4件成功。[独立コード確認](ACOUSTIC-HISTORY-001/history-main-consumer-review.md)は阻止0、独立runner/最終Post未了。b-B以降は未着手 |
+| 主要アプリ保存接続 | I2b-Aのpersist/import_deck/restoreを接続。自己20件に加え[独立20件](ACOUSTIC-HISTORY-001/history-main-consumer-runner.md)成功、失敗/ignored/timeout/未実行0、source/EXE不変・専用temp0。[独立コード確認](ACOUSTIC-HISTORY-001/history-main-consumer-review.md)は阻止0。最終Post未了。b-B以降は未着手 |
 | 統合 | Progress・backup・非同期処理・比較・UI・二host統合は未完了。製品EXEは未更新 |
 
-ブランチ：`codex/development-agent-team`。Pまでのソースcheckpoint `e9bdc15` と文書checkpoint `21c304a` を2026-10-11にpushし、GitHub先端との一致とclean treeを確認した。以後のI2b-Aは独立runner未了を明記した別checkpointとして保存する。最新pushの確定hashは再開時にgit status/logとremoteを照合する。main merge・製品EXE更新は行わない。
+ブランチ：`codex/development-agent-team`。Pまでのソースcheckpoint `e9bdc15` と文書checkpoint `21c304a`、I2b-A独立runner前checkpoint `6839e0a` はpush済み。今回再開HEADは `6839e0adb23f3515b4d8a238911e6eec3b2cec67`、開始tree clean。main mergeは範囲外。製品EXEは上記追加依頼に基づき適切な提供段階で更新する。
 
 ## 未解決の問題
 
@@ -51,6 +52,6 @@ ACOUSTIC-HISTORY-001：原音・音響解析結果・Qwen助言を保存し、�
 2. [実装計画](ACOUSTIC-HISTORY-001/implementation.md) の依存順に保存回復・既存データ/backup統合・残るPraat障害試験・処理統合・比較UI・二hostを継続し、最後に全体テスト/release検証を行う。
 3. I2は[設計](ACOUSTIC-HISTORY-001/design-i2.md)のG private接合追補も[独立Pre PASS](ACOUSTIC-HISTORY-001/history-commit-design-review.md)。plannerの[逐次所有追補](ACOUSTIC-HISTORY-001/implementation.md)に従う。GはsingleMutex/再入拒否/write-block口/strict pendingまでであり、Progress形式・移行・結果不明判定は後続である。現在、利用者の動作確認待ちはない。
 4. M/S/N/R/T/V/Pは最終Post PASS。Pの[最終判定](ACOUSTIC-HISTORY-001/history-pointer-commit-review.md)、[独立269件](ACOUSTIC-HISTORY-001/history-pointer-commit-runner.md)、[初回失敗の環境比較](ACOUSTIC-HISTORY-001/history-pointer-commit-diagnostic.md)を正とし、成功済みの反復は行わない。
-5. I2b-Aは[独立作者16件](ACOUSTIC-HISTORY-001/history-main-consumer-tests.md)と[本体・自己20件](ACOUSTIC-HISTORY-001/history-main-consumer-implementation.md)まで実施済み。次は固定source/EXEを別担当が実行する。親モデル切替を利用者へ案内し、`gpt-6.1-sol / medium` の独立runner前で停止する。process限定workspace TEMP/TMPとHidden起動を再利用し、初回環境失敗を繰り返さない。独立runner後の最終Postは既定Astra/high、b-B以降/I10/製品EXE提供は未着手である。
+5. I2b-Aは[独立作者16件](ACOUSTIC-HISTORY-001/history-main-consumer-tests.md)、[本体・自己20件](ACOUSTIC-HISTORY-001/history-main-consumer-implementation.md)、[独立runner20件](ACOUSTIC-HISTORY-001/history-main-consumer-runner.md)まで成功。次は既定`gpt-6-astra / high`の最終Postで新しい実行証拠を照合し、無変更の試験や静的確認を反復しない。利用者へ親モデル切替を案内して停止する。判定後は依存順のb-Bへ進み、製品EXE提供候補も確定する。b-B以降/I10/製品EXE提供は未着手である。
 
 今回の整理は作業用要約から廃案・重複ログ・無関係な履歴・設計本文の転載を除外したものである。根拠資料と旧記録は削除していない。旧版はインデックスに残すが通常再開時には読み込まない。

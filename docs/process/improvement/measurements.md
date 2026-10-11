@@ -2,6 +2,10 @@
 
 ## ACOUSTIC-HISTORY-001 実装再開（2026-10-07）
 
+- 同I2b-A独立runner結果。main_consumer_runnerは固定EXEを新規実行し新16＋旧4の20PASS、失敗/ignored/timeout/未実行0、source/EXE前後不変、fixture作成削除16/16・専用TEMP各job後0を確認した。親も報告・現物hashを確認。空stderrをnullとして扱う補助集計例外4件は文字列読取で訂正し、テスト再実行なし。新suite2.36秒、旧4件0.29/0.32/0.30/0.19秒は実測。既知環境条件の共有により初回fixture失敗を反復せず、rebuildも省いた。最終応答前までの終了counter/runtime metadata/親子包含は未取得、節約量は推計しない。Astra/high最終Post前で停止し、結果とEXE作成依頼を保存checkpointへ含める。
+
+- 2026-10-11 I2b-A独立runner再開。利用者がSol/mediumへ切替え続行を承認、試用用の製品EXE作成も依頼した。HEAD `6839e0a`、開始tree clean。指定main_consumer_runner（gpt-6.1-sol/medium）は固定EXEの新16/旧4件のみを所有し、親はEXE提供の依存確認/current/測定記録を担当する。既知workspace TEMPとHidden起動を再利用し、無変更sourceをrebuildしない。開始counter/runtime metadata/親子包含は未取得。全体release検証は製品提供段階で実施し、今回20件を代替にしない。
+
 - 2026-10-11 I2b-A切替前。main_consumer_impl（指定Astra/high）は本体3hunkのみ修正、同一EXEで新16件/旧4件の自己20PASS、fmt/diff成功、source/test不変照合・専用temp0を記録した。main_consumer_review（指定Astra/high）はread-onlyで本体/期待値/原ログ/hashを確認し阻止0、独立runnerへ進行可とした。最終Postではない。親は別checkpointで保存し、利用者指定どおりSol/medium独立runner前で停止する。初回fixture環境問題を再試行せず既知の実行条件を共有した。実装compile1分48秒/new16件2.35秒は実測、総elapsedと使用量・runtime metadata・親子包含は未取得で推計しない。製品EXE/I10は未実施。
 
 - 同checkpoint後のI2b-A作者結果。main_consumer_tests（指定Astra/high）は16関数を追加し、実行16件で6行動RED/10防御PASSを取得した。初回16件のharness初期化失敗、次の無出力native起動は成功に数えない。最終はprocess限定workspace TEMP/TMPとHidden/Wait起動で2.40秒、fixture作成16/削除16/retained0。未保存教材案sentinelの追加と再compileを記録し、本体未変更を元hash復元で確認した。main_consumer_impl（同指定）へ3関数本体だけ移譲した。保存先/起動方法の環境条件を後段へ渡すことで同じ切分けを反復しない。開始終了counter/runtime metadata/親子包含は未取得。
