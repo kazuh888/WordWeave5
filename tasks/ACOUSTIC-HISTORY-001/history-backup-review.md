@@ -39,3 +39,11 @@ reviewerは本体の確定欠陥0、既存oracle全文/integration hash不変、
 これは限定指摘の閉鎖であり、I2b-B最終Postではない。自己75件＋追加1件の成功証拠は複数EXE世代/環境に跨り、旧EXE hashとB-WB1親native exit/PIDの欠測は残す。次の独立runnerは最終sourceで4EXE（lib/bin/audio_history_backup/audio_history_progress）を再buildし、`--list`確認後、新scope43＋旧33＝76uniqueを新規実行する。source/EXE前後hash、各process exit/timeout、実名・件数、専用TEMP残存を採取する。build中の同EXE実行を避け、session_id/exit_codeを保持し、PowerShell表整形で列を失わず構造化出力する。既知の媒体/junction制約は同一EXEの該当exactだけ限定sandbox外で確認し、UAC/OS設定変更は行わない。
 
 担当は計画どおりrunner `gpt-6.1-sol/medium`、その後の最終Post `gpt-6-astra/high`。親は利用者の切替前停止指示を守る。I10全体test/release・本体UI・製品EXEは未了。reviewerはread-only、実行metadata/開始終了counter未取得である。
+
+## 独立最終Post（2026-10-11）
+
+利用者のAstra/high切替後、同reviewerが最終固定sourceと[独立runner報告](history-backup-runner.md)・新rawログを直接照合し、**I2b-B PASS／Closed**とした。確定欠陥・受入阻止・未解決確認事項0件である。確認HEADは `a0e97bb9b49b6875452805ab99a388497c0bd789`。
+
+`--list`の76実名と成功76実名は完全一致し、欠落・余分な成功名0。source3本/EXE4本の前後hashと現物hashは全一致、既存oracle snapshotも不変。B-WB1親PID3544 exit0、子exit0/固有marker/timeout=falseにより、今回の独立証拠では親終了状態も確認できた。旧証拠の欠測はそのまま保持する。初回junction setup失敗exit101を残したうえで、同じEXEの該当exact限定実行が成功した。全process timeoutなし、専用TEMP残存0である。
+
+既存コード確認・B-WB1閉鎖と新独立76件を合わせ、本単位の受入証拠が揃った。I2d-H/Bの外部write-block成功、I3、I10全体test/release、native受入、製品EXE提供は後続範囲である。reviewerは編集・再build・再試験・commitなし。指定gpt-6-astra/high、実行metadata／usage counter未取得。親が本記録を保存した。
