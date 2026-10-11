@@ -1975,6 +1975,41 @@ mod external_destination_windows {
         Ok(())
     }
 
+    // PathBuf::join normalizes relative components on a verbatim base. Keep
+    // every unobserved component until walk has checked its filesystem entry.
+    fn absolute_unobserved(path: &Path, cwd: &Path) -> Result<PathBuf, Error> {
+        if path.is_absolute() {
+            return Ok(path.to_owned());
+        }
+        let Some(Component::Prefix(prefix)) = cwd.components().next() else {
+            return Err(Error::UnsafePath);
+        };
+        let verbatim = matches!(
+            prefix.kind(),
+            Prefix::Verbatim(_) | Prefix::VerbatimDisk(_) | Prefix::VerbatimUNC(_, _)
+        );
+        let mut absolute = if path.has_root() {
+            prefix.as_os_str().to_owned()
+        } else {
+            let mut base = cwd.as_os_str().to_owned();
+            base.push("\\");
+            base
+        };
+        if verbatim {
+            // Ordinary relative input accepts '/', but a verbatim path does
+            // not. Convert separators only; retain '.'/'..' and their order.
+            let units: Vec<u16> = path
+                .as_os_str()
+                .encode_wide()
+                .map(|unit| if unit == 47 { 92 } else { unit })
+                .collect();
+            absolute.push(OsString::from_wide(&units));
+        } else {
+            absolute.push(path.as_os_str());
+        }
+        Ok(PathBuf::from(absolute))
+    }
+
     pub(super) fn prepare<'g>(
         root: &Path,
         dest: &Path,
@@ -1984,8 +2019,8 @@ mod external_destination_windows {
     ) -> Result<CheckedExternalDestination<'g>, Error> {
         validate_path(root)?;
         validate_path(dest)?;
-        let absolute_root = cwd.join(root);
-        let absolute_dest = cwd.join(dest);
+        let absolute_root = absolute_unobserved(root, cwd)?;
+        let absolute_dest = absolute_unobserved(dest, cwd)?;
         validate_path(&absolute_root)?;
         validate_path(&absolute_dest)?;
         let mut observations = Vec::new();
