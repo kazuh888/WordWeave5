@@ -2,6 +2,10 @@
 
 ## ACOUSTIC-HISTORY-001 実装再開（2026-10-07）
 
+- 同b-B終了境界：本体2file接合、自己75unique成功。独立reviewで本体欠陥0/P2検証欠落B-WB1を検出し、限定Pre→作者test-only1件追加→親子各1PASS（unique1）→限定Post Closed、コードrunner-readyとなった。最終76件の独立runner前にSol/medium切替を案内して停止する。実装者のsession ID観測漏れからno-run重複build（logged5分26秒）、build中EXE起動失敗と引数重複0件を記録した。以後はsession/exit全体保持、build終了後だけ固定EXE実行、構造化結果出力を適用する。書式差だけの成功suite反復はしない。B-WB1 build1分20秒、親0.24秒/子0.01秒は実測、親native exitは欠測。実行metadata/終了counter/包含未取得、総消費/削減額は推計しない。製品EXEは未更新、試用milestoneは既定I3/C1/I8と全体gate後である。
+
+- 同b-B：独立Pre PASS後、作者backup_consumer_tests（Astra/high）がnew37＋旧5の42unique件のoracleを固定し、25行動RED/17PASSを報告した。未接続fixedErr scaffoldは実装者がstore所有返却中だけ追加した。初回RAWの必須memo欠落をfixtureだけ訂正、sandbox内error5は同一EXEの限定sandbox外比較で区別した。環境失敗/compileを行動REDへ数えず、test期待値を固定してbackup_consumer_impl（Astra/high）へ返却。親は独立Pre記録・source所有調整・checkpoint ebac9e0のpush/remote一致を担当した。実行metadata/開始終了counter/包含は未取得。
+
 - 同b-B接合確認：designerがPath読取bridge不足を検出し、planner（backup_bridge_plan、指定Astra/high）はstore限定所有を加える最大3fileへ調整した。親が確定しdesigner反映→独立Preへ渡す。別前提unit/runnerの増設を避け、既存safe readerを共有する。外部write-block guardは既定I2d-H/Bへ維持。main試用EXEの依存/gateを確定した。実行metadata/開始終了counter/包含は未取得、削減量は推計しない。
 
 - 同再開のb-A最終Post。main_consumer_reviewは新runner16名/旧4名と原stdout、source/EXE現物、fixture16/16/残0を照合し、受入阻止0でPASS/Closedとした。親は計画checkbox/current/indexを更新し、同指定Astra/highのbackup_consumer_designへb-B限定接合を引き継いだ。親は閉鎖記録を担当し、designerはdesign-i2のb-B節だけを所有する。成功試験の再実行なし、終了counter/runtime metadata/包含は未取得。

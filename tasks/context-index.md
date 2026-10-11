@@ -74,6 +74,9 @@
 | I2b-A本体3関数・自己20件・固定EXEと後続実行条件 | [実装記録](ACOUSTIC-HISTORY-001/history-main-consumer-implementation.md) |
 | I2b-A独立20件を受領した最終Post PASS/Closed | [レビュー記録](ACOUSTIC-HISTORY-001/history-main-consumer-review.md) |
 | I2b-A新16/旧4の独立20件成功・最終Postへの固定証拠 | [独立実行記録](ACOUSTIC-HISTORY-001/history-main-consumer-runner.md) |
+| I2b-B backup接合・Pre PASS・B-WB1 Closed・runner-readyと次の独立76件 | [設計追補](ACOUSTIC-HISTORY-001/design-i2.md)、[限定計画](ACOUSTIC-HISTORY-001/implementation.md)、[レビュー](ACOUSTIC-HISTORY-001/history-backup-review.md) |
+| I2b-B独立42件・25行動RED/17PASS・fixture訂正と環境比較 | [独立テスト](ACOUSTIC-HISTORY-001/history-backup-tests.md) |
+| I2b-B本体接合・自己75件・世代/環境の証拠境界 | [実装記録](ACOUSTIC-HISTORY-001/history-backup-implementation.md) |
 
 ソース入口：保存は `src/audio_history/`、共有履歴型は `tools/practice-history/`、音響解析は `tools/acoustic-analysis/`。生ログは各試験記録から辿る。要約へログ本文を複製しない。
 

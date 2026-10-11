@@ -142,7 +142,9 @@ Windows合成native UIとprocess検証は許可範囲、利用者データ・実
 
 2026-10-08 b-A準備の限定照合：既定designer（Astra/high、read-only）は承認設計の再利用で接合可能、新API/新設計書不要と確認した。persist/import_deck/restoreは既存成功分岐に実保存Progressの採用を入れ、dirty/last_save/deck/message/epoch/chat reset等の既存更新順と失敗時fatal/候補保持を維持する。import_deckへ従来にないepoch更新を追加しない。restoreは復元前draftを別backupへ保存しUIを復元候補へ置換する既存契約であり、UIに旧draftを残す意味ではない。`json_restore_preserves_the_latest_unsaved_chat_draft`を維持する。restore失敗でも先行backupは残り得るため全ledger不変を要求しない。手製disk root Aとstale None/B、非履歴sentinel、pending拒否を同fileの既存harness_tests::fixtureから検証できる。backup内root整合はb-B所有、b-A source/testはP最終Post後である。
 
-#### b-B限定計画delta: Path読取bridge（2026-10-11、親確定・設計反映済み、Pre待ち）
+#### b-B限定計画delta: Path読取bridge（2026-10-11、親確定・設計反映・独立Pre PASS）
+
+確定：設計SHA `A7A6931A63A53E6842B91DC816ED1430BAF2D3EEB3CC95F753C6226AE26EFBE0` の[独立Pre PASS](history-backup-review.md)、阻止0を受領した。以下のPre待ちという準備時記述はこの確定により解消し、独立作者へ進む。本体・runner/Postは未了である。
 
 暫定案はstoreの別前提単位であったが、[設計のb-B接合節](design-i2.md)と現物のprivate `read_progress_bytes/read_progress_typed`を照合し、**b-Bへstoreの限定所有を加える3file案**へ絞った。同じbackup経路のread接合であり、別reader・別runner単位を増やす必要がない。b-A最終Post PASS/Closedを依存入力とし、単位順は維持する。designerが以下の共有配置を設計へ反映し、独立Preで確認してから作者→実装へ渡す。本deltaだけでPre合格や本体着手を宣言しない。
 
