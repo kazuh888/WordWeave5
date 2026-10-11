@@ -114,3 +114,11 @@ Pre snapshotはbranch `codex/development-agent-team`、HEAD `5d4ab1072158d3c9a3a
 限定Pre cycle 1は **PASS・阻止0**（独立reviewer export_destination_final_review、指定Astra/high）。提出文書SHA `4A516C7F169B8820695CF11B4DF9249E25A5C019354E6D354657F26B8EB55AD8`、source/public test/EXE不変、probe source/raw/hashを照合した。production observeへの接続と戻り値期待は整合する。復元失敗をrawとtest失敗として残せばよく、既存Temp/isolated cleanup変更や合成evidence copy追加は不要と確認。H-IDENTITY-EVIDENCEをPre-gate PASSとし、作者へ指定1caseを返却した。上記規範は判定後に変更していない。製品拒否/ledger/再試行・独立runner/Postは未実証である。
 
 限定コードレビューは **PASS・runner-ready・阻止0**（同独立reviewer）。既存1関数以外のHEAD原文一致を独立比較し、57実名集合差0、FFI ABI/DELETE-share7/FALSE解除後close/panic復元/復元失敗のtest failure、旧UNAVAILABLE早期通過の除去を確認した。作者exactの実Win32 5→recheck Io/publish Err→復元→全ledger/identity/bytes不変/tempなし→retry成功、親子exit0/timeout=false/TEMP0はrawと一致した。store SHA `BB35631D2EF3E42EE8B98B9C6BECC3FEC3310C5CD8D6E96E6F6EF47578745EBC`、lib SHA `68E8DC0504F714EEED8B547228396812089AAE9BFF5310C4BC6BC321454B1314` を現物照合、公開source/EXEは固定hashのままである。現行test規範も更新済み。次はSol/mediumの独立runnerへこのexact1件を返す。H-IDENTITY-EVIDENCEはVerified（作者自己検証）であり、独立runner/最終Post・H全体Closed・symlink2件を代替しない。
+
+### H-IDENTITY-EVIDENCE 限定最終Post（2026-10-12）
+
+独立reviewer `export_destination_final_review`（指定gpt-6-astra/high）は **PASS/Closed・追加指摘0**。HEAD `722f3f5c5cea02f23b22f02c46b22764bd165644`、store/公開test/lib/公開EXEの4hashを現物・前後記録・前回review対象へ照合し一致を確認した。独立runnerのlist対象1件、native PID29828と親子exit0、1PASS/0FAIL/0ignoredを新規rawで確認した。
+
+実Win32 5拒否→recheck Io/publish Err→FALSE解除後close→identity/bytes/全ledger不変/tempなし→retry成功へ到達し、UNAVAILABLE/timeout/復元失敗/TEMP残存は0。旧未実証の同名1件を重複なく差し替えた証拠接合は136unique中133成功/3未実証であり、一括再実行の結果ではない。closure matrixのH-IDENTITY-EVIDENCEをClosedへ更新する。
+
+H-SYMLINK-EVIDENCEの承認済み2件は引き続き必須証拠待ちであり、I2d-H全体Closedとd-S/B/M本体着手は保留する。別drive alias不在は条件付き未検証のまま。reviewerの編集/build/実行/再委任0、runtime metadata/usage counters未取得。親は固定EXEと既存手動scriptの存在を再確認済み、モデル切替を追加せず利用者の実行結果を待つ。

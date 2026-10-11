@@ -82,7 +82,7 @@
 | I2d-H独立期待値50件・未接続scaffold要求・環境依存5件・focused回帰 | [独立テスト](ACOUSTIC-HISTORY-001/export-destination-tests.md) |
 | I2d-H本体接合・特殊cwd修正・新57件中53成功/4未実証・旧79成功・固定EXE | [実装引継ぎ](ACOUSTIC-HISTORY-001/export-destination-implementation.md) |
 | I2d-H独立runner・新57＋旧79の136unique中132成功/4環境未実証・固定hash・限定環境比較 | [独立実行報告](ACOUSTIC-HISTORY-001/export-destination-runner.md) |
-| I2d-H最終Postの必須証拠2点・H06実属性拒否fixture置換・独立exact成功・限定Post待ち | [是正Preとレビュー](ACOUSTIC-HISTORY-001/export-destination-review.md)、[作者の追加証拠](ACOUSTIC-HISTORY-001/export-destination-tests.md#h-identity-evidence-必須fixtureへの置換)、[独立実行追補](ACOUSTIC-HISTORY-001/export-destination-runner.md#h-identity-evidence-独立追補2026-10-12) |
+| I2d-H最終Post・H06実属性拒否は独立Post Closed・管理者symlink2件の必須証拠待ち | [是正Preと最終レビュー](ACOUSTIC-HISTORY-001/export-destination-review.md)、[作者の追加証拠](ACOUSTIC-HISTORY-001/export-destination-tests.md#h-identity-evidence-必須fixtureへの置換)、[独立実行追補](ACOUSTIC-HISTORY-001/export-destination-runner.md#h-identity-evidence-独立追補2026-10-12) |
 
 ソース入口：保存は `src/audio_history/`、共有履歴型は `tools/practice-history/`、音響解析は `tools/acoustic-analysis/`。生ログは各試験記録から辿る。要約へログ本文を複製しない。
 
