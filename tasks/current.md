@@ -1,6 +1,6 @@
 # 現在のタスク要約
 
-更新：2026-10-12（I2d-H最終Postは必須証拠待ち。H06の実属性拒否fixtureを試験1件内で修正、自己exact成功・限定コードレビューPASS/runner-ready。次は利用者のSol/medium切替後に同1件の独立実行。管理者symlink2件は手動確認待ち。後続consumer・製品EXEは未着手/未更新）。以後の再開入口は本書である。設計本文・ログ全文は転載せず、必要な箇所だけ [参照インデックス](context-index.md) から読む。旧会話・旧状態記録は証拠確認時だけ参照する。
+更新：2026-10-12（H06実属性拒否の独立exact1件成功。証拠接合は136unique中133成功/3未実証、行動失敗0。次は利用者のAstra/high切替後のH-IDENTITY限定最終Post。管理者symlink2件は手動確認待ちでI2d-H全体未Closed。後続consumer・製品EXEは未着手/未更新）。以後の再開入口は本書である。設計本文・ログ全文は転載せず、必要な箇所だけ [参照インデックス](context-index.md) から読む。旧会話・旧状態記録は証拠確認時だけ参照する。
 
 ## 現在の目標
 
@@ -52,6 +52,6 @@ ACOUSTIC-HISTORY-001：原音・音響解析結果・Qwen助言を保存し、�
 2. [実装計画](ACOUSTIC-HISTORY-001/implementation.md) の依存順に保存回復・既存データ/backup統合・残るPraat障害試験・処理統合・比較UI・二hostを継続し、最後に全体テスト/release検証を行う。
 3. I2は[設計](ACOUSTIC-HISTORY-001/design-i2.md)のG private接合追補も[独立Pre PASS](ACOUSTIC-HISTORY-001/history-commit-design-review.md)。plannerの[逐次所有追補](ACOUSTIC-HISTORY-001/implementation.md)に従う。GはsingleMutex/再入拒否/write-block口/strict pendingまでであり、Progress形式・移行・結果不明判定は後続である。現在、利用者の動作確認待ちはない。
 4. M/S/N/R/T/V/Pは最終Post PASS。Pの[最終判定](ACOUSTIC-HISTORY-001/history-pointer-commit-review.md)、[独立269件](ACOUSTIC-HISTORY-001/history-pointer-commit-runner.md)、[初回失敗の環境比較](ACOUSTIC-HISTORY-001/history-pointer-commit-diagnostic.md)を正とし、成功済みの反復は行わない。
-5. I2b-A/Bは最終Post PASS/Closed。I2d-HのH-TEMP-1/Q-H-CWDは独立限定Closed。[独立136件](ACOUSTIC-HISTORY-001/export-destination-runner.md)の132成功/4未実証は最終reviewで確認済みだが、[必須証拠2点](ACOUSTIC-HISTORY-001/export-destination-review.md)によりH全体未Closed。H06は限定Pre後に既存1case内で実属性拒否fixtureへ置換し、[作者自己exact](ACOUSTIC-HISTORY-001/export-destination-tests.md#h-identity-evidence-必須fixtureへの置換)成功・コードreview PASS/runner-ready。source SHA `BB35631D2EF3E42EE8B98B9C6BECC3FEC3310C5CD8D6E96E6F6EF47578745EBC`、lib SHA `68E8DC0504F714EEED8B547228396812089AAE9BFF5310C4BC6BC321454B1314`。次は利用者がGPT-6.1 Sol/mediumへ切替後、固定libのH06 exact1件だけを独立実行しPostへ返す。成功済み136件は一律反復しない。管理者symlink2件は固定公開EXE `95E01D39B0ECB7C018C3D78FFE5D3C1B8FF96A395EC3748644F83345954C36AD` の手動scriptを利用者へ案内し、10分以上無応答でも未実行のまま維持。返答後はartifacts/export-destination-elevated-*を確認する。別drive alias不在は条件付き未検証、単独では受入阻止でない。consumer/I10/製品EXEは未了である。
+5. I2b-A/Bは最終Post PASS/Closed。I2d-HのH-TEMP-1/Q-H-CWDは独立限定Closed。H06は限定Pre/code-review後の[独立exact1件](ACOUSTIC-HISTORY-001/export-destination-runner.md#h-identity-evidence-独立追補2026-10-12)も成功（native PID29828/exit0、実Win32 5→production Io/publish Err→復元→全ledger/identity不変→retry成功、hash不変/TEMP0）。旧未実証H06の差替による証拠接合は136unique中133成功/3未実証・行動失敗0であり、現HEADの全136一括再実行ではない。source SHA `BB35631D2EF3E42EE8B98B9C6BECC3FEC3310C5CD8D6E96E6F6EF47578745EBC`、lib SHA `68E8DC0504F714EEED8B547228396812089AAE9BFF5310C4BC6BC321454B1314`。次は利用者のGPT-6 Astra/high切替後のH-IDENTITY限定最終Post。成功済みsuiteは反復しない。管理者symlink2件は固定公開EXE `95E01D39B0ECB7C018C3D78FFE5D3C1B8FF96A395EC3748644F83345954C36AD` の手動script実行待ち、返答後はartifacts/export-destination-elevated-*を確認する。別drive alias不在は条件付き未検証、単独では受入阻止でない。[必須証拠](ACOUSTIC-HISTORY-001/export-destination-review.md)が揃うまでH全体Closed/consumer着手を宣言しない。consumer/I10/製品EXEは未了である。
 
 今回の整理は作業用要約から廃案・重複ログ・無関係な履歴・設計本文の転載を除外したものである。根拠資料と旧記録は削除していない。旧版はインデックスに残すが通常再開時には読み込まない。

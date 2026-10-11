@@ -62,6 +62,37 @@ exactコマンドは `<固定EXE> <完全case名> --exact --nocapture --test-thr
 
 補助静的確認の `git diff --check` はexit0。本体・テスト・期待値・設定の変更0で所有を親へ返す。親のsymlink実行完了までsource/build固定を維持する。KPI開始/終了usage欠測と対象範囲を親へ引き継ぎ、measurements/currentの更新は親担当とする。
 
+## H-IDENTITY-EVIDENCE 独立追補（2026-10-12）
+
+同一runnerの計画者指定 `gpt-6.1-sol/medium` を維持し、独立限定Pre/コードレビューPASS・runner-ready後の指定exact1件だけを新規実行した。実行model/effort metadata・開始終了usage countersは未取得である。AGENTS.mdとwordweave-change全文、H-IDENTITY唯一規範Packet、作者handoff、対象caseを確認し、Skillの検証・報告部分を適用した。旧136件の上記記録は変更せず、作者旧ログを今回の成功根拠に代用していない。
+
+対象HEAD `2503efd570d619aa9bab64b0dd39f731eb243253`、branch `codex/development-agent-team`、開始tree clean。source SHA `BB35631D2EF3E42EE8B98B9C6BECC3FEC3310C5CD8D6E96E6F6EF47578745EBC`、lib SHA `68E8DC0504F714EEED8B547228396812089AAE9BFF5310C4BC6BC321454B1314`、公開source SHA `176709E152A6D26D6676B3424E673AD5B28987C423A8865C0358F5472D2E0324`、公開EXE SHA `95E01D39B0ECB7C018C3D78FFE5D3C1B8FF96A395EC3748644F83345954C36AD` を実行前後に照合し、4対象すべて差0だった。証跡は [before](logs/export-identity-runner-before.json) / [after](logs/export-identity-runner-after.json)。終了時の他者measurements変更は保持した。
+
+再buildは指示どおり不要とし、固定lib `target/debug/deps/wordweave5-b3388a7bbef44bb4.exe` へ以下の引数を順に与えた。
+
+```text
+store::i2_export_destination_tests::h06_real_identity_denial_is_not_absence_when_fixture_is_available --exact --list
+store::i2_export_destination_tests::h06_real_identity_denial_is_not_absence_when_fixture_is_available --exact --nocapture --test-threads=1
+```
+
+listは完全実名1件・native PID33556・exit0、UTC `2026-10-11T22:01:57.4633917Z`–`22:01:57.6800209Z`。新規exactはnative PID29828・exit0、UTC `22:01:57.7151843Z`–`22:01:58.3938154Z`、**1 passed/0 failed/0 ignored/316 filtered** である。exec wrapperもexit0。双方WindowStyle Hidden、非管理者（Administrator=False）、process限定TEMP/TMP `artifacts/export-identity-runner-temp`、外側30秒上限・既存子20秒上限で実行した。sandbox外比較・管理者実行・process killは不要であった。PID/時刻/引数/hash/token/timeoutは [runs.json](logs/export-identity-runner-runs.json) に保存した。
+
+今回の [exact stdout](logs/export-identity-runner-exact.stdout.log) / [exact stderr](logs/export-identity-runner-exact.stderr.log) は、親の子exit0/timeout=false・完全caseのCHILD_OKと次の到達を記録した。
+
+```text
+WW5_H_FIXTURE_CONFIRMED:h06_real_identity_denial:FILE_READ_ATTRIBUTES win32=5 PermissionDenied
+WW5_H_IDENTITY_RESTORED:DeleteFile=FALSE before handle close
+WW5_H_IDENTITY_RESULTS:recheck=Err(Io);publish=Err(...)
+WW5_H_IDENTITY_UNCHANGED:identity/bytes/ledger matched;fixed-temp absent
+WW5_H_IDENTITY_RETRY:exact PAYLOAD;outside entries=1
+```
+
+これは合成fileの実Windows属性open拒否であり、fake identityやmock結果ではない。既存prepare成功→実拒否→recheck/publish拒否→FALSE解除してclose→同一identity/bytes/ledger/temp比較→guard解放後retryのassertへ到達した。UNAVAILABLE0、timeout0、cleanup/復元失敗0、専用TEMP残存0である。[summary](logs/export-identity-runner-summary.json) に保存した。list生ログは `export-identity-runner-list.{stdout,stderr}.log`。新規実行はこの1caseだけで、成功済み他caseは反復していない。
+
+旧H06のUNAVAILABLE1件を今回の成功へ差し替えた証拠接合は **136 unique中133成功・3未実証・行動失敗0**（新境界54/3、旧focused79成功）となる。これは異なるbuild/時点の証拠を接合した集計であり、現HEADで136件を一括再実行した結果ではない。残る3件は公開symlink2と既存別drive alias不在1である。親が手動証拠確認中の管理者symlink2は未加算である。
+
+本runnerのsource/test/期待値/設定変更0、再委任/公開/API/実データ/OS設定変更0、`git diff --check` exit0。所有を親へ返す。H-IDENTITY限定最終Postは次の独立Astra/high担当に残し、本追補だけでH全体Closed、consumer接続、I10、Windows製品配布、native IME/マイク/ペン/TTS/実認証を完了としない。KPI/current更新と結果接合は親担当である。
+
 ## 親による承認済み管理者2件の起動確認
 
 同じ公開EXE/hashを指定し、既存 `artifacts/Invoke-ExportSymlinkTests.ps1` のRunAsをUTC `2026-10-11T18:52:25.7266576Z` に開始した（session36012、待機wrapper PID3172）。10分経過後も起動結果・`export-destination-elevated-*` artifactがなく、試験実行を確認できなかった。Windows確認画面が利用者に届いたか、起動しなかった原因は未確認である。
