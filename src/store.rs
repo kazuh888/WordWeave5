@@ -626,13 +626,31 @@ where
     publish_daily(&path, old_bytes)
 }
 
+enum ProgressRootPolicy {
+    RequireExisting,
+    AllowAbsent,
+}
+
+fn progress_root_exists(
+    absolute_root: &Path,
+    policy: ProgressRootPolicy,
+) -> Result<bool, ProgressReadError> {
+    let ancestors: Vec<_> = absolute_root.ancestors().collect();
+    for ancestor in ancestors.into_iter().rev() {
+        if progress_metadata(ancestor, true)?.is_none() {
+            return match policy {
+                ProgressRootPolicy::RequireExisting => Err(ProgressReadError::Io),
+                ProgressRootPolicy::AllowAbsent => Ok(false),
+            };
+        }
+    }
+    Ok(true)
+}
+
 fn read_progress_bytes(root: &Path, limit: u64) -> Result<Option<Vec<u8>>, ProgressReadError> {
     use std::io::Read;
     let absolute = std::path::absolute(root).map_err(|_| ProgressReadError::Io)?;
-    let ancestors: Vec<_> = absolute.ancestors().collect();
-    for ancestor in ancestors.into_iter().rev() {
-        progress_metadata(ancestor, true)?.ok_or(ProgressReadError::Io)?;
-    }
+    progress_root_exists(&absolute, ProgressRootPolicy::RequireExisting)?;
     let path = absolute.join("progress.json");
     let Some(metadata) = progress_metadata(&path, false)? else {
         // Only a missing leaf under verified ordinary ancestors is an empty store.
@@ -660,6 +678,23 @@ fn read_progress_typed(
     read_progress_bytes(root, limit)?
         .map(|bytes| decode_progress(&bytes))
         .transpose()
+}
+
+pub(crate) fn read_progress_for_backup(root: &Path) -> Result<Option<Progress>, String> {
+    let absolute =
+        std::path::absolute(root).map_err(|_| ProgressReadError::Io.message().to_owned())?;
+    if !progress_root_exists(&absolute, ProgressRootPolicy::AllowAbsent)
+        .map_err(|error| error.message().to_owned())?
+    {
+        return Ok(None);
+    }
+    if crate::commit::pending_checked(&absolute).map_err(|error| error.message())? {
+        return Err("未完了の教材保存があります。バックアップを停止しました。".into());
+    }
+    // Recheck the ancestors: disappearance after the first check is an I/O error.
+    read_progress_typed(&absolute, crate::commit::PROGRESS_LIMIT)
+        .map(|decoded| decoded.map(|decoded| decoded.progress))
+        .map_err(|error| error.message().to_owned())
 }
 
 pub struct ProgressHistoryHead;
@@ -2739,6 +2774,337 @@ pub(crate) mod i2_migration_tests {
                 assert_eq!(wire.get("audio_history"), Some(&serde_json::Value::Null));
             }
         }
+    }
+}
+
+#[cfg(all(test, windows))]
+mod i2_backup_path_tests {
+    use super::*;
+    use crate::store::i2_gate_tests::{tree, Temp};
+    use std::os::windows::fs::OpenOptionsExt;
+
+    const RAW: &str = r#"{"version":1,"settings":{"topic":"未保存とは別のdisk"},"memories":{},"reviews":[],"suspended":["kept"],"ai_calls":{"2026-10-11":7},"study_seconds":{"2026-10-11":31},"japanese_drafts":{"lesson":"日本語\\引用\""},"chats":[{"id":"backup-reader","title":"会話","memo":"読取fixture","draft":"保持する下書き","exchanges":[]}]}"#;
+    const ROOT: &str = r#"{"sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","bytes":82}"#;
+    fn v2(root: &str) -> String {
+        RAW.replace(
+            "\"version\":1",
+            &format!("\"version\":2,\"audio_history\":{root}"),
+        )
+    }
+
+    #[test]
+    fn r01_wire1_wire2_none_and_some_preserve_fields_without_writes() {
+        for raw in [RAW.to_owned(), v2("null"), v2(ROOT)] {
+            let temp = Temp::new();
+            let storage = Storage::at(temp.root.join("host")).unwrap();
+            fs::write(storage.dir.join("progress.json"), &raw).unwrap();
+            let before = tree(&temp.root);
+            let expected: Progress = serde_json::from_str(&raw).expect("valid independent fixture");
+            let result = read_progress_for_backup(&storage.dir).unwrap().unwrap();
+            assert_eq!(
+                serde_json::to_value(result).unwrap(),
+                serde_json::to_value(expected).unwrap()
+            );
+            assert_eq!(
+                tree(&temp.root),
+                before,
+                "read must not lock, migrate or write"
+            );
+        }
+    }
+
+    #[test]
+    fn r02_absent_root_is_backup_none_but_strict_reader_storage_and_head_reject() {
+        let temp = Temp::new();
+        let mut storage = Storage::at(temp.root.join("host")).unwrap();
+        for root in [
+            temp.root.join("missing"),
+            temp.root.join("missing/deep/host"),
+        ] {
+            let before = tree(&temp.root);
+            assert!(read_progress_for_backup(&root).unwrap().is_none());
+            assert_eq!(
+                read_progress_typed(&root, 10000).unwrap_err(),
+                ProgressReadError::Io
+            );
+            storage.dir = root;
+            assert!(storage.read_progress().is_err());
+            assert_eq!(
+                ProgressHistoryHead.read_current(&storage).unwrap_err().kind,
+                HistoryErrorKind::Io
+            );
+            assert_eq!(tree(&temp.root), before);
+        }
+    }
+
+    #[test]
+    fn r02_missing_leaf_under_existing_root_is_none_for_both_readers() {
+        let temp = Temp::new();
+        let root = temp.root.join("host");
+        fs::create_dir(&root).unwrap();
+        let before = tree(&temp.root);
+        assert!(read_progress_for_backup(&root).unwrap().is_none());
+        assert!(read_progress_typed(&root, 10000).unwrap().is_none());
+        assert_eq!(tree(&temp.root), before);
+    }
+
+    #[test]
+    fn r03_file_and_reparse_ancestors_before_missing_leaf_are_not_absence() {
+        for placement in 0..5 {
+            let mut temp = Temp::new();
+            let host = temp.root.join("host");
+            fs::create_dir(&host).unwrap();
+            let exposed = match placement {
+                0 => {
+                    let p = temp.root.join("file");
+                    fs::write(&p, b"keep").unwrap();
+                    p
+                }
+                1 => {
+                    let p = temp.root.join("file");
+                    fs::write(&p, b"keep").unwrap();
+                    p.join("absent/deep")
+                }
+                2 => {
+                    fs::create_dir(host.join("progress.json")).unwrap();
+                    host.clone()
+                }
+                3 => {
+                    let p = temp.root.join("alias");
+                    temp.junction(&p, &host);
+                    p.join("absent/deep")
+                }
+                _ => {
+                    let p = host.join("progress.json");
+                    let target = temp.root.join("target");
+                    fs::create_dir(&target).unwrap();
+                    temp.junction(&p, &target);
+                    host.clone()
+                }
+            };
+            let before = tree(&temp.root);
+            assert!(
+                read_progress_for_backup(&exposed).is_err(),
+                "placement {placement}"
+            );
+            assert_eq!(
+                read_progress_typed(&exposed, 10000).unwrap_err(),
+                ProgressReadError::UnsafePath
+            );
+            assert_eq!(tree(&temp.root), before);
+        }
+    }
+
+    #[test]
+    fn r04_pending_file_and_directory_block_backup_but_not_pure_read() {
+        for directory in [false, true] {
+            let temp = Temp::new();
+            let storage = Storage::at(temp.root.join("host")).unwrap();
+            fs::write(storage.dir.join("progress.json"), RAW).unwrap();
+            let pending = storage.dir.join("pending-material-commit.json");
+            if directory {
+                fs::create_dir(&pending).unwrap();
+            } else {
+                fs::write(&pending, b"must not recover").unwrap();
+            }
+            let before = tree(&temp.root);
+            assert!(read_progress_for_backup(&storage.dir).is_err());
+            assert_eq!(
+                read_progress_typed(&storage.dir, 10000)
+                    .unwrap()
+                    .unwrap()
+                    .wire_version,
+                1
+            );
+            assert_eq!(
+                storage.read_progress().unwrap().chats[0].draft,
+                "保持する下書き"
+            );
+            assert_eq!(tree(&temp.root), before);
+        }
+    }
+
+    #[test]
+    fn r05_unknown_malformed_duplicate_and_unknown_field_refuse_without_writes() {
+        for raw in [
+            v2("null").replace("\"version\":2", "\"version\":99"),
+            "{".into(),
+            v2("null").replacen('{', "{\"version\":2,", 1),
+            v2("null").replacen('{', "{\"audio_history\":null,", 1),
+            v2("null").replacen('{', "{\"unknown\":true,", 1),
+        ] {
+            let temp = Temp::new();
+            let root = temp.root.join("host");
+            fs::create_dir(&root).unwrap();
+            fs::write(root.join("progress.json"), &raw).unwrap();
+            assert!(
+                serde_json::from_str::<Progress>(&raw).is_err(),
+                "negative fixture"
+            );
+            let before = tree(&temp.root);
+            assert!(read_progress_for_backup(&root).is_err());
+            assert!(read_progress_typed(&root, 10000).is_err());
+            assert_eq!(tree(&temp.root), before);
+        }
+    }
+
+    #[test]
+    fn r05_exact_bound_and_production_oversize_remain_strict() {
+        let temp = Temp::new();
+        let root = temp.root.join("host");
+        fs::create_dir(&root).unwrap();
+        let path = root.join("progress.json");
+        fs::write(&path, RAW).unwrap();
+        let before = tree(&temp.root);
+        assert!(read_progress_for_backup(&root).unwrap().is_some());
+        assert!(read_progress_typed(&root, RAW.len() as u64)
+            .unwrap()
+            .is_some());
+        assert_eq!(
+            read_progress_typed(&root, RAW.len() as u64 - 1).unwrap_err(),
+            ProgressReadError::LimitExceeded
+        );
+        assert_eq!(tree(&temp.root), before);
+        let file = File::create(&path).unwrap();
+        file.set_len(crate::commit::PROGRESS_LIMIT + 1).unwrap();
+        drop(file);
+        let before = tree(&temp.root);
+        assert!(read_progress_for_backup(&root).is_err());
+        assert_eq!(
+            read_progress_typed(&root, crate::commit::PROGRESS_LIMIT).unwrap_err(),
+            ProgressReadError::LimitExceeded
+        );
+        assert_eq!(tree(&temp.root), before);
+    }
+
+    #[test]
+    fn r05_actual_sharing_denial_is_io_and_retry_reads_identical_bytes() {
+        let temp = Temp::new();
+        let root = temp.root.join("host");
+        fs::create_dir(&root).unwrap();
+        let path = root.join("progress.json");
+        fs::write(&path, RAW).unwrap();
+        let before = tree(&temp.root);
+        let held = OpenOptions::new()
+            .read(true)
+            .share_mode(0)
+            .open(&path)
+            .unwrap();
+        assert_eq!(
+            fs::read(&path).unwrap_err().raw_os_error(),
+            Some(32),
+            "fixture must fail real read"
+        );
+        let backup = read_progress_for_backup(&root);
+        let strict = read_progress_typed(&root, 10000);
+        drop(held);
+        assert!(backup.is_err());
+        assert_eq!(strict.unwrap_err(), ProgressReadError::Io);
+        assert_eq!(tree(&temp.root), before);
+        assert_eq!(
+            read_progress_for_backup(&root).unwrap().unwrap().chats[0].draft,
+            "保持する下書き"
+        );
+        assert_eq!(tree(&temp.root), before);
+    }
+
+    #[test]
+    fn b_wb1_write_block_refuses_both_backup_entries_without_parent_contamination() {
+        use std::{
+            process::{Command, Stdio},
+            time::{Duration, Instant},
+        };
+        const CASE: &str = "store::i2_backup_path_tests::b_wb1_write_block_refuses_both_backup_entries_without_parent_contamination";
+        const CHILD: &str = "WW5_I2_BACKUP_WRITE_BLOCK_CHILD";
+        const MARKER: &str = "WW5_BACKUP_WRITE_BLOCK_CHILD_OK";
+        if std::env::var(CHILD).as_deref() == Ok(CASE) {
+            let temp = Temp::new();
+            let storage = Storage::at(temp.root.join("host")).unwrap();
+            fs::write(storage.dir.join("progress.json"), RAW).unwrap();
+            let mut current: Progress = serde_json::from_str(RAW).unwrap();
+            current.chats[0].draft = "保存停止中の未保存下書き".into();
+            current.validate().unwrap();
+            assert!(storage.read_progress().unwrap().audio_history.is_none());
+            assert!(current.audio_history.is_none());
+            let deck = crate::model::parse_deck(crate::model::BUILTIN_DECK).unwrap();
+            let destination = temp.root.join("external-backup");
+            let caller = serde_json::to_value(&current).unwrap();
+            let before = tree(&temp.root);
+            let guard = acquire_progress_write().unwrap();
+            guard.block_writes();
+            drop(guard);
+
+            assert!(crate::backup::preserve_current_progress(&storage, &current).is_err());
+            assert_eq!(tree(&temp.root), before, "memory refusal must not write");
+            assert_eq!(serde_json::to_value(&current).unwrap(), caller);
+            assert!(!destination.exists());
+            assert_eq!(
+                acquire_progress_write().unwrap_err(),
+                ProgressGateError::WriteBlocked
+            );
+
+            // b-B interim contract; I2d-H/B owns future external-export availability.
+            assert!(crate::backup::export(&storage.dir, &destination, &deck, &current).is_err());
+            assert_eq!(tree(&temp.root), before, "export refusal must not write");
+            assert_eq!(serde_json::to_value(&current).unwrap(), caller);
+            assert!(!destination.exists());
+            assert_eq!(
+                acquire_progress_write().unwrap_err(),
+                ProgressGateError::WriteBlocked
+            );
+            drop(storage);
+            drop(temp);
+            println!("{MARKER}");
+            return;
+        }
+
+        let guard = acquire_progress_write().expect("parent begins writable");
+        assert_eq!(guard.ensure_writable(), Ok(()));
+        drop(guard);
+        let temp = Temp::new();
+        let mut child = Command::new(std::env::current_exe().unwrap())
+            .args([CASE, "--exact", "--nocapture", "--test-threads=1"])
+            .env(CHILD, CASE)
+            .env("WW5_I2_GATE_LIB_ROOT", &temp.root)
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .unwrap();
+        let deadline = Instant::now() + Duration::from_secs(15);
+        let mut timed_out = false;
+        loop {
+            if child.try_wait().unwrap().is_some() {
+                break;
+            }
+            if Instant::now() >= deadline {
+                child.kill().unwrap();
+                child.wait().unwrap();
+                timed_out = true;
+                break;
+            }
+            std::thread::sleep(Duration::from_millis(10));
+        }
+        let output = child.wait_with_output().unwrap();
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        eprintln!(
+            "B-WB1 child status={} timeout={timed_out}\n{stdout}\n{stderr}",
+            output.status
+        );
+        assert!(!timed_out, "child killed/reaped after 15s");
+        assert!(output.status.success(), "child must complete successfully");
+        assert!(
+            stdout.contains("running 1 test")
+                && stdout.contains("1 passed; 0 failed")
+                && stdout.contains(MARKER),
+            "zero-case success must not pass: {stdout}"
+        );
+        assert!(
+            tree(&temp.root).is_empty(),
+            "child-owned fixtures must be removed"
+        );
+        let guard = acquire_progress_write().expect("child block must not contaminate parent");
+        assert_eq!(guard.ensure_writable(), Ok(()));
     }
 }
 

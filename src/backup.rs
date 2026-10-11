@@ -2,7 +2,10 @@
 use crate::{
     assets::{sha256, AssetRef, AssetStore},
     model::{self, Entry},
-    store::{atomic_write, Progress, Storage},
+    store::{
+        acquire_progress_write, atomic_write, read_progress_for_backup, Progress,
+        ProgressGateError, ProgressWriteGuard, Storage,
+    },
 };
 use serde::{Deserialize, Serialize};
 use std::{
@@ -73,13 +76,14 @@ fn export_with_limits(
     progress: &Progress,
     limits: Limits,
 ) -> Result<(), String> {
+    let guard = acquire_progress_write().map_err(ProgressGateError::message)?;
     reject_asset_destination(root, dest)?;
     let deck = model::deck_text(deck);
     model::parse_deck(&deck)?;
     if deck.len() as u64 > crate::commit::DECK_LIMIT {
         return Err("バックアップの教材が大きすぎます。".into());
     }
-    let bytes = progress_bytes(progress, limits.progress)?;
+    let bytes = legacy_export_bytes_under_guard(root, progress, limits.progress, &guard)?;
     verify_references(root, progress)?;
     let store = AssetStore::new(root.to_owned());
     let assets = store.inventory()?;
@@ -129,6 +133,41 @@ fn progress_bytes(progress: &Progress, limit: u64) -> Result<Vec<u8>, String> {
     }
     Ok(bytes)
 }
+
+fn legacy_progress_bytes(progress: &Progress, limit: u64) -> Result<Vec<u8>, String> {
+    progress.validate()?;
+    if progress.audio_history.is_some() {
+        return Err("音声履歴を含むバックアップ形式には未対応です。".into());
+    }
+    // Project only an already typed value; raw input still uses strict decoding.
+    let mut legacy = serde_json::to_value(progress).map_err(|e| e.to_string())?;
+    let object = legacy.as_object_mut().ok_or("学習記録の形式が不正です。")?;
+    object.insert("version".into(), serde_json::json!(1));
+    object.remove("audio_history");
+    let bytes = serde_json::to_vec_pretty(&legacy).map_err(|e| e.to_string())?;
+    if bytes.len() as u64 > limit {
+        return Err("バックアップの学習記録が大きすぎます。".into());
+    }
+    Ok(bytes)
+}
+
+fn legacy_export_bytes_under_guard(
+    root: &Path,
+    candidate: &Progress,
+    limit: u64,
+    guard: &ProgressWriteGuard,
+) -> Result<Vec<u8>, String> {
+    guard
+        .ensure_writable()
+        .map_err(ProgressGateError::message)?;
+    if candidate.audio_history.is_some()
+        || read_progress_for_backup(root)?.is_some_and(|progress| progress.audio_history.is_some())
+    {
+        return Err("音声履歴を含むバックアップ形式には未対応です。".into());
+    }
+    legacy_progress_bytes(candidate, limit)
+}
+
 fn read(path: &Path, limit: u64) -> Result<Vec<u8>, String> {
     use std::io::Read;
     let f = fs::File::open(path).map_err(|e| e.to_string())?;
@@ -162,6 +201,9 @@ fn prepare_with_limits(path: PathBuf, limits: Limits) -> Result<Prepared, String
     let deck = model::parse_deck(std::str::from_utf8(&deck).map_err(|e| e.to_string())?)?;
     let progress: Progress = serde_json::from_slice(&progress).map_err(|e| e.to_string())?;
     progress.validate()?;
+    if progress.audio_history.is_some() {
+        return Err("音声履歴を含むバックアップ形式には未対応です。復元しません。".into());
+    }
     let store = AssetStore::new(path.clone());
     for r in &manifest.assets {
         store.read(r)?;
@@ -176,7 +218,9 @@ fn prepare_with_limits(path: PathBuf, limits: Limits) -> Result<Prepared, String
 }
 /// Preserve unsaved drafts independently of the on-disk rollback copy.
 pub fn preserve_current_progress(storage: &Storage, current: &Progress) -> Result<(), String> {
-    let current_bytes = progress_bytes(current, DEFAULT_LIMITS.progress)?;
+    let guard = acquire_progress_write().map_err(ProgressGateError::message)?;
+    let snapshot_progress = current_snapshot_under_guard(storage, current, &guard)?;
+    let current_bytes = progress_bytes(&snapshot_progress, DEFAULT_LIMITS.progress)?;
     let backups = storage.dir.join("backups");
     fs::create_dir_all(&backups).map_err(|e| e.to_string())?;
     let snapshot = backups.join(format!(
@@ -185,6 +229,31 @@ pub fn preserve_current_progress(storage: &Storage, current: &Progress) -> Resul
         chrono::Utc::now().timestamp_nanos_opt().unwrap()
     ));
     atomic_write(&snapshot, &current_bytes)
+}
+
+fn current_snapshot_under_guard(
+    storage: &Storage,
+    current: &Progress,
+    guard: &ProgressWriteGuard,
+) -> Result<Progress, String> {
+    guard
+        .ensure_writable()
+        .map_err(ProgressGateError::message)?;
+    if crate::commit::pending_checked(&storage.dir).map_err(|error| error.message())? {
+        return Err("未完了の教材保存があります。学習記録の退避を停止しました。".into());
+    }
+    let latest_root = storage.read_progress()?.audio_history;
+    if let Some(root) = &latest_root {
+        crate::audio_history::HistoryReader::new(storage)
+            .verify_closure(root)
+            .map_err(|_| {
+                "現在の音声履歴を確認できません。学習記録は変更していません。".to_owned()
+            })?;
+    }
+    let mut snapshot = current.clone();
+    snapshot.audio_history = latest_root;
+    snapshot.validate()?;
+    Ok(snapshot)
 }
 impl Prepared {
     pub fn media_count(&self) -> usize {
@@ -213,7 +282,8 @@ impl Prepared {
             target.put(r.kind, &source.read(r)?)?;
         }
         verify_references(&storage.dir, &progress)?;
-        crate::commit::save(&storage.dir, &model::deck_text(&self.deck), &progress)?;
+        let progress =
+            crate::commit::save_progress(&storage.dir, &model::deck_text(&self.deck), &progress)?;
         Ok((self.deck, progress))
     }
 }
@@ -315,7 +385,11 @@ mod tests {
         let source = root.join("source");
         let deck = model::parse_deck(model::BUILTIN_DECK).unwrap();
         let progress = Progress::default();
-        let progress_bytes = serde_json::to_vec_pretty(&progress).unwrap();
+        // AH-AC16: export emits legacy wire1, independently projected here.
+        let mut legacy = serde_json::to_value(&progress).unwrap();
+        legacy["version"] = serde_json::json!(1);
+        legacy.as_object_mut().unwrap().remove("audio_history");
+        let progress_bytes = serde_json::to_vec_pretty(&legacy).unwrap();
         for (name, limits) in [
             (
                 "progress",
@@ -339,7 +413,7 @@ mod tests {
         let first = root.join("first");
         export(&source, &first, &deck, &progress).unwrap();
         let limits = Limits {
-            progress: fs::metadata(first.join("progress.json")).unwrap().len(),
+            progress: progress_bytes.len() as u64,
             manifest: fs::metadata(first.join("learning-backup.json"))
                 .unwrap()
                 .len(),
@@ -348,6 +422,61 @@ mod tests {
         export_with_limits(&source, &exact, &deck, &progress, limits).unwrap();
         assert!(prepare_with_limits(exact, limits).is_ok());
         fs::remove_dir_all(root).unwrap();
+    }
+    #[test]
+    fn i2b_legacy_escaped_bytes_exact_limit_and_memory_runtime2_are_distinct() {
+        let temp = crate::store::i2_gate_tests::Temp::new();
+        let source = temp.root.join("source");
+        let mut progress = Progress::default();
+        progress.settings.topic = "日本語\n\\引用\"\t".into();
+        let deck = model::parse_deck(model::BUILTIN_DECK).unwrap();
+        let mut oracle = serde_json::to_value(&progress).unwrap();
+        oracle["version"] = serde_json::json!(1);
+        oracle.as_object_mut().unwrap().remove("audio_history");
+        let bytes = serde_json::to_vec_pretty(&oracle).unwrap();
+        let before = crate::store::i2_gate_tests::tree(&temp.root);
+        let small = temp.root.join("small");
+        assert!(export_with_limits(
+            &source,
+            &small,
+            &deck,
+            &progress,
+            Limits {
+                progress: bytes.len() as u64 - 1,
+                manifest: 8_000_000
+            }
+        )
+        .is_err());
+        assert_eq!(crate::store::i2_gate_tests::tree(&temp.root), before);
+        let exact = temp.root.join("exact");
+        export_with_limits(
+            &source,
+            &exact,
+            &deck,
+            &progress,
+            Limits {
+                progress: bytes.len() as u64,
+                manifest: 8_000_000,
+            },
+        )
+        .unwrap();
+        assert_eq!(
+            serde_json::from_slice::<serde_json::Value>(
+                &fs::read(exact.join("progress.json")).unwrap()
+            )
+            .unwrap(),
+            oracle
+        );
+        assert_eq!(
+            fs::metadata(exact.join("progress.json")).unwrap().len(),
+            bytes.len() as u64
+        );
+        let runtime = serde_json::to_vec_pretty(&progress).unwrap();
+        assert!(progress_bytes(&progress, runtime.len() as u64 - 1).is_err());
+        assert_eq!(
+            progress_bytes(&progress, runtime.len() as u64).unwrap(),
+            runtime
+        );
     }
     #[test]
     fn backup_restores_detached_originals_and_rejects_corruption() {
