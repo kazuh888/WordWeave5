@@ -1393,6 +1393,863 @@ pub fn atomic_write(path: &Path, bytes: &[u8]) -> Result<(), String> {
     result.map_err(|e: std::io::Error| e.to_string())
 }
 
+// I2d-H scaffold: unconnected, side-effect-free entry points for independent RED.
+pub fn resolve_storage_root() -> Result<PathBuf, String> {
+    Err("外部書き出し先の検査は未実装です。".into())
+}
+
+pub fn write_external_file(_root: &Path, _dest: &Path, _bytes: &[u8]) -> Result<(), String> {
+    Err("外部書き出し先の検査は未実装です。".into())
+}
+
+pub fn create_external_directory(_root: &Path, _dest: &Path) -> Result<(), String> {
+    Err("外部書き出し先の検査は未実装です。".into())
+}
+
+#[derive(Debug)]
+pub(crate) struct ExternalExportGuard {
+    _guard: ProgressWriteGuard,
+}
+
+pub(crate) fn acquire_external_export() -> Result<ExternalExportGuard, ProgressGateError> {
+    Err(ProgressGateError::Reentrant)
+}
+
+pub(crate) fn write_external_file_under_guard(
+    _root: &Path,
+    _dest: &Path,
+    _bytes: &[u8],
+    _guard: &ExternalExportGuard,
+) -> Result<(), String> {
+    Err("外部書き出し先の検査は未実装です。".into())
+}
+
+pub(crate) fn create_external_directory_under_guard(
+    _root: &Path,
+    _dest: &Path,
+    _guard: &ExternalExportGuard,
+) -> Result<PathBuf, String> {
+    Err("外部書き出し先の検査は未実装です。".into())
+}
+
+enum ExternalDestinationKind {
+    File,
+    Directory,
+}
+
+#[derive(Debug)]
+enum ExternalDestinationError {
+    UnsafePath,
+    ProtectedRoot,
+    IdentityUnavailable,
+    Io,
+    Changed,
+    AlreadyExists,
+}
+
+struct CheckedExternalDestination<'g> {
+    _guard: &'g ExternalExportGuard,
+}
+
+fn prepare_external_destination<'g>(
+    _root: &Path,
+    _dest: &Path,
+    _kind: ExternalDestinationKind,
+    _guard: &'g ExternalExportGuard,
+) -> Result<CheckedExternalDestination<'g>, ExternalDestinationError> {
+    Err(ExternalDestinationError::Io)
+}
+
+fn recheck_external_destination(
+    _checked: &CheckedExternalDestination<'_>,
+) -> Result<(), ExternalDestinationError> {
+    Err(ExternalDestinationError::Io)
+}
+
+fn publish_external_file(
+    _checked: &CheckedExternalDestination<'_>,
+    _bytes: &[u8],
+    _temp: &Path,
+) -> Result<(), String> {
+    Err("外部書き出し先の検査は未実装です。".into())
+}
+
+fn create_checked_external_directory(
+    _checked: &CheckedExternalDestination<'_>,
+) -> Result<PathBuf, String> {
+    Err("外部書き出し先の検査は未実装です。".into())
+}
+
+#[cfg(all(test, windows))]
+mod i2_export_destination_tests {
+    use super::*;
+    use crate::store::i2_gate_tests::{tree, Temp};
+    use std::{
+        os::windows::{fs::OpenOptionsExt, io::AsRawHandle},
+        process::{Command, Stdio},
+        sync::mpsc,
+        thread,
+        time::{Duration, Instant},
+    };
+
+    const PAYLOAD: &[u8] = "外部退避の未保存内容\n".as_bytes();
+    const CHILD: &str = "WW5_EXPORT_LIB_CHILD";
+
+    fn isolated(name: &str, body: impl FnOnce()) {
+        let case = format!("store::i2_export_destination_tests::{name}");
+        if std::env::var(CHILD).as_deref() == Ok(case.as_str()) {
+            body();
+            println!("WW5_H_LIB_CHILD_OK:{case}");
+            return;
+        }
+        let temp = Temp::new();
+        let mut child = Command::new(std::env::current_exe().unwrap())
+            .args([case.as_str(), "--exact", "--nocapture", "--test-threads=1"])
+            .env(CHILD, &case)
+            .env("WW5_I2_GATE_LIB_ROOT", &temp.root)
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .unwrap();
+        let deadline = Instant::now() + Duration::from_secs(20);
+        let mut timeout = false;
+        while child.try_wait().unwrap().is_none() {
+            if Instant::now() >= deadline {
+                child.kill().unwrap();
+                child.wait().unwrap();
+                timeout = true;
+                break;
+            }
+            thread::sleep(Duration::from_millis(10));
+        }
+        let output = child.wait_with_output().unwrap();
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        eprintln!(
+            "WW5_H_LIB_PARENT:{case}:exit={}:timeout={timeout}\n{stdout}\n{stderr}",
+            output.status
+        );
+        assert!(!timeout, "child killed/reaped after 20 seconds");
+        assert!(output.status.success(), "child behavior/fixture failure");
+        assert!(
+            stdout.contains("running 1 test")
+                && stdout.contains("1 passed; 0 failed")
+                && stdout.contains(&format!("WW5_H_LIB_CHILD_OK:{case}"))
+        );
+    }
+
+    fn paths(temp: &Temp) -> (PathBuf, PathBuf) {
+        let root = temp.root.join("host");
+        let outside = temp.root.join("external");
+        fs::create_dir(&root).unwrap();
+        fs::create_dir(&outside).unwrap();
+        fs::write(root.join("progress.json"), b"protected exact bytes").unwrap();
+        fs::write(root.join("pending-material-commit.json"), b"do not recover").unwrap();
+        (root, outside)
+    }
+
+    #[test]
+    fn h05_write_block_allows_external_file_directory_and_keeps_normal_block() {
+        isolated(
+            "h05_write_block_allows_external_file_directory_and_keeps_normal_block",
+            || {
+                let temp = Temp::new();
+                let (root, outside) = paths(&temp);
+                let protected = tree(&root);
+                let guard = acquire_progress_write().unwrap();
+                guard.block_writes();
+                drop(guard);
+                write_external_file(&root, &outside.join("saved.txt"), PAYLOAD).unwrap();
+                create_external_directory(&root, &outside.join("bundle")).unwrap();
+                assert_eq!(fs::read(outside.join("saved.txt")).unwrap(), PAYLOAD);
+                assert!(outside.join("bundle").is_dir());
+                assert_eq!(tree(&root), protected);
+                for _ in 0..2 {
+                    assert!(matches!(
+                        acquire_progress_write(),
+                        Err(ProgressGateError::WriteBlocked)
+                    ));
+                }
+                let ext = acquire_external_export().unwrap();
+                write_external_file_under_guard(&root, &outside.join("second.txt"), PAYLOAD, &ext)
+                    .unwrap();
+                drop(ext);
+                assert!(matches!(
+                    acquire_progress_write(),
+                    Err(ProgressGateError::WriteBlocked)
+                ));
+            },
+        );
+    }
+
+    #[test]
+    fn h05_poison_refuses_both_gate_entries_and_public_export_without_mutation() {
+        isolated(
+            "h05_poison_refuses_both_gate_entries_and_public_export_without_mutation",
+            || {
+                let temp = Temp::new();
+                let (root, outside) = paths(&temp);
+                let before = tree(&temp.root);
+                assert!(std::panic::catch_unwind(|| {
+                    let _guard = acquire_progress_write().unwrap();
+                    panic!("intentional isolated gate poison");
+                })
+                .is_err());
+                for _ in 0..2 {
+                    assert!(matches!(
+                        acquire_progress_write(),
+                        Err(ProgressGateError::Poisoned)
+                    ));
+                    assert!(matches!(
+                        acquire_external_export(),
+                        Err(ProgressGateError::Poisoned)
+                    ));
+                    assert!(write_external_file(&root, &outside.join("file"), PAYLOAD).is_err());
+                    assert!(create_external_directory(&root, &outside.join("directory")).is_err());
+                }
+                assert_eq!(tree(&temp.root), before);
+            },
+        );
+    }
+
+    #[test]
+    fn h05_external_guard_panic_poison_is_shared_with_normal_writer() {
+        isolated(
+            "h05_external_guard_panic_poison_is_shared_with_normal_writer",
+            || {
+                assert!(std::panic::catch_unwind(|| {
+                    let _guard = acquire_external_export().unwrap();
+                    panic!("intentional isolated external poison");
+                })
+                .is_err());
+                assert!(matches!(
+                    acquire_external_export(),
+                    Err(ProgressGateError::Poisoned)
+                ));
+                assert!(matches!(
+                    acquire_progress_write(),
+                    Err(ProgressGateError::Poisoned)
+                ));
+            },
+        );
+    }
+
+    #[test]
+    fn h05_reentry_both_directions_is_bounded_and_drop_restores_ownership() {
+        isolated(
+            "h05_reentry_both_directions_is_bounded_and_drop_restores_ownership",
+            || {
+                let normal = acquire_progress_write().unwrap();
+                assert!(matches!(
+                    acquire_external_export(),
+                    Err(ProgressGateError::Reentrant)
+                ));
+                drop(normal);
+                let external = acquire_external_export().unwrap();
+                assert!(matches!(
+                    acquire_progress_write(),
+                    Err(ProgressGateError::Reentrant)
+                ));
+                assert!(matches!(
+                    acquire_external_export(),
+                    Err(ProgressGateError::Reentrant)
+                ));
+                drop(external);
+                drop(acquire_progress_write().unwrap());
+                drop(acquire_external_export().unwrap());
+            },
+        );
+    }
+
+    #[test]
+    fn h05_one_external_guard_supports_directory_then_repeated_files() {
+        isolated(
+            "h05_one_external_guard_supports_directory_then_repeated_files",
+            || {
+                let temp = Temp::new();
+                let (root, outside) = paths(&temp);
+                let protected = tree(&root);
+                let guard = acquire_external_export().unwrap();
+                let resolved =
+                    create_external_directory_under_guard(&root, &outside.join("bundle"), &guard)
+                        .unwrap();
+                assert!(resolved.is_absolute());
+                assert_eq!(
+                    fs::canonicalize(&resolved).unwrap(),
+                    fs::canonicalize(outside.join("bundle")).unwrap()
+                );
+                for name in ["custom.tsv", "progress.json", "complete.json"] {
+                    write_external_file_under_guard(&root, &resolved.join(name), PAYLOAD, &guard)
+                        .unwrap();
+                    assert_eq!(fs::read(resolved.join(name)).unwrap(), PAYLOAD);
+                }
+                drop(guard);
+                assert_eq!(tree(&root), protected);
+                drop(acquire_progress_write().unwrap());
+            },
+        );
+    }
+
+    #[test]
+    fn h05_external_guard_excludes_other_thread_normal_writer_until_drop() {
+        isolated(
+            "h05_external_guard_excludes_other_thread_normal_writer_until_drop",
+            || {
+                let external = acquire_external_export().unwrap();
+                let (started_tx, started_rx) = mpsc::channel();
+                let (entered_tx, entered_rx) = mpsc::channel();
+                let join = thread::spawn(move || {
+                    started_tx.send(()).unwrap();
+                    let _normal = acquire_progress_write().unwrap();
+                    entered_tx.send(()).unwrap();
+                });
+                started_rx.recv_timeout(Duration::from_secs(3)).unwrap();
+                assert_eq!(
+                    entered_rx.recv_timeout(Duration::from_millis(200)),
+                    Err(mpsc::RecvTimeoutError::Timeout)
+                );
+                drop(external);
+                entered_rx.recv_timeout(Duration::from_secs(3)).unwrap();
+                join.join().unwrap();
+            },
+        );
+    }
+
+    #[test]
+    fn h05_normal_guard_excludes_other_thread_external_writer_until_drop() {
+        isolated(
+            "h05_normal_guard_excludes_other_thread_external_writer_until_drop",
+            || {
+                let normal = acquire_progress_write().unwrap();
+                let (started_tx, started_rx) = mpsc::channel();
+                let (entered_tx, entered_rx) = mpsc::channel();
+                let join = thread::spawn(move || {
+                    started_tx.send(()).unwrap();
+                    let _external = acquire_external_export().unwrap();
+                    entered_tx.send(()).unwrap();
+                });
+                started_rx.recv_timeout(Duration::from_secs(3)).unwrap();
+                assert_eq!(
+                    entered_rx.recv_timeout(Duration::from_millis(200)),
+                    Err(mpsc::RecvTimeoutError::Timeout)
+                );
+                drop(normal);
+                entered_rx.recv_timeout(Duration::from_secs(3)).unwrap();
+                join.join().unwrap();
+            },
+        );
+    }
+
+    #[test]
+    fn h04_legacy_atomic_write_remains_gate_free_under_both_guards() {
+        isolated(
+            "h04_legacy_atomic_write_remains_gate_free_under_both_guards",
+            || {
+                let temp = Temp::new();
+                let (root, outside) = paths(&temp);
+                let normal = acquire_progress_write().unwrap();
+                atomic_write(&outside.join("normal.txt"), PAYLOAD).unwrap();
+                drop(normal);
+                let external = acquire_external_export().unwrap();
+                atomic_write(&outside.join("external.txt"), PAYLOAD).unwrap();
+                drop(external);
+                assert_eq!(fs::read(outside.join("normal.txt")).unwrap(), PAYLOAD);
+                assert_eq!(fs::read(outside.join("external.txt")).unwrap(), PAYLOAD);
+                assert_eq!(
+                    fs::read(root.join("progress.json")).unwrap(),
+                    b"protected exact bytes"
+                );
+            },
+        );
+    }
+
+    #[test]
+    fn h06_prepare_is_read_only_and_typed_initial_refusals_are_distinct() {
+        isolated(
+            "h06_prepare_is_read_only_and_typed_initial_refusals_are_distinct",
+            || {
+                let temp = Temp::new();
+                let (root, outside) = paths(&temp);
+                let before = tree(&temp.root);
+                let guard = acquire_external_export().unwrap();
+                assert!(matches!(
+                    prepare_external_destination(
+                        &root,
+                        &root.join("new"),
+                        ExternalDestinationKind::File,
+                        &guard
+                    ),
+                    Err(ExternalDestinationError::ProtectedRoot)
+                ));
+                assert!(matches!(
+                    prepare_external_destination(
+                        &root,
+                        &outside.join("NUL.txt"),
+                        ExternalDestinationKind::File,
+                        &guard
+                    ),
+                    Err(ExternalDestinationError::UnsafePath)
+                ));
+                assert!(matches!(
+                    prepare_external_destination(
+                        &root,
+                        &outside,
+                        ExternalDestinationKind::Directory,
+                        &guard
+                    ),
+                    Err(ExternalDestinationError::AlreadyExists)
+                ));
+                let checked = prepare_external_destination(
+                    &root,
+                    &outside.join("new.txt"),
+                    ExternalDestinationKind::File,
+                    &guard,
+                )
+                .unwrap();
+                assert!(recheck_external_destination(&checked).is_ok());
+                assert_eq!(tree(&temp.root), before);
+            },
+        );
+    }
+
+    fn changed_file(which: &str) {
+        let temp = Temp::new();
+        let (mut root, outside) = paths(&temp);
+        let dest = outside.join("target.txt");
+        let present = matches!(
+            which,
+            "leaf_replace" | "leaf_disappear" | "hardlink_add" | "leaf_becomes_directory"
+        );
+        if present {
+            fs::write(&dest, b"old destination").unwrap();
+        }
+        if which == "root_appears" {
+            root = temp.root.join("planned");
+        }
+        if which == "planned_ancestor_appears" {
+            root = temp.root.join("planned/deeper");
+        }
+        let guard = acquire_external_export().unwrap();
+        let checked =
+            prepare_external_destination(&root, &dest, ExternalDestinationKind::File, &guard)
+                .unwrap();
+        match which {
+            "parent_replace" => {
+                fs::rename(&outside, temp.root.join("parked-parent")).unwrap();
+                fs::create_dir(&outside).unwrap();
+            }
+            "leaf_replace" => {
+                fs::rename(&dest, outside.join("old-leaf")).unwrap();
+                fs::write(&dest, b"replacement by fixture").unwrap();
+            }
+            "leaf_disappear" => {
+                fs::rename(&dest, outside.join("old-leaf")).unwrap();
+            }
+            "leaf_appears" => {
+                fs::write(&dest, b"created by fixture").unwrap();
+            }
+            "hardlink_add" => {
+                fs::hard_link(&dest, outside.join("alias")).unwrap();
+            }
+            "leaf_becomes_directory" => {
+                fs::rename(&dest, outside.join("old-leaf")).unwrap();
+                fs::create_dir(&dest).unwrap();
+            }
+            "root_appears" => fs::create_dir(&root).unwrap(),
+            "planned_ancestor_appears" => fs::create_dir(root.parent().unwrap()).unwrap(),
+            "root_moves" => {
+                fs::rename(&root, temp.root.join("parked-root")).unwrap();
+                fs::create_dir(&root).unwrap();
+            }
+            _ => unreachable!(),
+        }
+        let before = tree(&temp.root); // Fixture mutations are the new baseline.
+        assert!(
+            matches!(
+                recheck_external_destination(&checked),
+                Err(ExternalDestinationError::Changed)
+            ),
+            "expected Changed after {which}"
+        );
+        assert!(publish_external_file(&checked, PAYLOAD, &outside.join("fixed-temp")).is_err());
+        assert_eq!(
+            tree(&temp.root),
+            before,
+            "export changed fixture after {which}"
+        );
+        drop(checked);
+        drop(guard);
+        if matches!(
+            which,
+            "leaf_replace"
+                | "leaf_disappear"
+                | "leaf_appears"
+                | "parent_replace"
+                | "root_appears"
+                | "planned_ancestor_appears"
+                | "root_moves"
+        ) {
+            write_external_file(&root, &dest, PAYLOAD).unwrap();
+            assert_eq!(
+                fs::read(&dest).unwrap(),
+                PAYLOAD,
+                "a new explicit operation may accept the new safe identity"
+            );
+        }
+    }
+    #[test]
+    fn h06_file_parent_replaced_is_changed_and_retry_is_fresh() {
+        isolated(
+            "h06_file_parent_replaced_is_changed_and_retry_is_fresh",
+            || {
+                changed_file("parent_replace");
+            },
+        );
+    }
+    #[test]
+    fn h06_file_leaf_replaced_is_changed_and_retry_is_fresh() {
+        isolated(
+            "h06_file_leaf_replaced_is_changed_and_retry_is_fresh",
+            || {
+                changed_file("leaf_replace");
+            },
+        );
+    }
+    #[test]
+    fn h06_file_leaf_disappeared_is_changed_and_retry_is_fresh() {
+        isolated(
+            "h06_file_leaf_disappeared_is_changed_and_retry_is_fresh",
+            || {
+                changed_file("leaf_disappear");
+            },
+        );
+    }
+    #[test]
+    fn h06_file_absent_leaf_created_is_changed_and_retry_is_fresh() {
+        isolated(
+            "h06_file_absent_leaf_created_is_changed_and_retry_is_fresh",
+            || {
+                changed_file("leaf_appears");
+            },
+        );
+    }
+    #[test]
+    fn h06_file_hardlink_added_is_changed() {
+        isolated("h06_file_hardlink_added_is_changed", || {
+            changed_file("hardlink_add");
+        });
+    }
+    #[test]
+    fn h06_file_leaf_became_directory_is_changed() {
+        isolated("h06_file_leaf_became_directory_is_changed", || {
+            changed_file("leaf_becomes_directory");
+        });
+    }
+    #[test]
+    fn h06_planned_root_appeared_is_changed_and_retry_is_fresh() {
+        isolated(
+            "h06_planned_root_appeared_is_changed_and_retry_is_fresh",
+            || {
+                changed_file("root_appears");
+            },
+        );
+    }
+    #[test]
+    fn h06_planned_ancestor_appeared_is_changed_and_retry_is_fresh() {
+        isolated(
+            "h06_planned_ancestor_appeared_is_changed_and_retry_is_fresh",
+            || {
+                changed_file("planned_ancestor_appears");
+            },
+        );
+    }
+    #[test]
+    fn h06_existing_root_replaced_is_changed_and_retry_is_fresh() {
+        isolated(
+            "h06_existing_root_replaced_is_changed_and_retry_is_fresh",
+            || {
+                changed_file("root_moves");
+            },
+        );
+    }
+
+    fn changed_directory(which: &str) {
+        let temp = Temp::new();
+        let (mut root, outside) = paths(&temp);
+        let dest = outside.join("bundle");
+        if which == "root_appears" {
+            root = temp.root.join("planned");
+        }
+        let guard = acquire_external_export().unwrap();
+        let checked =
+            prepare_external_destination(&root, &dest, ExternalDestinationKind::Directory, &guard)
+                .unwrap();
+        match which {
+            "parent_replace" => {
+                fs::rename(&outside, temp.root.join("parked-parent")).unwrap();
+                fs::create_dir(&outside).unwrap();
+            }
+            "leaf_appears" => {
+                fs::create_dir(&dest).unwrap();
+                fs::write(dest.join("sentinel"), b"fixture bytes").unwrap();
+            }
+            "root_appears" => fs::create_dir(&root).unwrap(),
+            _ => unreachable!(),
+        }
+        let before = tree(&temp.root);
+        assert!(matches!(
+            recheck_external_destination(&checked),
+            Err(ExternalDestinationError::Changed)
+        ));
+        assert!(create_checked_external_directory(&checked).is_err());
+        assert_eq!(tree(&temp.root), before);
+    }
+    #[test]
+    fn h06_directory_parent_replaced_is_changed() {
+        isolated("h06_directory_parent_replaced_is_changed", || {
+            changed_directory("parent_replace");
+        });
+    }
+    #[test]
+    fn h06_directory_absent_leaf_created_is_changed() {
+        isolated("h06_directory_absent_leaf_created_is_changed", || {
+            changed_directory("leaf_appears");
+        });
+    }
+    #[test]
+    fn h06_directory_planned_root_appeared_is_changed() {
+        isolated("h06_directory_planned_root_appeared_is_changed", || {
+            changed_directory("root_appears");
+        });
+    }
+
+    #[test]
+    fn h06_real_identity_denial_is_not_absence_when_fixture_is_available() {
+        isolated(
+            "h06_real_identity_denial_is_not_absence_when_fixture_is_available",
+            || {
+                #[repr(C)]
+                struct Identity {
+                    volume: u64,
+                    id: [u8; 16],
+                }
+                #[link(name = "kernel32")]
+                extern "system" {
+                    fn GetFileInformationByHandleEx(
+                        handle: *mut std::ffi::c_void,
+                        class: i32,
+                        buffer: *mut std::ffi::c_void,
+                        size: u32,
+                    ) -> i32;
+                }
+                fn probe(path: &Path) -> std::io::Result<()> {
+                    let file = OpenOptions::new()
+                        .access_mode(0x80)
+                        .share_mode(7)
+                        .custom_flags(0x0020_0000)
+                        .open(path)?;
+                    let mut id = Identity {
+                        volume: 0,
+                        id: [0; 16],
+                    };
+                    // SAFETY: FileIdInfo is class 18; repr(C) storage is 24 bytes with 8-byte alignment.
+                    let ok = unsafe {
+                        GetFileInformationByHandleEx(
+                            file.as_raw_handle(),
+                            18,
+                            (&mut id as *mut Identity).cast(),
+                            std::mem::size_of::<Identity>() as u32,
+                        )
+                    };
+                    if ok == 0 {
+                        Err(std::io::Error::last_os_error())
+                    } else {
+                        Ok(())
+                    }
+                }
+                let temp = Temp::new();
+                let (root, outside) = paths(&temp);
+                let dest = outside.join("target.txt");
+                fs::write(&dest, b"preserved exact target").unwrap();
+                probe(&dest)
+                    .expect("FIXTURE_FAILURE: normal attributes/identity probe must succeed");
+                let guard = acquire_external_export().unwrap();
+                let checked = prepare_external_destination(
+                    &root,
+                    &dest,
+                    ExternalDestinationKind::File,
+                    &guard,
+                )
+                .unwrap();
+                let before = tree(&temp.root);
+                let exclusive = match OpenOptions::new().read(true).share_mode(0).open(&dest) {
+                    Ok(handle) => handle,
+                    Err(e) => {
+                        eprintln!("WW5_H_FIXTURE_UNAVAILABLE:h06_real_identity_denial:exclusive fixture handle failed:{e}; NOT BEHAVIOR PASS OR RED");
+                        return;
+                    }
+                };
+                if probe(&dest).is_ok() {
+                    drop(exclusive);
+                    eprintln!("WW5_H_FIXTURE_UNAVAILABLE:h06_real_identity_denial:FILE_READ_ATTRIBUTES/FileIdInfo succeeds under share_mode(0); NOT BEHAVIOR PASS OR RED");
+                    return;
+                }
+                eprintln!("WW5_H_FIXTURE_CONFIRMED:h06_real_identity_denial:independent attributes/identity probe failed");
+                let rechecked = recheck_external_destination(&checked);
+                let published =
+                    publish_external_file(&checked, PAYLOAD, &outside.join("fixed-temp"));
+                drop(exclusive);
+                assert!(matches!(
+                    rechecked,
+                    Err(ExternalDestinationError::Io
+                        | ExternalDestinationError::IdentityUnavailable)
+                ));
+                assert!(published.is_err());
+                assert_eq!(tree(&temp.root), before);
+                drop(checked);
+                drop(guard);
+                probe(&dest).unwrap();
+                write_external_file(&root, &dest, PAYLOAD).unwrap();
+                assert_eq!(fs::read(&dest).unwrap(), PAYLOAD);
+            },
+        );
+    }
+
+    #[test]
+    fn h07_fixed_temp_equal_to_planned_root_is_rejected_before_io() {
+        isolated(
+            "h07_fixed_temp_equal_to_planned_root_is_rejected_before_io",
+            || {
+                let temp = Temp::new();
+                let (_, outside) = paths(&temp);
+                let planned = outside.join("note.tmp-fixed");
+                let dest = outside.join("note.txt");
+                fs::write(&dest, b"existing destination").unwrap();
+                let before = tree(&temp.root);
+                let guard = acquire_external_export().unwrap();
+                let checked = prepare_external_destination(
+                    &planned,
+                    &dest,
+                    ExternalDestinationKind::File,
+                    &guard,
+                )
+                .unwrap();
+                assert!(publish_external_file(&checked, PAYLOAD, &planned).is_err());
+                assert_eq!(tree(&temp.root), before);
+                assert!(!planned.exists());
+            },
+        );
+    }
+    #[test]
+    fn h07_existing_temp_sentinel_is_not_deleted_or_replaced() {
+        isolated(
+            "h07_existing_temp_sentinel_is_not_deleted_or_replaced",
+            || {
+                let temp = Temp::new();
+                let (root, outside) = paths(&temp);
+                let dest = outside.join("note.txt");
+                let fixed = outside.join("fixed-temp");
+                fs::write(&dest, b"old destination").unwrap();
+                fs::write(&fixed, b"existing temp sentinel").unwrap();
+                let before = tree(&temp.root);
+                let guard = acquire_external_export().unwrap();
+                let checked = prepare_external_destination(
+                    &root,
+                    &dest,
+                    ExternalDestinationKind::File,
+                    &guard,
+                )
+                .unwrap();
+                assert!(publish_external_file(&checked, PAYLOAD, &fixed).is_err());
+                assert_eq!(tree(&temp.root), before);
+            },
+        );
+    }
+    #[test]
+    fn h07_normal_fixed_temp_publishes_exact_bytes_and_disappears() {
+        isolated(
+            "h07_normal_fixed_temp_publishes_exact_bytes_and_disappears",
+            || {
+                let temp = Temp::new();
+                let (root, outside) = paths(&temp);
+                let dest = outside.join("note.txt");
+                let fixed = outside.join("fixed-temp");
+                fs::write(&dest, b"old destination").unwrap();
+                let protected = tree(&root);
+                let guard = acquire_external_export().unwrap();
+                let checked = prepare_external_destination(
+                    &root,
+                    &dest,
+                    ExternalDestinationKind::File,
+                    &guard,
+                )
+                .unwrap();
+                publish_external_file(&checked, PAYLOAD, &fixed).unwrap();
+                assert_eq!(fs::read(&dest).unwrap(), PAYLOAD);
+                assert!(!fixed.exists());
+                assert_eq!(tree(&root), protected);
+                assert_eq!(fs::read_dir(&outside).unwrap().count(), 1);
+            },
+        );
+    }
+    #[test]
+    fn h07_wrong_parent_or_protected_temp_is_rejected_before_io() {
+        isolated(
+            "h07_wrong_parent_or_protected_temp_is_rejected_before_io",
+            || {
+                let temp = Temp::new();
+                let (root, outside) = paths(&temp);
+                let dest = outside.join("note.txt");
+                let guard = acquire_external_export().unwrap();
+                let checked = prepare_external_destination(
+                    &root,
+                    &dest,
+                    ExternalDestinationKind::File,
+                    &guard,
+                )
+                .unwrap();
+                for fixed in [temp.root.join("wrong-parent"), root.join("new-temp")] {
+                    let before = tree(&temp.root);
+                    assert!(publish_external_file(&checked, PAYLOAD, &fixed).is_err());
+                    assert_eq!(tree(&temp.root), before);
+                }
+            },
+        );
+    }
+    #[test]
+    fn h07_final_operation_requires_matching_file_or_directory_mode() {
+        isolated(
+            "h07_final_operation_requires_matching_file_or_directory_mode",
+            || {
+                let temp = Temp::new();
+                let (root, outside) = paths(&temp);
+                let guard = acquire_external_export().unwrap();
+                let file = prepare_external_destination(
+                    &root,
+                    &outside.join("file"),
+                    ExternalDestinationKind::File,
+                    &guard,
+                )
+                .unwrap();
+                let dir = prepare_external_destination(
+                    &root,
+                    &outside.join("directory"),
+                    ExternalDestinationKind::Directory,
+                    &guard,
+                )
+                .unwrap();
+                let before = tree(&temp.root);
+                assert!(create_checked_external_directory(&file).is_err());
+                assert!(publish_external_file(&dir, PAYLOAD, &outside.join("fixed-temp")).is_err());
+                assert_eq!(tree(&temp.root), before);
+                let created = create_checked_external_directory(&dir).unwrap();
+                assert!(created.is_absolute());
+                assert!(created.is_dir());
+            },
+        );
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
