@@ -12,3 +12,43 @@
 非阻止の検証留意：H06の共有制限fixtureは実失敗を確認して採用する。FILE_READ_ATTRIBUTES要求はshare-mode=0で拒否されるとは限らない。作者はmetadata/identity取得の実失敗を独立確認し、成立しないfixtureを拒否試験の成功に数えない。根拠は[CreateFileW](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew)。GUID取得の制約は[GetFinalPathNameByHandleW](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getfinalpathnamebyhandlew)と照合した。
 
 FFI ABI、実FSのidentity、alias権限、H06/H07実行証拠は実装/独立試験gateに残る。d-B/M consumer接続、I2-D2閉鎖、I10は未完了。reviewerはread-onlyで編集/build/test/再委譲なし。実行metadata/usage counter未取得。親が本記録を保存し、独立test作者へ留意点とともに引き継いだ。
+
+## コードレビュー cycle 1（2026-10-11）
+
+対象はbranch `codex/development-agent-team`、HEAD `ed2cd75fa90a314e19bbe1f6416d46a4b4021805` からのstore本体差分、source SHA `66287990637663A5A6B0119B9D686AB5AEAA34BB84CDD2D045B24DEA05AF4BD0`。独立reviewer backup_consumer_pre（指定gpt-6-astra/high）は **CHANGES_REQUIRED** と判定した。確定本体欠陥0、阻止する検証不足1、到達性確認の質問1である。独立runner/Postの代替ではない。
+
+| ID / 原文・位置 | 原因 / 状態 / Packet | 正本・owner / oracle / 残余 |
+| --- | --- | --- |
+| H-TEMP-1 P2: store.rs:1542「不存在destとtempの同名拒否が未固定」。既存temp試験はleaf_presentで先に拒否され同名判定を検証しない。欠落時は最終destをtempとして開き、公開前の部分書込み・失敗時削除が起こり得る | 追加した安全分岐の独立case不足。Accepted、Packet H-TEMP-1 | design-i2.md §5とstore専用cfg/test。test-author所有。prepare成功後temp=destでpublishしErr、dest不存在・全ledger不変・temp増分0。独立Post未了 |
+| Q-H-CWD: store.rs:1987のcwd.join(relative)はverbatim cwdならjunction/../safeをwalk前に縮約する | 元成分観測前の正規化。Decision pending、調査のみ | 設計H2.2。公開current_dir到達未実証、private注入だけで公開不具合と断定しない。隔離子processの実cwdと公開入口を観測、到達時だけ修正Packetを起こす |
+
+標準path結合の根拠は[Rust PathBuf::push](https://doc.rust-lang.org/std/path/struct.PathBuf.html#method.push)。reviewerは同Mutex/write-block例外/poison・再入/FFI配置/GUIDと128-bit identityのfail-closed/予定root双方向保護/再検査/公開atomic互換に追加指摘なしとした。raw markerとalias exactは報告と整合する。symlink2、別drive、実identity拒否、独立runner/Postは未完了である。
+
+### H-TEMP-1限定Pre提出（本節のみ規範）
+
+- 目的・契約：不存在destと固定tempが同名の場合は、I/O前にErrを返しdest・ledger・tempを変更しない既定分岐を固定する。製品仕様・型・公開APIは変更しない。
+- scope/owner：独立作者がsrc/store.rsの専用cfg/testへ1件のみ追加する。本体、既存test、integration、manifest、consumerは対象外。入力は安全な不存在destと同名temp、出力は既存ResultのErr、状態遷移はprepare成功→publish拒否→無変更である。
+- 境界：合成fixtureだけ、既定guardと既存ledger oracleを使い、実データ・外部通信・OS設定変更なし。旧50件と本体sourceを保持する。
+- 検証：新exact1件の到達/Err/不存在/ledger不変/temp増分0、変更範囲・本体不変・format/diffを確認する。成功済み旧46/79をtest-only追加で再実行しない。
+- 依存・停止：限定Pre PASS後に着手する。現コードがoracleに失敗した場合、作者は本体を変えず親へ返す。Q-H-CWDの本体修正とは混在しない。
+- rollback/artifact：追加testだけを取り消せる。生ログと初回失敗は保持する。利用者に製品判断を求める変更はない。Post PASS前はClosedとしない。
+
+親self-checkは対象source hashと既存証拠の対応を照合済み、文書リンク4件missing0・diff-check成功。独立reviewerは文書SHA `4BF8543BE6DD95A07EA154427F5E5743D3401FE94236CBB805E780F3081306CC` とsource hash一致を確認し、限定Pre PASSを返した。H-TEMP-1はPre-gate PASS、作者へ追加1件を返却済みである。規範内容は判定後に変更していない。
+
+H-TEMP-1限定Postは独立reviewerにより **PASS/Closed**。新case除去後の旧source hash一致、rawのprepare成功/拒否後不変/子exit0/timeout=false、source `F705AE19635F3C95828B36C60D5CBC8E59D9FB43DE3219A14BC02E73CC28022A`・lib/public EXE・integration hash、TEMP0を確認した。matrixのH-TEMP-1をClosedとする。新exact1件のみを追加成功として数え、Q-H-CWDと全体Postは未閉鎖である。
+
+### Q-H-CWDの到達条件観測（非規範）
+
+親はignored `artifacts/export_cwd_probe.rs` のstd-only合成probeをrustcでコンパイルし、PID1884/exit0で確認した。通常の絶対pathでset_current_dirするとcurrent_dirは通常形式であり、join後もjunction/..が残った。一方、合成directoryのfs::canonicalize結果（verbatim形式）をset_current_dirすると、実current_dirもverbatim形式を返し、joinはjunction成分を消した。成功後に元cwdへ戻し、生成した空fixture directoryのみremove_dir、cleanup=trueを確認した。製品コード/テスト期待値は変更していない。
+
+```text
+ordinary cwd: retains_junction=true
+canonical/verbatim cwd: retains_junction=false
+cleanup=true
+```
+
+storeの公開prepare経路は実current_dirをprivate prepareへ渡している。ただし公開export自体の結果は本probeで未実行である。OS上このcwdが存在しないという非到達理由では閉鎖できない。H-TEMP-1と分離した公開入口の合成再現・修正単位を後続で確定する。
+
+### 管理者2件の実行待ち
+
+利用者はsymlink2件だけの管理者実行を承認済み。親は固定public EXE SHA `CC53B50FC19DAEBE1EAB5219C7D7EF9F3389EBEF040F99D7290E25AD79548EC1` を指定したRunAsを開始したが、15分以上実行artifact生成なし、起動待機のままだった。session90972のwrapper PID33492（作成21:52:32 JST、コマンドとhash一致を再照合）だけを停止、session exit -1。製品アプリや他のprocessは終了していない。実テストの実行結果はなく、2件は未実証のままである。OS設定変更なし。修正後の確定EXEで再実行を要する。

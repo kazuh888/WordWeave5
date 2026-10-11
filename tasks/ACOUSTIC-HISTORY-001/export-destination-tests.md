@@ -1,6 +1,6 @@
 # I2d-H 独立テスト作者 handoff
 
-現状（2026-10-11追記）：fixedErr scaffold後の50件を実行し、31件の行動REDを採取した。本体実装へsource所有を返却する。測定結果は末尾「scaffold後のRED結果」を正とする。
+現状（2026-10-11追記）：H-TEMP-1限定追加1件がexact実行で成功した。source所有を親へ返却する。過去のscaffold RED記録は保持し、今回の測定結果は末尾「H-TEMP-1限定追加」を正とする。
 
 2026-10-11 / ACOUSTIC-HISTORY-001。指定 `gpt-6-astra/high`、実行model/effort metadata・開始/終了usage counterは未取得である。TDD Skillの作者工程を適用した。今回の完了境界は期待値固定とscaffold要求までである。
 
@@ -216,4 +216,24 @@ listのPIDは公開32588・内部5904、exitは双方0であり、上記固定50
 構造化記録は [export-destination-author-red.json](logs/export-destination-author-red.json) にbuild session/native PID/exit、EXE/source hash、50実名の初回/最終分類、exact再確認5件、28子marker、欠測とcleanupを格納した。生ログは同じlogs内の `export-destination-author-build.{stdout,stderr}.log`、`export-destination-author-{public,private}-{list,red}.{stdout,stderr}.log`、`export-destination-author-exact-<case>.{stdout,stderr}.log` である。元ログを集約値で上書きしていない。
 
 **RED採取完了、source所有返却。** 次は本体実装役である。既定scaffoldの固定Errを解消し、固定50件の到達済み/未到達境界を区別したGREENと上記focused回帰を行う。作者は本体を修正していない。
+
+## H-TEMP-1限定追加
+
+2026-10-11。指定test-author `gpt-6-astra/high`、TDD作者工程。入力HEADは `ed2cd75fa90a314e19bbe1f6416d46a4b4021805`、Packetはexport-destination-review.md「H-TEMP-1限定Pre」（SHA-256 `4BF8543BE6DD95A07EA154427F5E5743D3401FE94236CBB805E780F3081306CC`）であり、親から独立Pre PASS受領を確認して着手した。実行model/effort metadataとusage counterは未取得である。
+
+追加はstore専用moduleの `h07_absent_destination_cannot_be_its_own_temp` 1件だけである。安全な不存在destを独立のsymlink_metadata/NotFoundで確認し、prepare成功→temp=destでpublish→Err→dest不存在・全ledger不変・出力directory entry数0を検証する。既存temp sentinelを使わず、同名拒否の分岐へ到達させる。初回からPASSであり、新たな修正前REDの採取や本体修正は行っていない。旧50件に本件を追加したが、旧成功46/79の再実行はしていない。Q-H-CWDは扱っていない。
+
+| 検証 | 証拠 |
+| --- | --- |
+| libのみbuild | `cargo test --locked --lib --no-run`、exec session83484、cargo PID30204、native/exec exit0。UTC13:06:22.548–13:07:58.826 |
+| 新exact | `wordweave5-b3388a7bbef44bb4.exe store::i2_export_destination_tests::h07_absent_destination_cannot_be_its_own_temp --exact --nocapture --test-threads=1`。native PID26124、exit0、1 passed/0 failed/0 ignored/316 filtered |
+| 子process | `WW5_H_TEMP1_PREPARED_ABSENT`、`WW5_H_TEMP1_REJECTED_UNCHANGED`、exact CHILD_OKを確認。子exit0、timeout=false。親30秒/子20秒上限、実行timeout0 |
+| 限定format/diff | 新関数を抽出・共通indent除去後のrustfmt check exit0、git diff --check exit0。最初のstdin整形確認はPowerShellが付加した余分な終端改行だけを表示したため、入力終端を1改行へ直して無差分を確認した。sourceの再修正はない |
+| source境界 | 新test部分を除去したbytesのSHA-256が着手時 `66287990637663A5A6B0119B9D686AB5AEAA34BB84CDD2D045B24DEA05AF4BD0` と一致。本体・旧testは不変 |
+
+終了store SHA-256は `F705AE19635F3C95828B36C60D5CBC8E59D9FB43DE3219A14BC02E73CC28022A`。lib EXE SHA-256は `76EAA8D2CEEDBA99B0894B90611CF7C054D00276104D14E7D3AB6028EDE469F3` である。integration sourceは `9A14DCB790E29AC3407A0D47EB46CACA077BB08DFDCB52D1599C272B7968936E` のまま、public EXEは `CC53B50FC19DAEBE1EAB5219C7D7EF9F3389EBEF040F99D7290E25AD79548EC1` のままであり、public targetをrebuild/実行していない。
+
+TEMP/TMPはprocess限定の `artifacts/i2d-h-temp1-author-temp`。通常sandboxの合成fixtureで実行でき、権限昇格・OS設定変更はない。Drop後の直下残存0、cleanup失敗0を確認した。生ログは `logs/export-destination-author-temp1-build.{stdout,stderr}.log` と `logs/export-destination-author-temp1-exact.{stdout,stderr}.log` に保持した。独立Post判定は親へ渡し、本作者はClosedへ変更しない。
+
+**H-TEMP-1作者検証完了、source所有返却。** 本体失敗・fixture不成立・compile失敗は0であり、追加assertionの緩和や他者差分の変更は行っていない。
 
