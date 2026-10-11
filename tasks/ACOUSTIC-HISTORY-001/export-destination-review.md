@@ -90,8 +90,8 @@ closure matrixのH-TEMP-1とQ-H-CWDはともにClosedである。ただしsymlin
 
 | Finding / 原文・位置 | 原因・状態・owner | 必要証拠・残余 |
 | --- | --- | --- |
-| H-SYMLINK-EVIDENCE P2：公開試験438/456のfile/directory symlink拒否を未実証 | error1314でfixture前に終了。承認済みRunAsもartifactなし。Accepted、親/独立runner担当、コード修正なし | 固定公開EXE `95E01D39B0ECB7C018C3D78FFE5D3C1B8FF96A395EC3748644F83345954C36AD` の承認済みexact2だけを実行。各1PASS、UNAVAILABLEなし、ledger oracle到達を確認。利用者へ既存scriptの手動実行を案内した |
-| H-IDENTITY-EVIDENCE P2：設計§5 H06の実metadata/identity取得不能時の拒否が未検証 | store.rs:2713の独立probeが成功し、recheck/publish/不変assert前にreturnする。Accepted、独立test-author所有 | 合成fixtureで実取得失敗を独立probeにより成立させ、productionのIo/IdentityUnavailable、bytes/temp不変、制約解除後の再試行成功を確認する。期待値緩和/fake identityは禁止。方式の実現性を限定probeで調査してからPreへ提出 |
+| H-SYMLINK-EVIDENCE P2：file/directory symlink拒否の実証 | Closed（2026-10-12独立最終Post） | 利用者の管理者exact2件成功、固定hash一致、実alias/拒否/ledger不変、UNAVAILABLEと残存なし。下記最終Postを参照 |
+| H-IDENTITY-EVIDENCE P2：実metadata/identity取得不能時の拒否 | Closed（2026-10-12限定最終Post） | reversible delete-pendingによる実Win32 5、production拒否、解除後ledger不変/retryを独立exactで実証。下記限定Postを参照 |
 
 別drive alias不在1件は設計上「利用可能な」環境に限定されるため受入阻止ではないが、成功に数えない。新drive設定を要求しない。共通Mutex/write-block維持/poison・再入/元成分観測/GUID・128-bit identity/予定root双方向保護/直前再検査/temp/atomic互換に追加findingなし。敵対的TOCTOU・電源断・GUID非対応共有・consumer・I10/製品提供は対象外である。
 
@@ -121,4 +121,12 @@ Pre snapshotはbranch `codex/development-agent-team`、HEAD `5d4ab1072158d3c9a3a
 
 実Win32 5拒否→recheck Io/publish Err→FALSE解除後close→identity/bytes/全ledger不変/tempなし→retry成功へ到達し、UNAVAILABLE/timeout/復元失敗/TEMP残存は0。旧未実証の同名1件を重複なく差し替えた証拠接合は136unique中133成功/3未実証であり、一括再実行の結果ではない。closure matrixのH-IDENTITY-EVIDENCEをClosedへ更新する。
 
-H-SYMLINK-EVIDENCEの承認済み2件は引き続き必須証拠待ちであり、I2d-H全体Closedとd-S/B/M本体着手は保留する。別drive alias不在は条件付き未検証のまま。reviewerの編集/build/実行/再委任0、runtime metadata/usage counters未取得。親は固定EXEと既存手動scriptの存在を再確認済み、モデル切替を追加せず利用者の実行結果を待つ。
+この時点ではH-SYMLINK-EVIDENCEの承認済み2件は必須証拠待ちであった。以下の新規証拠と判定により解消した。
+
+### H-SYMLINK-EVIDENCE・I2d-H最終Post（2026-10-12）
+
+独立reviewer `export_destination_final_review`（指定gpt-6-astra/high）は **PASS/Closed・追加指摘0** と判定した。HEAD `91e6c00b64d026f9a90626d771eb2cabeb03e482`、source/test/両EXEのhashは既存対象と一致した。
+
+`artifacts/export-destination-elevated-f9de6117684847fc97131824a1d7d8b3/` のsummary/rawと試験コードを照合し、実alias確認・拒否・ledger不変のassert到達を確認した。利用者の管理者実行はnative PID2788/20580、各1成功、exit0、timeout/UNAVAILABLE/stderr/fixture残存なし。公開EXEのExpected/Final/実物SHA256は `95E01D39B0ECB7C018C3D78FFE5D3C1B8FF96A395EC3748644F83345954C36AD` に一致した。
+
+closure matrixのH-SYMLINK-EVIDENCEをClosedとし、H06を含む接合136unique中135成功/1条件付き未実証を認める。一括再実行ではなく、別drive alias不在を成功に含めない。I2d-S着手依存は解消した。consumer接続・I2-D2全体・I10・製品配布は未完了、敵対的TOCTOU/電源断/GUID非対応共有等の範囲外を維持する。reviewerの編集/build/再実行/再委任0、runtime metadataとusage countersは未取得である。

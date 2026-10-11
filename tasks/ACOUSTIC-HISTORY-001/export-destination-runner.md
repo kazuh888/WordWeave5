@@ -98,3 +98,16 @@ WW5_H_IDENTITY_RETRY:exact PAYLOAD;outside entries=1
 同じ公開EXE/hashを指定し、既存 `artifacts/Invoke-ExportSymlinkTests.ps1` のRunAsをUTC `2026-10-11T18:52:25.7266576Z` に開始した（session36012、待機wrapper PID3172）。10分経過後も起動結果・`export-destination-elevated-*` artifactがなく、試験実行を確認できなかった。Windows確認画面が利用者に届いたか、起動しなかった原因は未確認である。
 
 利用者の10分待機方針に従い、CIMで名前・作成時刻・script名・指定hash・Start-Processを照合した自分のwrapper3172だけをUTC `19:02:50.0100360Z` に終了した。session exit-1、artifact0。製品・他のprocess・OS設定には変更していない。管理者2件は未実行であり、上記132成功/4未実証の集計を変更しない。起動待ちは残していない。次工程の独立最終Postへ、この未実証を含む証拠を引き渡す。
+
+## 管理者symlink2件の利用者実行証拠（2026-10-12）
+
+利用者が承認済みscriptを管理者PowerShell 7.6.6で実行し、親が実ファイルのsummary/raw stdout/stderrを照合した。証拠は `artifacts/export-destination-elevated-f9de6117684847fc97131824a1d7d8b3/` にある。上の起動未確認記録は過去の試行として保持する。
+
+| exact case | PID | UTC開始–終了 | 結果 |
+| --- | --- | --- | --- |
+| `h02_leaf_file_symlink_is_rejected_when_fixture_is_available` | 2788 | 23:13:23.373–23:13:23.765 | 1 passed / 0 failed / 0 ignored / 28 filtered |
+| `h02_directory_symlink_is_rejected_when_fixture_is_available` | 20580 | 23:13:23.783–23:13:24.090 | 1 passed / 0 failed / 0 ignored / 28 filtered |
+
+UTC日付は2026-10-11（JST 2026-10-12）。両NativeExit=0、Timeout=false、FixtureUnavailable=false、stderr空、TempResidual=0である。ExpectedHash/FinalHashと親による実EXE SHA256は、固定値 `95E01D39B0ECB7C018C3D78FFE5D3C1B8FF96A395EC3748644F83345954C36AD` に一致した。成功済みテストの再実行は行っていない。
+
+H06の独立成功と合わせ、同名の未実証2件を置換した証拠接合は136 unique中135成功/1条件付き未実証となる。136件の一括再実行ではない。残る別drive alias不在は条件付き未検証のまま、H全体の最終判定は独立レビューへ渡す。

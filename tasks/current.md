@@ -1,6 +1,6 @@
 # 現在のタスク要約
 
-更新：2026-10-12（H-IDENTITY限定最終Post PASS/Closed。証拠接合は136unique中133成功/3未実証、行動失敗0。残る必須証拠は管理者symlink2件の手動実行結果。I2d-H全体未Closed、d-S/B/M本体着手は保留。現在Astra/high、追加モデル切替は不要。製品EXEは未更新）。以後の再開入口は本書である。設計本文・ログ全文は転載せず、必要な箇所だけ [参照インデックス](context-index.md) から読む。旧会話・旧状態記録は証拠確認時だけ参照する。
+更新：2026-10-12（管理者symlink2件の利用者実行と独立Post PASSによりI2d-H Closed。証拠接合136unique中135成功/1条件付き未実証、行動失敗0。I2d-S設定export consumerの設計照合へ進む。現在Astra/high、独立runner前にSol/mediumへの切替を案内する。製品EXE未更新）。以後の再開入口は本書である。詳細は [参照インデックス](context-index.md) を参照する。
 
 ## 現在の目標
 
@@ -45,7 +45,7 @@ ACOUSTIC-HISTORY-001：原音・音響解析結果・Qwen助言を保存し、�
 
 1. 旧cancel/子孫終了WAIT_TIMEOUTの根本原因は未確定であり、証拠を保持する。A1修正後の新一括回帰と外部M1は成功したが、過去原因を修正済みとは主張しない。I5c-2の障害注入・lease/cleanup・実work peak/物理メモリ等の検証は残る。
 2. 残りの保存回復・アプリ統合と全体受入条件は未達である。W1の試験不足は全37件成功と独立Post-gate PASSで解消済みである。
-3. I2d-Hの必須symlink2件は承認済みだが自動RunAs起動を確認できず、既存scriptの手動実行を利用者へ依頼済み。結果artifactが届くまでH全体と依存consumer本体は保留する。追加承認やモデル切替を再要求しない。既に10分以上待機して非依存のH06是正を完了しており、同じ無応答を成功に置き換えない。
+3. I2d-Hの必須symlink2件は利用者の管理者実行と独立最終Postで解消済み。別drive alias不在の条件付き未検証1件は残り、成功とは数えない。
 
 ## 次のアクション
 
@@ -53,6 +53,6 @@ ACOUSTIC-HISTORY-001：原音・音響解析結果・Qwen助言を保存し、�
 2. [実装計画](ACOUSTIC-HISTORY-001/implementation.md) の依存順に保存回復・既存データ/backup統合・残るPraat障害試験・処理統合・比較UI・二hostを継続し、最後に全体テスト/release検証を行う。
 3. I2は[設計](ACOUSTIC-HISTORY-001/design-i2.md)のG private接合追補も[独立Pre PASS](ACOUSTIC-HISTORY-001/history-commit-design-review.md)。plannerの[逐次所有追補](ACOUSTIC-HISTORY-001/implementation.md)に従う。GはsingleMutex/再入拒否/write-block口/strict pendingまでであり、Progress形式・移行・結果不明判定は後続である。現在、利用者の動作確認待ちはない。
 4. M/S/N/R/T/V/Pは最終Post PASS。Pの[最終判定](ACOUSTIC-HISTORY-001/history-pointer-commit-review.md)、[独立269件](ACOUSTIC-HISTORY-001/history-pointer-commit-runner.md)、[初回失敗の環境比較](ACOUSTIC-HISTORY-001/history-pointer-commit-diagnostic.md)を正とし、成功済みの反復は行わない。
-5. I2b-A/Bは最終Post PASS/Closed。I2d-HのH-TEMP-1/Q-H-CWD/H-IDENTITYは[独立限定Closed](ACOUSTIC-HISTORY-001/export-destination-review.md)。[独立exact1件追補](ACOUSTIC-HISTORY-001/export-destination-runner.md#h-identity-evidence-独立追補2026-10-12)との証拠接合は136unique中133成功/3未実証・行動失敗0。source SHA `BB35631D2EF3E42EE8B98B9C6BECC3FEC3310C5CD8D6E96E6F6EF47578745EBC`、lib SHA `68E8DC0504F714EEED8B547228396812089AAE9BFF5310C4BC6BC321454B1314`。次は管理者symlink2件の結果確認であり、成功済みsuiteは反復しない。固定公開EXE `target/debug/deps/progress_export_destination-b4a366b351b447cc.exe`、SHA `95E01D39B0ECB7C018C3D78FFE5D3C1B8FF96A395EC3748644F83345954C36AD`、手動script `tasks/ACOUSTIC-HISTORY-001/artifacts/Invoke-ExportSymlinkTests.ps1`。返答後は `artifacts/export-destination-elevated-*` のsummary/raw/2件exact/UNAVAILABLEなし/hash/tempを照合し独立reviewerへ最終証拠を返す。別drive alias不在は条件付き未検証、単独では受入阻止でない。必須証拠が揃うまでH全体Closed/consumer着手を宣言しない。モデル切替不要、consumer/I10/製品EXEは未了。
+5. I2b-A/BとI2d-Hは最終Post PASS/Closed。[最終レビュー](ACOUSTIC-HISTORY-001/export-destination-review.md)、[管理者2件の実行証拠](ACOUSTIC-HISTORY-001/export-destination-runner.md)を正とする。136unique中135成功/1条件付き未実証は異なる時点の証拠接合であり、一括再実行ではない。次はI2d-S（settings_ui/control_settingsの4書き出し口）→d-B→d-M→b-S→b-C。現在はS設計照合中。成功済みsuiteは反復せず、独立runner前に親モデル切替を案内する。consumer/I10/製品EXEは未了。
 
 今回の整理は作業用要約から廃案・重複ログ・無関係な履歴・設計本文の転載を除外したものである。根拠資料と旧記録は削除していない。旧版はインデックスに残すが通常再開時には読み込まない。
