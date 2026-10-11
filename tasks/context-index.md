@@ -77,6 +77,7 @@
 | I2b-B backup接合・Pre PASS・B-WB1 Closed・runner-readyと次の独立76件 | [設計追補](ACOUSTIC-HISTORY-001/design-i2.md)、[限定計画](ACOUSTIC-HISTORY-001/implementation.md)、[レビュー](ACOUSTIC-HISTORY-001/history-backup-review.md) |
 | I2b-B独立42件・25行動RED/17PASS・fixture訂正と環境比較 | [独立テスト](ACOUSTIC-HISTORY-001/history-backup-tests.md) |
 | I2b-B本体接合・自己75件・世代/環境の証拠境界 | [実装記録](ACOUSTIC-HISTORY-001/history-backup-implementation.md) |
+| I2b-B最終固定4EXE・独立76件成功・初回setup失敗と限定再実行 | [独立runner](ACOUSTIC-HISTORY-001/history-backup-runner.md) |
 
 ソース入口：保存は `src/audio_history/`、共有履歴型は `tools/practice-history/`、音響解析は `tools/acoustic-analysis/`。生ログは各試験記録から辿る。要約へログ本文を複製しない。
 
