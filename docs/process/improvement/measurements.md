@@ -1,5 +1,8 @@
 # 開発タスクの使用量記録
 
+- 同I2d-Sは設計再利用→独立作者25件（9PASS/16scaffoldRED）→本体5入口/4出口→自己新24/25＋旧9成功→S04 oracle限定是正exact1成功→独立コードreview runner-readyまで完了。最終記録23:40:29 UTC（JST 08:40）、commit/push・最終応答前。34unique成功は異時点接合、独立runner/最終Post未了。親は予定どおりSol/medium切替前で停止する。design/tests/impl/reviewerは既定Astra/highを明示、終盤はbuild中のread-onlyレビューだけ並行。開始/終了usage・runtime metadata・親子包含は未取得、推計しない。
+- 手戻りは作者fixture初期save失敗（workspace専用TEMP/Hidden比較で解消、根本syscall未取得）、子filter0件の成功判定（exact1件を恒久assert）、保持中app.lock読取（空長assertによる限定ledger表現）、S04のf32 wire/Value経路差（独立作者とreviewで是正）である。旧失敗rawを保持した。原作者before source snapshot未保存のためstub除去以外の不変再計算は欠測、現在oracleは仕様へ独立照合した。是正時はbefore snapshotを保存しS04外不変を証明した。次の同file逐次handoffでは作者完了時にsource snapshotも保存するとこの欠測を防げる。恒久harness・検証水準・親モデルの自動変更はしていない。成功済み33件はS04訂正だけでは反復せず、必要なexact1件のみ再build/実行した。
+
 - 2026-10-12 I2d-H管理者証拠受領・I2d-S再開。開始時計23:14:02 UTC、HEAD `91e6c00`、tree clean。親Astra/highを維持、reviewer `export_destination_final_review` Astra/highが管理者2件のsummary/raw/source/hashを照合してH全体PASS/Closed。136unique中135成功/1条件付き未実証は証拠接合であり一括再実行ではない。成功済み試験の反復0。次は既定designer `settings_export_design` Astra/highで設定の4出口を照合、完了境界はS実装・自己検証・コードreviewと独立runnerへの引継ぎ。開始usage counter・実行metadata・親子包含は未取得、推計しない。
 
 ## ACOUSTIC-HISTORY-001 実装再開（2026-10-07）

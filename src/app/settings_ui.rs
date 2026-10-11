@@ -1,6 +1,492 @@
 use super::*;
 
 #[cfg(test)]
+pub(super) mod i2_export_settings {
+    use super::*;
+    use std::{
+        collections::BTreeMap,
+        fs,
+        path::Path,
+        process::{Command, Stdio},
+    };
+
+    pub(in crate::app) const REPORT: &str = "合成診断\r\n要求と返却は別\n末尾空白  \n";
+    const TSV: &str = "id\tbase\tmeaning\tlevel\tbusiness\televated\tregister\tusage\tcontext\texample\ttranslation\tanswers\tquestion\texplanation\ttag\treplacements\texamples\nsynthetic\thelp\t助ける\tB1\tassist\taid\tneutral\t用法\t場面\tPlease help.\t手伝って。\thelp|assist\t問い\t解説\ttest\n";
+
+    pub(in crate::app) struct Fixture {
+        pub app: WordApp,
+        pub root: PathBuf,
+    }
+
+    impl Fixture {
+        pub fn new() -> Self {
+            let (_, mut app, root) = crate::app::harness_tests::fixture();
+            eprintln!("I2d-S fixture-created: {}", root.display());
+            app.deck = vec![model::Entry {
+                id: "synthetic".into(),
+                base: "help".into(),
+                meaning: "助ける".into(),
+                level: "B1".into(),
+                business: "assist".into(),
+                elevated: "aid".into(),
+                register: "neutral".into(),
+                usage: "用法".into(),
+                context: "場面".into(),
+                example: "Please help.".into(),
+                translation: "手伝って。".into(),
+                answers: vec!["help".into(), "assist".into()],
+                question: "問い".into(),
+                explanation: "解説".into(),
+                tag: "test".into(),
+                replacements: vec![],
+                examples: vec![],
+            }];
+            app.progress.chats[0].draft = "未保存の会話\n日本語".into();
+            app.progress
+                .japanese_drafts
+                .insert("synthetic".into(), "未保存の回答".into());
+            app.progress.settings.topic = "memory progress settings".into();
+            app.begin_settings_edit();
+            app.settings_editor.draft.topic = "editor-only: do not export".into();
+            app.diagnostic_export = Some(REPORT.into());
+            app.annotation.text = "未保存の筆跡注釈".into();
+            app.dirty = true;
+            app.message = "operation not completed".into();
+            let dir = root.join("data");
+            for folder in ["backups", "assets/audio-history", "audio-history/assets"] {
+                fs::create_dir_all(dir.join(folder)).unwrap();
+            }
+            for file in [
+                "custom.tsv",
+                "pending-material-commit.json",
+                "backups/kept.json",
+                "assets/audio-history/kept.bin",
+                "audio-history/assets/kept.bin",
+            ] {
+                fs::write(dir.join(file), format!("synthetic preserved {file}")).unwrap();
+            }
+            // Disk root A and UI root None differ deliberately. These exports
+            // must neither overwrite A nor turn a memory snapshot into a commit.
+            let root_bytes = br#"{"schema_version":1,"revision":0,"next_save_sequence":1,"trials":{},"receipts":{}}"#;
+            let root_hash = "ad4eb5ad867a175c2c85b92de9486ce9a68e76af08b36e1a5e44433670f7f7f0";
+            fs::write(
+                dir.join(format!("audio-history/assets/{root_hash}.bin")),
+                root_bytes,
+            )
+            .unwrap();
+            let mut disk: Progress =
+                serde_json::from_slice(&fs::read(dir.join("progress.json")).unwrap()).unwrap();
+            disk.audio_history = Some(
+                serde_json::from_value(serde_json::json!({
+                    "sha256": root_hash, "bytes": root_bytes.len()
+                }))
+                .unwrap(),
+            );
+            fs::write(
+                dir.join("progress.json"),
+                serde_json::to_vec(&disk).unwrap(),
+            )
+            .unwrap();
+            Self { app, root }
+        }
+
+        pub fn dir(&self) -> PathBuf {
+            self.root.join("data")
+        }
+    }
+
+    impl Drop for Fixture {
+        fn drop(&mut self) {
+            drop(self.app.storage.take());
+            match fs::remove_dir_all(&self.root) {
+                Ok(()) => eprintln!("I2d-S fixture-removed: {}", self.root.display()),
+                Err(error) if std::thread::panicking() => {
+                    eprintln!("I2d-S fixture-retained: {}: {error}", self.root.display())
+                }
+                Err(error) => panic!("owned fixture cleanup failed: {error}"),
+            }
+        }
+    }
+
+    // Snapshot directories as well as bytes: rejecting an export must not leave temps.
+    pub(in crate::app) fn ledger(root: &Path) -> BTreeMap<PathBuf, Option<Vec<u8>>> {
+        fn walk(root: &Path, at: &Path, result: &mut BTreeMap<PathBuf, Option<Vec<u8>>>) {
+            for item in fs::read_dir(at).unwrap() {
+                let path = item.unwrap().path();
+                if path.is_dir() {
+                    result.insert(path.strip_prefix(root).unwrap().to_owned(), None);
+                    walk(root, &path, result);
+                } else {
+                    // Storage holds a Windows byte-range lock on this empty
+                    // file. Length zero proves its bytes without reading through
+                    // the lock; every other file still requires an exact read.
+                    let bytes = if path.file_name().is_some_and(|name| name == "app.lock") {
+                        assert_eq!(
+                            fs::metadata(&path).unwrap().len(),
+                            0,
+                            "lock file stays empty"
+                        );
+                        Vec::new()
+                    } else {
+                        fs::read(&path).unwrap()
+                    };
+                    result.insert(path.strip_prefix(root).unwrap().to_owned(), Some(bytes));
+                }
+            }
+        }
+        let mut result = BTreeMap::new();
+        walk(root, root, &mut result);
+        result
+    }
+
+    pub(in crate::app) fn memory(app: &WordApp) -> serde_json::Value {
+        serde_json::json!({
+            "progress": app.progress, "deck": app.deck,
+            "editor": app.settings_editor.draft, "active": app.settings_editor.active,
+            "diagnostic": app.diagnostic_export, "annotation": app.annotation.text,
+            "dirty": app.dirty, "fatal": app.fatal,
+        })
+    }
+
+    #[derive(Clone, Copy, Debug)]
+    enum Route {
+        Deck,
+        Progress,
+        Report,
+    }
+
+    impl Route {
+        fn run(self, app: &mut WordApp, dest: &Path) {
+            match self {
+                Self::Deck => app.export_deck_to(dest),
+                Self::Progress => app.export_progress_to(dest),
+                Self::Report => app.export_diagnostic_report_to(dest, REPORT),
+            }
+        }
+
+        fn bytes(self, app: &WordApp) -> Vec<u8> {
+            match self {
+                Self::Deck => TSV.as_bytes().to_vec(),
+                Self::Progress => serde_json::to_vec_pretty(&app.progress).unwrap(),
+                Self::Report => REPORT.as_bytes().to_vec(),
+            }
+        }
+    }
+
+    fn rejected(route: Route, existing: bool) {
+        let mut f = Fixture::new();
+        let targets = if existing {
+            vec![
+                "progress.json",
+                "custom.tsv",
+                "pending-material-commit.json",
+                "app.lock",
+                "backups/kept.json",
+                "assets/audio-history/kept.bin",
+                "audio-history/assets/kept.bin",
+            ]
+        } else {
+            vec![
+                "new-export",
+                "backups/new-export",
+                "assets/audio-history/new-export",
+                "audio-history/assets/new-export",
+            ]
+        };
+        let before = ledger(&f.root);
+        let state = memory(&f.app);
+        for target in targets {
+            f.app.notification_error.clear();
+            let dest = f.dir().join(target);
+            route.run(&mut f.app, &dest);
+            assert!(
+                !f.app.notification_error.is_empty(),
+                "{route:?}/{target}: rejection must be visible"
+            );
+            assert_eq!(
+                f.app.message, f.app.notification_error,
+                "no success notification"
+            );
+            assert_eq!(
+                ledger(&f.root),
+                before,
+                "{route:?}/{target}: protected bytes and temps"
+            );
+            assert_eq!(
+                memory(&f.app),
+                state,
+                "{route:?}/{target}: drafts and dirty state"
+            );
+        }
+    }
+
+    fn succeeds(route: Route, replace: bool) {
+        let mut f = Fixture::new();
+        let external = f.root.join("data-similar-name");
+        fs::create_dir(&external).unwrap();
+        let dest = external.join("書き出し.dat");
+        if replace {
+            fs::write(&dest, b"old external bytes").unwrap();
+        }
+        let protected = ledger(&f.dir());
+        let state = memory(&f.app);
+        let expected = route.bytes(&f.app);
+        f.app.notification_error = "previous failure".into();
+        route.run(&mut f.app, &dest);
+        assert!(
+            f.app.notification_error.is_empty(),
+            "{route:?}: {}",
+            f.app.notification_error
+        );
+        assert_ne!(f.app.message, "operation not completed");
+        assert_eq!(fs::read(&dest).unwrap(), expected, "exact external content");
+        assert_eq!(
+            fs::read_dir(external).unwrap().count(),
+            1,
+            "no temporary output"
+        );
+        assert_eq!(ledger(&f.dir()), protected);
+        assert_eq!(memory(&f.app), state);
+    }
+
+    fn fails_then_retries(route: Route) {
+        let mut f = Fixture::new();
+        let bad = f.root.join("missing-parent/export.dat");
+        let before = ledger(&f.root);
+        let state = memory(&f.app);
+        route.run(&mut f.app, &bad);
+        assert!(!f.app.notification_error.is_empty());
+        assert_eq!(f.app.message, f.app.notification_error);
+        assert_eq!(
+            ledger(&f.root),
+            before,
+            "missing parent must not be created"
+        );
+        assert_eq!(memory(&f.app), state);
+        let dest = f.root.join("retry.dat");
+        let expected = route.bytes(&f.app);
+        route.run(&mut f.app, &dest);
+        assert!(
+            f.app.notification_error.is_empty(),
+            "retry: {}",
+            f.app.notification_error
+        );
+        assert_eq!(fs::read(dest).unwrap(), expected);
+        assert_eq!(memory(&f.app), state);
+    }
+
+    macro_rules! route_tests {
+        ($route:ident, $existing:ident, $new:ident, $create:ident, $replace:ident, $retry:ident) => {
+            #[test]
+            fn $existing() {
+                rejected(Route::$route, true);
+            }
+            #[test]
+            fn $new() {
+                rejected(Route::$route, false);
+            }
+            #[test]
+            fn $create() {
+                succeeds(Route::$route, false);
+            }
+            #[test]
+            fn $replace() {
+                succeeds(Route::$route, true);
+            }
+            #[test]
+            fn $retry() {
+                fails_then_retries(Route::$route);
+            }
+        };
+    }
+
+    route_tests!(
+        Deck,
+        s01_tsv_rejects_protected_existing,
+        s01_tsv_rejects_protected_new,
+        s02_tsv_creates_exact_external,
+        s02_tsv_replaces_exact_external,
+        s03_tsv_failure_preserves_drafts_and_retry_succeeds
+    );
+    route_tests!(
+        Progress,
+        s01_json_rejects_protected_existing,
+        s01_json_rejects_protected_new,
+        s02_json_creates_exact_external,
+        s02_json_replaces_exact_external,
+        s03_json_failure_preserves_drafts_and_retry_succeeds
+    );
+    route_tests!(
+        Report,
+        s01_report_rejects_protected_existing,
+        s01_report_rejects_protected_new,
+        s02_report_creates_exact_external,
+        s02_report_replaces_exact_external,
+        s03_report_failure_preserves_drafts_and_retry_succeeds
+    );
+
+    #[test]
+    fn s04_json_exports_memory_root_and_drafts_without_committing_editor() {
+        let mut f = Fixture::new();
+        let protected = ledger(&f.dir());
+        // The JSON export is a memory snapshot, not a latest-disk-root commit.
+        f.app.progress.audio_history = Some(serde_json::from_value(serde_json::json!({
+            "sha256": "7852cc9a55f3f85fdfba7b2edb9ecdf814cf35787df7fe13fd6ac2b85b73af97", "bytes": 82
+        })).expect("valid synthetic RootRef"));
+        let state = memory(&f.app);
+        // Compare wire snapshots: json!(Progress) widens f32 to a Value f64,
+        // whereas JSON serialization preserves the shortest f32 representation.
+        let expected_bytes = serde_json::to_vec_pretty(&f.app.progress).unwrap();
+        let expected: serde_json::Value = serde_json::from_slice(&expected_bytes).unwrap();
+        let dest = f.root.join("memory.json");
+        f.app.export_progress_to(&dest);
+        assert!(
+            f.app.notification_error.is_empty(),
+            "{}",
+            f.app.notification_error
+        );
+        let actual_bytes = fs::read(dest).unwrap();
+        assert_eq!(
+            actual_bytes, expected_bytes,
+            "exact pre-export memory snapshot"
+        );
+        let output: serde_json::Value = serde_json::from_slice(&actual_bytes).unwrap();
+        assert_eq!(output, expected);
+        assert_eq!(output["chats"][0]["draft"], "未保存の会話\n日本語");
+        assert_eq!(output["settings"]["topic"], "memory progress settings");
+        assert_eq!(ledger(&f.dir()), protected);
+        assert_eq!(memory(&f.app), state);
+    }
+
+    pub(in crate::app) fn isolated(case: &str, run: impl FnOnce()) {
+        const MARKER: &str = "WW_I2_SETTINGS_EXPORT_CHILD";
+        // libtest lists names below the binary crate, unlike module_path!().
+        let case = case.strip_prefix("wordweave5::").unwrap_or(case);
+        if std::env::var(MARKER).ok().as_deref() == Some(case) {
+            run();
+            return;
+        }
+        let mut child = Command::new(std::env::current_exe().unwrap())
+            .args(["--exact", case, "--nocapture", "--test-threads=1"])
+            .env(MARKER, case)
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .unwrap();
+        let deadline = Instant::now() + Duration::from_secs(45);
+        loop {
+            if let Some(status) = child.try_wait().unwrap() {
+                let output = child.wait_with_output().unwrap();
+                let stdout = String::from_utf8_lossy(&output.stdout);
+                eprintln!(
+                    "child {case}:\n{stdout}\n{}",
+                    String::from_utf8_lossy(&output.stderr)
+                );
+                assert!(
+                    status.success(),
+                    "isolated behavioral assertion failed: {case}"
+                );
+                assert!(
+                    stdout.contains("running 1 test") && stdout.contains("1 passed; 0 failed"),
+                    "exactly one child acceptance test must actually run: {case}"
+                );
+                break;
+            }
+            if Instant::now() >= deadline {
+                let _ = child.kill();
+                let _ = child.wait();
+                panic!("45-second child deadline exceeded: {case}");
+            }
+            std::thread::sleep(Duration::from_millis(20));
+        }
+    }
+
+    #[test]
+    fn s05_actual_storage_precedes_fallback_environment() {
+        isolated(
+            concat!(
+                module_path!(),
+                "::s05_actual_storage_precedes_fallback_environment"
+            ),
+            || {
+                let f = Fixture::new();
+                std::env::remove_var("LOCALAPPDATA");
+                let dest = f.root.join("external.dat");
+                f.app
+                    .write_settings_export(&dest, b"actual storage wins")
+                    .unwrap();
+                assert_eq!(fs::read(dest).unwrap(), b"actual storage wins");
+                let before = ledger(&f.root);
+                assert!(f
+                    .app
+                    .write_settings_export(&f.dir().join("protected-new"), b"no")
+                    .is_err());
+                assert_eq!(ledger(&f.root), before);
+            },
+        );
+    }
+
+    #[test]
+    fn s06_storage_none_uses_resolved_root_without_opening_or_creating_it() {
+        isolated(
+            concat!(
+                module_path!(),
+                "::s06_storage_none_uses_resolved_root_without_opening_or_creating_it"
+            ),
+            || {
+                let mut f = Fixture::new();
+                drop(f.app.storage.take());
+                let local = f.root.join("fallback-local");
+                fs::create_dir(&local).unwrap();
+                std::env::set_var("LOCALAPPDATA", &local);
+                let root = local.join("WordWeave5");
+                let dest = f.root.join("external.dat");
+                f.app
+                    .write_settings_export(&dest, b"absent root export")
+                    .unwrap();
+                assert_eq!(fs::read(&dest).unwrap(), b"absent root export");
+                assert!(!root.exists(), "resolver must not mkdir/open Storage");
+                fs::create_dir(&root).unwrap();
+                fs::write(root.join("progress.json"), b"fallback protected sentinel").unwrap();
+                let before = ledger(&f.root);
+                for name in ["progress.json", "new-export"] {
+                    assert!(f
+                        .app
+                        .write_settings_export(&root.join(name), b"no")
+                        .is_err());
+                    assert_eq!(ledger(&f.root), before);
+                }
+                assert!(!root.join("app.lock").exists(), "no Storage re-open");
+            },
+        );
+    }
+
+    #[test]
+    fn s07_unresolvable_root_refuses_existing_and_new_external_destinations() {
+        isolated(
+            concat!(
+                module_path!(),
+                "::s07_unresolvable_root_refuses_existing_and_new_external_destinations"
+            ),
+            || {
+                let mut f = Fixture::new();
+                drop(f.app.storage.take());
+                std::env::remove_var("LOCALAPPDATA");
+                fs::write(f.root.join("existing.dat"), b"external sentinel").unwrap();
+                let before = ledger(&f.root);
+                for name in ["existing.dat", "new.dat"] {
+                    assert!(f
+                        .app
+                        .write_settings_export(&f.root.join(name), b"must refuse")
+                        .is_err());
+                    assert_eq!(ledger(&f.root), before);
+                }
+            },
+        );
+    }
+}
+
+#[cfg(test)]
 mod tests {
     use super::*;
     use crate::app::harness_tests::fixture;
@@ -757,6 +1243,38 @@ impl WordApp {
         ui.small("手書き認識は画像対応モデルが必要。録音の自動文字起こしには音声入力対応モデルが必要。非対応時も録音・再生は利用できる。");
     }
 
+    pub(super) fn write_settings_export(
+        &self,
+        dest: &std::path::Path,
+        bytes: &[u8],
+    ) -> Result<(), String> {
+        match &self.storage {
+            Some(storage) => store::write_external_file(&storage.dir, dest, bytes),
+            None => store::write_external_file(&store::resolve_storage_root()?, dest, bytes),
+        }
+    }
+
+    fn export_deck_to(&mut self, dest: &std::path::Path) {
+        self.notify_result(
+            self.write_settings_export(dest, model::deck_text(&self.deck).as_bytes())
+                .map(|_| "教材TSVを書き出した。「語彙を追加」の③から追加・更新できる。".into()),
+        );
+    }
+
+    fn export_progress_to(&mut self, dest: &std::path::Path) {
+        let result = serde_json::to_vec_pretty(&self.progress)
+            .map_err(|e| e.to_string())
+            .and_then(|bytes| self.write_settings_export(dest, &bytes));
+        self.notify_result(result.map(|_| "学習記録をバックアップした。このJSONに教材TSV・録音・筆跡原本は含まれない。媒体付きバックアップも使用してください。".into()));
+    }
+
+    fn export_diagnostic_report_to(&mut self, dest: &std::path::Path, report: &str) {
+        self.notify_result(
+            self.write_settings_export(dest, report.as_bytes())
+                .map(|_| "診断情報を保存した。".into()),
+        );
+    }
+
     fn backup_settings_panel(&mut self, ui: &mut egui::Ui) {
         home_art::title(ui, "教材・バックアップ", 22.0);
         let idle = self.session.is_none() && self.pending.is_none() && self.recorder.is_none();
@@ -768,14 +1286,7 @@ impl WordApp {
                     .add_filter("TSV", &["tsv"])
                     .save_file()
                 {
-                    self.notify_result(
-                        store::atomic_write(&path, model::deck_text(&self.deck).as_bytes()).map(
-                            |_| {
-                                "教材TSVを書き出した。「語彙を追加」の③から追加・更新できる。"
-                                    .into()
-                            },
-                        ),
-                    );
+                    self.export_deck_to(&path);
                 }
             }
             if ui
@@ -794,19 +1305,33 @@ impl WordApp {
         ui.horizontal_wrapped(|ui| {
             if ui.ww_button("学習記録をバックアップ").clicked() {
                 self.credit_time();
-                if let Some(path) = rfd::FileDialog::new().set_file_name("wordweave-progress.json")
-                    .add_filter("JSON", &["json"]).save_file() {
-                    let result = serde_json::to_vec_pretty(&self.progress).map_err(|e| e.to_string())
-                        .and_then(|bytes| store::atomic_write(&path, &bytes));
-                    self.notify_result(result.map(|_| "学習記録をバックアップした。このJSONに教材TSV・録音・筆跡原本は含まれない。媒体付きバックアップも使用してください。".into()));
+                if let Some(path) = rfd::FileDialog::new()
+                    .set_file_name("wordweave-progress.json")
+                    .add_filter("JSON", &["json"])
+                    .save_file()
+                {
+                    self.export_progress_to(&path);
                 }
             }
-            if ui.add_enabled(idle && self.storage.is_some() && self.color_editor.is_none(),
-                crate::app::controls::Button::new("学習記録を復元")).clicked() {
-                if let Some(path) = rfd::FileDialog::new().add_filter("JSON", &["json"]).pick_file() {
+            if ui
+                .add_enabled(
+                    idle && self.storage.is_some() && self.color_editor.is_none(),
+                    crate::app::controls::Button::new("学習記録を復元"),
+                )
+                .clicked()
+            {
+                if let Some(path) = rfd::FileDialog::new()
+                    .add_filter("JSON", &["json"])
+                    .pick_file()
+                {
                     match read_limited(&path, 100_000_000)
-                        .and_then(|text| serde_json::from_str::<Progress>(&text).map_err(|e| e.to_string()))
-                        .and_then(|progress| { progress.validate()?; Ok(progress) }) {
+                        .and_then(|text| {
+                            serde_json::from_str::<Progress>(&text).map_err(|e| e.to_string())
+                        })
+                        .and_then(|progress| {
+                            progress.validate()?;
+                            Ok(progress)
+                        }) {
                         Ok(progress) => self.pending_restore = Some(progress),
                         Err(error) => self.notify_error(error),
                     }
@@ -843,8 +1368,7 @@ impl WordApp {
                 }
                 if ui.ww_button("診断情報を保存").clicked() {
                     if let Some(path) = rfd::FileDialog::new().set_file_name("wordweave-codex-diagnostics.txt").save_file() {
-                        self.notify_result(store::atomic_write(&path, report.as_bytes())
-                            .map(|_| "診断情報を保存した。".into()));
+                        self.export_diagnostic_report_to(&path, &report);
                     }
                 }
                 ui.hyperlink_to("ChatGPTを開く（手動貼り付け）", "https://chatgpt.com/");

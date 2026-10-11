@@ -84,6 +84,8 @@
 | I2d-H独立runner・新57＋旧79の136unique中132成功/4環境未実証・固定hash・限定環境比較 | [独立実行報告](ACOUSTIC-HISTORY-001/export-destination-runner.md) |
 | I2d-H最終Post PASS/Closed・H06と管理者symlink2件成功・証拠接合135成功/1条件付き未実証 | [是正Preと最終レビュー](ACOUSTIC-HISTORY-001/export-destination-review.md)、[作者の追加証拠](ACOUSTIC-HISTORY-001/export-destination-tests.md#h-identity-evidence-必須fixtureへの置換)、[独立実行追補](ACOUSTIC-HISTORY-001/export-destination-runner.md#h-identity-evidence-独立追補2026-10-12) |
 
+I2d-S設定の4書き出し口：[独立25件の期待値・RED・既存回帰9件](ACOUSTIC-HISTORY-001/settings-export-tests.md)、[接続実装・自己検証34件・最終hash](ACOUSTIC-HISTORY-001/settings-export-implementation.md)、[S04是正Closed・runner-ready・独立実行待ち](ACOUSTIC-HISTORY-001/settings-export-review.md)を参照する。
+
 ソース入口：保存は `src/audio_history/`、共有履歴型は `tools/practice-history/`、音響解析は `tools/acoustic-analysis/`。生ログは各試験記録から辿る。要約へログ本文を複製しない。
 
 ## docs以下
