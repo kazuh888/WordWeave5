@@ -1,177 +1,54 @@
-# 現在の状態（2026-10-03）
+# 現在のタスク要約
 
-- PUBLISH-20261003：蓄積修正を`3bf9f39`でブランチ`codex/development-agent-team`へpush済み。その後39Rustファイルを標準整形し、本体/単独Qwen fmt成功、全470件成功、release成功、独立整形比較39一致を確認した。第二commitは書式と検証記録のみ。EXE23:25:03 JST、SHA256 `9B888E9FC923823C59B4C3B0AB1A4DAD2051CA6139DE153B6DE6CA213DD387D3`。PR/mainマージなし。ローカル生成物は公開対象外。下記全体fmt未合格は整形前の履歴である。[結果](PUBLISH-20261003/results.md)。
+更新：2026-10-11（I2a-P完了後の続行と適度なpushを利用者が承認。Pまでの保存checkpointとI2b-A準備へ移る）。以後の再開入口は本書である。設計本文・ログ全文は転載せず、必要な箇所だけ [参照インデックス](context-index.md) から読む。旧会話・旧状態記録は証拠確認時だけ参照する。
 
-- QWEN-STOP-001 U2色差再改善完了：無効■を#C8CFD6、有効円枠を#0064BE/2.0へ変更。全470件成功、合成native4比較・独立レビュー確定欠陥0。型明示のみの同値修正を照合し最終release成功、対象fmt成功・指定5入力hash一致。EXE22:48:40 JST、SHA256 `8BA9C64E1893A1D247FD8916037D89DB068E06BBD6170C93FAD748241E421DE6`。全体fmt既存39ファイル不一致・実音声/DPI未検証は保持する。次は利用者の色差目視受入、commit/pushなし。[結果](QWEN-STOP-001/results.md)。下記U1は履歴である。
+## 現在の目標
 
-- QWEN-STOP-001実装・自動検証・release更新完了：音読評価の停止を共有円＋■へ変更し、常時描画・実再生中のみ有効とした。全469件（追加4件）成功、合成native5画像確認。実音声の停止/自然終了は未検証、狭幅拡大は既存本文スクロールが必要。全体fmtは既存39ファイル差分でFAIL、対象3ファイルは成功。EXEは2026-10-03 21:53:46 JST、SHA256 `7E5E931752A5F14FBA722CD0798BC0ACCF57AE35AB97242030322D64890D6B97`。音響解析・commit/pushは未実施。正本は[結果](QWEN-STOP-001/results.md)。
+ACOUSTIC-HISTORY-001：原音・音響解析結果・Qwen助言を保存し、同条件の練習履歴をグラフ・表・再生で比較できるようにする。WordWeave5と単独音読ツールで共通ライブラリを利用する。実装・検証は継続中であり、完成ではない。
 
-- QWEN-UX-003実装・自動検証・合成native・release更新完了：音読評価を①準備→②送信確認→③結果へ整理し、状態案内を各段階へ移し、丁寧語・句点改行・評価後の折畳みを実装した。本体全体465件成功、native14画像の表示確認、独立review新規P1/P2なし。全体fmt gateは既存39ファイル差分でFAILのまま、対象3ファイルは整形成功であり全gate合格とはしない。EXEは2026-10-03 20:21:28 JST、SHA256 `F6C1960698C86EA809B7AC7D0CE82DDCE236717660AC09513D4EB4E420DCB532`。次は利用者の新UI受入・実音声/API確認。nativeキー操作・取消し終端画像・DPI等は未確認。Skill化・commit/pushは未実施。正本は[結果](QWEN-UX-003/results.md)と[検証](QWEN-UX-003/runner.md)。
+## 主要な決定事項
 
-- QWEN-UX-002実装・自動検証・合成native・両release更新完了：形式エラーを発音の良否と区別しJSON Object要求を追加、音読画面を階層化、AI接続ページ内のQwen編集とモデル一覧だけの接続確認を追加した。本体451件、共通147件/core100件、資格情報構成check成功。標準と実最小820×650の拡大表示を確認。root全体fmtの既存差分は保持。EXEは2026-10-03 18:13:01 JST、SHA256 `42E13397C323A34D5A1F77E6456C4B5DE5D764ADECD2E50559018C3B49FE4B49`。過去の生応答がなく実障害原因は未確定。次は利用者の接続確認・同MP3再評価・新UI受入。Skill化は受入後、実キー/音声送信・commit/pushは未実施。正本は[結果](QWEN-UX-002/results.md)と[検証](QWEN-UX-002/runner.md)。
+- 原音と固定した例文・目標を保持する。音響値の変化を発音の優劣や総合点へ直結させない。
+- Rustの基本測定と固定版Praatの音高解析を組み合わせる。承認済み上限は子メモリ512MiB・同時1件・60秒である。
+- 保存・比較・ごみ箱・復元・二つのアプリへの組込みが承認範囲である。完全削除は今回含めない。
+- Windowsファイルリンク権限が必要な1件は、利用者承認済みの必須別実行テストである。通常実行のignoredを成功に数えない。
+- 詳細契約と担当モデル/effortはインデックス先を正とし、ここでは再定義しない。
+- 利用者は残作業を順に進めることを承認済み。動作確認依頼時は10分待ち、無応答なら確認結果に依存しない作業へ進む。未確認を成功にせず、安全性/データ保護/依存gateは保留する。この指示は実API送信・公開・追加権限の承認ではない。
+- 2026-10-11の最新指示はP完了後の続行と適度なcommit/pushを承認している。小単位の実装・検証・独立レビューが揃った区切りと、長時間作業の中断前をpushの基本とする。中断checkpointは未完了範囲を明記し、秘密・実データ・build/log生成物は含めない。既存開発ブランチへ通常pushし、mainへのmerge・releaseとは区別する。
+- モデル/effort切替が適切な工程では停止して知らせる。次のI2b-A設計/作者/実装/reviewは既定Astra/high、独立runnerはSol/medium。質問や切替がなければ承認済み順に続行する。
 
-- QWEN-SETTINGS-001実装・自動検証・両release更新完了：別英文の適合応答を形式不正と分け、本体「設定→AI接続」へQwen設定を移設し6地域を追加、READMEのNode/npm/Volta・FFmpeg条件を明確化。本体439件（設定20件含む）、共通lib135件/core88件成功。既存v1互換・保存取消し・キー非流用・背景操作遮断を確認し、標準/狭幅の合成native画面と独立レビューを完了。root全体fmtの広範差分は保持。EXEは2026-10-03 15:26:35 JST更新、SHA256 `F9F708A48E8EFC3ECDC4CD50C19DB211158BE1C3BBEA5D6A319FB7F1EB78FF24`。次は利用者が同じMP3で実APIの別英文表示を確認する。実キー/課金送信・利用者音声精度・release実機受入・commit/pushは未実施。正本は[結果](QWEN-SETTINGS-001/results.md)と[検証](QWEN-SETTINGS-001/runner.md)。
+## 重要な制約
 
-- Windows別PCへの導入文書を追加：READMEに実行時の外部ツール/OS機能/クラウド設定と開発専用ツールの一覧を掲載し、[導入手順](../docs/install-windows.md)に配置・Codex CLI認証・FFmpeg/ffprobe/AMR-WB・Qwen設定・学習データ移動を記した。コード/EXEは変更していない。文書リンクと差分形式を確認済み。別PC実機での導入検証は未実施。
+- 既存dirty変更・学習データ・録音を保持する。試験は合成データのみ。実API送信は今回の範囲外。commit/pushは上記保存checkpointとして承認済みである。
+- モデル・資源上限・検証基準を無断で変更しない。親モデルは利用者選択を維持する。
+- 個別試験成功・独立レビュー・機能完成・実機受入を区別する。
+- A1変更後の[利用者M1成功](ACOUSTIC-HISTORY-001/process-cancel-a1-user-green.md)と[独立最終Post PASS](ACOUSTIC-HISTORY-001/m2-w1-gates.md)を受領し、M1待ちの再build停止は解除した。確認済みsource/EXEのhashとsnapshotは保持する。無変更の成功済み試験を再実行しない。
+- 管理者実行の承認はファイルリンク1件だけである。M1へ流用しない。OS設定は変更しない。
 
-- QWEN-FORMATS-001設計・実装・自動検証・両release更新完了：WAV/MP3/AAC/AMR/3GP/3GPPを共通lib/両hostへ追加し、本体の指定3説明を削除、取消し注記を冒頭へ移動した。原bytes保持、再生PCM分離、60秒/6MiB維持、破損/属性変化/取消し/終了回収を検証。本体418件、単独113件、core-only8+3+12件成功、native合成5画像、独立review P1/P2なし。本体EXE 2026-10-03 12:52:27 JST、SHA256 D859AACB60B0B5060E5F2579ED56DFD99015EDC37C86DA2BC8DB155834AD9C56。FFmpeg/ffprobeが必要、codec条件は設計に明記。既存整形差分は保持。追加形式の実機原音/実API・配布先backendは未確認、実API追加送信・commit/pushなし。正本は[計画](QWEN-FORMATS-001/plan.md)と[結果](QWEN-FORMATS-001/results.md)。以下QWEN-INTEGRATION-001のWAV実接続待ちは利用者受入で解消、客観的な発音精度は未保証のままである。
+## 現在の進捗
 
-- QWEN-INTEGRATION-001の実装・自動検証完了：step2の共通Qwen評価ライブラリと、本体「教材→主な例文→読んで発音を確認」を実装した。チャット/教材生成のCodex経路を維持し、本体音声評価は単独ツールと別の専用接続設定・毎回確認送信・メモリ限定結果である。本体415件/単独90件、core-only、両release、MCP smoke、標準/狭幅の合成native5画像と独立レビュー合格。本体release EXEを2026-10-03 02:23:00 JSTに更新。親は利用者選択Sol/highを維持し、helper起動capにより同指定の親が実装/検証を担当した。実API接続/助言の妥当性は人のGUI操作待ち、実マイク/IME/DPI等も別受入であり、step2全体完了ではない。本体設定にTokyo Host/キーを明示入力し、短い音声で確認送信する。キーをチャットへ収集しない。既存dirty/原音/記録を保持し、commit/pushは対象外。証拠は [results](QWEN-INTEGRATION-001/results.md)、設計は [共通音声評価](../docs/reuse/qwen-audio.md)。
+| 部分 | 確認済み範囲と未完了境界 |
+| --- | --- |
+| 保存 | writerは新junction2件を含む全37件が独立実行成功、W1 Post-gate PASS/Closed。本体変更なし。reader37件成功/権限依存1件ignored、権限依存1件は別の単独昇格実行で成功済み |
+| 解析 | A1最終runnerでunit93/Praat20/core32/schema27の計172件、no-default59件成功。外部M1は利用者の別実行1件成功。異なる構成・バッチをユニーク件数へ合算しない |
+| M1修正 | 作成時Job所属へ修正、利用者RED→GREEN確認、独立最終Post-gate PASS。I5-P1/M1はClosed。I5全体・機能全体は未完了 |
+| M2・A1 | WAV書込digestとread pin同一性の照合、およびテスト側の同定・後始末・ACK記録競合修正は独立Post PASS/Closed。旧cancel失敗の根本原因が特定されたわけではない |
+| 保存回復 | I1b-2bは独立回復34/writer37/reader37成功・1明示ignored、追加境界2件を含む独立Post PASS。原音等の欠損を捏造せず、同requestで保存だけ再試行するheadless境界まで |
+| 履歴保存確定 | I2a-P本体・新22件・関連269件の成功証拠と独立最終Post PASS/Closed。取消し・既保存・結果不明の判定まで。後続アプリ接続は未着手 |
+| 統合 | Progress・backup・非同期処理・比較・UI・二host統合は未完了。製品EXEは未更新 |
 
-- FRAMEWORK-DESIGN-001の文書化完了：[Framework方針](../docs/reuse/framework.md)に技術部品・学習進行・教科/ホストの境界と第二教科の縦断gate、[候補台帳](../docs/reuse/library-candidates.md)に今設計3件/条件付き保留6件を記録。音声I/O・原本管理・egui controlsの設計を追加し、既存4設計は元の本文を保ちFramework補足だけ追加した。仕様/設計の独立レビューP1/P2なし、FW-AC01–08文書受入PASS、リンク/構造検査成功。ソース/設定98件とCargo/AGENTS/旧計画5件は開始hash一致。本体EXE・実API・実データ・commit/pushは操作なし。次のライブラリ化/第二教科仕様着手時には台帳を読み、着手条件を再判定する。切出し・二製品利用・第二教科実証は未実施。証拠 [results](FRAMEWORK-DESIGN-001/results.md)。
+ブランチ：`codex/development-agent-team`。従来のレビュー基準HEAD：`b077d6c4e6da5ed7cbbf10c967e3ea36a6dc172d`。2026-10-11にPまでのソースと設計・検証記録を保存用commitへ分ける。最新commit/push状態は再開時のgit statusとlogで確認する。
 
-- REUSE-DESIGN-001の文書化完了：音声評価/Qwen、Codex app-server、Markdown表示、チャットの再利用境界とADRを作成した。入口は [docs/reuse/README.md](../docs/reuse/README.md)。現行/提案/未検証、同意・取消し・保存失敗、互換性・二製品での将来受入を区別。独立レビュー指摘2件を修正しAC01–AC07文書受入PASS、リンク/構造検査成功。本体ソース98件とルートCargo2件は開始hashと一致し、本体/EXE/設定/実データ/commit/pushは変更なし。ライブラリ切出しや実APIは今回行っていない。次は利用者が選ぶ実接続確認または個別の切出しタスク。証拠 tasks/REUSE-DESIGN-001/。
+## 未解決の問題
 
-- QWEN-AUDIO-001のオフライン開発完了：Qwen3.8-Omni-Flash/Tokyo用の独立した日本語音読評価GUIとSTDIO MCP、再利用用Rustライブラリを実装。EXEは `target/qwen-audio/release/qwen-audio.exe`、SHA256 `9B36D56936D39852F0A24C66B153D5BBA475514F8FF65C5DF17F4041DEBB64CC`。独立81tests・fmt・release・MCP smoke成功、本体377tests/release成功。標準/狭幅native画面、実GUI子1件とcancel/EOF/親crash回収を確認し、独立レビューPASS。キーは専用Windows資格情報、毎回GUIで確認して送信、自動再送なし。本体AI/教材/学習記録は未変更。実キー保存・Tokyo接続・音声評価品質・IME等・実Codex登録は別受入。利用者MCP設定変更/課金送信/commit/pushなし。次はEXEの接続設定にTokyo API Hostとキーを入力し、短いWAVで実接続・評価内容を確認する。手順 tools/qwen-audio/README.md、証拠 tasks/QWEN-AUDIO-001/。
+1. 旧cancel/子孫終了WAIT_TIMEOUTの根本原因は未確定であり、証拠を保持する。A1修正後の新一括回帰と外部M1は成功したが、過去原因を修正済みとは主張しない。I5c-2の障害注入・lease/cleanup・実work peak/物理メモリ等の検証は残る。
+2. 残りの保存回復・アプリ統合と全体受入条件は未達である。W1の試験不足は全37件成功と独立Post-gate PASSで解消済みである。
 
-- AUDIO-EVAL-001：ChatGPT認証の実app-serverで能力を照会。実返却モデルgpt-6.1-sol／medium、取得した7モデルは全てtext/imageのみで音声対応なし、実モデルは一覧にない。現行の音声対応確認条件を満たせないため、音声付き生成は行わず停止。原音理解・発音評価は未検証。設定変更・利用者録音の送信・アプリ変更なし。詳細はtasks/AUDIO-EVAL-001/feasibility.md。
+## 次のアクション
 
-- FEEDBACK-UI-001 U7完了。教材案確認の固定会話AI回答をMarkdown表示、変更項目一覧/詳細を独立スクロール、選択変更時は右先頭へ戻す。原文/strict/承認/保存契約を保持。focused4/4、既存狭幅1/1、全targets377件、debug/release成功。標準/狭幅の日本語太字・表・固定回答末尾と固定操作を新native4画像で親/独立reviewer確認、blocking指摘0。EXE更新2026-09-30 21:31:46 JST、11,962,880 bytes、SHA256 C91B34B1900D0D31DEC09E314153AEB7F0326055189588D2F9803BE2A8868F23。実AI/IME/touch/pen受入・commit/pushなし。音声評価は「例文を読む練習」を優先とし、Codex原音評価能力の確認が次の課題（未実装）。詳細はtasks/FEEDBACK-UI-001/review-detail-{plan,design,results,runner}.md。
+1. 保存回復I1b-2b、I2a-0 Path reader、I2a-G metadata排他は独立Post PASS。Gは[独立24件](ACOUSTIC-HISTORY-001/history-gate-tests.md)の4PASS/20行動REDから実装後全GREEN、[独立runner](ACOUSTIC-HISTORY-001/history-gate-runner.md)で新24/旧store・commit17/writer37/recovery34計112件成功・失敗0・ignored0、[最終Post PASS](ACOUSTIC-HISTORY-001/history-gate-review.md)。source/test/EXE固定と新temp残存0も確認済み。現在のM/S段階は下記4を参照する。D1欠測temp `F:\TempCodex\ww-praat-process-日本語 Z32XRK` と旧原因未確定の証拠は保持する。
+2. [実装計画](ACOUSTIC-HISTORY-001/implementation.md) の依存順に保存回復・既存データ/backup統合・残るPraat障害試験・処理統合・比較UI・二hostを継続し、最後に全体テスト/release検証を行う。
+3. I2は[設計](ACOUSTIC-HISTORY-001/design-i2.md)のG private接合追補も[独立Pre PASS](ACOUSTIC-HISTORY-001/history-commit-design-review.md)。plannerの[逐次所有追補](ACOUSTIC-HISTORY-001/implementation.md)に従う。GはsingleMutex/再入拒否/write-block口/strict pendingまでであり、Progress形式・移行・結果不明判定は後続である。現在、利用者の動作確認待ちはない。
+4. M/S/N/R/T/V/Pは最終Post PASS。Pは指定Astra/highのpointer_post_reviewが[最終Post PASS/Closed](ACOUSTIC-HISTORY-001/history-pointer-commit-review.md)、受入阻止0と判定した。[独立269件](ACOUSTIC-HISTORY-001/history-pointer-commit-runner.md)は初回75＋再開194の合成であり、対象重複0/欠落0、現物source16/EXE9一致。初回4失敗は[同EXE環境比較](ACOUSTIC-HISTORY-001/history-pointer-commit-diagnostic.md)後に非管理者sandbox外で独立再検証済み。旧失敗/欠測/G syscall未特定は保持する。依頼された1は完了し、最新の続行承認により既定b-A（アプリ側の保存呼出しへの接続）の設計確認へ進んだ。次は独立テスト作成、3保存経路の修正、自検証である。独立runner前にSol/mediumへの切替を案内する。I10/製品EXE提供は未着手である。
 
-- FEEDBACK-UI-001 U6実装・検証・release更新完了。通知引用と英語チャットAI回答のCommonMark＋GFM表/取消線/タスクリストを表示し、対象語付き登録成功receiptと失敗通知を実装。原文copy/strict照合/登録前承認/保存形式は維持。表の折返し行高修正、focused12/12・全targets373件・深い引用単独1件・release成功。EXE更新2026-09-30 10:17:47 JST、11,960,832 bytes、SHA256 F982FD5DEE9BE799AF713C54562B2FD10D6AD30544A1382374865942B9A7763D。起動0件を確認し強制終了なし。独立本体/分割PNG review済み、通知/chat標準・小画面のnative成功証拠と親目視を取得。最後のdebug helper条件変更後chatは再実行せず、詳細はgfm-results.mdに区別して記録した。実AI/利用者受入・commit/pushなし。次は利用者の実表示・実AI登録確認である。詳細はtasks/FEEDBACK-UI-001/gfm-{plan,spec,design,tests,results,runner-results}.md。
-
-- FEEDBACK-UI-001 U5実装・検証・release更新完了。通知を要点/理由/次の操作・引用比較・原文/Markdown切替・全文copy・折畳み技術情報へ改修。strict照合/登録承認/String互換維持。独立review指摘解消、最新alltargets361件成功/debug/release実exit0、native8状態と親の要約/比較/原文/狭幅末尾目視を確認。利用者がアプリを閉じた後、起動0を確認してEXE更新（2026-09-28 23:16:07 JST、11,598,336 bytes、SHA256 3674873D6CE550127CFE0FE5DDD107781D7965E3BB557A42E8E7E2664EFDDB76）。アプリ強制終了/再起動なし。画像はtasks/FEEDBACK-UI-001/artifacts/notice-native-rerun2/、最終結果はnotice-runner-results.md。次は利用者の表示受入であり、実AI/実データ試験/commit/pushなし。以下は前回時点の状態である。
-
-- FEEDBACK-UI-001実装・ローカル検証・release更新完了。上限拒否時だけの設定誘導、背景/入力欄別の色・濃さプレビューと明示保存取消し、引用診断の対象/原因/比較/対処分離を実装。全343テスト・debug/releaseビルドexit0、独立レビューblockingなし。標準/狭幅の隔離Windows描画を確認。設定移動後のshortcut撮影は通知が残るためSlider可視証拠にせず、実クリック・可視化・1回focusの自動試験と区別した。最新EXE SHA256 `F09882DA963F1643065040B16DEFE4851B053A53B529F528B3F72A04C22C446E`。実IME/実AI・全ダイアログの実機操作受入は別途、commit/pushなし。既存変更と実データを保持。詳細はtasks/FEEDBACK-UI-001/results.md、tests.md。
-
-- MATERIAL-QUOTE-001 U5実装・検証・release更新完了。教材確認を変更一覧＋選択箇所の前後比較＋理由/引用に整理し、固定会話を折畳み、見出し/登録操作を本文スクロールから分離。言い換え/意味/条件を常時表示し、語調・文体と分離。「追加のみ」「内容を見直す（追加・変更・削除）」へUI名称と説明を更新、AI/保存形式/登録処理は維持。全315テスト成功、標準/狭幅/スクロール後の隔離native描画と独立レビュー確認済み。EXEは2026-09-27 16:05:33 JST更新、SHA256 `4644B2AECBF270F28F3AEADB81DB8D374D4A84CB8304193B138B4E60A834FCAE`。次は利用者の実教材での画面受入であり、実AI再生成は今回未実施。commit/pushなし。詳細はtasks/MATERIAL-QUOTE-001/results.md U5。以下は以前の状態である。
-
-- MATERIAL-QUOTE-001 U4の通知修正・自動検証・release更新済み。再取得でCompletedかつ非空白本文の場合だけ情報通知、それ以外は状態と本文の取得有無を示す注意通知とした。本文なしの「実行記録で確認できる」という誤案内を解消。独立回帰3件追加、通知13件/全308件成功・release exit0。EXEは2026-09-27 11:43:55 JST、SHA256 `DD138102A892139D0892BF61FA6A5F8235F1E6E358E6DBFC2533A79578DD82D3`。timeout/生成/登録処理は変更なし。次は利用者による教材案の再作成・通知実機受入である。実AI未実施、commit/pushなし。詳細は同タスクresults.md U4。
-
-- MATERIAL-QUOTE-001 U3の実装・自動検証・release更新完了。format-first（依頼文・応答スキーマ・アプリ検証の整合）を実装し、項目全体pathは引き続き拒否、生成/保存済み案の変更理由番号・path・具体原因を通知へ表示する。追加回帰7件、focused22/22・実送信モック1/1・pattern正例4/負例6・全305テスト成功、独立最終レビューpass。release EXEは2026-09-27 11:05:08 JST更新、SHA256 `CB356D322EA73C576E3EBC2D1B0ACC07623F1C82C245995469F5D409BA24706A`。厳密引用照合/登録前承認を維持。実AI・実機表示は未検証、commit/pushなし。詳細は同タスクresults.md U3。下段は前回時点の記録である。
-
-- MATERIAL-QUOTE-001 実装・自動検証・release更新完了。実行記録でAIが引用からMarkdown強調記号を省いたことによる厳密包含不一致と特定し、発言消失ではないと確認した。判定は緩めず、理由・元会話の往復番号/話者・引用/生成時原文プレビューと確認案内を表示し、生成指示も明確化。7件回帰追加、全298件成功・release成功（EXE 2026-09-27 10:10:12更新）、独立最終レビューpass。詳細 `tasks/MATERIAL-QUOTE-001/`。実機表示/スクロール/コピーと実AI再生成は未検証。7役は今回ホストから起動できたが実行model/effort metadataは未取得。既存7役設定の未コミット変更を保持し、今回もcommit/pushなし。
-
-- DEVELOPMENT-TEAM-001：7役の開発エージェント定義と `docs/process/development-team.md` を作成。計画/外部仕様はGPT-6 Astra固定、設計/実装/テスト作成/実施/レビューは計画者が起動時モデルを選定。既存Skillを役割別に使用し、新規Skillなし。AGENTS.mdへ選定権と引継ぎを追記した。7TOML構文/必須項目/固定2役・可変5役/権限/9Skill参照先/既存scout保持を静的確認、限定独立確認実施。役名のホスト検出・実起動は未検証で次の開発開始時に確認する。branch `codex/development-agent-team`、未コミット・未push。設定/文書のみ、アプリ本体・EXE・既存検証基準は変更していない。
-
-- PLAYBACK-NOTICE-001 通知修正は利用者が「OK」と受入済み。commit・pushを依頼されたため、`codex/playback-notification-fixes` を公開対象とする。全291テスト/release成功後のアプリ変更はなく、今回の更新は受入記録のみ。PR作成・mainマージは今回の範囲外。commit SHAとpush結果はGitを正とする。再生位置の未再現残件は継続する。
-
-- PLAYBACK-NOTICE-001 追加対応：自動通知を「エラー・警告・ユーザー要求の操作を実施できなかった場合」とした。生成上限、生成対象なし、非テキストの表示不可、作成中注釈による拒否、設定変更でモデル取得結果を採用できない場合、未保存媒体による終了拒否を明示分類。バックアップ/注釈退避の失敗経路も補完。同文言でも再試行時は表示し、閉じた後の単なる再描画やコピーでは再表示しない。生成上限は赤エラー扱いにせず、教材案作成と語彙一括生成で再開操作の案内を区別した。全291テスト・releaseビルド・diffチェック成功（EXE 2026-09-26 20:09更新）。回帰は上限非消費/同文言再試行/対象なし/非対応プレビュー/コピー非表示を確認。限定独立確認のエラー再試行指摘を修正し試験を追加。今回の実操作受入・commit/pushは未実施。ログは `.context/compound-engineering/blocked-notice-{red,final-tests,release}.log`。以下は前段の記録である。
-
-- PLAYBACK-NOTICE-001：通知ダイアログの自動表示をエラー・警告だけに限定。コピー・保存成功等の情報は「通知」から手動確認する。既存の失敗経路を明示分類し、閉じたfatal/フォント警告がコピーで再表示されない回帰も追加。全289テスト・releaseビルド成功、限定独立確認で具体的不具合なし。`target/release/wordweave5.exe` を更新済み。branch `codex/playback-notification-fixes`、未コミット・未push。ログは `.context/compound-engineering/notification-policy-{final-tests,release}.log`。教材TTSの一時停止→±5秒→再生の問題は利用者も再現せず、隔離WAV30回/TTS60回で再現なし。再生処理は変更せず、`tasks/todo.md` に未解決として保持する。今回の通知の実操作受入は未確認である。
-
-- SETTINGS-UI-001 公開前最終確認完了：利用者が保存方式・連続ズームを受入済み。隔離データでバックアップの取消し、設定/会話/教材/添付原本の復元、再起動、復元前の未保存会話の退避、破損拒否を確認。全286テスト・releaseビルド成功、独立境界確認で公開を止める指摘なし。実データを使う全体実機確認は利用者が別途実施する。commit・push・PR・CI成功確認後のmainマージまで明示承認済み。以後のCI・統合結果と確定SHAはGitHub PRを正とし、結果記録だけの追加CIは発火させない。ログは `.context/compound-engineering/settings-restore-final-{tests,release}.log`。以下は各時点の履歴である。
-
-- SETTINGS-UI-001 保存／キャンセル・連続ズームを実装検証済み（2026-09-26）：設定フォームを確定済みProgressから分離。保存成功時だけ確定、取消しで元へ戻す。会話/学習の定期保存・終了保存から未確定設定を除外し、保存失敗時は下書きを保持する。未保存の離脱/終了は「保存して進む／破棄して進む／編集を続ける」。接続確認・候補取得・音声試聴は編集値を使い、試用だけでは保存しない。復元は下書きもリセットする。外側の音量/リピート記憶を維持し、同時変更は保存時に取り込む。倍率は固定位置パネルで連続プレビューし、egui 0.31の旧倍率ポインター座標も換算する（未対策時の75%→52%逆跳ねを回帰試験で再現）。全285テスト・debug/release・diffチェック成功。標準80%/小画面160%の倍率パネルと接続設定のWindows実描画3件を確認。独立境界確認済み。実マウス・高DPI/タッチ・音声/実Codexの受入は残る。`target/release/wordweave5.exe` 更新済み、commit/pushなし。検証は `.context/compound-engineering/settings-manual-*`、再現ログは `settings-zoom-drag.log`。次は利用者の保存/取消しと連続倍率操作の受入であり、別画面へ自動着手しない。
-
-- SETTINGS-UI-001 利用者決定・残件登録：用語統一と③の取り込み統合は「OK！」で受入済み。設定は「保存／キャンセル」方式、設定の自動保存なしと確定した（以下の回答待ち記載を更新）。[残件一覧](todo.md) と [計画](plan.md) にA：編集値分離と保存/取消し、B：試用・離脱・復元との整合、C：操作部固定の連続ズームを登録。今回の依頼は残件作成のみで、アプリ実装・EXE更新・commit/pushは行っていない。学習記録/チャットの自動保存は別の保護対象として維持する。次に実装を開始する場合はAから進める。
-
-- SETTINGS-UI-001 用語統一・③へのファイル追加統合を実装検証済み：学習記録JSONを「バックアップ／復元」へ統一し、教材TSVの共有編集・追加更新と区別。設定のTSV選択は「語彙・教材の追加へ」に置換。③で単語リストと完成教材を列名自動判定し、完全15/17列・重複なし・順不同対応と内容検査を行う。不正な教材はAI生成へフォールバックしない。既存出力の17列見出し＋任意末尾2列なしの15列行にも対応。完成教材は確認前に保存/AI送信せず、追加・変更概要と展開可能な詳細差分を表示して確認後のみ既存の原子的保存を実行する。全280テスト、debug/release、diffチェック成功、標準80%・小画面160%の③/確認画面と設定の計5描画を確認。13:01更新のrelease EXE配置済み。独立境界確認の差分概要/狭幅指摘は対応済み。実データでの受入・GitHub CI・commit/pushは未実施。ログは `.context/compound-engineering/material-file-routing-*`、画像は `material-file-ui*` / `material-confirm-ui*` / `material-backup-labels.png`。倍率操作部固定の連続ズームは提案段階、設定の明示保存方式は回答待ちで今回変更なし。
-
-- SETTINGS-UI-001 追加方針の調査：利用者のExcel動画で、35%→86%→53%でも倍率操作部の位置・サイズが固定されていることを確認。既存の全体倍率変更を維持しつつ操作部を拡縮から分離して連続反映する案を提示する。教材TSV取り込みは完成済み教材のID別追加/更新、語彙ファイルは単語を材料にAI生成する別処理である。入口を「語彙を追加」へ集約し、③内で単語リスト/完成済み教材を明示的に分ける案を提示する。今回は動画・ソース調査のみでアプリ未変更。保存方式の回答待ちも継続。
-
-- SETTINGS-UI-001 受入指摘の部分修正：倍率Sliderはドラッグ中に画面倍率へ適用せず、解放時に一度反映。数値は％表示・固定幅とし、分類ComboBoxを440→240ptへ縮小。JSON復元は学習記録・設定・チャットの置換であり追加インポートではない旨を説明した。全275テスト、debug/release、diffチェック成功、隔離Windows標準80%・小画面160%・復元説明を確認。release EXEは11:48更新、未コミット・未push。実マウス/キーボードの利用者受入は残る。保存ボタンなしで確定する原因は既存の20秒自動保存・終了保存・各操作によるProgress全体保存。設定だけ明示保存に分離するか、自動保存を明示するか利用者へ質問中であり、この点は未修正。次は回答に従って保存方式を確定する。ログ/画像は `.context/compound-engineering/settings-feedback-*`。
-
-- SETTINGS-UI-001 実装・ローカル検証完了：設定を学習・表示／音声／AI接続／教材・データ／診断・ヘルプへ分類。設定本文だけをスクロールし、標準幅では保存を下部固定、小画面では分類選択と保存を上部1行へ配置。共通書体・操作余白・入力欄の背景色を適用。全274テスト、debug/releaseビルド、diffチェック成功。標準80%の全5分類と小画面160%の学習・AI接続・データを隔離Windows描画で確認。保存・復旧経路の独立確認で重大指摘なし。`target/release/wordweave5.exe` 更新済み。保存形式・認証・モデル選択処理・教材/学習データは変更なし。実Codex接続・音声・バックアップ操作の再試験と利用者受入は未実施。`codex/settings-ui`（base `aa6c475`）で未コミット・未push。検証ログは `.context/compound-engineering/settings-compact-*.log`、最終画像は `settings-ready-*.png`。
-
-- CHAT-MEDIA-SPACING-001 push完了：受入済み余白修正を `aa6c475` として `origin/codex/attachment-table-spacing` へpush済み。PR作成・main統合は未実施。既存CIはmain push/PR/手動実行が対象であり、このブランチpushでは自動起動しない。今回はGitHub CIの手動実行なし。以下の未push記載は当時の記録である。
-
-- CHAT-MEDIA-SPACING-001 受入完了：2026-09-26に利用者の「OKです」と続くpush承認を受領。以下の余白調整の見た目を確認済み。アプリソースの追加変更なし。`codex/attachment-table-spacing` をcommit・pushする対象とする。PR作成・main統合は今回の依頼に含まない。次は利用者承認済みの「設定」画面の見た目・配置を見直す。以下の未コミット・未push・受入未確認は各記録時点の状態である。
-
-- CHAT-MEDIA-SPACING-001 実装・ローカル検証完了：添付ダイアログの一覧下に残る空白を、見出しの実際の高さからスクロール領域を算出して解消。枠内余白と14ptの高さ変更バーを維持。修正前39ptの空白を再現する回帰試験を追加し、空/1/8件・高さ3段階・倍率2種類で成功。全271テスト、debug/releaseビルド、diffチェック成功。隔離Windows描画を標準80%・小画面160%で確認。`target/release/wordweave5.exe` 更新済み。利用者受入は未確認、ブランチ `codex/attachment-table-spacing` で未コミット・未push。ログ/画像は `.context/compound-engineering/attachment-spacing-*`。実データと添付の保存・送信処理は変更なし。
-
-- UI-INTEGRATION-001：利用者がPR作成・main統合を承認。統合先は [PR #2](https://github.com/kazuh888/WordWeave5/pull/2)、ブランチ `codex/study-records-ui`。記録画面だけでなく `fe69f8e` 以降の受入済みUI・チャット・添付改修全体を含む。添付送信許可・原本保持の独立監査でP1/P2なし。共通操作・通知復旧・再生設定・集計の重点確認でも追加修正なし。以下の「未マージ」は各記録時点の状態であり、統合後も履歴として保持する。CI・レビュー・マージの最新状態と確定SHAはPRの記録を正とする。結果記録だけでアプリCIを再発火させないため、以後の結果はPRへ集約する。残る既知事項は既存の未使用メソッド2件とActionsのNode.js 20廃止警告である。
-
-- STUDY-RECORDS-UI-001 受入・公開・CI完了：2026-09-25に「記録画面OK」の確認を受領。`a612242` を `codex/study-records-ui` へpushし、[Windows CI run 36144196741](https://github.com/kazuh888/WordWeave5/actions/runs/36144196741) の全対象テスト・releaseビルド成功（6分23秒）。ローカル全270テスト、標準80%の記録あり/なし、小画面160%の隔離描画も確認済み。集計の意味・保存データは変更なし。CI後の追補は本ファイルと計測文書のみで、アプリソース・CI構成は検証済みコミットと同一。mainへのマージ・PR作成は未実施。次の判断はmainへの統合である。ログと画像は `.context/compound-engineering/records-*`。
-- UI-PUBLISH-001 完了：以前の改修を `fe69f8e`（アプリ）・`d375c0d`（記録）の2コミットにして `codex/home-dashboard` へpushした。公開前の全268テスト・release成功。GitHub CI [run 36141201583](https://github.com/kazuh888/WordWeave5/actions/runs/36141201583) は `d375c0d` の全テスト・releaseに成功（6分44秒）。mainへのマージ・PR作成は未実施。Actions実行環境のNode.js 20廃止警告は残る。以下の履歴中「未コミット」は当時の状態であり、この2コミット以前の改修は公開済みである。
-
-- CHAT-MEDIA-FOLLOWUP-001 利用者受入完了：2026-09-25、ダイアログを縮めても幅が勝手に広がらないことを利用者が確認した。次はUI改修一式のcommit・pushと既存Windows CIのブランチ指定実行、その後に「学習の記録」画面の下書き実装を検証・仕上げる。今回の依頼はmainへのマージではない。
-
-- CHAT-MEDIA-FOLLOWUP-001 幅の再修正：前回の狭画面試験は最大幅制約に隠れて不十分であった。実際に右枠を縮小する試験で、無操作60フレーム中に619.78125→740ptへ拡大する不具合を再現。Frameの余白だけを差し引き枠線2ptを見落としていたため、毎フレーム親の必要幅が増加していた。枠内の実利用可能幅へ統一し、表の幅もスクロールバー領域を除いた内側で計算するよう修正。4状態×3段階縮小×各60フレームの回帰試験、全268テスト、debug/releaseビルド成功。隔離Windows描画へのドラッグ入力注入でも標準80%は914→613.5pt、小画面160%は487→406.5ptとなり、それぞれ60フレーム幅が不変。独立チェックで重大指摘なし。実マウスによる利用者受入・今回GitHub CIは未実施、既存の未コミット変更を保持。ログと画像は `.context/compound-engineering/chat-media-width-*`。下記の前回記録を幅安定性に関して置き換える。
-
-- CHAT-MEDIA-FOLLOWUP-001 受入追補：添付ダイアログの最前面レイヤーより下に出ていた画像・テキスト表示窓を同じ最前面レイヤーへ変更し、両方が重なり領域でも前面に出る回帰テストを追加。添付表は狭幅時に2列から縦積みに切り替え、`Ui::columns` の子要素の必要幅でダイアログが再拡張する問題を防止した。全268テスト、debug/releaseビルド、diffチェック成功。隔離データで画像/テキスト表示窓、標準80%・小画面160%の添付表を描画確認。実マウスでの幅ドラッグと利用者受入、今回GitHub CIは未確認。既存変更は未コミットのまま保持。ログ `chat-media-window-followup-*.log`、画像 `chat-media-window-*.png`。
-
-- CHAT-MEDIA-FOLLOWUP-001 ローカル実装・検証完了：添付ダイアログ内のタイトル・本文・見出し・ボタンを2pt縮小し、固定アンカーをやめて移動可能なWindowへ変更。BMP/GIF/JPEGの原本を保持し、表示・送信用のPNGを別途生成（GIFは先頭フレーム）。録音入力音量の見切れを解消。③で英文下地か白紙を選び④で手書きする案内と配置へ整理し、未添付注釈の破棄をOK／キャンセルのモーダル確認に変更。全266テスト、debug/releaseビルド、diffチェック成功。隔離データの標準80%・小画面160%・手書き中を描画確認。実マウスのドラッグ、実マイク・ペン、利用者受入、今回GitHub CIは未確認。既存の未コミット変更を保持。ログ `chat-media-followup-*-final.log`、画像 `chat-media-followup-*-centered.png`。
-
-- CHAT-MEDIA-TABLE-001 ローカル実装・検証完了：添付ダイアログの先頭に、保存済み添付を種類・名前／確認・削除の表として表示。画像・音声・ファイルの確認、選択した添付だけの解除を維持し、下側にファイル・録音・キーボード・手書きの追加操作を分離した。青い表と白い追加領域の境界は縦方向にドラッグでき、双方を独立スクロール可能。「次の発言」を「メッセージ」に統一し、キーボードを③、手書きを④にした。異常終了時の注釈破棄確認は終了警告内からも届く位置に置き、二段階確認を維持。全263テスト、debug/releaseビルド、diffチェック成功。隔離データで標準80%、小画面160%の表・拡張状態・添付ゼロを実描画確認。実マウスでのドラッグ、実ファイル・音声・ペン、利用者受入、今回GitHub CIは未確認。既存の未コミット変更を保持。ログ `chat-media-table-*-delivery.log`、画像 `chat-media-table-delivery-*.png`。
-
-- CHAT-MEDIA-EXIT-001 実装・ローカル検証完了：未送信の録音・原文・手書きがある状態でアプリを閉じると、単に添付ダイアログを再表示する代わりに、先頭に「作業を続ける」「破棄して終了」と録音・注釈の退避操作を示す。明示破棄時のみ一時的な媒体を消し、保存済みの下書き・添付・学習記録は維持する。手書き中はキー入力欄を隠し、筆跡操作と描画領域だけを示す。ダイアログをファイル・音声・手書きの番号付き案内へ整理し、倍率を二重適用しない寸法計算に変更。全262テスト、debug/releaseビルド、diffチェック成功。隔離データで標準80%と小画面160%の実描画確認済み。ネイティブのウィンドウ終了操作、実マイク・ペン、利用者受入、今回GitHub CIは未確認。既存の未コミット変更を保持した。ログ `chat-media-ux-final-tests.log` / `chat-media-release-build.log`、画像 `chat-media-final-*.png`。
-
-- ENGLISH-CHAT-DROP-001 実装・ローカル検証完了：英語チャットでファイルをドラッグ＆ドロップすると、対象の会話名とファイル名を示す確認ダイアログを開き、確定後に次の発言の下書きへ添付する。確認前は保存しない。入力欄へのドラッグ中は枠と案内を表示。8件上限、処理中・会話切替、パスのないドロップを保護し、テキスト本文のCodex送信許可は送信時に別途求める。全258テスト、debug/releaseビルド、diffチェック成功。隔離データで標準80%と小画面160%の確認画面を実描画確認し、独立レビューの重大指摘なし。実際のWindows Explorerからのドロップ・利用者受入・今回GitHub CIは未確認。既存の未コミット変更は保持した。ログ `chat-drop-final-tests.log` / `chat-drop-final-debug.log` / `chat-drop-final-release.log`、画像 `chat-drop-confirm-final-standard.png` / `chat-drop-confirm-final-small.png`。
-
-- ENGLISH-CHAT-UI-001 添付・配置追補の実装とローカル検証完了：発言内に画像・音声・ファイル名付き添付を表示し、画像は表示、WAVは共通読み上げパネルで再生、テキストファイルは本文表示、非テキストは非表示にした。汎用ファイル添付は原本を保持し、テキスト本文のCodex送信はファイル名を示す発言ごとの確認後だけ行う。その他メニューの書体、操作ボタン余白、左ごみ箱の下部固定、吹き出し右端、サイドバー省略、小窓の履歴初期位置と操作列幅も修正した。全253テスト、debug/releaseビルド、diffチェック成功。隔離データの標準80%添付画面、小窓160%添付画面、送信確認ダイアログを目視確認した。独立レビューの同意経路テスト指摘は回帰試験で対応済み。実ファイル選択・実WAV出力・実Codex送信・利用者受入・今回GitHub CIは未確認。教材・学習記録は変更せず、既存の未コミット変更を保持。ログ `chat-attachment-all-tests-delivery.log` / `chat-attachment-release-delivery.log`、画像 `chat-attachments-final-standard.png` / `chat-attachments-final-narrow-action.png` / `chat-file-consent-final.png`。
-
-- ENGLISH-CHAT-UI-001最終受入修正完了：会話カードを本文高に追従させ、最初の発言が履歴領域の高さまで伸びる問題を修正した。読み上げは初期音量50%とし、利用者が変更した音量・リピート設定を次回表示にも復元する。一時停止アイコンの中央揃え、閉じるボタンの縮小、ダイアログ本文・操作の可読性、語彙数値欄と教材操作の横余白・狭幅配置も修正。「会話を削除…」は後続確認を表す省略記号だったが、意図が即読できる「会話の削除を確認」へ変更した。全240テスト、releaseビルド、diffチェック成功。標準80%のチャット/読み上げ/ダイアログ/語彙/教材と、小画面160%の読み上げ/語彙を隔離描画確認。独立監査の重大指摘なし。既存の未使用メソッド警告2件あり。実音声、利用者受入、今回GitHub CIは未確認。未コミット。次は学習の記録画面である。ログ `chat-acceptance-followup-all-tests.log` / `chat-acceptance-followup-release.log`、画像 `chat-acceptance-followup-*.png`。
-
-- ENGLISH-CHAT-UI-001受入修正完了：全ダイアログがContext共通の本文19pt・ボタン18pt・見出し24ptを継承するようにし、通知専用の既受入書体は維持した。チャットタイトルを1〜100文字で変更でき、利用者が付けたタイトルは後続AI応答で上書きしない。各発言は従来どおり選択可能で、その下のコピーアイコンから当該発言だけをコピーできる。読み上げパネルは標準幅で操作1行＋再生位置1行（110〜145論理px）、速度欄76論理pxへ縮小し、小画面は全操作を保って折り返す。全236テスト、releaseビルド、diffチェック成功。標準80%のチャット/タイトル変更と、標準80%・小画面160%の読み上げパネルを隔離描画確認。実クリップボード貼付、実音声、利用者受入、今回GitHub CIは未確認。未コミット。次は学習の記録画面である。ログ `chat-feedback-all-tests-final.log` / `chat-feedback-release.log`、画像 `chat-feedback-*.png` / `playback-feedback-*.png`。
-
-- ENGLISH-CHAT-UI-001実装・ローカル検証完了：会話一覧、会話なし/空/履歴あり/応答待ち、提案カード、入力欄をWordWeave共通UIへ更新した。下書き・添付・音声・手書き・会話削除・教材案の既存経路を維持し、提案カードは下書きへ入れるだけで自動送信・教材登録を行わない。標準1150×950・80%と小画面820×650・160%を隔離データで実描画確認。全230テスト、releaseビルド、diffチェック成功。独立レビューの必須指摘なし。実Codex応答、実IME・マイク・ペン、利用者受入、今回GitHub CIは未確認。未コミット。次は学習の記録画面である。ログ `chat-cargo-test-final.log` / `chat-release-build-final.log`、画像 `chat-after-*.png`。
-
-- VOCABULARY-FILE-HELP-001追補：Word/Headword/Lemmaはどれを列名にしてもよく、公開語彙ファイルごとの列名の違いに対応して変更せず利用しやすくするための3種類である、と説明を追加。全228テスト、focused 5件、debug/release、diffチェック成功。標準80%・小画面160%の隔離描画確認済み。既存警告3件、未コミット。
-
-- VOCABULARY-FILE-HELP-001実装・ローカル検証完了：②・③に「先に④へ候補保存→教材生成・登録」「教材登録エラー後も④から1語を再実行可能」を明記。③の見出しを「ファイルの書き方」とし、列名/TXT/Headword CSV/Lemma TSV/完成教材TSVを小見出し・説明・例示枠へ分割。全228テスト、最終focused 5件、release、diffチェック成功。隔離Windows描画を標準80%・小画面160%で確認。既存警告3件。実データのファイル選択・利用者受入・GitHub CIは未確認、未コミット。ログ/画像 vocabulary-file-help-*。
-
-- 上記語彙追補の検証：全対象テスト成功、releaseビルド成功（既存警告3件）、diffチェック成功。起動中debug版によるファイルロックは利用者の終了後に解消。未処理語保持の画面テストを更新した。実画面・実Codex生成・GitHub CIは未確認。使用量の開始値欠測、未コミット。
-
-- 語彙追加の追補：保存成功後だけ、この起動中の登録語一覧へ追加する表示とコピーを追加。未処理先頭語を表示。Headword/LemmaのCSV・TSV例と、原形の自動変換はしない旨を追加。利用者の実出力はbase=in、exampleに6例文のJSON文字列、examplesにも空欄あり。happyの出力ではない。生成側の修正・実Codex再試行は未実施。検証ログ vocabulary-results-*。
-
-- VOCABULARY-UI-001受入修正：①の選択上限/生成済み除外/未処理優先を説明。③にUTF-8 TXT/CSV例、列名の意味、単語リストと完成教材TSVの違いを追加。④を独立表示し、検索対象/部分一致/件数を明記。100語制限を解除して仮想リスト化、高さ280〜320論理px・左寄せ全幅行・枠付き検索欄・常時スクロールバーを適用。全227テスト、debug/release、diffチェック成功。Windows隔離プレビューで④の標準80%/小画面160%を確認。EXE更新済み、既存警告3件、未コミット。ログ vocabulary-feedback-delivery-* / vocabulary-feedback-release.log。
-- 生成エラーは調査継続：穴埋め用exampleの「___が1個」検査で停止。内部TSVの2行目であり、入力語リストの2行目ではない。成功語は1語ずつ保存、失敗語と後続はキューに保持。①の残キューが②のhappyより先に再試行されるため、実際の失敗語は未確定。利用者へ「メニュー→実行記録→時刻の行→本文をコピー」を案内済み。返答のbase/example確認待ち。生成プロンプト・検査条件・保存処理は今回変更していない。実Codex再生成/CIは未実施。
-
-- 再生パネルは利用者受入済み。次のVOCABULARY-UI-001を実装中：語彙追加をNGSL/直接入力/ファイルの番号付きカードへ整理し、共通書体・大きい操作・狭幅縦配置を適用。登録処理・対応ファイル形式・保存形式は維持。保存済み候補は折りたたみで残す。検証ログ vocabulary-layout-*。
-
-- VOCABULARY-UI-001実装・ローカル検証完了：共通設定は数値入力、3つの追加方法は番号と色で識別、標準80%では全入口を1画面に配置。小画面は縦配置/スクロール。全225テスト、debug/release、diffチェック成功（既存警告3件）。3幅×空/通常/長い入力×生成中/待機で入力・教材・記録の保持と操作禁止を検証。Windows隔離画面の標準80%/小画面160%を確認。EXE更新済み。実Codex生成・ファイル選択の実操作・利用者受入・今回GitHub CIは未確認。未コミット。受入後は英語チャット画面。最新ログ vocabulary-layout-final-* と vocabulary-layout-release.log。
-
-- 再生パネル画像対応：丸形操作、音量0〜100%、速度0.5〜4倍、リピート、横長タイムライン、右上×を青系で実装。Windows MediaPlayerの同一音声ループを使用し、停止/閉じる/次の音声で解除。全224テストとdebug/release成功後、実描画で矢印の左右反転を発見して修正。最終再検証中（playback-redesign-delivery-*）。標準80%/小画面160%の模擬描画確認済み。実音声・今回CIは未確認。教材/学習記録の保存変更なし、未コミット。
-
-- 上記の最終再検証完了：矢印修正後の全224テスト、debug/releaseビルド、diffチェック成功。最終Windows模擬描画も標準80%/小画面160%で確認した。target/release/wordweave5.exeを更新済み。既存未使用コード警告3件。実音声による終端リピート・音量・速度の受入とGitHub CIは未確認。最新ログ playback-redesign-delivery-*、最終画像 playback-redesign-final-*。
-
-- 読み上げパネル再調整完了：状態文字を削除。5秒戻る/再生・一時停止/停止（先頭へ）/5秒進むを維持し、最後にクリックした停止以外のボタンだけ選択表示。停止・次の読み上げ開始・閉じる成功時に解除。切替ボタンを固定幅112論理pxとし、右上×で停止して閉じる。状態表示専用の前回音声エンジン変更は除去。全223テスト、debug/release、diffチェック成功。標準80%/小画面160%で選択表示・×の実描画を確認。EXE更新済み。実音声操作・利用者受入・今回CIは未確認。ログ speech-buttons-*。教材・学習記録の変更なし。
-
-- 読み上げパネルの閉じる/状態表示を修正：「停止して閉じる」は停止成功後のみ非表示にし、次の読み上げで再表示。停止操作をSpeakerに保持し、Windowsの一時停止状態と区別する。準備中/再生中/一時停止中/停止中/再生完了/待機中を表示。全222テスト、debug/releaseビルド、diffチェック成功。標準80%/小画面160%の模擬Windows描画確認済み。EXE更新済み。実音声での一連の操作・利用者受入・今回GitHub CIは未確認。ログ speech-close-*。教材/学習記録は非変更、未コミット。
-
-- 読み上げ操作パネルの追加指摘対応完了：対象は利用者画像で確定。本文19論理pt・ボタン高さ44論理px以上・余白を拡大し、操作/速度/位置を別行にした。通知ボタンと親行を30論理pxに統一。全220テスト、debug/releaseビルド、diffチェック成功。Windows隔離プレビューの標準80%/小画面160%で表示確認済み（音声再生なし）。EXE更新済み、実音声の操作・利用者受入・今回GitHub CIは未確認。ログ speech-panel-final-*。教材・学習記録の変更なし。以下の対象確認待ち・配布未更新は解消。
-
-- 操作パネル可読性・通知位置の追加指摘：操作パネルの対象（読み上げ/教材管理/その他）を利用者へ確認中。通知ボタンと親行を30論理pxに統一し、3倍率×通知有無の字面中央回帰テスト成功。ボタン単独の高さ変更では6px差が残ったため親行も修正。全対象テスト・最新debug/release・実描画は未完了、配布EXEは未更新。作業再開時は対象確認後にパネル修正とまとめて検証する。
-
-- 上記指摘対応の最終結果：releaseビルドも成功し、target/release/wordweave5.exeを更新済み。全218テスト成功、diffチェック成功。既存の未使用コード警告3件あり。以下の「実行中」はこの追記で解消。
-
-- MATERIALS-UI-001受入指摘対応：一覧/詳細の独立スクロールとドラッグ式幅調整を追加。一覧は左寄せ「語 — 意味」の1行（長文は省略・hoverで全文）、分類タグは詳細のみ、スクロールバーは余白付き。例文の展開見出しと読み上げボタンを44論理pxへ拡大。小画面では上部説明を省略して操作領域を確保。操作回帰を含む全218テスト、debugビルド、標準80%・小画面160%のWindows実描画確認済み。releaseビルドは実行中。今回GitHub CI・実データでの利用者受入は未確認。ログ materials-panes-verified-*、画像 materials-panes-final-*。未コミット、教材/学習記録は変更なし。
-
-- 学習完了画面は利用者受入済み。MATERIALS-UI-001：教材画面を共通書体・カード配色へ変更。検索欄を枠付きにし、一覧幅と高さを確保、選択中教材を青表示、詳細と既存操作を読みやすくした。狭幅は縦配置。検索3状態×画面幅3種で教材・学習記録の非変更を検証。全217テスト、debug/releaseビルド、diffチェック成功。標準80%・小画面160%・教材ゼロの実描画を確認。追加編集は縦スクロール下部。実データ受入・今回GitHub CIは未確認、未コミット。ログ `.context/compound-engineering/materials-ui-*`。受入後は語彙追加画面へ進む。
-
-- STUDY-COMPLETE-UI-001実装・ローカル検証完了：全216テスト、debug/releaseビルド、diffチェック成功。標準80%で終了画面全体をスクロールなし表示、小画面160%は縦スクロールの実描画を確認。終了理由3種・回答有無・3幅で学習記録非変更を検証。初回egui仮領域を実画面幅と比較していたテストを、実際の親領域との比較へ修正した。実データでの利用者受入・今回GitHub CIは未確認。未コミット。受入後は教材画面へ進む。
-
-- COMMON-UI-001の通知修正は利用者受入済み。次のSTUDY-COMPLETE-UI-001を実装中：学習完了画面をホームと共通の書体・カード・色へ統一し、終了理由、実績4種、振り返り、終了/継続を整理する。集計・採点・保存ロジックは維持する。学習完了の正常通知だけは重複ダイアログを開かず通知欄に保持する。ログは `.context/compound-engineering/study-complete-*`。
-
-- COMMON-UI-001 通知再修正：通知バーを隣のボタンの字面中央に合わせ、Windowタイトルも字面中央へ補正。フッターを先に実寸配置し、残りの白い本文領域を縦横伸縮させた。推定フッター高に起因する毎フレームの自動拡大を解消。80フレーム静止＋ドラッグ相当入力で拡大/縮小後各40フレーム安定の回帰テストを追加し、全215テスト・debug/releaseビルド・diffチェック成功。標準80%と小画面160%の実描画確認済み。利用者の実機受入は未確認。ログは `.context/compound-engineering/notice-resize-*`。
-
-- 通知書体・縦リサイズ修正：全214テストとdebugビルド成功、標準80%の通知実描画を確認。利用者の終了連絡後に `cargo build --release --locked --bin wordweave5` が成功し、target/release/wordweave5.exeを更新した（未使用警告3件）。実機でのリサイズドラッグは未確認。
-
-- COMMON-UI-001 通知追加調整：通知をステータスと共通のstatus_font（游ゴシックRegular優先・16pt）へ統一。従来の1.5pt加算を置き換え、本文・操作・ツールチップに適用した。詳細Windowを縦横リサイズ可能とし、本文スクロール領域を利用可能な高さに追従させた。画面に応じた最大幅・高さも指定した。今回ログは `.context/compound-engineering/notice-layout-*`。
-
-- 通知文字追加修正の検証：全214テスト、releaseビルド、diffチェック成功。標準80%の実描画で通知の文字と赤色を確認。ツールチップの実マウス操作は未確認。小画面160%では既存の詳細Window幅が画面幅を超える課題を確認（今回の字体変更とは分離して残す）。
-
-- COMMON-UI-001 追加受入修正：通知バー・通知ボタン・通知ツールチップ・詳細ダイアログの文字を各1.5 egui pt拡大（表示倍率は別途適用）。既知のCodex未検出、非同期処理エラー、保存障害を通知ボタンの赤色で識別する。通常通知へ変更された後は赤色を残さない。検証ログは `.context/compound-engineering/notification-font-*`。既存の他画面の文字サイズは変更しない。
-
-- COMMON-UI-001 最終検証：`cargo test --all-targets --locked` 全213件成功、`cargo build --release --locked --bin wordweave5` 成功（未使用警告3件）、`git diff --check` 成功。Windows隔離データで学習の入力/照合、教材、語彙追加、チャット空状態、記録、設定を撮影・確認し、最終の修正誘導は標準80%と小画面160%で対象欄が見えることを確認した。実Codex認証、実音声/IME/ペン、全ダイアログの手動操作は今回未検証。
-
-- COMMON-UI-001: 通常ボタン・選択項目・折りたたみ見出しを共通の字面中央揃えへ移行。ステータスは1行、通知はhover＋クリック詳細、保存障害と中断は別の可視領域。既知のCodexパスエラーではAI接続に絞った設定画面へ移動し、枠・説明・フォーカスで誘導する。案内を閉じると全設定へ戻る。回答・筆跡・学習セッションを保持し、接続テスト結果も学習中に受信する。UI Skillに再発防止を追記。未コミット、GitHub CI未実施。実機受入後、学習完了画面へ進む。最新検証ログは `.context/compound-engineering/common-ui-*`。
-
-- STUDY-ACTIVE-UI-001: 学習開始画面は利用者受入済み。学習中の操作・問題・入力・ヒント・照合結果をカード化し、時間説明をバー外へ、入力欄へ枠線を追加した。学習・採点・保存処理は維持。全209テスト成功、全技能の狭幅描画と回答/記録保持を追加検証。Windows標準80%・小画面160%を隔離データで確認。最後の変更は枠線幅1.0のf32明示のみで、その後release再ビルド成功。実IME/音声/ペン操作と利用者受入は未確認。未コミット、今回GitHub CI未実施。次は学習完了画面。ログは `.context/compound-engineering/study-active-*`。
-
-- STUDY-START-UI-001: ステータスの文字調整は利用者受入済み。次の学習開始画面をカード構成へ更新し、開始案内・実キューの候補数・設定中の技能・継続ヒントを表示した。「今日は2分だけ」と既存start/study_queueは維持。全208テスト、debug/releaseビルド成功。隔離データのWindows標準1150×950・80%で全体表示、小画面160%の描画と横はみ出しテストを確認。`.context/compound-engineering/study-start-*` が今回の検証記録。利用者受入・今回差分のGitHub CIは未実施、未コミット。次は学習中画面である。
-
-- ステータス追加修正: 游ゴシックRegular専用フォント・16 egui point・#5c6066へ変更。文字のmesh_boundsを区画の縦中央へ合わせ、長文1行省略・全文tooltipを維持した。他画面フォント変更なし。倍率4種類の回帰テスト追加、全207テスト・debug/releaseビルド成功。Windows実描画を標準80%と小画面160%で確認（`.context/compound-engineering/status-polish-*.png`）。利用者の読みやすさの受入は未確認。
-
-- HOME-INTEGRATION-001追記: 利用者の追加指定に従い、毎回の起動倍率を標準80%へ変更（前回倍率維持を置換）。初期クライアントサイズ1150×950論理px。通常ステータスを接続テスト結果 / サーバーから取得したモデル / effort / 動作方針の1行4区画、home_font 19へ変更。重要通知・中断操作は別枠を維持。小画面ではステータス横スクロール。全206テスト・debug/releaseビルド成功。実Windows標準サイズで全メニューとホーム全体がスクロールなしで表示され、小画面160%も確認した。OS別DPI倍率・実データ受入は未確認。ログは `.context/compound-engineering/home-status-*`。未コミット。
-
-- HOME-INTEGRATION-001: `codex/home-dashboard`（base `57eed80`）で承認済みホーム試作を本体へ組込み。実データの集計・既存学習開始へ接続し、共通ナビと倍率操作を追加した。新規設定80%、既存倍率は保持。現ソースで全206テスト、debug/releaseビルド成功。Windows実描画を隔離データで80%・小画面160%・空教材で取得（`.context/compound-engineering/home-production-*.png`）。標準・小画面は目視確認済み。実ユーザーデータでの受入、現変更のGitHub CIは未実施。変更は未コミット。次は学習開始画面であり、学習中・完了など残り画面は未改装である。以前からの未コミット変更は保持している。
-
-- 追記07:54 UTC: 利用者の明示承認によりPR #1をmainへmergeした（`57eed80`）。ローカルmainもfast-forward済み。既存の未コミット5項目は保持し、今回はcommitしていない。次はホーム本体組込みである。下記のマージ待ちはこの追記で解消した。PRのCI成功と、merge後mainへのpushで起動するCIの結果は別であり、後者は未確認。
-
-- WINDOWS-CI-001検証完了: 利用者はホーム試作の最終修正を受入れ、CI→ホーム本体組込み→他画面の順序を承認した。[PR #1](https://github.com/kazuh888/WordWeave5/pull/1) / `codex/windows-ci` / head `4640b6c` はWindows全198テスト・releaseビルド成功（[実行35573703481](https://github.com/kazuh888/WordWeave5/actions/runs/35573703481)、検証用merge `058c299`）。初回の診断相関テスト失敗は、共有ログから別runを選ぶ競合と再現し、テストの子プロセス隔離で修正した。本番コード・検査のassertは変更なし。2026-09-21 07:50 UTC時点でMERGEABLE/CLEAN・未対応指摘0、マージは未実施で利用者の方針確認待ちである。ホーム本体の編集は未開始。未コミット試作・Skill・計測記録は保護済み。下記の「push未実施」「受入未確認」は過去時点の記録である。
-
-- 最新受入/修正: サイズ変更は利用者受入済み。試作右上の倍率数値を削除し、指定説明文6か所をさらに1ポイント拡大、下部帯の2文を縦中央揃えした。10件成功・debugビルド成功、標準80％/小画面160％の実描画確認済み。同名EXEを更新した。今回の文字修正の利用者受入は未確認。本体・CI・実データは変更していない。
-
-- アプリは0.6.0。ホームの独立試作は本体から分離しており、本体実装・依存関係・利用者データを変更していない。CI確認のため本体EXEは同一ソースで再ビルドした。
-- UX変更は `8c3d7cb` に統合済み。以前の自動検証は198件成功・releaseビルド成功である。[検証範囲](../validation/ux-0.6.0.md)。これは今回の再実行結果ではない。
-- 未完了は保全済み実記録の更新/再起動/復元、学習一巡、実IME・マイク・ペン・TTS・実Codex、小画面の実機受入である。[受入手順](../UPGRADE-0.6.0.md)。自動試験の成功で代用しない。
-- 開発の入口は [AGENTS.md](../AGENTS.md)。次の新規タスクには目的・範囲・完了条件だけを渡す。[依頼例と設定上の制約](../docs/development-requests.md)。
-- 過去の開発経緯が必要な場合だけ [tasks/todo.md](todo.md) や対象バージョンの設計/検証を参照する。
-- ホーム試作は `.context/compound-engineering/ce-prototype/2026-09-21-home/`。全体外観の肯定評価後、ナビゲーションと学習開始ボタンの日本語文字の中央揃えを修正した。6件のテスト、debugビルド、通常幅/小画面の実描画確認は成功し、同フォルダーの独立EXEを更新した。文字位置修正後の利用者受入と本体への採用は未完了である。承認済みのGit除外配下のため、試作自体はcommit/push・CIの対象外である。
-- [使用量記録 HOME-PREVIEW-001](../docs/process/improvement/measurements.md) を追加した。親子のカウンターは包含関係が不明なため別掲し、最終報告前までの測定である。削減率は未判定である。
-- [Windows CI](../docs/process/improvement/windows-ci.md) を既存workflowへ設定した。今回のローカル実行は本体198件成功・releaseビルド成功（未使用メソッドの警告2件）。push後のGitHub実行と必須チェック設定は未確認である。全体整形は利用者の選択により別作業とした。Issue/PR作成・pushは行っていない。
-- [wordweave-egui-ui](../.agents/skills/wordweave-egui-ui/SKILL.md) を追加した。日本語字面の中央揃え、カードのレイアウト継承、小画面、実描画検証の注意点を局所的にまとめ、構文検証と限定した適用シナリオ確認を実施した。
-- 追記: 文字位置修正は利用者受入済み。試作の倍率メニューへ50・60・70％を追加し、全7倍率の文字位置と縮小時の横幅を含む6件成功・ビルド成功。1320×980で各縮小倍率の画像を保存して確認し、同名EXEを更新した。縮小表示の利用者受入と本体採用は未完了である。本体/CIは今回変更・再実行していない。
-- 最新: 利用者の確認後、初期/標準倍率を80％へ変更した。右上「大100％・標準80％・小60％」、Ctrl＋ホイール・＋/＝/－、Ctrl＋0（80％）を追加し、範囲50～160％とした。赤枠のナビゲーション/語彙見出し/復習注記だけ1ポイント拡大した。試作9件成功・debugビルド成功、標準80％と狭幅160％の実描画確認済み。同名EXEを更新し、実機のCtrl操作・最新仕様の利用者受入を待つ。本体/CIの変更・実行はなし。
+今回の整理は作業用要約から廃案・重複ログ・無関係な履歴・設計本文の転載を除外したものである。根拠資料と旧記録は削除していない。旧版はインデックスに残すが通常再開時には読み込まない。

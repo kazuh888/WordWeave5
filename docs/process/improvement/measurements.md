@@ -1,5 +1,99 @@
 # 開発タスクの使用量記録
 
+## ACOUSTIC-HISTORY-001 実装再開（2026-10-07）
+
+- 2026-10-11 P完了後のcheckpoint/続行開始。利用者が適度なpushと後続実装を承認。親は既存開発ブランチへの保存checkpointを作成し、designer main_consumer_design（既定Astra/high）が非交差read-onlyでI2b-Aを照合する。検証済み小単位完了時と長い中断前をpushの目安とし、未完了checkpointと製品releaseを区別する。開始counter/runtime metadata/親子包含は未取得、推計なし。
+
+- 2026-10-11 P最終Post結果。pointer_post_review（指定Astra/high）が本体P01–08・22oracle・原stdout/jobsを独立確認し、269対象の重複0/欠落0、現物25hash一致、baseline逆除去一致を確認。受入阻止0でP限定PASS/Closedとした。親は計画P/current/indexへ完了を反映し、1の範囲を終了する。成功suiteの再実行・source変更なし。初回4失敗/環境比較/再開と欠測を保持する。code-review Skillの五軸と保存整合性確認を適用、read-only制約によりmutation実行は行わず既存RED→GREENと区別した。最終応答前までの開始/終了counter/runtime metadata/親子包含は未取得、消費や削減量を推計しない。製品EXE/I10/nativeは未完了のままである。
+
+- 2026-10-11 P最終Post再開。利用者のAstra/high切替連絡を受け、指定pointer_post_reviewへP限定本体/oracle/269件の独立成功証拠を渡した。reviewerはread-only、親は進捗と完了記録を担当する。成功済みsuiteの反復を行わず、初回失敗/比較/再開を区別して照合する。完了境界は1保存確定処理の最終判定まで、後続2/I10は含めない。開始counter/runtime metadata/親子包含は未取得、推計なし。
+
+- 2026-10-11 P独立runner再開2結果。18:57:43–19:05:38 JSTに非管理者sandbox外で14suite/194PASS、0FAIL/0ignored/timeout0/未実行0。回復34件は426.754秒、事前900秒内。親も結果JSONの194件・名前一致・全exit0を集約確認した。16source/9EXE前後一致、各suite fixture/process0、空ownedroot削除。初回75PASSと合わせ関連269件が成功し、成功75を反復せずbuildを再利用した。単一環境連続実行とは称さず、初回4FAILと診断ログを保持する。次のAstra/high最終Post前で停止、P完了判定は未了。終了counter/runtime metadata/親子包含は未取得、節約量の推計なし。
+
+- 2026-10-11 P独立runner再開2。利用者のSol/medium切替連絡を受け、指定pointer_runner_resumeへ失敗4＋未実行190の194件だけを渡した。固定EXEと非管理者sandbox外条件、元jobsの対象/上限、元失敗の保存を継承する。親は記録/参照整合のみ所有し、本体/期待値編集や成功済み75件の重複実行を行わない。完了境界は独立回帰まで、Astra/high最終Post前で停止する。開始counter/runtime metadata/親子包含は未取得、推計なし。
+
+- 2026-10-11 P失敗診断再開。利用者のAstra/high切替連絡後、親が固定EXEで4件だけをsandbox内再現（4FAIL）と非管理者sandbox外比較（4PASS）した。16source/9EXE前後不変、専用root残存0/process0。pointer_failure_review（既定Astra/high）はsource経路と比較証拠を独立確認する。Gの失敗syscallは未特定として保持し、環境比較を新たな製品修正や期待値緩和へ置換しない。絶対開始終了時刻・開始終了counter/runtime metadata/親子包含は未取得、各実行所要秒は結果JSONに保存。残194の独立runner再開前にモデル切替を通知する。
+
+- 同日のP独立実行結果。listで269件を固定、最初のstore79件は21.018秒で75PASS/4FAIL/0ignored、exit101/timeout0。新P18成功、junction作成OS5のfixture失敗3件とG子caseのpublish Io1件を分離し、残190件を未実行として停止した。16source/9EXEの前後hash一致、同shell専用root前後0/対象process0。再build/期待値変更/安易な再試行なし。既存Gの非管理者sandbox外成功との差は診断材料であり、今回の根本原因は未確定。利用者指定に従いAstra/high診断へ移る前で停止する。終了counter/runtime metadata/親子包含は未取得、節約量推計なし。
+
+- 2026-10-11 I2a-P独立実行再開。利用者の切替連絡を受け、指定ww-test-runner/gpt-6.1-sol/mediumのpointer_runnerへ固定16source/9EXEと関連対象を引き渡した。親は記録・参照整合を担当し、runnerは新ログ実行と合成tempだけ所有する。完了境界は関連回帰の独立実行までで、Astra/high最終Postへ移る前に停止する。開始counter/runtime metadata/親子包含は未取得、推計なし。既存buildを再利用し、実装者が未実行の旧関連回帰を今回確認する。
+
+- 2026-10-11 I2a-P切替前停止。本体固定後の集約no-runは215.173秒で成功し9EXEを固定、新lib18件13.11秒/public4件0.97秒がすべてPASS。Astra/highの独立reviewerが静的本体と実行証拠を確認し阻止0、16source/9EXE hash一致。固定EXEを後続へ渡し、旧関連回帰は実装者が重複実行しない。debugging手順により初回fixture不成立と行動REDを分離し、診断以外の期待値を維持した。利用者指定どおりSol/medium独立runner前で停止、最終Post/1全体完了は未了。開始・終了counter/runtime metadata/親子包含は未取得であり、使用量や節約量を推計しない。
+
+- 2026-10-11 I2a-P限定再開。利用者がモデル/effort変更後に1の実施を承認し、次のモデル切替前停止を指定した。新22件のimport限定訂正後（store E9F28165…91F6FD9）の再compile/REDから開始する。作者/実装/reviewerは既定Astra/high、独立runner Sol/mediumへ移る前に停止する。開始counter・runtime metadata・親子包含は未取得であり、推計なし。未完了の1と2以降/製品EXE未更新を区別する。
+
+- 同再開のRED確認：lib-only compile154.403秒成功、内部18件は17行動RED＋1fixture不成立。normal worker実Errを失わない診断5行だけを追加し再build74.341秒・当1件診断、日別atomicのerror5を確認した。同EXE/sourceのworkspace一時root比較でnormal成功後pointer固定Ioに到達し、その1件もRED。公開4もRED、異なる22件を独立reviewerが確認し本体着手。成功経路/期待値を変えず、旧全回帰は反復していない。初回TEMPがcommandごと別rootで集合差を取得できていなかった点は欠測へ訂正し、その後は同shellで計測。診断・環境差の実時間とlogsは試験記録に残す。使用量counter/runtime metadata/包含は未取得のままである。
+
+- 2026-10-08 16:37頃のP再開観測。正本差分の旧1段落を受領し、独立reviewerがメモリ上で旧SHA復元一致を確認して最終Pre PASS。最小未接続scaffoldは既存全文/旧test不変・fmt/diff成功、単独cargoを省き作者testとの集約compileへ渡した。b-Aは非交差read-only設計照合のみで、新API/追加設計書不要と判定した。開始counter・実行metadata・親子包含は未取得であり推計しない。Pの行動検証/本体/製品提供はまだ未完了、利用者確認待ちはない。
+
+- 2026-10-08 V最終Post観測。V08当caseだけのfixture訂正を独立静的確認後、lib-only build94.432秒でaffected30件成功。無変更integrationの自己再build/再実行は省き、固定3EXEをSol/medium runnerが独立新規101件実行して全成功（recovery34/324.76秒、outer900秒内）。Astra/high reviewerが8hash前後/現物一致・P2後段到達を確認しClosed。TEMPの先行曖昧表現は親照会でww*全体558→558/集合差0、関連3prefix各0→0と区別し訂正した。初回timeout/fixture失敗は保持し基準を緩めない。P正本統合へ継続、counter/runtime metadata/包含・節約量は未取得で推計なし。
+
+- 2026-10-08 V本実装の初回観測。固定後build2m56s成功、自己101件100PASS/1FAIL、旧82は全成功（recovery34/318.51s、15分outer内、temp0）。新V08の8MiB+1をdisk Progressへ設定するfixtureが既存型validateで拒否され、confirm未到達であった。独立reviewerが先行静的見逃しをP2と認め、合法disk head保持＋公開token.nextのみ超過とする作者限定訂正へ返した。厳密LimitExceeded/ledgerと本体を維持し、無変更integration EXEの再build/自己再実行を避け、静的解消後libだけ確認する。失敗/未到達証拠は保持、品質基準は緩めない。counter/runtime metadata/包含は未取得、削減量は推計しない。
+
+- 2026-10-08 V独立RED実行の中間観測。compile1回3m06.5s成功、新19は固定Ioに対する行動RED、旧lib11/store37成功。旧recoveryは31成功後100k境界のcleanup中に今回作者のouter5分で中断し、未完了1/未実行2を残した。以前の許容20分watchdogを参照しなかった実行方法の不足である。独立reviewerが製品60秒/512MiB/性能基準とは別と確認し、固定EXE・未完了3件だけouter15分で再実行を認めた。旧log保持・自動延長なし・今回owned合成fixtureだけの後始末を条件にし、期待値/sourceは変更しない。未完了を成功へ計上しない。counter/runtime metadata/包含は未取得、時間節約の推計なし。
+
+- 2026-10-08 T最終Post観測。新T21は3PASS/18行動REDから全GREEN、正式M成功1件もseen2→12のREDからGREEN、旧124件は全維持した。試験build1回4m01.9s、本体固定後build1回4m20s、自己146/独立146件すべて成功。Sol/medium runnerの新ログをAstra/high reviewerが確認し最終Post Closed、15hash一致/temp0/fmt/diff成功。先行静的P2の誤oracle訂正はcompile前に完了し、本体後の期待値変更はない。V/P文書だけ非交差で準備し、T後V正本統合へ進める。実行metadata/counter/親子包含は未取得、節約量は推計しない。隙間fault未注入/I10/native/製品未完了は維持する。
+
+- 2026-10-08 T独立試験のcompile前観測。既定Astra/high作者が新21件と正式M成功配列1件を固定し、同reviewerが再入エラー分類の誤oracle1件を指摘した。作者がIo→Busyの1期待値だけ訂正し、静的解消/阻止0後にsource hashを固定して集約buildを開始した。旧124件は保持する。並行は非交差のV/P設計文書だけで、confirm共有の予備静的PASSとBusy説明訂正まで。runtime/fixture成立・行動RED/GREENはまだ未確認である。counter/実行metadata/包含は未取得、削減量は推計しない。品質基準・親モデル・公開権限は変更せず、利用者確認待ちはない。
+
+- 2026-10-08 14:13 +09:00 R最終Post観測。新R25は2PASS/23行動REDから全GREEN、指定Sol/medium runnerの独立125件/0FAIL/0ignored・16hash一致/temp0をAstra/high reviewerが確認しClosed。先行P2の3補強も実行証拠で閉鎖した。本体build中に最終補強が入りrustc開始との順序根拠が不足したため、初回3m14sログを保持し、source固定後の再build3m13sから生成した6EXEだけを根拠にした。今後は固定/hash後にcargo起動し、build中の追加編集を行わない。環境やharnessの変更はしていない。T正本統合へ継続、Vは非交差文書の予備静的PASSまで。counter/runtime metadata/包含・節約量は未取得で推計なし。機能全体/I10未完了、利用者確認待ちなし。
+
+- 2026-10-08 R独立試験準備の中間観測。新25件/旧100件を固定後、先行静的レビューでoracle不足3点（M後pending改変block、交絡のないduplicate、同hash異bytes権限）を検出した。初回compileも新test import2原因/7diagnosticsで失敗し、行動REDに数えず保持した。作者が既定範囲だけ補強し、再compile前にreviewerが静的解消/阻止0を確認した。再buildの手戻りを減らすため確認順序を寄せたが、品質基準・役割・modelは変えていない。R作者/reviewerは既定Astra/high、counter/runtime metadata/包含は未取得。Tは予備静的PASSとplanner限定M oracle所有追補まで、source未着手である。
+
+- 2026-10-08 N最終Post観測。N03c限定訂正後lib74件成功、指定Sol/medium runnerが固定5EXEを新実行して独立100PASS/0FAIL/0ignored、11hash前後一致/temp0。Astra/high reviewerの最終Post PASSでNを閉鎖した。初回99/1と作者訂正を保持し、本体を変えずlibだけ再build、他26件の固定EXEを維持した。作者がsource/build所有を先に返し記録追記だけ続けることで、非交差の次担当実行を開始できた。削減時間/トークンは未測定で推計しない。R設計統合へ継続、実機確認待ちなし。
+
+- 2026-10-08 13:18 +09:00中間観測。N本実装の初回100件は99PASS/1FAIL、静的本体阻止0。日別I/O試験がreadのOS32をrenameにも固定し、実5で停止したため、独立reviewerと作者（既定Astra/high）が解除後同操作成功対照を加える限定oracle訂正へ返した。本体・他99件を変更せず失敗記録を保持し、libのみ再buildして未到達assertを検証する。品質gateを緩めず、固定integration EXEの余分な再buildを避ける。開始/終了counter・runtime metadata・包含関係は未取得。ユーザー確認待ちなし、実装全体は未完了である。
+
+- 2026-10-08 13:03 +09:00中間観測。Nの独立test作成で日別atomic実I/O失敗の安定した注入口不足が判明した。designer/reviewer（Astra/high）が単publisher署名維持・private二publisherの最小deltaを正本へ反映し限定Pre PASS、作者→実装者→作者の逐次所有で固定Err2口だけ追加した。既存N/旧81件は維持し、scaffoldだけのbuildはせず最終test群と一回に集約する。検査拒否をwrite I/O証拠へ読み替えず、OS/ACL/UAC変更も行わない。R文書は非交差で準備し予備静的PASS、本体はN Post後。counter/実行metadata/包含は未取得、削減量は推計しない。ユーザー確認待ちなし。
+
+- 2026-10-08 12:40 +09:00中間観測。S独立81件成功・最終Post PASSでClosed。初回80/1の失敗はf32のto_valueとwire経由Valueの経路差であり、reviewerと独立作者が全field exact wire＋float bit保持へ限定訂正した。本体を変えず当該4件だけ再build/実行、他77件のsource/test/EXE不変を確認して余分な再buildを避けた。最終runnerは固定4EXEを独立実行し81PASS・hash10対象/patch前後不変・TEMP0を確認した。N文書を先行準備し、本体はS Post後の統合/Preを待つ。初回失敗・手戻りを同taskへ記録、品質gate/実機受入は未変更。counter/runtime metadata/包含・節約量は未取得。ユーザー確認待ちなし。
+
+- 2026-10-08 12:26 +09:00中間観測。S scaffold後の旧62件は全成功。独立作者history_path_tests（Astra/high）がM指定oracleを21→25件へ改訂し新S15件を追加、集約compile1回と固定EXEで81件57PASS/24行動RED、fixture失敗0/ignored0/残存temp0を確認した。production/G/旧test不変をhash再構成で確認し、history_recovery_impl（Astra/high）へ本体だけ返した。後続N文書のreview再開はthread limitで2回不成立、作者完了後に同history_gate_review（Astra/high）で成立した。別モデルや自己承認へ置換せず、文書とsourceの非交差だけ並行する。counter/runtime metadata/親子包含は未取得。実機確認待ちなし。
+
+- 2026-10-08 12:07 +09:00再開観測。M独立Post完了を確認し、S限定Pre PASS・阻止0を受領した。親はplannerの限定4file/oracle移行を確定し、同history_recovery_impl（指定Astra/high）へ未接続scaffoldと旧62件維持を返した。実装完成前に独立期待値と行動REDを置く。親は現状/参照索引を同期、実機待ちなし。開始counter/runtime metadata/親子包含は未取得で推計しない。品質gate・親model・公開権限は変更しない。
+
+- 2026-10-08 11:58:52 +09:00中間観測。I2a-Mを独立Post PASSで閉鎖した。新21件は5PASS/16行動RED→全GREEN、独立runner history_gate_runner（Sol/medium）でM21/G24/旧17計62成功、共有違反32/後段assert/固定hash/残存0を確認した。M作者history_path_tests・実装history_recovery_impl・reviewer history_gate_reviewはAstra/high。初回独立reviewer再開がagent thread limitで不成立だったため、並行designerの完了後に同じ割当で再開し、別modelへ切替えなかった。M自己・独立の3EXEを固定して余分なbuildを避け、変更のないwriter/recoveryの100,000件回帰は独立reviewの影響判定で反復しなかった。SではM oracleのwire/runtime変更をplanner history_progress_plan（Astra/high）が限定4fileへ割り当て、期待値の黙示緩和を避ける。全体未完了・実機確認待ちなし。counter/runtime metadata/包含・節約量は未取得で推計しない。
+- 2026-10-08 11:22:32 +09:00中間観測。I2a-Gを独立Post PASSで閉鎖した。新24件は4PASS/20行動RED→全GREEN、独立runner history_gate_runner（Sol/medium）が新24/旧88計112件成功、固定source/test/EXE hashと残存temp0を確認。実装history_recovery_impl、review history_gate_reviewは指定Astra/high。新buildは実装者の集約1回、独立runnerはその固定4EXEを新ログで再実行した。後続M文書の独立確認では旧形式保存への不要な旧source検査の回帰を検出し、designer訂正→delta解消判定を得た。M本体未着手、G完了後の正本統合/Preへ進む。安全なsource実装と後続文書だけの並行を用い、品質gate/モデル/上限を緩めていない。counter/実行metadata/包含・削減量は未取得。実機確認依頼はまだなく、10分timerは開始していない。
+- 2026-10-08 11:02:44 +09:00再開観測。利用上限による中断後、利用者の再開指示でI2a-G独立test作成/compile/REDを同じhistory_path_tests（指定Astra/high）へ戻した。中断前のbuild結果を先に確認し、重複起動しない。I2a-0は既に独立Post PASSで再試験せず、G本実装は独立RED受領後とする。並行のhistory_commit_design（指定Astra/high）は後続Mの限定文書だけを所有し、固定G正本/sourceへ触れない。親は統合・進捗を担当。完了境界/品質gate/親モデルを変更せず、実機確認待ちはない。中断時間を作業時間へ算入しない。開始counter/実行metadata/親子包含は未取得で推計しない。
+- 2026-10-08 06:57:45 +09:00に利用者の順次実装指示でI1b-2bへ再開。完了境界は承認済み全機能だが、小単位の保存回復→I2以降を既存独立gate順で進める。確認依頼後10分無応答なら非依存作業へ進む指示を記録し、合格や権限へ読み替えない。既存設計/モデル割当を再利用、test author history_recovery_testsは指定Astra/high。親は4source/既存testのbyte snapshot、API/接合/進捗記録を担当。開始counter/runtime metadata/親子包含は未取得、推計なし。
+- 再開中の役割追加：I1b-2b本体scaffoldのhistory_recovery_implとI2準備設計history_commit_designは既定Astra/high。新testとsourceの非交差で2補助を短時間並行し、scaffold compile成功後は実装担当をRED待ちに止めた。次は独立test作成とI2文書だけの設計を並行する。I2本体は先行Postまで開始しない。親は既存全writer呼出し/参照境界・進捗を統合する。compile失敗は行動REDへ数えず、待機を完了にしない。
+- 2026-10-08 07:18:00 +09:00中間観測。独立32件は3PASS/29行動REDから本実装後32GREEN、writer37/reader37+ignored1も自己実行成功。本体/期待値/EXEを固定し独立レビューへ移した。I2設計では親がPublished偽造のintent束縛を補い、独立reviewer（history_commit_review、既定Astra/high）が教材pending root変更・設定export全writer漏れの2阻止を検出、設計だけ修正中。依存再buildが2回起きたため以降は一括--no-runから固定EXE直接実行へ集約、成功基準不変。削減量は未測定。counter/runtime metadata/親子包含は欠測を維持。
+- 2026-10-08 07:35:11 +09:00観測後にI1b-2b独立Post PASSを受領。不足した上限境界2件を独立作者history_recovery_boundary_tests(Astra/high)が補い、runner history_recovery_runner(Sol/medium)で34/37/37成功・ignored1、前後hash/cleanupを照合した。初回code判定の不足を隠さず同task手戻りとする。I2設計2指摘は訂正後PASS、planner history_commit_plan(Astra/high)が安全な移行順で逐次所有へ分割。I2a-0作者history_path_tests(Astra/high)はread-only PREP後、依存Postを待ってscaffold接合へ進める。役割間で固定EXEを再利用し、親は前snapshot/consumer/受入統合を担当。counter/runtime metadata/親子包含・削減量は未取得。
+
+- 2026-10-08 06:47:18 +09:00受入確認中の開始観測、06:50:37 +09:00最終応答前統合観測。利用者の新M1 GREENを受領し、source17件と最終unit/childの現物hash一致を確認した。既定Astra/highの継続reviewer `cancel_a1_fresh_review` が新外部証拠と固定M2本体/試験を限定照合し、A1とI5-Q1/M2をPost PASSと判定した。親は証拠・closure matrix・current/indexを同期した。コード/期待値/EXE変更・成功済み試験の再実行なし。M1待ち停止は解除、機能全体/製品EXEは未完了。counter/runtime metadata/親子包含は開始・終了とも未取得で推計しない。今回の確認は受入統合までで、次の実装単位は開始していない。
+
+- 2026-10-08 00:44:05 +09:00の最終応答前観測。A1は親が正常ACKの記録遅延による偽失敗を指摘し、設計§13→決定的RED→修正後focused29件→新しい独立安全review PASSを経た。最終runnerはfeature172件/no-default59件・fmt成功、残存ledger6→6・増分0。外部M1が必要な同一最終unit/childを固定し、その結果とPostまでは再build/Closedを止める。source本体を変更しないfixture補正とM2を区別し、旧cancel原因未確定も残す。担当は既定Astra/highの作者/設計/新reviewer、Sol/medium runner。開始/終了token counters・runtime metadata・親子包含は未取得、時間/費用削減の推計なし。製品EXE未更新・全体未完了である。
+
+- 21:56:47 +09:00に利用者の実装再開指示を受けM2へ着手。M2設計→独立gate→実装/回帰/レビュー、その後writer2ケースが今回の区切りである。plannerの既存I5割当を再利用しdesigner `praat_m2_design` はgpt-6-astra/high。親は既存証拠・snapshotを統合、親モデル変更なし。M1の改善機会を適用し、未追跡本体praat.rs/praat_protocol.rs/lib.rsの編集前byte一致snapshotをartifacts/m2-beforeへ保存した。start counters/runtime metadata/親子包含は未取得、推計しない。
+- 22:13:10 +09:00の中間観測。M2/W1とも独立Pre-gateの手順不整合を修正しPASS。reviewerは既定Astra/high、test author `praat_m2_tests` / `history_w1_tests` も計画指定Astra/high。解析crateとhost保存テストは所有非交差であるため、計画の最大2補助を適用し並行作成する。親は元source/test snapshot、gateとインデックスを統合する。新しい親/子モデル選択・上限・品質基準の変更なし。counter/実行metadata/親子包含は引き続き未取得。
+- 22:37:42 +09:00の中間観測。W1は37件・独立Post PASSでClosed。本体M2はRED→15 GREEN/静的阻止0だが、一括unitの子孫終了確認で失敗・fixtureの二重panicを検出しPost保留。新機能追加を停止して診断へ移った。runnerは指定Sol/medium、implementer/reviewer/designerはAstra/high。限定scout Terra/mediumはcapacityで起動失敗、別モデルへ黙って切替えず親がsourceを読みrisk判断を既定reviewerへ返した。失敗時source/EXE/child snapshotを保存した。単独再実行成功で一括失敗を消さない。counter/親子包含は欠測のままである。
+- 23:40:10 +09:00の中間観測。隔離CANCEL-D1は自己試験14件と共有fixture2case、再安全reviewを通過し、一回全unit82件成功（52.83秒/M1 filter1）。元cancel未再現だが別tree-exitの孫同定欠測/保持temp1件を記録し、M2は閉じない。安全reviewでseal競合とcleanup保持の不足を検出、設計追補→2件RED→修正GREENを残した。sandbox rename拒否は非管理者sandbox外で切り分け、OS設定/UAC/期限緩和なし。A1として原本fixture採用と欠測補完の設計へ移る。指定Astra/highのdesigner/test author/reviewer、Sol/medium runnerを継続。counter/runtime metadata/親子包含は未取得。観測機会は、PID単独ではなく所有handleのrole・creationと最初の失敗を記録すれば異常時の再調査範囲を狭められること。時間/費用の削減量は対照測定がなく主張しない。
+- 21:50:02 +09:00受入確認開始。利用者M1 GREEN受領、source/test/EXE/childの前回凍結hash一致を確認。継続reviewer `praat_m1_review`（既存gpt-6-astra/high）が不足していた外部oracleと現物hashだけを追加確認し、M1限定Post-gate PASS。21:51:27 +09:00の中間観測後、最終応答前にClosed/次の作業を記録した。コード・期待値・EXEは変更せず、成功済み回帰の再実行もなし。親子counter/実行metadata/包含は未取得、消費推計なし。ユーザー実行時hash等の未提示値は補わない。全体未完了・製品EXE更新なし。
+- 21:34:02 +09:00再開観測。利用者のM1修正前RED（外側Jobなし、残留・後始末を分離）受領によりM1限定実装へ進む。計画I5指定のimplementer `praat_m1_impl` はgpt-6-astra/high、親モデル変更なし。親は証拠統合を担当する。今回はM1修正・回帰・独立レビューまでが区切りであり、全体完成ではない。開始counter/実行metadata/親子包含関係は未取得、待機時間を実作業時間へ加算しない。
+- 21:45:26 +09:00の新EXE照合とその後の最終応答前統合：M1実装、独立runner53/20/59成功、独立コード確認阻止0。外部M1 GREEN待ちで全体未完了。runner `praat_m1_runner` はgpt-6.1-sol/medium、reviewer `praat_m1_review` はgpt-6-astra/high。固定コードの静的判定とOS実行検証に独立した確認効果があるため、この二補助だけ短時間並行した。通常sandbox event失敗はsandbox外成功との差を記録し、原因確定とはしない。公開targetによるchild再build後は最終実行入力が変わったため53件だけ再確認した。開始/終了token countersと実行metadata/親子包含は欠測のまま推定しない。未追跡sourceの限定diffが残らなかったため、今後は編集前snapshotの保存が改善候補である。恒久的harness/規則変更なし。
+- 再開後の開始観測12:40:05.3202555 +09:00。中断期間を実作業時間へ加算しない。承認済みの保存・解析・比較・二host実装と検証が完了境界であり、現時点では未完了である。
+- 保存されたI5a実装と独立テストを再利用した。親モデル変更なし。子`acoustic_contracts`（I5a実装検証）、`history_reader_impl`（I1b-1実装）、`praat_process_tests`（I5b独立テスト）は計画指定gpt-6-astra/high。同時補助は独立した保存系と解析系の最大2件に限定し、親がmanifest・export・記録を統合する。実行metadata・入力/cache/出力/推論の開始/終了counter・親子包含関係は未取得であり推定しない。
+- I5aは前回利用上限中断で完了記録が欠けていたため再検証し、31件と既存59件が成功した。既存テストや期待値を作り直していない。LF固定をscript1件だけへ追加し、別PCの改行設定によるhash不一致を防ぐ。全体設定・検証水準・公開権限は変更しない。
+- 13:20:18.1612202 +09:00までの中間観測。reader37件＋明示昇格1件、I5b53件が成功。権限依存1件の分離は利用者承認後に行い、新EXEで別実行成功を確認した。writer詳細設計のintent上限不一致を実装前に訂正、独立レビュー阻止0。I5c公開20件は1成功/19未実装RED。設計/テスト/実装の継続役はすべて計画指定Astra/high、親子counterは引き続き未取得である。全体実装の終了観測ではない。
+
+- 14:03:32 +09:00の中間終了観測ではwriter35件、抽出後reader37件/権限依存1件明示ignored、I5c公開20件成功。権限依存1件の過去の単独昇格成功を最新reader実行へ合算しない。独立レビューでwriter経路2ケースの証拠不足、I5親異常終了のP1とWAV差替え対策が残った。M1のPre-gateはPASSだが追加テストは外側Jobの前提不成立で止まり、行動RED未取得・本体未修正である。凍結EXEのhash一致を再確認し、再buildせずCodex外での限定実行を利用者へ依頼する。最終応答前までの記録であり、全体完了・製品EXE更新ではない。親子counterは未取得、消費量は推定しない。
+
+## ACOUSTIC-HISTORY-001 実装開始・I0実測（2026-10-04）
+
+- 開始観測08:52:54.4336750 +09:00（初期調査後）、統合観測09:04:41.3362803 +09:00（最終応答前）。基準HEADは設計段階と同じ。実装の完了境界はAH-AC01–18、本体/単独ツールの検証・releaseであるが、今回はI0資源条件の変更回答待ちまでで未完了。[実装経過](../../../tasks/ACOUSTIC-HISTORY-001/implementation-results.md)。
+- 親モデルは変更なし。子acoustic_plan/acoustic_design/acoustic_probeは指定gpt-6-astra/high。実行metadataと入力/cache/出力/推論counterの開始・終了・差分、親子包含関係は未取得。以前のcounterや文字数で補完しない。
+- 合成Praat検証で256MiB上限の60秒入力失敗を確認し、診断512MiB成功とpeak469,676,032 bytesを記録した。製品上限変更は利用者へ質問し、黙って緩和していない。診断launcherの短命processのsampling raceは終了確認で修正したが、製品のsuspended起動やbounded pipesの検証済みとはしない。
+- 既存本体の変更前に依存実測を行ったことで未実測上限の不成立を早期検出した。削減効果は未計測。設計追補とprocess検証だけを別所有で並行し、役割数に合わせた常駐agentは作っていない。本体未変更なので全体Cargo再buildは実施せず、今後の実装時gateは維持する。
+
+## ACOUSTIC-HISTORY-001 音響解析・原音保持・練習履歴の設計
+
+- 現行方式、基準HEAD `b077d6c4e6da5ed7cbbf10c967e3ea36a6dc172d`。開始2026-10-03 23:59:18.7415923 +09:00。完了境界は設計案・18ACの独立試験計画・レビュー・文書検査であり、実装/実API/実音声/EXE更新/公開は対象外。[結果](../../../tasks/ACOUSTIC-HISTORY-001/results.md)に最終応答前の終了時刻を記録する。
+- 親 `/root` のモデルは変更していない。子は `/root/acoustic_plan`、`acoustic_spec`、`acoustic_design`、`acoustic_tests`、`acoustic_review` が指定 `gpt-6-astra/high`、文書runner `acoustic_doccheck` が `gpt-6.1-sol/medium`。実行metadataは未取得であり起動指定と区別する。実装役は今回は非該当。
+- 入力/cache/出力/推論の開始値→終了値→差分、子の取得値と親子包含関係は未取得。消費量・削減率を文字数や所要時間から推定しない。
+- 手戻りは、親点検の取込音声の本人/日時・読上げ一致・破損時閲覧・部分解析の境界、独立レビューMedium2件（Praat不在の期待、ごみ箱容量oracle）とclose操作の質問である。[レビュー記録](../../../tasks/ACOUSTIC-HISTORY-001/review.md)に修正と判定を残す。
+- 初回test author起動は枠不足で拒否されたが、spec完了後に同じ指定で起動成功。モデル/検証基準は変更していない。既存保存の独立調査と仕様、仕様由来の受入ケースと内部設計だけを別所有ファイルで並行した。通常shellのACL初期化失敗は読取専用の承認経路で代替した。
+- 効率上の機会：文書のみの変更ではCargo再検証を行わず、レビュー修正後の文書だけ再点検する。既存設計の追補は6文書の短いリンク・境界説明に限定し、算出式/schemaを新設計へ一元化した。効果量は未計測。恒久的な設定・harness・モデル選定規則の変更はない。
+
 ## IGNORE-20261003 公開不要な生成物の除外
 
 - 2026-10-03 23:28:06 JST着手観測。ユーザー依頼は.gitignore更新までであり、新規commit/pushは含めない。nested Cargo target、taskログ/画像/差分/ハッシュ/runner manifest、ローカル検証専用ディレクトリと一時スクリプトを除外した。ファイル削除・既存追跡解除は行っていない。
