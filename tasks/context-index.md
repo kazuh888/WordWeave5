@@ -78,6 +78,7 @@
 | I2b-B独立42件・25行動RED/17PASS・fixture訂正と環境比較 | [独立テスト](ACOUSTIC-HISTORY-001/history-backup-tests.md) |
 | I2b-B本体接合・自己75件・世代/環境の証拠境界 | [実装記録](ACOUSTIC-HISTORY-001/history-backup-implementation.md) |
 | I2b-B最終固定4EXE・独立76件成功・初回setup失敗と限定再実行 | [独立runner](ACOUSTIC-HISTORY-001/history-backup-runner.md) |
+| I2d-H外部書出し先保護・同Mutexの外部guard・Windows同一性・予定rootとtemp保護（設計Pre PASS） | [設計§5追補](ACOUSTIC-HISTORY-001/design-i2.md)、[独立レビュー](ACOUSTIC-HISTORY-001/export-destination-review.md) |
 
 ソース入口：保存は `src/audio_history/`、共有履歴型は `tools/practice-history/`、音響解析は `tools/acoustic-analysis/`。生ログは各試験記録から辿る。要約へログ本文を複製しない。
 

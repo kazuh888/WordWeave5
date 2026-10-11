@@ -205,6 +205,111 @@ store.rsへ狭い共通宛先境界を置く。単一file用`write_external_file
 
 共通化するのは宛先の領域/alias検査だけである。backup v1の内容/closure検査や新規directory条件はbackup.rsに残す。現行reject_asset_destinationはこの共通Directory検査へ置き換え、assets限定の古い判定を並行正本にしない。Settings JSON/TSV/診断と未保存媒体の通常の外部出力は維持する。processの正本write-block中も、安全な外部宛先へメモリを退避する操作は許可する。この限定入口は正本を書けないため、write-blockの解除にはならない。JSON退避を音声原本込みの完全backupや新しい保存済み判定へ昇格しない。
 
+### I2d-H限定接合・実装handoff（2026-10-11）
+
+入力は承認済みAH-AC04/16、I2-T08/T08b、implementation.mdのd-H/B行とb-B Path bridge deltaである。b-B独立76件・最終Post PASS/Closedは親から受領した。本節はd-Hの内部契約だけを具体化し、独立Preの判定を代行しない。指定は`gpt-6-astra/high`、実行metadata・開始/終了usage counterは未取得である。現物照合HEADは`a0e97bb9b49b6875452805ab99a388497c0bd789`、SHA-256は`src/store.rs=516F5DA0E8C6CFDAB76BACAC9578BD477BBE85852A908534C2E5FCCB0F2C2EA9`、`src/backup.rs=12A20A9E5C509574B078A77C47E6B836A112A81EAAD0B8419CDC8E028DC84261`である。
+
+現物の不足は、通常gate取得が内部でwrite-blockを拒否すること、Storage::openのroot解決がopenから独立していないこと、atomic_writeが検査前に一時名を内部生成することの3点である。b-Bの`read_progress_for_backup`は再利用できる。d-Hの所有は本体`src/store.rs`と新`tests/progress_export_destination.rs`の最大2fileを維持する。private試験はstore内の新`cfg(test) mod i2_export_destination_tests`を作者→実装者へ逐次移譲する。backup/consumer/manifest/依存fileはd-Hで編集しない。
+
+#### H1. 取得口と型の境界
+
+次の加算的署名を固定する。`ExternalExportGuard`のfield/constructorはstore privateとし、Clone/Deref/内部guardの返却を設けない。MutexGuardにより同じthread内に寿命を限定する。
+
+```rust
+pub fn resolve_storage_root() -> Result<PathBuf, String>;
+pub fn write_external_file(root: &Path, dest: &Path, bytes: &[u8]) -> Result<(), String>;
+pub fn create_external_directory(root: &Path, dest: &Path) -> Result<(), String>;
+
+pub(crate) struct ExternalExportGuard { /* private ProgressWriteGuardを所有 */ }
+pub(crate) fn acquire_external_export() -> Result<ExternalExportGuard, ProgressGateError>;
+pub(crate) fn write_external_file_under_guard(
+    root: &Path, dest: &Path, bytes: &[u8], guard: &ExternalExportGuard,
+) -> Result<(), String>;
+pub(crate) fn create_external_directory_under_guard(
+    root: &Path, dest: &Path, guard: &ExternalExportGuard,
+) -> Result<PathBuf, String>;
+```
+
+`resolve_storage_root`は現在の`LOCALAPPDATA`のOsString取得→`WordWeave5`結合だけを抽出する。環境変数欠落時の既存日本語エラーを保持し、canonicalize/mkdir/app.lock/recover/gateは行わない。Storage::openは`Self::at(resolve_storage_root()?)`へ委譲するだけであり、Storage::atの契約は変更しない。実Storageがあるcallerは必ずそのdirを使う。Storage取得失敗時のcallerは同じ試行rootを保持するか同resolverを使用し、カスタムroot失敗を既定rootへ置換しない。環境が変更された場合も試行rootの保持を優先する。
+
+現在の取得処理から、再入検査→同じPROGRESS_WRITE.lock→同じthread-local設定→ProgressWriteGuard生成だけをprivate `acquire_progress_exclusion() -> Result<ProgressWriteGuard, ProgressGateError>`へ抽出する。既存`acquire_progress_write`はその後ensure_writableを従来どおり呼ぶ。新external取得口だけはensure_writableを呼ばずwrapperへ包む。poison/reentrant拒否、他threadの待機、Drop時のthread-local解除/poison保持は共有する。external tokenから正本writer用tokenへ変換する口、別Mutex、flag解除、lock中のアプリcallbackは追加しない。
+
+公開file/directory入口はexternal guardを1回取得して対応under_guardへ委譲する。under_guardは再lock/ensure_writableを行わず、全宛先検査を必ず実施する。directory版の返却値は検査・作成した解決済み絶対pathであり、公開版だけが`()`へ捨てる。複数file exportのcallerはunder_guardの返却pathを後続の基点に使い、元の相対/別drive表記へ戻さない。
+
+#### H2. Windowsの同一性と予定root
+
+store内private型は、`ExternalDestinationKind::{File, Directory}`、`FileIdentity { volume_serial: u64, file_id: [u8; 16] }`、`ProtectedRoot::{Existing, Planned}`、`CheckedExternalDestination`に限定する。Existingはroot identity/handle、Plannedは最寄り既存祖先identity/handleと未作成成分列を所有する。Checkedは元の絶対root/dest、解決済み親とleaf、祖先/親のidentity・handle、leafの`Absent | ExistingFile(identity, links)`、modeを保持する。型の値をcallerに構築させず、成功boolだけを後で別pathへ転用しない。bytesはcallerから借り、Progress/dirty/保存済み判定は所有しない。
+
+1. root/destを同じ取得済みcurrent_dir基準で絶対化する前に、入力のnamespace/成分を検査する。通常drive絶対path・UNC・相対pathと通常filesystemを示すverbatim drive/UNC/volume GUIDを扱い、drive-relative、device namespace、GLOBALROOT、NUL文字、drive区切り以外のcolon（ADS）、予約device名を拒否する。予約名は拡張子付きCON/NUL/COM等とWindowsの上付き数字も含む。末尾dot/space等で通常名と別解釈になり得る成分もUnsafePathとする。日本語はOsStr/UTF-16のまま扱い、lossy変換しない。
+2. `.`/`..`は既存祖先を順に確認してから整理する。先にcanonicalize/lexical collapseして`junction/..`を消し、入力にあったreparseを見落とさない。root/dest双方のすべての既存祖先とleafを`symlink_metadata`＋FILE_ATTRIBUTE_REPARSE_POINTで検査する。既存祖先はdirectory、file leafは通常fileでなければ拒否する。既存directory宛先は再利用しない。初回の確認済みNotFoundだけを不在とし、取得不明/観測後消失を不在へ変換しない。
+3. Windows handleをOPEN_EXISTING、FILE_READ_ATTRIBUTES、FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE、FILE_FLAG_OPEN_REPARSE_POINT（directoryはBACKUP_SEMANTICSも付加）で開く。特権を有効化しない。handleの属性/typeを再検査し、GetFileInformationByHandleEx(FileIdInfo)のvolume serial＋128-bit file IDを同一性とする。GetFileInformationByHandleのNumberOfLinksを使い、既存fileは1以外を拒否する。64-bit file indexへの縮小、metadata取得失敗時の文字比較へのfallbackはしない。handleはRAIIのFile/OwnedHandleで保有し、全終了経路で閉じる。
+4. GetFinalPathNameByHandleW(FILE_NAME_NORMALIZED | VOLUME_NAME_GUID)から解決済み親pathを得る。返却長を確認し必要容量で再取得する。元drive表記の祖先だけで止まらず、解決済み親からvolume rootまで各directoryを開いてidentity列を得る。既存rootのidentityがこの列にあれば保護配下として拒否する。これで大小文字・短縮名・同volumeの別drive表記を文字のprefix判定に依存せず処理する。GUID解決またはidentityが得られないfilesystem/共有/driverはIdentityUnavailableで拒否する。UNCへ表記を変えてこの失敗を迂回しない。GUIDのないnetwork shareの対応を完了とは主張しない。
+5. rootが不在の場合は、既存部分を同じ手順で開き、その最深祖先identityに未作成成分列を固定する。destの解決済み既存祖先列に同identityを照合してから、未作成名だけをWindows CompareStringOrdinal(TRUE)で成分比較する。これは存在しない名の予定領域比較であり、既存directory identity失敗のfallbackではない。API失敗は拒否、ASCII lowercase/文化依存比較は不可である。case-sensitive directoryでも予定名の大小文字だけの差は保護側へ倒す。短縮名が実在すれば既存handleで判定し、存在しない8.3名を推測生成しない。
+6. 両modeとも予定root自身/配下と、予定rootへ続く未作成祖先そのものへの出力を拒否する。例：root=`X:\safe\new\assets`が未作成、dest=`X:\safe\new`をDirectoryで許すとbackupのassets生成が予定rootへ侵入し、Fileで許すと予定directory成分がfileで塞がるためである。既存rootの場合はその祖先が既存directoryなので元の新規条件/型検査で拒否される。root=`X:\safe\new\assets`に対するdest=`X:\safe\other`や、root=`X:\safe\WordWeave5`に対する`WordWeave5-export`は許可する。dest親が不在ならmkdir_allせず拒否する。
+
+metadataの型/reparse判定は既存progress_metadataと同じ規則を再利用する。ただしreaderのStrict/AllowAbsent policyへexport用途を混ぜず、identity/予定root/再検査はexportのprivate helperへ置く。Windows以外は新export入口を未対応エラーにして、既存Storage/atomic_writeの他platform挙動は変更しない。Windows依存の機能追加が本単位の範囲である。
+
+既存Cargo.tomlのwindows 0.56.0はStorage/FileSystem featureを有効化していないが、新依存/feature変更は不要である。`src/assets.rs::sha256`やstore既存fixtureと同じ`#[link(name = "kernel32")] extern "system"`方式をstore内private Windows moduleに置ける。CreateFileW/GetFileInformationByHandleEx/GetFileInformationByHandle/GetFinalPathNameByHandleW/GetFileType/CompareStringOrdinalと必要なrepr(C)型だけを宣言し、構造体size/ABIとunsafeのbuffer・handle寿命を局所化する。FFIが実環境で未対応なら安全判定を緩めず親へ返す。
+
+#### H3. 検査・永続化の順序とエラー
+
+共通順序は、guard取得→prepare_external_destination（副作用なし）→内容はcallerで確定→recheck_external_destination→最初の作成、である。再検査は元pathと固定解決先の双方の祖先/親/leaf、rootまたは予定root既存祖先・不在成分を再観測する。identity/型/link数の差、AbsentからPresent、PresentからAbsent、root出現/移動をChangedとし、同じ操作内で新しい宛先へ再baseしない。再試行は新しい呼出しである。再検査終了後の敵対的TOCTOU完全防止、OS renameの電源断耐久性を追加保証しない。
+
+fileの書込先は固定解決親＋leafである。既存atomic_writeの順序（隣接tempのcreate_new→write_all→sync_all→close→rename、失敗時temp cleanup）を共有するが、tempも保護領域検査の対象にする。到達可能な衝突例は、カスタムroot=`X:\safe\note.tmp-<pid>-<stamp>`が未作成で、dest=`X:\safe\note.txt`の場合である。現在のwith_extensionによるtemp名が予定rootそのものになり得る。日時の一致が稀であることを安全性の根拠にしない。
+
+抽出はstore内private `atomic_temp_path(path: &Path) -> PathBuf`（現行命名をそのまま使用）と`atomic_write_with_temp(path: &Path, bytes: &[u8], temp: &Path) -> Result<(), String>`（現行I/O/cleanup本体）だけとする。公開atomic_writeは両者への委譲であり、gate/安全検査/新エラー分類を追加しない。外部file入口は同じ命名helperでtempを一度選び、同じ解決親であること、temp自身も保護領域外であること、既存tempなしを確認し、root/親/宛先leafの最終再検査を終えてから同じI/O本体へ渡す。直前拒否ではI/O本体/cleanupへ入らず、tempや既存destを作成・削除しない。既存tempの競合を自動削除してやり直さない。外部操作の実I/O開始後の失敗は元atomic契約であり、全bytes不変を事前拒否と同じ範囲で約束しない。
+
+directoryは最終再検査→固定解決pathにcreate_dirを一度行い、成功時そのPathBufを返す。再lockやcreate_dir_allは行わない。作成失敗を成功へ補正しない。後続file/markerの失敗で作成済みexport directoryや先行fileを自動削除せず、完了markerがない途中成果物として残す。sourceのProgress/pending/rootは変更しない。
+
+private `ExternalDestinationError`は`UnsafePath / ProtectedRoot / IdentityUnavailable / Io / Changed / AlreadyExists`を区別する。gateのPoisoned/Reentrantは既存messageを使う。境界で「安全な保存先を確認できない」「保存先が変更された」「別の外部保存先を選ぶ」等の日本語Stringへ変換し、path/本文/原音を含めない。OSエラー文字列のparseで分類しない。最初の固定順序の不合格を返し、分類はprivate試験、公開試験はErrとledgerで確認する。実atomic/create_dirエラーの従来String契約は維持する。どのexternalエラーも正本write-blockを新設/解除せず、pending回復・移行退避・保存済み判定を起動しない。
+
+#### H4. d-B/Mへの接合と同期区間
+
+d-Bはbackup.rs::export_with_limitsの通常gateを`acquire_external_export`へ置換し、その1つのguardを内容snapshot取得前から完了manifest書込まで保持する。`legacy_export_bytes_under_guard`のguard型をExternalExportGuardへ替え、ensure_writableだけを除く。candidate/disk history拒否、read_progress_for_backupによるstrict pending/版/構造/不存在の検査、v1 wire投影、deck/媒体/inventory/manifest上限はそのままである。preserve_current_progress/restore等の内部正本系のProgressWriteGuard/ensure_writableは変更しない。
+
+順序はexternal guard→全内容preflight→create_external_directory_under_guard→返却pathを媒体出力基点に設定→媒体→write_external_file_under_guard(custom.tsv)→同(progress.json)→同(learning-backup.json)最後、である。reject_asset_destinationを除き、public locking directory/file helperを入れ子に呼ばない。媒体AssetStoreの元検査/putと順序は維持し、外側directoryが予定rootの祖先でもないことをH2で保証する。d-Mのannotation一式も同じguard、返却path、各fileのunder_guard、完了marker最後を使用する。d-S/単一媒体fileは公開file wrapperで足りる。
+
+write-block中も安全な外部file退避、およびb-Bの内容条件を満たすbackup exportは成功できるが、pendingやhistory混入の内容拒否を迂回しない。guardは同期snapshot/出力区間だけに所有し、file picker/確認画面、解析、ネットワーク、worker完了待ちを含めない。guardをasync taskへ移動せず、取消callbackやtokenを新設しない。既存callerの取消し/遅延結果契約は維持する。d-H時点ではbackup/媒体のconsumer接続とI2-D2 Closedを主張しない。
+
+#### H5. 独立oracle・受入と引継ぎ
+
+| 受入 / 割当 | 独立作者が固定する入力と観測 |
+| --- | --- |
+| H01 / T08 / AC04・16 / store境界 | 手製root配下のprogress/custom.tsv/pending/app.lock/backups/assets/audio-historyと日本語sentinelの全file/dir ledgerを先に作る。既存file・新規file・既存root・配下新規directoryを各公開入口へ渡し、Err、既存bytes/dir集合不変、temp増分0を確認する。Progressの候補None/Bを安全判定の入力にしない |
+| H02 / T08 / Windows identity | root/dest両方の大小文字、既存成分を含む`.`/`..`、利用可能な8.3/別drive、祖先junction・leaf symlink、外部へのjunctionも拒否、外部hardlinkを独立fixtureにする。links>1は保護root外同士でも拒否する。ADS、device（拡張子/上付き数字）、曖昧末尾、directory-as-file、非既存親を拒否し、通常の日本語名を許す。alias生成成功を別OS handle/fixture情報で確認し、guard判定をoracleにしない |
+| H03 / T08・T08b / 予定root | rootの未作成1成分/複数成分、大小文字別表記、既存祖先alias、rootを内包するdirectory宛先拒否と兄弟directory成功を別caseにする。root不在を維持し、parent自動作成なし。解決rootが既定以外でも保護対象が変わらないこと、resolver単独のmkdir/lockなしを確認する。LOCALAPPDATA欠落/変更は子process内だけで扱う |
+| H04 / T08b / 通常成功・互換 | 外部新規file、通常1-link file置換、新規directory、似た名前の兄弟、空bytes/日本語bytesを公開入口で成功させexact bytesを確認する。公開atomic_writeの新規/置換/I/O失敗を抽出前契約と比較し、gate保持中の従来atomic_write成功も既存gate回帰で確認する。旧reader/pending/移行/backup bridgeのoracleを変更しない |
+| H05 / T08b / gate | store専用試験を有限timeoutの子processで実施する。通常guardのblock_writes後drop→external file/directory成功→通常acquireは引き続きWriteBlocked、poison時は両取得口拒否、通常→externalとexternal→通常/外部の同thread再入は即Reentrant、under_guard連続fileは成功とする。外部guardを保持中の別thread通常writerが開始せず、drop後に完了することをchannelで確認する。解除口/別Mutex/無期限waitを置かない |
+| H06 / T08 / 直前拒否 | private prepareでCheckedを得て、fixture側が親directory交換・leaf置換/消失・Absent leaf新設・hardlink追加・root出現を行った後、productionと同じ最終recheck/publishを呼ぶ。変更後ledgerを比較基準とし、export由来temp/bytes変更0を確認する。metadata/identity取得不能は実handle共有制限等で作り、安易なNone化を検出する。最後の再検査からOS作成までの敵対的競争を完全防止したとは扱わない |
+| H07 / T08 / temp保護 | private final-publishが受ける固定temp pathを使い、予定rootと同名temp、既存temp sentinel、通常tempの3対照を決定的に作る。禁止tempではI/O本体を呼ばず、root/既存temp/dest不変、通常tempではexact置換後tempなしを確認する。時刻の偶然一致や同一guard実装による期待値再計算へ依存しない |
+| d-B/M後続 / T08・T08b / AC16 | 同じexternal guardによるsnapshot→directory→子file→markerの順序、write-block中の適格backup成功、history/pending拒否、途中失敗のmarker欠損とsource不変をconsumer作者が確認する。d-Hのhelper成功をこの証拠で代用しない |
+
+private試験seamの署名は以下とする。Checkedのprivate fieldが`&'g ExternalExportGuard`を保持し、最終操作まで同じguardの生存を要求する。publish/createは対応modeを要求し、不一致はUnsafePathで拒否する。publishのtempは検査前の名前だけを受け、検証済みとして信用しない。
+
+```rust
+fn prepare_external_destination<'g>(
+    root: &Path, dest: &Path, kind: ExternalDestinationKind,
+    guard: &'g ExternalExportGuard,
+) -> Result<CheckedExternalDestination<'g>, ExternalDestinationError>;
+fn recheck_external_destination(
+    checked: &CheckedExternalDestination<'_>,
+) -> Result<(), ExternalDestinationError>;
+fn publish_external_file(
+    checked: &CheckedExternalDestination<'_>, bytes: &[u8], temp: &Path,
+) -> Result<(), String>;
+fn create_checked_external_directory(
+    checked: &CheckedExternalDestination<'_>,
+) -> Result<PathBuf, String>;
+```
+
+productionとtestでprepare/recheck/最終作成の安全判定を複製しない。testがfake identityや合格boolを注入する口は不要である。H03はFileで予定rootの未作成祖先を塞ぐ拒否も含む。上表のcase数/名称は独立作者が固定する。昇格が必要なaliasは親へ返し、作成不能/未実行を成功件数へ混ぜない。既存の特定symlink試験への承認を新fixtureへ転用しない。
+
+設計Pre後、作者は新integration＋store専用節で期待値を先に固定する。実装役は本体だけを変更し、runnerは`cargo test --locked --test progress_export_destination`、`cargo test --locked --lib store::i2_export_destination_tests`、`cargo test --locked --test audio_history_gate`およびgate取得/atomic抽出の影響する既存store・migration・save・material・backup bridge回帰を固定source/EXE hashと実在件数で記録する。通過済み全体suiteを無条件に反復せず、影響caseは作者/親が既存受入から選ぶ。format/diff・独立Post・I10全体gateは維持する。
+
+判断根拠は[FILE_ID_INFO](https://learn.microsoft.com/en-us/windows/win32/api/winbase/ns-winbase-file_id_info)（volumeと128-bit identity）、[CreateFileW](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew)（既存handle/共有/reparse flags）、[GetFinalPathNameByHandleW](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getfinalpathnamebyhandlew)（GUID/normalized pathと非対応）、[CompareStringOrdinal](https://learn.microsoft.com/en-us/windows/win32/api/stringapiset/nf-stringapiset-comparestringordinal)（予定名だけのOS比較）である。型付き内部境界と加算的APIはapi-and-interface-design Skillに基づく。REST/新dependencyは不要である。
+
+未実測はOS/FSのidentity取得可否、alias作成権限、実I/O競争であり、実装/独立試験で証拠を得る。APIの不足や新file/依存が判明すれば親へ戻す。現段階で承認仕様の変更は不要と判断するが、GUID解決不能環境の拒否、予定rootを内包するdirectory拒否、atomic private抽出は独立Preで明示確認する。UI描画の変更はなく、日本語配置・両軸button中央・縮尺・狭幅設計とUI Skillは本単位では非該当である。本追補の完了は文書差分/参照検査とhandoffであり、build/test/実データ/API/公開は実施しない。
+
 ## 6. consumer・非同期・取消し
 
 | consumer | 必要な反映 |

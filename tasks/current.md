@@ -1,6 +1,6 @@
 # 現在のタスク要約
 
-更新：2026-10-11（I2b-B独立76件成功・最終Post PASS/Closed。次のI2d-H外部書出し先保護を設計具体化中。製品EXE提供条件は確定、EXE未更新）。以後の再開入口は本書である。設計本文・ログ全文は転載せず、必要な箇所だけ [参照インデックス](context-index.md) から読む。旧会話・旧状態記録は証拠確認時だけ参照する。
+更新：2026-10-11（I2b-B独立76件成功・最終Post PASS/Closed。I2d-H外部書出し先保護の設計Pre PASS、独立test作者が期待値を固定中。製品EXE提供条件は確定、EXE未更新）。以後の再開入口は本書である。設計本文・ログ全文は転載せず、必要な箇所だけ [参照インデックス](context-index.md) から読む。旧会話・旧状態記録は証拠確認時だけ参照する。
 
 ## 現在の目標
 
@@ -52,6 +52,6 @@ ACOUSTIC-HISTORY-001：原音・音響解析結果・Qwen助言を保存し、�
 2. [実装計画](ACOUSTIC-HISTORY-001/implementation.md) の依存順に保存回復・既存データ/backup統合・残るPraat障害試験・処理統合・比較UI・二hostを継続し、最後に全体テスト/release検証を行う。
 3. I2は[設計](ACOUSTIC-HISTORY-001/design-i2.md)のG private接合追補も[独立Pre PASS](ACOUSTIC-HISTORY-001/history-commit-design-review.md)。plannerの[逐次所有追補](ACOUSTIC-HISTORY-001/implementation.md)に従う。GはsingleMutex/再入拒否/write-block口/strict pendingまでであり、Progress形式・移行・結果不明判定は後続である。現在、利用者の動作確認待ちはない。
 4. M/S/N/R/T/V/Pは最終Post PASS。Pの[最終判定](ACOUSTIC-HISTORY-001/history-pointer-commit-review.md)、[独立269件](ACOUSTIC-HISTORY-001/history-pointer-commit-runner.md)、[初回失敗の環境比較](ACOUSTIC-HISTORY-001/history-pointer-commit-diagnostic.md)を正とし、成功済みの反復は行わない。
-5. I2b-A/Bは最終Post PASS/Closed。b-Bの新scope43＋旧33＝76unique全PASS、ignored/timeout/未実行0、source/EXE前後hash一致、TEMP残存0を[独立最終Post](ACOUSTIC-HISTORY-001/history-backup-review.md)で確認した。次は既定順のI2d-H（外部書出し先共通保護）。designer export_destination_design（gpt-6-astra/high）がdesign-i2.md §5のroot解決・OS同一性・外部guard/under-guard接合を具体化中。その独立Pre後に作者→実装へ進む。runnerへ移る際はSol/medium切替前に停止する。I10/製品EXEは未了である。
+5. I2b-A/Bは最終Post PASS/Closed。次は既定順のI2d-H（外部書出し先共通保護）。design-i2.md §5追補SHA `50BE63D85B75AF7E7D1F1EABB306698722CAF89AF6E46821FCB34B04E6A06380` は[独立Pre PASS](ACOUSTIC-HISTORY-001/export-destination-review.md)。作者export_destination_tests（gpt-6-astra/high）が新integrationとstore専用cfg内で期待値を固定中。新API不在のため固定後に所有返却→実装役の未接続fixedErr scaffold→作者RED採取→本体の順とする。H06共有制限fixtureは実失敗確認を必須とし、未実証を成功にしない。runnerへ移る際はSol/medium切替前に停止する。I10/製品EXEは未了である。
 
 今回の整理は作業用要約から廃案・重複ログ・無関係な履歴・設計本文の転載を除外したものである。根拠資料と旧記録は削除していない。旧版はインデックスに残すが通常再開時には読み込まない。
