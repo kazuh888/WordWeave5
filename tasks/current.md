@@ -1,6 +1,6 @@
 # 現在のタスク要約
 
-更新：2026-10-12（I2d-Hは独立Post PASS/Closed、56b3462でpush済み。I2d-Sの4出口接続・自己検証34unique成功・S04 oracle是正の独立限定Post PASSを完了。独立runner前で停止し、親をGPT-6.1 Sol/mediumへ切替待ち。I2d-S全体/製品EXEは未完了）。詳細は [参照インデックス](context-index.md) を参照する。
+更新：2026-10-12（I2d-Sの独立34件成功、全採用実行のnative exit0/timeoutなし・source/EXE前後hash一致・TEMP残存0を確認。集計例外のmetadata欠測は旧5件だけ再取得して解消。親Sol/medium、次はAstra/highの最終Post前で停止する。I2d-S全体/製品EXEは未完了）。詳細は [参照インデックス](context-index.md) を参照する。
 
 ## 現在の目標
 
@@ -39,7 +39,7 @@ ACOUSTIC-HISTORY-001：原音・音響解析結果・Qwen助言を保存し、�
 | 主要アプリ保存接続 | I2b-Aのpersist/import_deck/restoreを接続。[独立20件](ACOUSTIC-HISTORY-001/history-main-consumer-runner.md)成功と[最終Post PASS/Closed](ACOUSTIC-HISTORY-001/history-main-consumer-review.md)。b-Bは[独立76件](ACOUSTIC-HISTORY-001/history-backup-runner.md)成功と[最終Post PASS/Closed](ACOUSTIC-HISTORY-001/history-backup-review.md) |
 | 統合 | Progress・backup・非同期処理・比較・UI・二host統合は未完了。製品EXEは未更新 |
 
-ブランチ：`codex/development-agent-team`。I2d-H本体checkpoint `f60f4be`、Q修正 `b928834`、独立runner記録 `5d4ab10`。今回のH06修正はtest-onlyの途中保存でありmain merge/releaseは範囲外。製品EXEは上記提供段階で更新する。
+ブランチ：`codex/development-agent-team`。H完了記録 `56b3462`、S本体checkpoint `476bad7`。今回のS独立実行はこの確定ソースを対象とし、main merge/releaseは範囲外。製品EXEは上記提供段階で更新する。
 
 ## 未解決の問題
 
@@ -53,6 +53,6 @@ ACOUSTIC-HISTORY-001：原音・音響解析結果・Qwen助言を保存し、�
 2. [実装計画](ACOUSTIC-HISTORY-001/implementation.md) の依存順に保存回復・既存データ/backup統合・残るPraat障害試験・処理統合・比較UI・二hostを継続し、最後に全体テスト/release検証を行う。
 3. I2は[設計](ACOUSTIC-HISTORY-001/design-i2.md)のG private接合追補も[独立Pre PASS](ACOUSTIC-HISTORY-001/history-commit-design-review.md)。plannerの[逐次所有追補](ACOUSTIC-HISTORY-001/implementation.md)に従う。GはsingleMutex/再入拒否/write-block口/strict pendingまでであり、Progress形式・移行・結果不明判定は後続である。現在、利用者の動作確認待ちはない。
 4. M/S/N/R/T/V/Pは最終Post PASS。Pの[最終判定](ACOUSTIC-HISTORY-001/history-pointer-commit-review.md)、[独立269件](ACOUSTIC-HISTORY-001/history-pointer-commit-runner.md)、[初回失敗の環境比較](ACOUSTIC-HISTORY-001/history-pointer-commit-diagnostic.md)を正とし、成功済みの反復は行わない。
-5. I2b-A/BとI2d-Hは最終Post PASS/Closed。I2d-Sは4出口を接続し、[自己検証](ACOUSTIC-HISTORY-001/settings-export-implementation.md)の34unique成功、[限定Post](ACOUSTIC-HISTORY-001/settings-export-review.md)でrunner-ready。次は利用者のSol/medium切替後、確定sourceとEXEで新25＋旧9を独立実行する。[テスト引継ぎ](ACOUSTIC-HISTORY-001/settings-export-tests.md)の実名/filter・workspace TEMP・Hidden・有限timeoutを使う。sourceはsettings_ui C7C7C9D1…、control F7A3FB07…、test EXEは287E9A97…（完全hashは実装記録）。実行後はAstra/highの最終Postへ渡す。d-S全体Closedまではd-B/M本体着手保留、以後d-B→d-M→b-S→b-C。I10/製品EXEは未了。
+5. I2b-A/BとI2d-Hは最終Post PASS/Closed。I2d-Sの[独立runner](ACOUSTIC-HISTORY-001/settings-export-runner.md)は新25＋旧9の34unique成功を確認。集計例外の旧edit5はPID29836で限定再実行しexit0/timeoutなし、欠測を解消。最終採用は新25/旧5/旧4の34uniqueで重複加算しない。sourceはsettings_ui C7C7C9D1…、control F7A3FB07…不変、独立buildのtest EXEはA11ECC23…（完全hashはrunner報告）。次は利用者のAstra/high切替後、確定source/EXE/rawを[独立レビュー](ACOUSTIC-HISTORY-001/settings-export-review.md)へ渡し最終Postを受ける。d-S全体Closedまではd-B/M本体着手保留、以後d-B→d-M→b-S→b-C。I10/製品EXEは未了。
 
 今回の整理は作業用要約から廃案・重複ログ・無関係な履歴・設計本文の転載を除外したものである。根拠資料と旧記録は削除していない。旧版はインデックスに残すが通常再開時には読み込まない。

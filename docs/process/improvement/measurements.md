@@ -1,5 +1,9 @@
 # 開発タスクの使用量記録
 
+- 同独立runnerはbuild1回2分14秒、list305件のうち新25/旧5/旧4を固定し34unique成功。source2本と新EXE A11ECC23…の前後hash一致、TEMP残存0、format/diff成功。集計の空stderr例外で旧5件のPID/nativeexit/timeoutが永続化されなかったため、この5件だけ再取得しPID29836/exit0/timeoutなしを確認した。他29/build/listは反復0、旧欠測と例外rawを保持。終了記録23:50:23 UTC（JST 08:50）、保存push/最終応答前まで。終了usage counter/runtime metadata/親子包含は未取得。次はAstra/highの最終Postへ利用者切替待ち。改善候補は集計前の実行metadata永続化であり、担当logs内の今回再取得手順に適用済み、恒久harness・設定・検証水準変更なし。
+
+- 2026-10-12 I2d-S独立runner再開。開始時計2026-10-11 23:43:57 UTC（JST 08:43）、HEAD `476bad7475c1e7375e80c98bdee1bc29b753ae7b`、tree clean。利用者のSol/medium切替を受領。新規runner `settings_export_runner` を既定 `gpt-6.1-sol/medium`・fresh contextで起動し、新25＋旧9を確定sourceから独立build/実行する。親は証拠照合と短い現状記録を担当。完了境界は独立実行報告、最終Post/製品EXEは次工程である。開始usage counter・実行metadata・親子包含は未取得、推計しない。
+
 - 同I2d-Sは設計再利用→独立作者25件（9PASS/16scaffoldRED）→本体5入口/4出口→自己新24/25＋旧9成功→S04 oracle限定是正exact1成功→独立コードreview runner-readyまで完了。最終記録23:40:29 UTC（JST 08:40）、commit/push・最終応答前。34unique成功は異時点接合、独立runner/最終Post未了。親は予定どおりSol/medium切替前で停止する。design/tests/impl/reviewerは既定Astra/highを明示、終盤はbuild中のread-onlyレビューだけ並行。開始/終了usage・runtime metadata・親子包含は未取得、推計しない。
 - 手戻りは作者fixture初期save失敗（workspace専用TEMP/Hidden比較で解消、根本syscall未取得）、子filter0件の成功判定（exact1件を恒久assert）、保持中app.lock読取（空長assertによる限定ledger表現）、S04のf32 wire/Value経路差（独立作者とreviewで是正）である。旧失敗rawを保持した。原作者before source snapshot未保存のためstub除去以外の不変再計算は欠測、現在oracleは仕様へ独立照合した。是正時はbefore snapshotを保存しS04外不変を証明した。次の同file逐次handoffでは作者完了時にsource snapshotも保存するとこの欠測を防げる。恒久harness・検証水準・親モデルの自動変更はしていない。成功済み33件はS04訂正だけでは反復せず、必要なexact1件のみ再build/実行した。
 
