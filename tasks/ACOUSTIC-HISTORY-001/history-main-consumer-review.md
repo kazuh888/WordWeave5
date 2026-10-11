@@ -23,3 +23,15 @@ I2-T02 / AH-AC04の限定差分について、受入を阻害する確定欠陥�
 reviewerはファイル編集・build・test実行・mutation・公開を行っていない。read-only制約を優先し、Skillのmutation実験は実施せず、変更前REDとoracle不変の証拠を確認した。新たな独立実行に代えて既存成功ログを使ったという意味ではない。次のrunnerは固定source/EXEを自分で実行し、20件の実名・件数・前後hash・専用一時領域の後始末を確認する。上限は各job50秒、作者/実装者と同じprocess限定workspace TEMP/TMPとHidden起動を用いる。元ログを上書きせず、失敗時は原因と未実行をそのまま報告する。
 
 利用者のモデル切替前停止指示に従い、親はここで `gpt-6.1-sol / medium` への切替を案内する。独立runner後の最終Postは既定 `gpt-6-astra / high` である。
+
+## 最終Post（2026-10-11）
+
+利用者のAstra/high切替後、同reviewerが[独立runner20件](history-main-consumer-runner.md)の新証拠を照合した。判定は **I2b-A限定PASS／Closed**。確定欠陥・受入阻止質問・追加修正要求は0である。
+
+- 確認HEAD `6dd82855f0b42690b5c20315b2335a7fabe2e3cb`。runner対象からsrc/manifest/lock変更なし、上記source/EXE hash一致。
+- runner stdoutの新16名は固定sourceの16関数に一致、重複/欠落0。旧4件も完全名と各1PASSを確認。合計20PASS/0FAIL/0ignored、各exit0/timeout0はrunner報告に記録されている。
+- 新ログはrunner専用path/PID5564のfixtureを含み、実装者のログと内容/hashが異なる。新たな独立実行証拠として整合する。
+- marker作成16/削除16/残留0、専用TEMP現物子0。旧4件のstderrは各0bytes。補助集計のnull例外とtest結果を区別し、再読による訂正を確認した。
+- 前回静的レビュー対象/oracleは不変であり、今回は不足していた独立実行証拠を追加確認した。コードレビュー/build/testを重複実施していない。
+
+本判定は主要3consumerのみである。b-B以降、I10全体gate、release/native/API受入は残る。reviewerはread-only、指定Astra/high、実行metadata/開始終了counter未取得である。

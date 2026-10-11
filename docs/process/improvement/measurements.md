@@ -2,6 +2,12 @@
 
 ## ACOUSTIC-HISTORY-001 実装再開（2026-10-07）
 
+- 同b-B接合確認：designerがPath読取bridge不足を検出し、planner（backup_bridge_plan、指定Astra/high）はstore限定所有を加える最大3fileへ調整した。親が確定しdesigner反映→独立Preへ渡す。別前提unit/runnerの増設を避け、既存safe readerを共有する。外部write-block guardは既定I2d-H/Bへ維持。main試用EXEの依存/gateを確定した。実行metadata/開始終了counter/包含は未取得、削減量は推計しない。
+
+- 同再開のb-A最終Post。main_consumer_reviewは新runner16名/旧4名と原stdout、source/EXE現物、fixture16/16/残0を照合し、受入阻止0でPASS/Closedとした。親は計画checkbox/current/indexを更新し、同指定Astra/highのbackup_consumer_designへb-B限定接合を引き継いだ。親は閉鎖記録を担当し、designerはdesign-i2のb-B節だけを所有する。成功試験の再実行なし、終了counter/runtime metadata/包含は未取得。
+
+- 2026-10-11 I2b-A最終Post再開。利用者のAstra/high切替連絡を受け、同指定main_consumer_reviewへ独立20件の新証拠を引き渡した。無変更の静的確認・成功suiteは反復せず、親は次のb-B保存/backup境界と製品EXE提供条件を確認する。開始tree clean、HEAD `6dd8285`。使用量開始counter/runtime metadata/親子包含は未取得。製品EXE依頼を保持し、I3未了でhistory付きbackupを製品提供しない既存条件も維持する。
+
 - 同I2b-A独立runner結果。main_consumer_runnerは固定EXEを新規実行し新16＋旧4の20PASS、失敗/ignored/timeout/未実行0、source/EXE前後不変、fixture作成削除16/16・専用TEMP各job後0を確認した。親も報告・現物hashを確認。空stderrをnullとして扱う補助集計例外4件は文字列読取で訂正し、テスト再実行なし。新suite2.36秒、旧4件0.29/0.32/0.30/0.19秒は実測。既知環境条件の共有により初回fixture失敗を反復せず、rebuildも省いた。最終応答前までの終了counter/runtime metadata/親子包含は未取得、節約量は推計しない。Astra/high最終Post前で停止し、結果とEXE作成依頼を保存checkpointへ含める。
 
 - 2026-10-11 I2b-A独立runner再開。利用者がSol/mediumへ切替え続行を承認、試用用の製品EXE作成も依頼した。HEAD `6839e0a`、開始tree clean。指定main_consumer_runner（gpt-6.1-sol/medium）は固定EXEの新16/旧4件のみを所有し、親はEXE提供の依存確認/current/測定記録を担当する。既知workspace TEMPとHidden起動を再利用し、無変更sourceをrebuildしない。開始counter/runtime metadata/親子包含は未取得。全体release検証は製品提供段階で実施し、今回20件を代替にしない。

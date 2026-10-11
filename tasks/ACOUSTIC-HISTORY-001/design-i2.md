@@ -306,6 +306,53 @@ I2-T02の「未知/壊れたAは変更0」は、b-Aでは正本 `progress.json`�
 
 検証は3経路×stale None/Bの成功、壊れた/未知rootとpendingの拒否、教材pending作成後の保存拒否での旧snapshot非書戻しを対象とする。`backups`をfileにするfixtureは現recoverの退避先事前確認で停止するため、両metadata書込後のfinish失敗と称さない。後半障害注入用seamは追加せず、保存層R/Tの既存証拠とconsumerの実到達境界を区別する。restoreは復元candidate採用、未保存draft別退避、当日生成回数最大値、既存chat resetを維持する。独立作者は `src/app.rs` 内の専用 `i2_history_main_consumer` のみを追加し、作者のRED確認後に3関数本体の所有を実装者へ移す。既存restore/partial-save回帰と新focused試験を実行する。独立runnerは既定Sol/mediumの別工程であり、I10全体gate・製品EXE提供とは区別する。
 
+### I2b-B接合確認・実装handoff（2026-10-11）
+
+入力は承認済みAH-AC16／I2-T06、implementation.mdのb-B行と7役割当、b-A最終Post PASS/Closedである。担当指定は`gpt-6-astra/high`、実行metadata・usage counterは未取得である。照合HEADは`6dd82855f0b42690b5c20315b2335a7fabe2e3cb`。本節だけを設計担当が所有し、本体・test・gateの変更を許可しない。受入単位は次の3条件であり、公開署名`export(&Path, &Path, &[Entry], &Progress)`と`Prepared::restore`を維持する。
+
+| 条件／受入 | 所有・データ契約 | 独立受入 |
+| --- | --- | --- |
+| B1／T06・AC16 | `preserve_current_progress`は最新disk rootだけをcurrent cloneへ反映し、非履歴draft・ai_calls等はcurrentから保持する。`Prepared::restore`はbackup candidateへ日別ai_callsのcurrentとの最大値を反映し、`commit::save_progress`の実保存返却値を返す | 手製disk A＋current None/B、異なるbackup draft/current未保存日本語draft、複数日の大小逆転ai_calls。復元後はbackup draft、別memory退避はcurrent draft、両方のrootは各保存区間のdisk A。返却値と正本を比較する |
+| B2／T06・AC16 | v1 exportはcandidate／最新diskのどちらかがSomeなら宛先作成前に拒否する。両方Noneだけ明示wire1・`audio_history`キーなしとして出力する | candidateだけSome／diskだけSome／両方Noneを別caseとする。拒否時destなし、source全ledger不変。成功時は手製legacy oracleと全非履歴field・manifest hashを照合しprepare/restoreまで往復する |
+| B3／T06・AC16 | prepareは既存のhash／媒体照合とstrict `Progress` Deserializeを維持し、manifest1＋非null rootと未知manifestを拒否する | 正しい再計算manifest hash付きの混入root、未知版、重複version/rootキー、未知field、壊れたJSONを各別fixtureにする。単なるhash不一致による拒否をschema拒否の証拠にしない |
+
+現物SHA-256は`src/backup.rs=193D347A4D1A8C97612D4F283BFDD0F78492AAFE1DDA3EE31E3BD694392E0F16`、`src/store.rs=FA9ECA988D4EDF5233E0198F8B2E090F760098D16779001179CBFFF151F38BEB`、`src/commit.rs=14952768353B2111D7AF9C96541B8F321AC79BDD30FE26CF9C41A3EA188E0154`である。初案2fileではPath読取を共有できなかったため、plannerがimplementation.mdのb-B限定計画deltaで本体`src/backup.rs`、`src/store.rs`の限定bridge／共有読取接合、新`tests/audio_history_backup.rs`の最大3fileへ確定し、親から承認を受領した。両本体の専用cfg(test)は独立作者が先に所有する。本節の反映後も独立Preは未了である。
+
+#### 既存APIの再利用と不足
+
+`Storage::read_progress(&self)`は安全な祖先／leaf検査、100MB bounded read、strict版dispatchを共有し、復旧もgate取得も行わない。内部memory退避にはこれをそのまま使える。`HistoryReader::new(storage).verify_closure(root)`も読取専用であり、guard保持中に呼べる。`commit::pending_checked`はmissing leafだけをfalseとし、I/O不明・不正pathをErrとする。`commit::save_progress`は自分でgateを取り最新rootを再読し、実保存値を返す。
+
+一方、外部exportの入力は`&Path`だけである。`store::read_progress_bytes/read_progress_typed`と`commit::read_recovery_bytes`はprivateであり、既存のcrate-private `decode_progress_for_material(bytes)`は安全なfile読取を提供しない。`ProgressHistoryHead`も`&Storage`が必要である。`Storage::at(root)`による再取得はapp.lock競合とmkdirを起こすため使わない。backupの既存`read`はmanifest等のbounded読取であり、稼働rootの祖先/reparse安全検査を備えない。ここへ別のProgress readerを複製する案も不採用とする。
+
+確定するcrate-private入口は`pub(crate) fn read_progress_for_backup(root: &Path) -> Result<Option<Progress>, String>`である。store内にprivate `enum ProgressRootPolicy { RequireExisting, AllowAbsent }`と`fn progress_root_exists(absolute_root: &Path, policy: ProgressRootPolicy) -> Result<bool, ProgressReadError>`を置き、現`read_progress_bytes`の祖先走査だけを共有helperへ抽出する。helperの入力はcallerが`std::path::absolute`で得たpathに限り、ルートから最終rootまで祖先を上から順に既存`progress_metadata(path, true)`で検査する。全て通常directoryならtrue、最初のNotFoundはAllowAbsentだけfalse、RequireExistingなら従来どおりIoである。途中のfile／symlink／reparseはUnsafePath、NotFound以外のmetadata失敗はIoで停止し、下流が存在しないことを理由に先行異常を無視しない。`exists()`やcanonicalize失敗を不存在へ読み替えない。
+
+bridgeの順序はabsolute解決→上記AllowAbsent→falseなら`Ok(None)`→既存rootなら`pending_checked`のErr/trueを拒否→既存`read_progress_typed(root, PROGRESS_LIMIT)`→runtime Progressへmapである。pendingを解消せず、gate／app.lock取得・mkdir／backup／recover／書込を一切行わない。存在しないrootへpending_checkedを呼ばない。通常`read_progress_bytes`はRequireExistingで同じ祖先helperを呼び、その後のleaf metadata／長さ確認／File::open／limit+1読取をそのまま保つ。typed decodeと既存ProgressReadErrorの型・分類は変更しない。bridge後半のstrict readによる祖先再検査は、初回確認後にrootが消失した場合をNoneへ落とさないために維持する。検証済み既存rootのprogress leafなしはNone、観測済みleafがopen時に消えた場合はIoであり、この区別も維持する。Storage／head／通常writerは全て既存の厳格reader入口を継続し、AllowAbsentを流用しない。
+
+さらに`acquire_progress_write()`は取得内部で`ensure_writable()`を呼ぶため、write-block中に外部退避だけを直列化する取得口は現物にない。内部memory退避は稼働rootのbackupsへの書込みなのでwrite-blockで拒否する。外部exportは§5の外部退避契約に従い、write-blockを解除せず利用できる必要がある。これは既定I2d-Hの外部宛先/gate接合へ渡す不足であり、b-Bでglobal flagを読んだり別Mutexを作ったりしない。最終的には外部exportの内容snapshot取得と宛先作成が同じ外部guard区間を通る必要がある。新たなguardを入れ子に取るdirectory helperの呼出しは不可であり、I2d-H/Bの所有でunder-guard接合を確定する。b-B時点の通常write gate利用を完成したwrite-block時外部exportとして報告しない。
+
+#### backup内の最小helperと順序
+
+1. `fn current_snapshot_under_guard(storage: &Storage, current: &Progress, guard: &ProgressWriteGuard) -> Result<Progress, String>`はguardのwrite可否→pending_checked→read_progress→Some rootのclosure検証→current.cloneのroot置換→validateを行う。root leafなしはNoneを採用し、古いcurrent rootを復活させない。pending、未知版、不正root、局所欠損、read不明は退避directory作成前に拒否する。callerのcurrentは変更しない。
+2. `preserve_current_progress`だけがこの区間のgateを1回取得し、上記helper→既存`progress_bytes`→memory退避作成／atomic_writeまで保持する。`progress_bytes`はruntime2用のままとし、`audio_history`を消さない。guardを解放してから返る。commit/recover/load/exportをこのguard内から呼ばない。
+3. `fn legacy_progress_bytes(progress: &Progress, limit: u64) -> Result<Vec<u8>, String>`をexport専用に置く。runtime validateとhistory None確認後、既に型付けされたProgressをSerializeしたobjectだけにversion=1／historyキー削除を施し、pretty bytesの実長で上限を判定する。raw inputを`Value`へ先行decodeして重複キーを潰す経路にはしない。全非履歴fieldを保持し、型を丸ごと複製したlegacy structは作らない。manifestのhashはこの最終bytesを対象とする。
+4. 外部exportの内容検査helperは`fn legacy_export_bytes_under_guard(root: &Path, candidate: &Progress, limit: u64, guard: &ProgressWriteGuard) -> Result<Vec<u8>, String>`程度に限定する。b-Bの暫定接合ではexport_with_limitsが通常gateを1回取得し完了markerまで保持する。候補Someは拒否し、上記bridgeでpendingなし・安全な最新disk読取を確認してdisk Someも拒否する。helperはgateを再取得しない。disk Someはclosureを走査してもv1 exportできないため、rootを消して続行せず未対応で停止する。両方Noneならlegacy_progress_bytesへ進む。deck／参照／inventory／manifest上限を全て検査した後にdestを新規作成し、媒体→deck→progress→完了manifest最後の順を維持する。exportからrecoverは起動しない。外部guardへの切替は前述I2d-H/Bの未解決接合である。
+5. prepareはmanifest版→元bytesのhash→strict `serde_json::from_slice::<Progress>`→history Noneの明示条件→既存媒体検証の順である。manifest1にruntime wire2・null rootが入った既存互換入力を新たに拒否しないが、非null rootはwire版にかかわらず拒否する。exportが新しく生成するwireは常に1とする。
+6. restoreはsource媒体の再検証→current memory退避→不変媒体のtargetへの追加→参照検証→`commit::save_progress`→実保存Progress返却を維持する。restore自身は外側gateを保持しない。退避とcommitは別のgate区間であり、間に履歴が更新された場合は各時点の最新rootを使う。退避で読んだrootを最終commitへ強制しない。旧current draftを復元後UIへmergeせず、別退避で保護する。ai_callsは既存どおりbackup/currentの各日最大値であり、diskの非履歴field全体を混ぜる変更はしない。
+
+新しい非同期処理、取消token、公開fault APIは不要である。確認dialogの取消しはrestore呼出し前の既存UIで完結する。restore開始後の中断・結果不明は完成済みcommitのpending／write-block／実再読契約に委ね、旧snapshotの書戻しや自動再送を追加しない。source媒体再検証／memory事前検査での拒否は正本と媒体を不変にする。memory write後や媒体追加後、commit失敗では先行memory退避・不変媒体・既定commitの移行退避／pendingが残り得るため全ledger不変を要求しない。残存を「復元成功」とせず、既存UIへErrを返す。原音削除・既存backupの削除は行わない。
+
+#### 独立作者／実装者への引継ぎ
+
+作者はB1–3に加え、progress leafなしとroot自体なし、pendingあり／metadata不明、未知版・破損disk、closure欠損、memory退避先がfile、媒体再検証失敗を合成データだけで用意する。事前拒否は全既存bytesとdest未作成、後半失敗は正本不変または既定pending状態と許される先行残存を別oracleとする。返却値／disk／memory退避の3者と、caller currentの不変を検証する。guard再入停止なしは有限timeoutの子processで確認し、write-block試験は解除口を追加せず子process隔離とする。外部write-block成功はI2d-H/B未実装なら未検証として残す。
+
+storeの新`cfg(test) mod i2_backup_path_tests`には最小で次の5群を置く。(R1) 手製v1／v2 None／v2 Someの全field・root保持と全ledger不変、(R2) root直下／複数段の最初の不存在はbridge Noneかつstrict reader Io、既存rootでprogress leafなしは両方None、(R3) 不存在leafより上のfile・junction/reparse、progress leafのdirectory等を拒否し不在扱いしない、(R4) pendingあり／pending不正pathはbridgeだけ拒否しstrict pure readは既存どおり読める、(R5) 未知版・不正JSON・重複キー・上限超過・実open/read不明をbridgeも拒否する。小上限exact/exact-1は既存`s03_typed_read_has_exact_limit_and_only_verified_missing_leaf_is_none`、実read拒否は`s03_real_read_denial_is_io_for_typed_read_public_read_and_head`のfixtureを参照し、新backup用filesystem差替えAPIを増やさない。観測済みleafのopen前消失など実fixtureで起こせない競合／metadata I/Oは静的確認と未測定を分ける。全群でroot/dest/temp新設なしを確認し、既存Storage/headのroot不存在拒否も回帰する。
+
+`backup::tests::rejects_unrestorable_sizes_before_creating_destination`は現状runtime2のSerialize長をv1 export上限に使っている。独立作者がこの1箇所のoracleを明示wire1・historyキーなしの独立投影へ改訂し、`exact-1`拒否／`exact`成功を保つ。production helperや先行exportの実測長を唯一の期待値にしない。`memory_snapshot_rejects_invalid_or_oversized_progress`のruntime2 oracleは変更しない。default100MB／deck64MB／manifest8MB、JSON escapingを含む最終bytes長の判定を維持する。
+
+実在回帰は`--lib backup::`全5件、`--lib store::i2_progress_tests`、`--test audio_history_progress`、`--bin wordweave5 backup_confirmation_`、`--bin wordweave5 json_restore_preserves_the_latest_unsaved_chat_draft`、b-Aの`i2_history_main_consumer`である。新target `audio_history_backup`と新module `store::i2_backup_path_tests`は作者作成後に`--list`で固定しRED→実装→GREENを独立記録する。構造／署名追加のscaffoldと行動REDを区別し、所有は作者のcfg(test)/integration→実装者のbackup本体と限定store接合へ逐次移す。親が独立Pre/Post、runner、I10全体test/releaseを扱う。本設計追記だけで各gateを通過済みとしない。
+
+Path読取bridgeとroot不存在互換の配置・最大3file所有は本追補で確定し、独立Preへ渡す。後続未解決はI2d-H/Bの外部guard接合である。UI描画変更はなく、UI skill／日本語配置・両軸中央揃え・縮尺・狭幅の新設計は非該当である。日本語draftの保存往復はB1のデータ受入に含む。I3のhistory backup v2/union、I8の利用可能UI、全体test/release／製品EXE提供のplanner確定gateを維持する。
+
 ## 8. 分割提案とhandoff
 
 以下は親/plannerへ返す所有提案であり、dispatch許可ではない。各行最大5file（独立testを含む）、すべて逐次である。I2担当model/effortと独立Pre/Post、I10全体gateを変更しない。同file内cfg(test)の編集は作者→実装者の所有切替後に行う。
