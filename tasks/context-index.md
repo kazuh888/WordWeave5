@@ -8,6 +8,7 @@
 | --- | --- |
 | 外部仕様・18受入条件 / 内部契約 | [spec.md](ACOUSTIC-HISTORY-001/spec.md)、[design.md](ACOUSTIC-HISTORY-001/design.md) |
 | 実装順・所有・役割別モデル/effort・完了条件 | [implementation.md](ACOUSTIC-HISTORY-001/implementation.md) |
+| 工程別自動引継ぎの運用・通常開発の使用量観測 | [開発7役](../docs/process/development-team.md)、[KPI](../docs/process/improvement/kpi.md)、[2026-10-12観測](ACOUSTIC-HISTORY-001/usage-observation-20261012.md) |
 | 検証結果・未完了範囲 | [implementation-results.md](ACOUSTIC-HISTORY-001/implementation-results.md) |
 | 固定Praat・資源・共有境界 | [design-i0.md](ACOUSTIC-HISTORY-001/design-i0.md) |
 | 保存reader/writer・回復契約 | [design-i1b.md](ACOUSTIC-HISTORY-001/design-i1b.md) |

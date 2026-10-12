@@ -1,5 +1,7 @@
 # 開発タスクの使用量記録
 
+- 2026-10-12 工程別自動引継ぎと通常開発計測を正式に継続。開始01:46:45 UTC、HEAD `b4f100c`、tree clean、週枠91%（7日窓）。既存7役定義を確認し、新たな重複定義や常駐routerは追加せず、親が既定モデル/effortでdispatchする運用をdevelopment-teamへ記録した。I2d-Mのdesignerを既定Astra/high・fresh contextで起動。親長期ログの末尾usageとturn_contextを取得できたが、親子包含は未確認であり合算しない。開始snapshotと前の2担当の取得範囲は[観測記録](../../../tasks/ACOUSTIC-HISTORY-001/usage-observation-20261012.md)へ保存した。KPIへ通常開発だけを使う比較・週枠粒度・並行作業/リセット・キャッシュ/重複加算の扱いを明記し、削減率は未判定とする。
+
 - 同再開の終了境界00:55:27 UTC（保存push・最終応答前）：独立build136.20秒、integration38＋lib13＝51unique PASS、native exit0/timeoutなし、通常token administrator=False、隔離子5件終了wait・fixture残存0。独立Post担当 `backup_destination_post` を既定Astra/highで起動し、raw JSON/list/個別ok/EXEhash/source固定とoracle保持を照合してPASS／I2d-B Closedとなった。親の工程別切替待ちは不要となり、モデル指定した子への逐次引継ぎを実行できた。成功済み検査の不要な反復はない。全体test/release・製品EXEは未実施。終了usage/runtime metadata/親子包含は未取得であり推計しない。
 
 - 2026-10-12 I2d-B独立runner再開。開始時計00:48:42 UTC、対象HEAD `b063591`、開始tree clean。利用者の工程別LLM/effort担当への自動引継ぎ提案を受け、親の切替待ちを工程移行条件から除いた。既定 `backup_destination_runner` を `gpt-6.1-sol/medium`、fresh context、source/oracle変更禁止で起動した。完了境界は固定sourceの独立build・integration38＋lib backup::13の51件と独立Postであり、製品EXEは後工程である。開始usage/runtime metadata/親子包含は未取得であり推計しない。
