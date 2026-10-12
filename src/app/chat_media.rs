@@ -589,7 +589,7 @@ impl WordApp {
             .unsaved_chat_audio
             .as_ref()
             .ok_or("未保存の録音はありません。")?;
-        store::atomic_write(path, bytes)?;
+        self.write_settings_export(path, bytes)?;
         self.unsaved_chat_audio = None;
         self.discard_audio_confirm = false;
         Ok(())
@@ -601,7 +601,7 @@ impl WordApp {
         if self.annotation.frozen() || self.annotation.text.is_empty() {
             return Err("退避する未固定の原文はありません。固定後は筆跡・背景・送信画像をまとめて退避してください。".into());
         }
-        store::atomic_write(dest, self.annotation.text.as_bytes())?;
+        self.write_settings_export(dest, self.annotation.text.as_bytes())?;
         self.annotation = Default::default();
         self.discard_annotation_confirm = false;
         Ok(())
@@ -619,13 +619,19 @@ impl WordApp {
         }
         let marker = serde_json::to_vec_pretty(&serde_json::json!({"version":1,"files":manifest}))
             .map_err(|e| e.to_string())?;
-        // Never merge with an existing directory. The marker is published only after every original.
-        std::fs::create_dir(dest)
-            .map_err(|e| format!("新しい退避先フォルダーを作成できません：{e}"))?;
-        for (name, bytes) in &files {
-            store::atomic_write(&dest.join(name), bytes)?;
-        }
-        store::atomic_write(&dest.join("complete.json"), &marker)?;
+        let root = match &self.storage {
+            Some(storage) => storage.dir.clone(),
+            None => store::resolve_storage_root()?,
+        };
+        let borrowed_files = files
+            .each_ref()
+            .map(|(name, bytes)| (*name, bytes.as_slice()));
+        store::write_external_bundle(
+            &root,
+            dest,
+            &borrowed_files,
+            ("complete.json", marker.as_slice()),
+        )?;
         self.annotation = Default::default();
         self.discard_annotation_confirm = false;
         Ok(())

@@ -1419,12 +1419,62 @@ pub fn create_external_directory(root: &Path, dest: &Path) -> Result<(), String>
 }
 
 pub fn write_external_bundle(
-    _root: &Path,
-    _dest: &Path,
-    _files: &[(&str, &[u8])],
-    _completion: (&str, &[u8]),
+    root: &Path,
+    dest: &Path,
+    files: &[(&str, &[u8])],
+    completion: (&str, &[u8]),
 ) -> Result<(), String> {
-    Err("外部一式出力は未実装です。".to_owned())
+    let guard = acquire_external_export().map_err(ProgressGateError::message)?;
+    validate_external_bundle_names(files, completion).map_err(ExternalDestinationError::message)?;
+    let resolved = create_external_directory_under_guard(root, dest, &guard)?;
+    #[cfg(all(test, windows))]
+    i2_export_bundle_tests::observe_bundle(
+        i2_export_bundle_tests::BundleStage::AfterDirectory,
+        &resolved,
+        &guard,
+    );
+    for (name, bytes) in files {
+        write_external_file_under_guard(root, &resolved.join(name), bytes, &guard)?;
+    }
+    #[cfg(all(test, windows))]
+    i2_export_bundle_tests::observe_bundle(
+        i2_export_bundle_tests::BundleStage::BeforeCompletion,
+        &resolved,
+        &guard,
+    );
+    write_external_file_under_guard(root, &resolved.join(completion.0), completion.1, &guard)
+}
+
+fn validate_external_bundle_names(
+    files: &[(&str, &[u8])],
+    completion: (&str, &[u8]),
+) -> Result<(), ExternalDestinationError> {
+    #[cfg(windows)]
+    {
+        use std::ffi::OsStr;
+        for (name, _) in files.iter().chain(std::iter::once(&completion)) {
+            external_destination_windows::validate_bundle_leaf(OsStr::new(name))?;
+        }
+        for (index, (name, _)) in files.iter().enumerate() {
+            for (other, _) in files[index + 1..]
+                .iter()
+                .chain(std::iter::once(&completion))
+            {
+                if external_destination_windows::same_planned_name(
+                    OsStr::new(name),
+                    OsStr::new(other),
+                )? {
+                    return Err(ExternalDestinationError::UnsafePath);
+                }
+            }
+        }
+        Ok(())
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = (files, completion);
+        Err(ExternalDestinationError::IdentityUnavailable)
+    }
 }
 
 #[derive(Debug)]
@@ -1787,6 +1837,24 @@ mod external_destination_windows {
                     byte.is_ascii_hexdigit()
                 }
             })
+    }
+
+    pub(super) fn validate_bundle_leaf(name: &OsStr) -> Result<(), Error> {
+        let mut components = Path::new(name).components();
+        if name.is_empty()
+            || name == OsStr::new(".")
+            || name == OsStr::new("..")
+            || name.encode_wide().any(|unit| {
+                [b'/', b'\\', b'~']
+                    .iter()
+                    .any(|byte| unit == u16::from(*byte))
+            })
+            || !matches!(components.next(), Some(Component::Normal(_)))
+            || components.next().is_some()
+        {
+            return Err(Error::UnsafePath);
+        }
+        validate_name(name)
     }
 
     fn validate_name(name: &OsStr) -> Result<(), Error> {
