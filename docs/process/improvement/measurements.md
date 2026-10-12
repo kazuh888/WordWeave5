@@ -1,5 +1,9 @@
 # 開発タスクの使用量記録
 
+- 同再開の終了境界00:55:27 UTC（保存push・最終応答前）：独立build136.20秒、integration38＋lib13＝51unique PASS、native exit0/timeoutなし、通常token administrator=False、隔離子5件終了wait・fixture残存0。独立Post担当 `backup_destination_post` を既定Astra/highで起動し、raw JSON/list/個別ok/EXEhash/source固定とoracle保持を照合してPASS／I2d-B Closedとなった。親の工程別切替待ちは不要となり、モデル指定した子への逐次引継ぎを実行できた。成功済み検査の不要な反復はない。全体test/release・製品EXEは未実施。終了usage/runtime metadata/親子包含は未取得であり推計しない。
+
+- 2026-10-12 I2d-B独立runner再開。開始時計00:48:42 UTC、対象HEAD `b063591`、開始tree clean。利用者の工程別LLM/effort担当への自動引継ぎ提案を受け、親の切替待ちを工程移行条件から除いた。既定 `backup_destination_runner` を `gpt-6.1-sol/medium`、fresh context、source/oracle変更禁止で起動した。完了境界は固定sourceの独立build・integration38＋lib backup::13の51件と独立Postであり、製品EXEは後工程である。開始usage/runtime metadata/親子包含は未取得であり推計しない。
+
 - 同再開の終了境界（00:25:30 UTC／JST 09:25、commit/push・最終応答前）：d-Bは作者17件（5PASS/10行動RED/2接合RED）、本体1file接続、自己確認新17＋旧34の51unique成功、独立コードreview PASS。source/EXE hash一致・TEMP残存0を親が確認した。sandbox hardlinkのfixture失敗は実装失敗に数えず、sandbox外要求の初回拒否を保持した。管理者tokenなら実行を拒否するguard追加後に許可され、Administrator=Falseの通常権限で固定2EXEを実行した。途中の限定7件は51へ重複加算しない。ET0仕様/設計は初回ET-D01の表示誤断言を1cycle是正し独立Pre PASS、計画確定。既存判定の無変更反復はなく、次の独立runner前でSol/medium切替待ちにする。全体test/releaseと実機/API受入は未実施。終了usage/runtime metadata/親子包含は未取得。改善は不要な文書runnerを起動せず、別所有の試用設計とd-Bの実装検証を並行した点であり、消費量・所要時間の削減率は未測定である。
 
 - 同再開でI2d-S最終Postを記録し `d82e311` を既存開発ブランチへpushした。早期試用は通常版とは別の限定計画とし、既承認d-Bテスト作者とET0仕様・設計を別所有で並行する。d-B試験用observerの追加設計は独立Pre PASS、製品コードには含めない。全役は既定Astra/high指定、固定ソースの独立runner前に利用者へSol/medium切替を知らせる。3補助となった区間は、d-B作者・必要な接合review・別所有の試用設計に限定した。旧release SHA256 `9B888E9FC923823C59B4C3B0AB1A4DAD2051CA6139DE153B6DE6CA213DD387D3` を読取記録し、試用build/delivery候補のignore適用を確認した。旧EXEの置換・実API送信は行っていない。途中usage/runtime metadata/親子包含は未取得である。

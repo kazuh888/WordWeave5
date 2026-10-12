@@ -1,6 +1,6 @@
 # 現在のタスク要約
 
-更新：2026-10-12（I2d-Bの本体接続、新17＋旧34の自己確認51件、独立コードレビューPASSを確認。試用版の仕様／設計もET-D01是正後の独立Pre PASS。親Astra/high、次はI2d-B独立runnerへSol/medium切替待ち。音声履歴UI・試用EXEは未完成）。詳細は [参照インデックス](context-index.md) を参照する。
+更新：2026-10-12（I2d-Bは独立runner51件成功と最終Post PASS／Closed。工程別モデル指定の子エージェント引継ぎを実行済み。試用版の仕様／設計もET-D01是正後の独立Pre PASS。次はI2d-M。音声履歴UI・試用EXEは未完成）。詳細は [参照インデックス](context-index.md) を参照する。
 
 ## 現在の目標
 
@@ -15,7 +15,7 @@ ACOUSTIC-HISTORY-001：原音・音響解析結果・Qwen助言を保存し、�
 - 詳細契約と担当モデル/effortはインデックス先を正とし、ここでは再定義しない。
 - 利用者は残作業を順に進めることを承認済み。動作確認依頼時は10分待ち、無応答なら確認結果に依存しない作業へ進む。未確認を成功にせず、安全性/データ保護/依存gateは保留する。この指示は実API送信・公開・追加権限の承認ではない。
 - 2026-10-11の最新指示はP完了後の続行と適度なcommit/pushを承認している。小単位の実装・検証・独立レビューが揃った区切りと、長時間作業の中断前をpushの基本とする。中断checkpointは未完了範囲を明記し、秘密・実データ・build/log生成物は含めない。既存開発ブランチへ通常pushし、mainへのmerge・releaseとは区別する。
-- モデル/effort切替が適切な工程では停止して知らせる。I2b-B設計/作者/実装/reviewは既定Astra/high、独立runnerはSol/medium。質問や切替がなければ承認済み順に続行する。
+- 2026-10-12の利用者承認により、工程別に計画者指定のLLM/effortを明示した子エージェントへ自動で引き継ぐ。親モデルは利用者選択を維持し、工程移行だけを理由に親の切替待ちで停止しない。指定モデルが利用不能、重要な質問・追加権限が必要な場合は停止して知らせる。I2b-B設計/作者/実装/reviewは既定Astra/high、独立runnerはSol/mediumである。
 - 2026-10-11の追加依頼により、利用者が動作を試せる区切りで製品EXEを作成する。plannerの[限定計画](ACOUSTIC-HISTORY-001/implementation.md)により、I3までの保存/backup、I4–5/C1、I6–8の本体操作受入・独立レビューと、必須全体test/release build・関連crate/format/diff検証後を試用milestoneとする。I9が本体の実装依存でなければ単独ツール完成前でも提供可能。SHA/EXE hashと未完成範囲を明記し、I9/C2/I10全体完成や実機/API受入と混同しない。製品EXE作成の再承認は不要である。
 
 ## 重要な制約
@@ -53,7 +53,7 @@ ACOUSTIC-HISTORY-001：原音・音響解析結果・Qwen助言を保存し、�
 2. [実装計画](ACOUSTIC-HISTORY-001/implementation.md) の依存順に保存回復・既存データ/backup統合・残るPraat障害試験・処理統合・比較UI・二hostを継続し、最後に全体テスト/release検証を行う。
 3. I2は[設計](ACOUSTIC-HISTORY-001/design-i2.md)のG private接合追補も[独立Pre PASS](ACOUSTIC-HISTORY-001/history-commit-design-review.md)。plannerの[逐次所有追補](ACOUSTIC-HISTORY-001/implementation.md)に従う。GはsingleMutex/再入拒否/write-block口/strict pendingまでであり、Progress形式・移行・結果不明判定は後続である。現在、利用者の動作確認待ちはない。
 4. M/S/N/R/T/V/Pは最終Post PASS。Pの[最終判定](ACOUSTIC-HISTORY-001/history-pointer-commit-review.md)、[独立269件](ACOUSTIC-HISTORY-001/history-pointer-commit-runner.md)、[初回失敗の環境比較](ACOUSTIC-HISTORY-001/history-pointer-commit-diagnostic.md)を正とし、成功済みの反復は行わない。
-5. I2b-A/B、I2d-H/Sは最終Post PASS/Closed。I2d-Bは[独立作者17件](ACOUSTIC-HISTORY-001/backup-destination-tests.md)、[本体・自己確認51件](ACOUSTIC-HISTORY-001/backup-destination-implementation.md)、[コードレビューPASS](ACOUSTIC-HISTORY-001/backup-destination-review.md)まで完了し、全体Closedではない。sourceはbackup CF035548…／integration 1BCA808E…で固定。自己確認は管理者tokenを明示拒否した通常権限で51件成功、native exit0／timeoutなし／TEMP残存0。詳細hashとlogは実装報告を正とする。次は利用者のSol/medium切替後、独立runnerが同sourceから新buildし、integration38＋lib backup::13を固定して検証する。管理者51件への許可はなく、通常権限のsandbox外実行と承認済みsymlink2件の管理者実行を混同しない。結果後にAstra/highで最終Post、次にd-Mへ進む。
+5. I2b-A/B、I2d-H/S/Bは最終Post PASS/Closed。I2d-Bは[独立runner](ACOUSTIC-HISTORY-001/backup-destination-runner.md)が固定source（backup CF035548…／integration 1BCA808E…）から新buildし、integration38＋lib backup::13の51unique成功を確認した。[最終Post](ACOUSTIC-HISTORY-001/backup-destination-review.md)は実名集合・source/EXEhash・guard連続保持・作者oracle不変を照合してClosedと判定した。通常権限administrator=False、native exit0／timeoutなし／子5件終了wait／TEMP残存0。管理者51件への許可はなく、通常権限のsandbox外実行と承認済みsymlink2件の管理者実行を混同しない。次は既定d-Mのdesigner/作者/実装/reviewer Astra/high、runner Sol/mediumへ工程別に引き継ぐ。親のモデル切替待ちは不要である。
 6. [早期試用計画](ACOUSTIC-HISTORY-001/early-trial-plan.md)と[仕様・設計](ACOUSTIC-HISTORY-001/early-trial-contract.md)は、[ET-D01是正後の独立Pre PASS](ACOUSTIC-HISTORY-001/early-trial-review.md)。既承認d-B→d-Mを完了してから試用保存先／Qwen資格情報分離のET1/2へ合流する。通常rootやkeyの自動共有・移行なし、利用者の手動取込は既存確認を維持する。新履歴UIを含まず、全体test/release gate後に既存releaseと別配置する。旧release SHA256は `9B888E9FC923823C59B4C3B0AB1A4DAD2051CA6139DE153B6DE6CA213DD387D3`、今回は置換していない。
 
 今回の整理は作業用要約から廃案・重複ログ・無関係な履歴・設計本文の転載を除外したものである。根拠資料と旧記録は削除していない。旧版はインデックスに残すが通常再開時には読み込まない。
