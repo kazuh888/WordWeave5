@@ -603,3 +603,196 @@ fn b01_restore_commit_refusal_keeps_prior_memory_and_immutable_media_but_not_new
     assert_eq!(value(&memories[0]), value(&expected));
     assert_eq!(tree(&bundle), source_before);
 }
+
+// I2d-B / AH-AC04,16 / T08,T08b: the backup consumer must protect the
+// entire storage root, independently of the current history pointer.
+mod i2_export_backup {
+    use super::*;
+
+    fn source(temp: &Temp) -> PathBuf {
+        let root = temp.0.join("ProtectedHost");
+        fs::create_dir(&root).unwrap();
+        fs::write(root.join("progress.json"), RAW_V1).unwrap();
+        fs::write(root.join("custom.tsv"), model::BUILTIN_DECK).unwrap();
+        fs::write(root.join("app.lock"), b"synthetic lock sentinel").unwrap();
+        for dir in ["backups", "audio-history", "nested"] {
+            fs::create_dir(root.join(dir)).unwrap();
+            fs::write(root.join(dir).join("保持.txt"), "変更禁止の合成記録").unwrap();
+        }
+        AssetStore::new(root.clone())
+            .put(AssetKind::AudioWav, b"RIFF\x04\0\0\0WAVE")
+            .unwrap();
+        root
+    }
+
+    // This fixture has no open Storage and no links. Include app.lock bytes,
+    // which the older integration helper deliberately omits for open Storage.
+    fn ledger(base: &Path) -> BTreeMap<PathBuf, Vec<u8>> {
+        let mut result = tree(base);
+        let lock = base.join("ProtectedHost/app.lock");
+        if lock.exists() {
+            result.insert(
+                PathBuf::from("ProtectedHost/app.lock"),
+                fs::read(lock).unwrap(),
+            );
+        }
+        result
+    }
+
+    fn refuse(destination: impl FnOnce(&Path, &Temp) -> PathBuf) {
+        let temp = Temp::new();
+        let root = source(&temp);
+        let dest = destination(&root, &temp);
+        let before = ledger(&temp.0);
+        let progress = candidate();
+        let memory = value(&progress);
+        let deck = model::parse_deck(model::BUILTIN_DECK).unwrap();
+        for attempt in 1..=2 {
+            let result = backup::export(&root, &dest, &deck, &progress);
+            assert!(
+                result.is_err(),
+                "T08 backup destination must be refused on attempt {attempt}: {}",
+                dest.display()
+            );
+            assert_eq!(
+                ledger(&temp.0),
+                before,
+                "T08 refusal/retry must preserve all files and directories"
+            );
+            assert_eq!(value(&progress), memory);
+        }
+    }
+
+    #[test]
+    fn d_b_root_itself_refuses_without_mutation() {
+        refuse(|root, _| root.to_owned());
+    }
+
+    #[test]
+    fn d_b_root_child_refuses_before_creating_directory() {
+        refuse(|root, _| root.join("new-backup"));
+    }
+
+    #[test]
+    fn d_b_internal_backups_child_refuses_before_creating_directory() {
+        refuse(|root, _| root.join("backups/new-backup"));
+    }
+
+    #[test]
+    fn d_b_audio_history_child_refuses_before_creating_directory() {
+        refuse(|root, _| root.join("audio-history/new-backup"));
+    }
+
+    #[test]
+    fn d_b_assets_child_remains_refused() {
+        refuse(|root, _| root.join("assets/new-backup"));
+    }
+
+    #[test]
+    fn d_b_existing_component_dotdot_alias_is_refused() {
+        refuse(|root, _| root.join("nested/../new-backup"));
+    }
+
+    #[test]
+    fn d_b_case_alias_is_refused() {
+        refuse(|root, temp| {
+            let alias = temp.0.join("pROTECTEDhOST");
+            assert_eq!(
+                fs::canonicalize(&alias).unwrap(),
+                fs::canonicalize(root).unwrap(),
+                "FIXTURE_FAILURE: case alias must resolve to the same directory"
+            );
+            alias.join("new-backup")
+        });
+    }
+
+    #[test]
+    fn d_b_existing_external_directory_is_not_merged_or_overwritten() {
+        refuse(|_, temp| {
+            let dest = temp.0.join("existing-backup");
+            fs::create_dir(&dest).unwrap();
+            fs::write(
+                dest.join("learning-backup.json"),
+                b"existing completion sentinel",
+            )
+            .unwrap();
+            fs::write(dest.join("keep.txt"), b"existing external bytes").unwrap();
+            dest
+        });
+    }
+
+    #[test]
+    fn d_b_directory_containing_planned_root_is_refused() {
+        let temp = Temp::new();
+        let dest = temp.0.join("planned");
+        let root = dest.join("assets");
+        let before = tree(&temp.0);
+        let deck = model::parse_deck(model::BUILTIN_DECK).unwrap();
+        for _ in 0..2 {
+            assert!(
+                backup::export(&root, &dest, &deck, &candidate()).is_err(),
+                "T08 export must not materialize an ancestor of the planned storage root"
+            );
+            assert_eq!(tree(&temp.0), before);
+        }
+    }
+
+    #[test]
+    fn d_b_external_and_similar_name_preserve_wire1_deck_media_and_source() {
+        let temp = Temp::new();
+        let root = source(&temp);
+        let progress = candidate();
+        let memory = value(&progress);
+        let deck = model::parse_deck(model::BUILTIN_DECK).unwrap();
+        let source_before = ledger(&temp.0);
+        let media_before = tree(&root.join("assets"));
+        let expected_deck = model::deck_text(&deck);
+        let mut expected_progress = memory.clone();
+        expected_progress["version"] = json!(1);
+        expected_progress
+            .as_object_mut()
+            .unwrap()
+            .remove("audio_history");
+        for name in ["外部バックアップ", "ProtectedHost-export"] {
+            let dest = temp.0.join(name);
+            backup::export(&root, &dest, &deck, &progress).unwrap();
+            assert_eq!(
+                fs::read(dest.join("custom.tsv")).unwrap(),
+                expected_deck.as_bytes()
+            );
+            let bytes = fs::read(dest.join("progress.json")).unwrap();
+            assert_eq!(
+                serde_json::from_slice::<Value>(&bytes).unwrap(),
+                expected_progress
+            );
+            assert_eq!(
+                tree(&dest.join("assets")),
+                media_before,
+                "detached originals must be preserved exactly"
+            );
+            let manifest: Value =
+                serde_json::from_slice(&fs::read(dest.join("learning-backup.json")).unwrap())
+                    .unwrap();
+            assert_eq!(manifest["version"], 1);
+            assert_eq!(manifest["progress_sha256"], assets::sha256(&bytes).unwrap());
+            assert_eq!(
+                manifest["deck_sha256"],
+                assets::sha256(expected_deck.as_bytes()).unwrap()
+            );
+            assert_eq!(manifest["assets"].as_array().unwrap().len(), 1);
+            assert_eq!(backup::prepare(dest.clone()).unwrap().media_count(), 1);
+            let completed = tree(&dest);
+            assert!(backup::export(&root, &dest, &deck, &progress).is_err());
+            assert_eq!(
+                tree(&dest),
+                completed,
+                "retry must not replace a completed backup"
+            );
+            let after = ledger(&temp.0);
+            for (path, bytes) in &source_before {
+                assert_eq!(after.get(path), Some(bytes), "{}", path.display());
+            }
+            assert_eq!(value(&progress), memory);
+        }
+    }
+}

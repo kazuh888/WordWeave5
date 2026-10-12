@@ -1,5 +1,9 @@
 # 開発タスクの使用量記録
 
+- 同再開の終了境界（00:25:30 UTC／JST 09:25、commit/push・最終応答前）：d-Bは作者17件（5PASS/10行動RED/2接合RED）、本体1file接続、自己確認新17＋旧34の51unique成功、独立コードreview PASS。source/EXE hash一致・TEMP残存0を親が確認した。sandbox hardlinkのfixture失敗は実装失敗に数えず、sandbox外要求の初回拒否を保持した。管理者tokenなら実行を拒否するguard追加後に許可され、Administrator=Falseの通常権限で固定2EXEを実行した。途中の限定7件は51へ重複加算しない。ET0仕様/設計は初回ET-D01の表示誤断言を1cycle是正し独立Pre PASS、計画確定。既存判定の無変更反復はなく、次の独立runner前でSol/medium切替待ちにする。全体test/releaseと実機/API受入は未実施。終了usage/runtime metadata/親子包含は未取得。改善は不要な文書runnerを起動せず、別所有の試用設計とd-Bの実装検証を並行した点であり、消費量・所要時間の削減率は未測定である。
+
+- 同再開でI2d-S最終Postを記録し `d82e311` を既存開発ブランチへpushした。早期試用は通常版とは別の限定計画とし、既承認d-Bテスト作者とET0仕様・設計を別所有で並行する。d-B試験用observerの追加設計は独立Pre PASS、製品コードには含めない。全役は既定Astra/high指定、固定ソースの独立runner前に利用者へSol/medium切替を知らせる。3補助となった区間は、d-B作者・必要な接合review・別所有の試用設計に限定した。旧release SHA256 `9B888E9FC923823C59B4C3B0AB1A4DAD2051CA6139DE153B6DE6CA213DD387D3` を読取記録し、試用build/delivery候補のignore適用を確認した。旧EXEの置換・実API送信は行っていない。途中usage/runtime metadata/親子包含は未取得である。
+
 - 2026-10-12 I2d-S最終Postと早期試用版の条件確認を再開。開始時計2026-10-11 23:55:12 UTC（JST 08:55）、HEAD `0ec2fc2`、tree clean。利用者のAstra/high切替と、現実装を通常データと分離して試す提案の了承を受領した。既定reviewer Astra/highが独立34件を最終確認し、親は試用保存先/資格情報/EXE配置の実装境界を読取調査する。試用には既定全体test/release buildを維持し、未完成の音声履歴UIを提供済みとしない。開始usage/runtime metadata/親子包含は未取得である。
 
 - 同独立runnerはbuild1回2分14秒、list305件のうち新25/旧5/旧4を固定し34unique成功。source2本と新EXE A11ECC23…の前後hash一致、TEMP残存0、format/diff成功。集計の空stderr例外で旧5件のPID/nativeexit/timeoutが永続化されなかったため、この5件だけ再取得しPID29836/exit0/timeoutなしを確認した。他29/build/listは反復0、旧欠測と例外rawを保持。終了記録23:50:23 UTC（JST 08:50）、保存push/最終応答前まで。終了usage counter/runtime metadata/親子包含は未取得。次はAstra/highの最終Postへ利用者切替待ち。改善候補は集計前の実行metadata永続化であり、担当logs内の今回再取得手順に適用済み、恒久harness・設定・検証水準変更なし。

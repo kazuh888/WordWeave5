@@ -3,8 +3,10 @@ use crate::{
     assets::{sha256, AssetRef, AssetStore},
     model::{self, Entry},
     store::{
-        acquire_progress_write, atomic_write, read_progress_for_backup, Progress,
-        ProgressGateError, ProgressWriteGuard, Storage,
+        acquire_external_export, acquire_progress_write, atomic_write,
+        create_external_directory_under_guard, read_progress_for_backup,
+        write_external_file_under_guard, ExternalExportGuard, Progress, ProgressGateError,
+        ProgressWriteGuard, Storage,
     },
 };
 use serde::{Deserialize, Serialize};
@@ -76,8 +78,9 @@ fn export_with_limits(
     progress: &Progress,
     limits: Limits,
 ) -> Result<(), String> {
-    let guard = acquire_progress_write().map_err(ProgressGateError::message)?;
-    reject_asset_destination(root, dest)?;
+    let guard = acquire_external_export().map_err(ProgressGateError::message)?;
+    #[cfg(all(test, windows))]
+    i2_export_backup::observe_export(i2_export_backup::ExportStage::BeforeContent, dest, &guard);
     let deck = model::deck_text(deck);
     model::parse_deck(&deck)?;
     if deck.len() as u64 > crate::commit::DECK_LIMIT {
@@ -98,32 +101,23 @@ fn export_with_limits(
         return Err("バックアップの管理情報が大きすぎます。".into());
     }
     // Never merge into or overwrite an existing backup directory.
-    fs::create_dir(dest).map_err(|e| e.to_string())?;
-    let target = AssetStore::new(dest.to_owned());
+    let dest = create_external_directory_under_guard(root, dest, &guard)?;
+    #[cfg(all(test, windows))]
+    i2_export_backup::observe_export(i2_export_backup::ExportStage::AfterDirectory, &dest, &guard);
+    let target = AssetStore::new(dest.clone());
     for r in &manifest.assets {
         target.put(r.kind, &store.read(r)?)?;
     }
-    atomic_write(&dest.join("custom.tsv"), deck.as_bytes())?;
-    atomic_write(&dest.join("progress.json"), &bytes)?;
-    atomic_write(&dest.join("learning-backup.json"), &manifest_bytes)
-}
-fn reject_asset_destination(root: &Path, dest: &Path) -> Result<(), String> {
-    if root.exists() {
-        let assets = root.join("assets");
-        let assets = if assets.exists() {
-            fs::canonicalize(assets)
-        } else {
-            fs::canonicalize(root).map(|p| p.join("assets"))
-        }
-        .map_err(|e| e.to_string())?;
-        let parent = fs::canonicalize(dest.parent().ok_or("退避先の親フォルダーがありません。")?)
-            .map_err(|e| e.to_string())?;
-        let destination = parent.join(dest.file_name().ok_or("退避先の名前がありません。")?);
-        if destination.starts_with(assets) {
-            return Err("媒体原本のassetsフォルダー内はバックアップ先に指定できません。別の保存先を選んでください。".into());
-        }
-    }
-    Ok(())
+    write_external_file_under_guard(root, &dest.join("custom.tsv"), deck.as_bytes(), &guard)?;
+    write_external_file_under_guard(root, &dest.join("progress.json"), &bytes, &guard)?;
+    #[cfg(all(test, windows))]
+    i2_export_backup::observe_export(i2_export_backup::ExportStage::BeforeManifest, &dest, &guard);
+    write_external_file_under_guard(
+        root,
+        &dest.join("learning-backup.json"),
+        &manifest_bytes,
+        &guard,
+    )
 }
 fn progress_bytes(progress: &Progress, limit: u64) -> Result<Vec<u8>, String> {
     progress.validate()?;
@@ -155,11 +149,8 @@ fn legacy_export_bytes_under_guard(
     root: &Path,
     candidate: &Progress,
     limit: u64,
-    guard: &ProgressWriteGuard,
+    _guard: &ExternalExportGuard,
 ) -> Result<Vec<u8>, String> {
-    guard
-        .ensure_writable()
-        .map_err(ProgressGateError::message)?;
     if candidate.audio_history.is_some()
         || read_progress_for_backup(root)?.is_some_and(|progress| progress.audio_history.is_some())
     {
@@ -508,5 +499,487 @@ mod tests {
         assert!(prepare(dest).is_err());
         drop(storage);
         fs::remove_dir_all(root).unwrap();
+    }
+}
+
+#[cfg(all(test, windows))]
+mod i2_export_backup {
+    use super::*;
+    use crate::store::{
+        acquire_external_export,
+        i2_gate_tests::{tree, Temp},
+        ExternalExportGuard,
+    };
+    use std::{
+        cell::RefCell,
+        collections::BTreeMap,
+        process::{Command, Stdio},
+        thread,
+        time::{Duration, Instant},
+    };
+
+    const CHILD: &str = "WW5_BACKUP_DESTINATION_CHILD";
+
+    // Approved H4 test seam. Production call sites belong to the implementer.
+    #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+    pub(super) enum ExportStage {
+        BeforeContent,
+        AfterDirectory,
+        BeforeManifest,
+    }
+
+    struct Scenario {
+        stages: Vec<ExportStage>,
+        expected_before_manifest: BTreeMap<PathBuf, Vec<u8>>,
+        fail_media_directory: bool,
+    }
+    thread_local! {
+        static SCENARIO: RefCell<Option<Scenario>> = const { RefCell::new(None) };
+    }
+    struct Registration;
+    impl Registration {
+        fn new(expected: BTreeMap<PathBuf, Vec<u8>>, fail_media_directory: bool) -> Self {
+            SCENARIO.with(|slot| {
+                let mut slot = slot
+                    .try_borrow_mut()
+                    .expect("recursive scenario registration");
+                assert!(slot.is_none(), "nested scenario registration is forbidden");
+                *slot = Some(Scenario {
+                    stages: Vec::new(),
+                    expected_before_manifest: expected,
+                    fail_media_directory,
+                });
+            });
+            Self
+        }
+        fn stages(&self) -> Vec<ExportStage> {
+            SCENARIO.with(|slot| slot.borrow().as_ref().unwrap().stages.clone())
+        }
+    }
+    impl Drop for Registration {
+        fn drop(&mut self) {
+            SCENARIO.with(|slot| {
+                slot.borrow_mut().take();
+            });
+        }
+    }
+
+    const MEDIA_DIRECTORY_SENTINEL: &[u8] = b"synthetic fixture blocks assets directory creation";
+
+    pub(super) fn observe_export(stage: ExportStage, dest: &Path, _guard: &ExternalExportGuard) {
+        SCENARIO.with(|slot| {
+            let mut slot = slot.try_borrow_mut().expect("recursive export observer is forbidden");
+            let Some(scenario) = slot.as_mut() else { return };
+            let expected_stage = match scenario.stages.len() {
+                0 => ExportStage::BeforeContent,
+                1 => ExportStage::AfterDirectory,
+                2 => ExportStage::BeforeManifest,
+                _ => panic!("scenario applies to exactly one export"),
+            };
+            assert_eq!(stage, expected_stage, "strict export observation order");
+            assert!(matches!(acquire_progress_write(), Err(ProgressGateError::Reentrant)), "normal writer must share the export exclusion at {stage:?}");
+            assert!(matches!(acquire_external_export(), Err(ProgressGateError::Reentrant)), "external writer must share the export exclusion at {stage:?}");
+            scenario.stages.push(stage);
+            match stage {
+                ExportStage::BeforeContent => assert!(!dest.exists(), "no output before content snapshot"),
+                ExportStage::AfterDirectory => {
+                    assert!(dest.is_dir());
+                    assert!(tree(dest).is_empty(), "directory observation must precede all payload writes");
+                    if scenario.fail_media_directory {
+                        fs::write(dest.join("assets"), MEDIA_DIRECTORY_SENTINEL).unwrap();
+                        assert!(dest.join("assets").is_file(), "FIXTURE_FAILURE: assets obstacle is a normal file");
+                    }
+                }
+                ExportStage::BeforeManifest => {
+                    assert!(!scenario.fail_media_directory, "real media I/O failure must stop before marker");
+                    assert!(!dest.join("learning-backup.json").exists());
+                    assert_eq!(tree(dest), scenario.expected_before_manifest, "all media, deck and wire1 progress must be exact before the completion marker");
+                }
+            }
+        });
+    }
+
+    // Global write-block/reentrancy state belongs only to a finite child.
+    // Keep the fixture under a parent-owned directory even after a child kill.
+    fn isolated(name: &str, body: impl FnOnce()) {
+        let case = format!("backup::i2_export_backup::{name}");
+        if std::env::var(CHILD).as_deref() == Ok(case.as_str()) {
+            body();
+            println!("WW5_BACKUP_CHILD_OK:{case}");
+            return;
+        }
+        let temp = Temp::new();
+        let fixture_root = temp.root.clone();
+        eprintln!("WW5_BACKUP_FIXTURE_CREATED:{}", fixture_root.display());
+        let mut child = Command::new(std::env::current_exe().unwrap())
+            .args([case.as_str(), "--exact", "--nocapture", "--test-threads=1"])
+            .env(CHILD, &case)
+            .env("WW5_I2_GATE_LIB_ROOT", &fixture_root)
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .unwrap();
+        let pid = child.id();
+        let deadline = Instant::now() + Duration::from_secs(20);
+        let mut timeout = false;
+        while child.try_wait().unwrap().is_none() {
+            if Instant::now() >= deadline {
+                child.kill().unwrap();
+                child.wait().unwrap();
+                timeout = true;
+                break;
+            }
+            thread::sleep(Duration::from_millis(10));
+        }
+        let output = child.wait_with_output().unwrap();
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        eprintln!(
+            "WW5_BACKUP_PARENT:{case}:pid={pid}:exit={}:timeout={timeout}\n{stdout}\n{stderr}",
+            output.status
+        );
+        drop(temp);
+        assert!(!fixture_root.exists(), "synthetic fixture cleanup failed");
+        eprintln!("WW5_BACKUP_FIXTURE_REMOVED:{}", fixture_root.display());
+        assert!(
+            !timeout,
+            "child killed/reaped after 20 seconds; not behavior success"
+        );
+        assert!(output.status.success(), "child behavior/fixture failure");
+        assert!(
+            stdout.contains("running 1 test")
+                && stdout.contains("1 passed; 0 failed")
+                && stdout.contains(&format!("WW5_BACKUP_CHILD_OK:{case}"))
+        );
+    }
+
+    fn source(temp: &Temp) -> (PathBuf, Vec<Entry>, Progress) {
+        let root = temp.root.join("source");
+        fs::create_dir(&root).unwrap();
+        let mut progress = Progress::default();
+        progress.settings.topic = "write-block中も保持する日本語\\\"\n".into();
+        fs::write(
+            root.join("progress.json"),
+            serde_json::to_vec_pretty(&progress).unwrap(),
+        )
+        .unwrap();
+        fs::write(root.join("custom.tsv"), model::BUILTIN_DECK).unwrap();
+        fs::create_dir(root.join("audio-history")).unwrap();
+        fs::write(
+            root.join("audio-history/sentinel"),
+            b"unrelated immutable history bytes",
+        )
+        .unwrap();
+        AssetStore::new(root.clone())
+            .put(crate::assets::AssetKind::AudioWav, b"RIFF\x04\0\0\0WAVE")
+            .unwrap();
+        (
+            root,
+            model::parse_deck(model::BUILTIN_DECK).unwrap(),
+            progress,
+        )
+    }
+
+    #[test]
+    fn d_b_write_block_allows_eligible_external_backup_without_unblocking() {
+        isolated(
+            "d_b_write_block_allows_eligible_external_backup_without_unblocking",
+            || {
+                let temp = Temp::new();
+                let (root, deck, progress) = source(&temp);
+                let before = tree(&root);
+                let original = serde_json::to_value(&progress).unwrap();
+                let guard = acquire_progress_write().unwrap();
+                guard.block_writes();
+                drop(guard);
+                for name in ["external", "source-export"] {
+                    let dest = temp.root.join(name);
+                    let result = export(&root, &dest, &deck, &progress);
+                    assert_eq!(tree(&root), before);
+                    assert!(
+                        matches!(
+                            acquire_progress_write(),
+                            Err(ProgressGateError::WriteBlocked)
+                        ),
+                        "external backup must not clear the write block, including failure"
+                    );
+                    assert!(result.is_ok(), "T08b eligible external backup must succeed while normal writes stay blocked: {result:?}");
+                    let mut wire = original.clone();
+                    wire["version"] = serde_json::json!(1);
+                    wire.as_object_mut().unwrap().remove("audio_history");
+                    assert_eq!(
+                        serde_json::from_slice::<serde_json::Value>(
+                            &fs::read(dest.join("progress.json")).unwrap()
+                        )
+                        .unwrap(),
+                        wire
+                    );
+                    assert_eq!(
+                        fs::read(dest.join("custom.tsv")).unwrap(),
+                        model::deck_text(&deck).as_bytes()
+                    );
+                    assert_eq!(tree(&dest.join("assets")), tree(&root.join("assets")));
+                    assert_eq!(prepare(dest).unwrap().media_count(), 1);
+                }
+                assert_eq!(serde_json::to_value(&progress).unwrap(), original);
+            },
+        );
+    }
+
+    #[test]
+    fn d_b_write_block_still_checks_pending_history_and_corrupt_content() {
+        isolated(
+            "d_b_write_block_still_checks_pending_history_and_corrupt_content",
+            || {
+                let outer = Temp::new();
+                let guard = acquire_progress_write().unwrap();
+                guard.block_writes();
+                drop(guard);
+                for case in [
+                    "pending",
+                    "pending-directory",
+                    "candidate-history",
+                    "disk-history",
+                    "broken-json",
+                    "corrupt-media",
+                ] {
+                    let temp = Temp::new();
+                    let (root, deck, mut progress) = source(&temp);
+                    match case {
+                        "pending" => fs::write(
+                            root.join("pending-material-commit.json"),
+                            b"must not recover",
+                        )
+                        .unwrap(),
+                        "pending-directory" => {
+                            fs::create_dir(root.join("pending-material-commit.json")).unwrap()
+                        }
+                        "candidate-history" | "disk-history" => {
+                            let history =
+                                crate::audio_history::RootRef::new(crate::audio_history::BlobRef {
+                                    sha256: crate::audio_history::Sha256::parse(&"a".repeat(64))
+                                        .unwrap(),
+                                    bytes: 82,
+                                });
+                            if case == "candidate-history" {
+                                progress.audio_history = Some(history);
+                            } else {
+                                let mut disk = progress.clone();
+                                disk.audio_history = Some(history);
+                                fs::write(
+                                    root.join("progress.json"),
+                                    serde_json::to_vec_pretty(&disk).unwrap(),
+                                )
+                                .unwrap();
+                            }
+                        }
+                        "broken-json" => fs::write(root.join("progress.json"), b"{").unwrap(),
+                        "corrupt-media" => {
+                            let path = fs::read_dir(root.join("assets"))
+                                .unwrap()
+                                .next()
+                                .unwrap()
+                                .unwrap()
+                                .path();
+                            fs::write(path, b"same fixture, corrupt original").unwrap();
+                        }
+                        _ => unreachable!(),
+                    }
+                    let before = tree(&temp.root);
+                    let dest = temp.root.join("export");
+                    for _ in 0..2 {
+                        let error = export(&root, &dest, &deck, &progress).expect_err(case);
+                        assert_eq!(
+                            tree(&temp.root),
+                            before,
+                            "{case}: rejected content cannot create a destination or change source"
+                        );
+                        assert!(matches!(
+                            acquire_progress_write(),
+                            Err(ProgressGateError::WriteBlocked)
+                        ));
+                        assert_ne!(error, ProgressGateError::WriteBlocked.message(), "{case}: external export must reach its content checks instead of the normal writer block");
+                    }
+                }
+                drop(outer);
+            },
+        );
+    }
+
+    #[test]
+    fn d_b_normal_and_external_guard_reentry_refuse_without_deadlock_or_writes() {
+        isolated(
+            "d_b_normal_and_external_guard_reentry_refuse_without_deadlock_or_writes",
+            || {
+                let temp = Temp::new();
+                let (root, deck, progress) = source(&temp);
+                let before = tree(&temp.root);
+                let dest = temp.root.join("export");
+                let normal = acquire_progress_write().unwrap();
+                assert_eq!(
+                    export(&root, &dest, &deck, &progress).unwrap_err(),
+                    ProgressGateError::Reentrant.message()
+                );
+                drop(normal);
+                let external = acquire_external_export().unwrap();
+                assert_eq!(
+                    export(&root, &dest, &deck, &progress).unwrap_err(),
+                    ProgressGateError::Reentrant.message()
+                );
+                drop(external);
+                assert_eq!(tree(&temp.root), before);
+                export(&root, &dest, &deck, &progress).unwrap();
+                assert_eq!(prepare(dest).unwrap().media_count(), 1);
+                drop(acquire_progress_write().unwrap());
+            },
+        );
+    }
+
+    fn junction_refusal(target_is_protected: bool) {
+        let mut temp = Temp::new();
+        let (root, deck, progress) = source(&temp);
+        let outside = temp.root.join("external");
+        fs::create_dir(&outside).unwrap();
+        fs::write(outside.join("keep.txt"), b"external sentinel").unwrap();
+        let alias = temp.root.join("alias");
+        let target = if target_is_protected { &root } else { &outside };
+        temp.junction(&alias, target);
+        assert_eq!(
+            fs::canonicalize(&alias).unwrap(),
+            fs::canonicalize(target).unwrap(),
+            "FIXTURE_FAILURE: junction must resolve to intended directory"
+        );
+        let before = tree(&temp.root);
+        for _ in 0..2 {
+            let result = export(&root, &alias.join("new-backup"), &deck, &progress);
+            assert!(
+                result.is_err(),
+                "T08 stable junction ancestor must be refused, even if its target is external"
+            );
+            assert_eq!(tree(&temp.root), before);
+        }
+    }
+
+    #[test]
+    fn d_b_protected_junction_ancestor_refuses_before_creation() {
+        junction_refusal(true);
+    }
+
+    #[test]
+    fn d_b_external_junction_ancestor_refuses_before_creation() {
+        junction_refusal(false);
+    }
+
+    fn before_manifest(
+        root: &Path,
+        deck: &[Entry],
+        progress: &Progress,
+    ) -> BTreeMap<PathBuf, Vec<u8>> {
+        let mut expected = BTreeMap::from([
+            (PathBuf::from("assets"), Vec::new()),
+            (
+                PathBuf::from("custom.tsv"),
+                model::deck_text(deck).into_bytes(),
+            ),
+        ]);
+        for (path, bytes) in tree(&root.join("assets")) {
+            expected.insert(PathBuf::from("assets").join(path), bytes);
+        }
+        let mut wire = serde_json::to_value(progress).unwrap();
+        wire["version"] = serde_json::json!(1);
+        wire.as_object_mut().unwrap().remove("audio_history");
+        expected.insert(
+            PathBuf::from("progress.json"),
+            serde_json::to_vec_pretty(&wire).unwrap(),
+        );
+        expected
+    }
+
+    #[test]
+    fn d_b_guard_observations_cover_snapshot_directory_and_marker_last() {
+        isolated(
+            "d_b_guard_observations_cover_snapshot_directory_and_marker_last",
+            || {
+                let temp = Temp::new();
+                let (root, deck, progress) = source(&temp);
+                let before = tree(&root);
+                let dest = temp.root.join("export");
+                let expected = before_manifest(&root, &deck, &progress);
+                let registration = Registration::new(expected.clone(), false);
+                let result = export(&root, &dest, &deck, &progress);
+                let stages = registration.stages();
+                drop(registration);
+                assert_eq!(tree(&root), before);
+                assert!(result.is_ok(), "{result:?}");
+                assert_eq!(
+                    stages,
+                    [
+                        ExportStage::BeforeContent,
+                        ExportStage::AfterDirectory,
+                        ExportStage::BeforeManifest
+                    ],
+                    "missing observations cannot pass guard/marker acceptance"
+                );
+                let mut completed = tree(&dest);
+                let manifest_bytes = completed
+                    .remove(&PathBuf::from("learning-backup.json"))
+                    .expect("completion marker");
+                assert_eq!(completed, expected);
+                let manifest: serde_json::Value = serde_json::from_slice(&manifest_bytes).unwrap();
+                assert_eq!(manifest["version"], 1);
+                assert_eq!(
+                    manifest["deck_sha256"],
+                    sha256(&expected[Path::new("custom.tsv")]).unwrap()
+                );
+                assert_eq!(
+                    manifest["progress_sha256"],
+                    sha256(&expected[Path::new("progress.json")]).unwrap()
+                );
+                assert_eq!(prepare(dest).unwrap().media_count(), 1);
+                drop(acquire_progress_write().unwrap());
+            },
+        );
+    }
+
+    #[test]
+    fn d_b_real_media_io_failure_keeps_source_and_leaves_no_completion_marker() {
+        isolated(
+            "d_b_real_media_io_failure_keeps_source_and_leaves_no_completion_marker",
+            || {
+                let temp = Temp::new();
+                let (root, deck, progress) = source(&temp);
+                assert_eq!(
+                    AssetStore::new(root.clone()).inventory().unwrap().len(),
+                    1,
+                    "FIXTURE_FAILURE: valid media is required to reach real put I/O"
+                );
+                let before = tree(&root);
+                let dest = temp.root.join("export");
+                let registration =
+                    Registration::new(before_manifest(&root, &deck, &progress), true);
+                let result = export(&root, &dest, &deck, &progress);
+                let stages = registration.stages();
+                drop(registration);
+                assert_eq!(tree(&root), before);
+                assert_eq!(
+                    stages,
+                    [ExportStage::BeforeContent, ExportStage::AfterDirectory],
+                    "failure injection must be observed, not inferred from any Err"
+                );
+                assert!(
+                    result.is_err(),
+                    "real AssetStore directory/file collision must fail"
+                );
+                assert!(dest.is_dir(), "partial export is retained");
+                assert_eq!(tree(&dest), BTreeMap::from([(PathBuf::from("assets"), MEDIA_DIRECTORY_SENTINEL.to_vec())]), "only the fixture-created obstacle may remain; no payload, temp or completion marker");
+                drop(acquire_progress_write().unwrap());
+                // Registration is gone on Err and the operation can be retried at a
+                // fresh external destination without an injected obstacle.
+                let retry = temp.root.join("retry");
+                export(&root, &retry, &deck, &progress).unwrap();
+                assert_eq!(prepare(retry).unwrap().media_count(), 1);
+                assert_eq!(tree(&root), before);
+            },
+        );
     }
 }
