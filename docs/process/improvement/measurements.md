@@ -1,5 +1,7 @@
 # 開発タスクの使用量記録
 
+- 2026-10-12 I2d-S最終Postと早期試用版の条件確認を再開。開始時計2026-10-11 23:55:12 UTC（JST 08:55）、HEAD `0ec2fc2`、tree clean。利用者のAstra/high切替と、現実装を通常データと分離して試す提案の了承を受領した。既定reviewer Astra/highが独立34件を最終確認し、親は試用保存先/資格情報/EXE配置の実装境界を読取調査する。試用には既定全体test/release buildを維持し、未完成の音声履歴UIを提供済みとしない。開始usage/runtime metadata/親子包含は未取得である。
+
 - 同独立runnerはbuild1回2分14秒、list305件のうち新25/旧5/旧4を固定し34unique成功。source2本と新EXE A11ECC23…の前後hash一致、TEMP残存0、format/diff成功。集計の空stderr例外で旧5件のPID/nativeexit/timeoutが永続化されなかったため、この5件だけ再取得しPID29836/exit0/timeoutなしを確認した。他29/build/listは反復0、旧欠測と例外rawを保持。終了記録23:50:23 UTC（JST 08:50）、保存push/最終応答前まで。終了usage counter/runtime metadata/親子包含は未取得。次はAstra/highの最終Postへ利用者切替待ち。改善候補は集計前の実行metadata永続化であり、担当logs内の今回再取得手順に適用済み、恒久harness・設定・検証水準変更なし。
 
 - 2026-10-12 I2d-S独立runner再開。開始時計2026-10-11 23:43:57 UTC（JST 08:43）、HEAD `476bad7475c1e7375e80c98bdee1bc29b753ae7b`、tree clean。利用者のSol/medium切替を受領。新規runner `settings_export_runner` を既定 `gpt-6.1-sol/medium`・fresh contextで起動し、新25＋旧9を確定sourceから独立build/実行する。親は証拠照合と短い現状記録を担当。完了境界は独立実行報告、最終Post/製品EXEは次工程である。開始usage counter・実行metadata・親子包含は未取得、推計しない。

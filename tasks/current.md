@@ -1,6 +1,6 @@
 # 現在のタスク要約
 
-更新：2026-10-12（I2d-Sの独立34件成功、全採用実行のnative exit0/timeoutなし・source/EXE前後hash一致・TEMP残存0を確認。集計例外のmetadata欠測は旧5件だけ再取得して解消。親Sol/medium、次はAstra/highの最終Post前で停止する。I2d-S全体/製品EXEは未完了）。詳細は [参照インデックス](context-index.md) を参照する。
+更新：2026-10-12（I2d-S独立34件と最終Post PASS/Closedを確認。利用者は現実装を試用専用データで試す早期EXE提案を了承しAstra/highへ切替済み。現在は保存先・Qwen資格情報を通常版から分ける限定計画中。音声履歴UI・製品EXEは未完成）。詳細は [参照インデックス](context-index.md) を参照する。
 
 ## 現在の目標
 
@@ -53,6 +53,6 @@ ACOUSTIC-HISTORY-001：原音・音響解析結果・Qwen助言を保存し、�
 2. [実装計画](ACOUSTIC-HISTORY-001/implementation.md) の依存順に保存回復・既存データ/backup統合・残るPraat障害試験・処理統合・比較UI・二hostを継続し、最後に全体テスト/release検証を行う。
 3. I2は[設計](ACOUSTIC-HISTORY-001/design-i2.md)のG private接合追補も[独立Pre PASS](ACOUSTIC-HISTORY-001/history-commit-design-review.md)。plannerの[逐次所有追補](ACOUSTIC-HISTORY-001/implementation.md)に従う。GはsingleMutex/再入拒否/write-block口/strict pendingまでであり、Progress形式・移行・結果不明判定は後続である。現在、利用者の動作確認待ちはない。
 4. M/S/N/R/T/V/Pは最終Post PASS。Pの[最終判定](ACOUSTIC-HISTORY-001/history-pointer-commit-review.md)、[独立269件](ACOUSTIC-HISTORY-001/history-pointer-commit-runner.md)、[初回失敗の環境比較](ACOUSTIC-HISTORY-001/history-pointer-commit-diagnostic.md)を正とし、成功済みの反復は行わない。
-5. I2b-A/BとI2d-Hは最終Post PASS/Closed。I2d-Sの[独立runner](ACOUSTIC-HISTORY-001/settings-export-runner.md)は新25＋旧9の34unique成功を確認。集計例外の旧edit5はPID29836で限定再実行しexit0/timeoutなし、欠測を解消。最終採用は新25/旧5/旧4の34uniqueで重複加算しない。sourceはsettings_ui C7C7C9D1…、control F7A3FB07…不変、独立buildのtest EXEはA11ECC23…（完全hashはrunner報告）。次は利用者のAstra/high切替後、確定source/EXE/rawを[独立レビュー](ACOUSTIC-HISTORY-001/settings-export-review.md)へ渡し最終Postを受ける。d-S全体Closedまではd-B/M本体着手保留、以後d-B→d-M→b-S→b-C。I10/製品EXEは未了。
+5. I2b-A/B、I2d-H/Sは最終Post PASS/Closed。[設定export最終レビュー](ACOUSTIC-HISTORY-001/settings-export-review.md)と[独立34件](ACOUSTIC-HISTORY-001/settings-export-runner.md)を正とする。通常の次単位はd-B→d-M→b-S→b-Cだが、利用者了承の早期試用EXEを先に準備するため限定計画を確認中。保存先分離だけでは通常Qwen資格情報が共有される点を含め、通常データに触れない起動・表示・配布・検証を具体化する。全体test/release gateは維持、新音声履歴UIは未提供である。
 
 今回の整理は作業用要約から廃案・重複ログ・無関係な履歴・設計本文の転載を除外したものである。根拠資料と旧記録は削除していない。旧版はインデックスに残すが通常再開時には読み込まない。
