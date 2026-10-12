@@ -89,6 +89,8 @@ I2d-S設定の4書き出し口：[独立25件の期待値・RED・既存回帰9�
 
 I2d-Bバックアップ書出し：[独立17件の期待値とRED](ACOUSTIC-HISTORY-001/backup-destination-tests.md)、[本体と自己確認51件](ACOUSTIC-HISTORY-001/backup-destination-implementation.md)、[独立runner51件成功](ACOUSTIC-HISTORY-001/backup-destination-runner.md)、[最終Post PASS／Closed](ACOUSTIC-HISTORY-001/backup-destination-review.md)。
 
+I2d-M媒体書出し：[限定設計とM-D01の計画解消](ACOUSTIC-HISTORY-001/media-export-design.md)、[独立Pre PASS](ACOUSTIC-HISTORY-001/media-export-review.md)。2file所有と役割別モデルはimplementation.mdのI2d-M計画deltaを参照する。本体・テストは未実装である。
+
 現実装の早期試用：[限定計画・通常データ/資格情報分離・提供gate](ACOUSTIC-HISTORY-001/early-trial-plan.md)、[外部契約と設計](ACOUSTIC-HISTORY-001/early-trial-contract.md)、[仕様／設計レビューとET-D01是正](ACOUSTIC-HISTORY-001/early-trial-review.md)。新音声履歴UIの完成とは別であり、EXEは未提供である。
 
 ソース入口：保存は `src/audio_history/`、共有履歴型は `tools/practice-history/`、音響解析は `tools/acoustic-analysis/`。生ログは各試験記録から辿る。要約へログ本文を複製しない。

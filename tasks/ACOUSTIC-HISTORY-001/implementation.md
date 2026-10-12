@@ -144,6 +144,61 @@ Windows合成native UIとprocess検証は許可範囲、利用者データ・実
 
 I2d-S接合照合（2026-10-12）：H最終Post PASS後、独立designer `settings_export_design`（Astra/high）が承認済み設計の再利用・2file所有を確認した。新仕様/公開API/描画変更は不要。settings_ui内の内部 `write_settings_export` は実Storage.dirを優先し、Noneの場合だけ副作用なしresolverを呼ぶ。3出口は生成bytesと既存通知まで同じproductionメソッドとして抽出し、control_settingsのJSONLは不変借用のままResultを返してclosure後に既存通知へ渡す。credit_time→picker→memory Progress JSONの順序とdiagnostic eventの既存増分を維持する。settings editorの未確定draftをJSONへ混ぜない。両fileの独立cfg(test)から外部exact/保護先拒否/状態保持を検証し、環境変数と診断sinkは有限timeout子processに隔離する。test作者→本体実装者は逐次所有。Hのwrite-block検証を再利用し新公開seamを増やさない。7役は既定I2割当、次の独立runner前に親モデル切替を案内する。
 
+#### I2d-M限定計画delta: library内bundle façade（2026-10-12、親確定・設計反映・独立Pre PASS）
+
+確定：親が下記限定方針・2file所有を採用し、designerが署名・全member名検査・2点observer・証拠分担を反映した。設計SHA256 `F6A1D38ABEFEC370FAF14835BFDF48D40B4F76A6E7321F889E1AD028B1B1F49F` は[独立Pre PASS](media-export-review.md)、阻止0。以下のPre待ちという準備時記述はこの確定により解消し、独立作者へ進む。本体・runner/Postは未了である。
+
+本節は上表I2d-Mの「本体1file」だけを**本体・同file試験の計2file**へ更新する計画判断である。未完了チェック・他単位・品質gateは変更しない。本節のチェックリストをこのdeltaの作業リストとし、別todoは作らない。親受領のd-B独立51件・最終Post PASS/Closedを依存入力とするが、上表d-Bの状態記録は親の担当へ残す。**本deltaは本体着手許可やM-D01の独立Closedを意味しない。** 完了境界は計画判断をdesignerへ返すまでであり、source/test編集・再委任・commit/push・公開を含まない。
+
+初期仮案はchat_mediaの1file接合と既存public helper再利用であった。[媒体限定設計](media-export-design.md) SHA-256 `9B492E9074F7D0DF82674D766110AD2B79E68CFEA00C5A4DB39F73772D7EC9AB` とHEAD `b4f100ca5a8cf997ad1682bbf16f907977e81ebc` のmain/lib/store境界を照合し、この仮案を更新する。binaryのappからlibraryの`pub(crate) ExternalExportGuard`／under_guardには到達できず、public helperを個別に呼ぶだけではH4の同一guardと解決済みpathの契約を満たさない、というM-D01の根拠を確認した。
+
+**採用方針はstore.rs内でguardを取得・保持・解放する同期の限定bundle façadeである。** 媒体3出口という同じ縦の単位へstoreの最小所有を追加し、bridgeだけの新単位・別runner工程は増やさない。`ExternalExportGuard`、取得口、under_guard、`ProgressGateError`／messageの可視性拡張は採用しない。外部型公開はbinaryに長期guard保持能力と正本gateのerror契約を持ち出すため、この用途より広い。別Mutex、storeのbinaryへの再include、直接atomic_write残置、各memberごとのpublic locking wrapperも不採用である。
+
+既存承認仕様AH-AC04/16、I2-T08/T08b、[design-i2.md](design-i2.md) §5 H1/H4/H5を再利用する。新外部仕様執筆は非該当であり、型の公開境界の修正は既存の利用者動作を実現する内部判断である。単一file2出口は既存`write_settings_export`を再利用し、改名・移動しない。一式は生成済みimmutable bytesをfaçadeへ借用し、原文・ink・画像生成とmarker serializationが成功してからdirectory作成へ進む。実Storage.dirを優先し、None時だけ現在の既定起動で使う副作用なしresolver契約を再利用する。任意カスタムroot失敗・起動後の環境変更から元rootを復元できるという保証は追加しない。実際の起動経路がその保証を必要とするなら、推測した既定rootへ置換せず阻止条件として親へ返す。ET1のroot選択や起動state追加は本単位へ混ぜない。
+
+façadeは「新規の平坦directoryへborrowed bytes列を書き、別指定の完了memberを最後に書く」1操作だけを公開する。設計§6の`write_external_bundle(root, dest, files, completion) -> Result<(), String>`案を基準とし、正確な署名・検査順・private test seamはdesignerが確定する。guardはstoreのlocal所有で、directory作成からmarker書込のResult確定まで連続保持し、directory helperの返却済み絶対pathを全memberの基点に使う。各member/marker/tempの保護は既存under_guardへ委譲する。member名の全件事前検査は最初の作成前に行い、単一通常leaf以外、Windows上で同じ出力先となる重複、completionとの衝突を拒否する。区切り、`.`/`..`、prefix/絶対path、ADS、曖昧名等を通さず、既存Windows境界規則を再利用する。検査済みpathをbinaryが生成したと信用しない。
+
+公開callback/trait、再帰directory、ストリーミング、rollback、自動再試行、完了後の追加書込、別のexport frameworkは追加しない。marker bytesの版・内容・hashの構築責任は現行WordApp側に残し、storeにannotation/JSON形式を解釈させない。新façadeをbackup/settings等へ展開するrefactorも対象外である。公開API加算とmember名検査の必要性は独立Preで確認する。
+
+| 所有対象 | 作者→実装者の逐次所有と除外 |
+| --- | --- |
+| `src/app/chat_media.rs` | 作者は新`#[cfg(test)] mod i2_export_media`とその合成fixture/oracleのみ。実装者は3 exportメソッドの本体接合のみ。picker、通知、描画、save処理、既存test期待値を変更しない |
+| `src/store.rs`（追加1file） | 作者は新`#[cfg(all(test, windows))] mod i2_export_bundle_tests`のobserver/fixture/oracleのみ。実装者は限定façade、必要なprivate member名preflight、承認された本体中のtest-only observer呼出のみ。既存guard・identity・atomic・save・H/G試験の意味/可視性を変えない |
+
+新source/test file・manifest・依存は不要で、最大5fileの既定上限に対し予定は2fileである。designerの出力は既存media-export-design.mdの更新と必要なdesign-i2.md H4への限定統合であり、parentがその文書所有をdispatchする。plannerは本節だけを所有する。src/app/harness_tests.rs等の既存試験はread-only実行とし、期待値変更が必要なら追加理由を親へ返す。作者・本体役の同file同時編集は禁止し、所有返却を明示する。
+
+| 単位I2d-Mの受入条件（3点） | 必須証拠 |
+| --- | --- |
+| M-AC1 / T08・T08b：3出口が実rootを保護し、通常外部への音声/原文exact bytes、一式の現行3fileとversion=1 markerを保持する | M01–05と既存媒体harness。保護先/alias/既存directory・無効member名は事前ledger不変・temp増分0。既存正常系oracleを緩めない |
+| M-AC2 / H1・H4・H5：一式が同一external guard、返却path、3file→marker最後を守り、write-blockを解除せず適格な外部退避を許す | libraryのproduction façadeを通るM06/M07。AfterDirectoryとBeforeCompletionの観測、両gate取得口のReentrant、終了後再取得、block維持を有限timeout子processで確認。点間/marker Resultまでの連続生存は独立静的review。binaryからprivate gateへ触れる試験口は作らない |
+| M-AC3 / AH-AC04・16：失敗時のpayload/annotation/確認flagと他媒体・Progressを保持し、全成功後に対象だけclearする | M01–08。事前拒否の全不変と、途中失敗時の先行成果物残存・完了marker欠損を区別する。picker取消しは呼出0回の既存分岐確認、native実機未実施を明記する |
+
+M06の途中失敗はlibraryのAfterDirectoryで第二memberのleafを合成directoryへ変える決定的fixture案をdesignerが確定する。これは境界拒否であり、実atomic I/O失敗と呼ばない。既存H04/H07のatomic/cleanup回帰を再利用する。libraryの途中失敗の動的証拠と、binaryの成功/事前拒否での状態保持・`?`後にのみclearするproduction接合の独立reviewを合成して示す。binary production一式で同じ途中失敗を動的に観測したとは主張しない。この証拠の分担で既存受入を満たすかをPreで明示確認し、不足指摘があればdesignerへ返す。公開故障注入口や汎用FS抽象化で埋めない。observerは2点のみ、test-only、thread-local/RAII回収、Result置換なしとし、fixture由来残存物をproduction出力と区別する。
+
+| 役割 | exact model / effort | 難易度・riskと選定理由 |
+| --- | --- | --- |
+| planner | `gpt-6-astra` / `high` | 固定役。中/高：crate境界・所有・受入証拠の調整 |
+| external-spec author | `gpt-6-astra` / `high`（新規執筆N/A） | 固定役。承認仕様を再利用し、observableな差分が必要な場合だけ戻す |
+| designer | `gpt-6-astra` / `high` | 高/高：公開操作の最小化、名前検査、単一guard、test観測境界を確定する |
+| implementer | `gpt-6-astra` / `high` | 中/高：2fileでも保護領域迂回・未保存媒体喪失が起き得るため既定割当を維持する |
+| test author | `gpt-6-astra` / `high` | 高/高：独立bytes/hash/ledgerと別crateに分かれた動的・静的証拠を設計する |
+| test runner | `gpt-6.1-sol` / `medium` | 中/高：固定差分/手順の実施であり、期待値を変更せず実行件数・未実行・hashを記録する |
+| reviewer（Pre/Post） | `gpt-6-astra` / `high` | 高/高：作者から独立し、公開境界・連続guard・失敗時保持と証拠不足をread-onlyで判定する |
+
+親から渡された呼出可能一覧と上記exact ID/effortは対応している。各dispatchで明示指定し、役/model/skillの不在はblockerとする。親model/effortは変更しない。2026-10-12の工程別自動引継ぎ承認を適用し、旧節の「runner前に親モデル切替のため停止」という記述は本単位に適用しない。これは既存Pre/Post・独立性・権限・全体gateを変えるものではない。
+
+依存順とチェックポイントは次のとおりである。
+
+- [x] 親が本限定方針・2file所有を確定し、designer（Astra/high）が署名、全member事前検査、2点observer、root適用範囲と証拠分担を既存設計へ反映する。d-H/S/Bの完了差分・所有返却を入力とする。
+- [x] 独立Pre（Astra/high）が更新設計と本deltaを確認し、M-D01、public API必要性、member衝突、binary/library試験の到達可能性、H1/H4/H5の維持について判定する。PASSの固定hashを親が記録するまでsource/testを開始しない。
+- [ ] 独立作者（Astra/high）が2fileの試験・期待値を先に固定する。API不在でcompile不能なら、それを行動REDと数えず、Preで確定した副作用なし固定Errの最小scaffoldだけを実装者へ渡し、所有を作者へ返してからREDを取得する。既存7役の責任分離を保つ。
+- [ ] 実装者（Astra/high）が作者から返却された本体2fileを接合し、期待値を変更せずfocused GREEN/format/diffを得る。ここで差分とsource/試験EXE hashを固定し、独立runner（Sol/medium）へ返す。
+- [ ] 独立runnerの結果を独立Post（Astra/high）が確認し、M-AC1–3と全3出口の迂回残置なしを確認してから親がI2d-Mを閉じる。D2の閉鎖はd-H/S/B/M全体の既存条件を満たして判定し、次は既定I2b-S→I2b-Cへ渡す。
+
+required verificationは新`cargo test --locked --bin wordweave5 i2_export_media`、新`cargo test --locked --lib store::i2_export_bundle_tests`、既存`cargo test --locked --bin wordweave5 chat_media::`、媒体限定設計§5の5件のharness実名filterである。library加算の関連確認は`cargo test --locked --lib store::i2_export_destination_tests`、`cargo test --locked --test progress_export_destination`、`cargo test --locked --test audio_history_gate`、共有helperを使う`cargo test --locked --lib backup::i2_export_backup`とする。filterは作者完成後に`-- --list`で実在・非0件と対応ACを固定し、名前差は記録して実在名を用いる。重複実行はunique件数へ重複加算しない。format/diff、独立Pre/Post、I10の`cargo test --all-targets --locked`と`cargo build --release --locked --bin wordweave5`を維持する。通過済み全体suiteは関連変更・失敗・未解決riskがない限り途中で反復しない。
+
+未決はdesignerの具体署名・member同一名判定・試験seamの確定と独立Pre判定であり、現時点で利用者の新しい動作選択は不要である。公開境界拡大、外部動作変更、任意root回復保証、新権限、所有の追加が必要になれば理由と候補を親へ返す。本plannerはAGENTS/development-team/KPIとplanning-and-task-breakdown全文・参照DoDを読了し、依存順・小単位・受入/検証の分離を適用した。文書のみの確認でありruntime試験は未実施、指定値は`gpt-6-astra/high`、実行model/effort metadataとusage開始/終了counterは未取得である。取得環境識別は`CODEX_THREAD_ID=01a12dce-fb43-72e2-84b2-9e5af7f0a6cd`、`CODEX_SESSION_ID=01a08550-055c-7aa1-9834-905e4a7ce148`、親子包含関係は未確認として親の同一task測定へ渡す。
+
 #### b-B限定計画delta: Path読取bridge（2026-10-11、親確定・設計反映・独立Pre PASS）
 
 確定：設計SHA `A7A6931A63A53E6842B91DC816ED1430BAF2D3EEB3CC95F753C6226AE26EFBE0` の[独立Pre PASS](history-backup-review.md)、阻止0を受領した。以下のPre待ちという準備時記述はこの確定により解消し、独立作者へ進む。本体・runner/Postは未了である。
