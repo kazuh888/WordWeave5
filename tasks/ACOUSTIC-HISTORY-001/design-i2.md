@@ -271,6 +271,16 @@ d-Bはbackup.rs::export_with_limitsの通常gateを`acquire_external_export`へ�
 
 write-block中も安全な外部file退避、およびb-Bの内容条件を満たすbackup exportは成功できるが、pendingやhistory混入の内容拒否を迂回しない。guardは同期snapshot/出力区間だけに所有し、file picker/確認画面、解析、ネットワーク、worker完了待ちを含めない。guardをasync taskへ移動せず、取消callbackやtokenを新設しない。既存callerの取消し/遅延結果契約は維持する。d-H時点ではbackup/媒体のconsumer接続とI2-D2 Closedを主張しない。
 
+##### I2d-B試験接合（2026-10-12）
+
+AH-AC16／I2-T08・T08bのH4/H5を再利用し、`src/backup.rs`の同一export本体にだけ、`#[cfg(all(test, windows))]`のobserver呼出を3点置く。作者所有の既存`i2_export_backup`内に`pub(super) enum ExportStage { BeforeContent, AfterDirectory, BeforeManifest }`と`pub(super) fn observe_export(stage: ExportStage, dest: &Path, guard: &ExternalExportGuard)`を置く。BeforeContentはexternal guard取得直後・deck変換を含む全内容preflight前で、destは入力pathである。AfterDirectoryは`create_external_directory_under_guard`成功直後・最初の媒体put前、BeforeManifestはprogress.jsonの書込成功後・learning-backup.json書込直前で、両者のdestは返却済みの解決pathである。同じguardを借用し、所有権を渡さない。型・hook本体・登録状態・3呼出とも非test buildから除外し、公開API、production trait、別export本体、取消し／async境界は増やさない。
+
+作者はthread-localの登録済みscenarioを1回のexportだけに適用し、RAIIで通常終了・Err・unwind時に登録を除去する。未登録時はno-op、入れ子登録と再帰exportは拒否する。hookは`()`を返し、読取結果・検証結果・I/O結果を置換しない。借用path/guardを保持せず、合成fixtureの観測と指定点での外部宛先への副作用だけを許す。作者がhook／fixture／期待値、実装者が本体の3呼出を逐次所有する。gate観測やassert panicは既存の有限timeout子process内とし、親が所有する隔離directoryを回収する。gateの解除口は追加しない。
+
+成功scenarioは厳密な観測列`BeforeContent → AfterDirectory → BeforeManifest`と、各点で通常／external両取得口が`ProgressGateError::Reentrant`になることを確認する。BeforeContentではdest不在、AfterDirectoryでは作成済み空directory、BeforeManifestでは独立fixture由来の全媒体・custom.tsv・progress.jsonのexact bytesとmarker不在を照合し、export成功後は完成manifest／source全file・dir ledger不変と通常gate再取得成功を確認する。これが動的証拠の範囲である。点間でguardをdrop／再取得しないこと、最後のmanifest書込のResult確定まで同じローカルguardが生存すること、marker後に書込がないことは本体の独立静的reviewで確認する。別threadのnegative timeout観測や追加の完了hookではこの連続性の証明を置き換えない。
+
+失敗scenarioは有効な合成媒体1件以上を事前にsourceへ用意し、AfterDirectoryで`dest/assets`に通常fileの固定sentinelを作る。既存`AssetStore::put`の`fs::create_dir_all`がこのfileと衝突して実I/Oエラーを返すため、期待列は`BeforeContent → AfterDirectory`、exportはErr、sourceの全bytes／dir集合は不変、dest残存は作成directoryとfixture sentinelだけ、custom.tsv／progress.json／完了marker／tempは不存在、終了後はgateを再取得可能とする。fixtureが作ったsentinelをproductionの残存物と混同せず、検査後に隔離fixture全体を回収する。marker予定leafのdirectory化は外部file helperの事前検査拒否になり、実I/O失敗の証拠に不足するため採用しない。時間競争watcherとFS全体の抽象化も不要である。作者へこの2scenarioを引き継ぎ、既定の`--test audio_history_backup`／`--lib backup::`、独立Pre/Postと全体gateは維持する。本追補は設計のみであり、実行証拠ではない。
+
 #### H5. 独立oracle・受入と引継ぎ
 
 | 受入 / 割当 | 独立作者が固定する入力と観測 |
