@@ -2,6 +2,20 @@
 
 2026-10-12。通常開発から評価する初期観測である。比較用再実行・品質基準変更はない。方法は[開発体制](../../docs/process/development-team.md)と[KPI](../../docs/process/improvement/kpi.md)を正とする。
 
+## I2d-Mテスト作成・実装・検証の開始
+
+2026-10-12 02:14:41 UTC（11:14:41 JST）、対象HEAD `a64ede0`、tree clean。週枠usedPercent=93、windowDurationMins=10080、resetsAt=1792298129。今回の完了境界は独立作者→本体実装→独立runner→最終Postであり、試用EXEやI10全体完了とは区別する。モデルは作者/実装/レビューAstra/high、runner Sol/mediumを既定どおり明示してdispatchする。
+
+親の開始usage snapshotは02:14:58.848 UTC、input=1530333655、cached=1493809536、output=3506519、reasoning=1063701、total=1533840174、cache_write=0。着手からsnapshotまでの区間は差分に含まれない。親子包含は未確認のまま別記録する。作者 `media_export_tests` をfresh contextで起動した。終了snapshotと各子sessionの範囲は工程完了時に追記する。
+
+### 作者RED工程のcheckpoint
+
+02:36:47 UTCの週枠は96%（同じ窓・reset）であった。開始93%との差はアカウント共通の観測であり工程単独消費へ換算しない。新25件は15行動RED/10PASS、fixture不成立0、compile blocker0。既存consumerの保護先不正受理を検出し、独立hash fixture不成立を修正、unwind assertionを強化した1件だけ再実行した。実装側は固定Errの入口のみであり未完成である。今回のcheckpointは利用者承認済みの途中保存であり、GREEN/最終Postや製品配布ではない。
+
+作者session `01a12de4-4b0b-7561-a325-9b8bca07594c`（Astra/high指定）のusage53イベントを取得した。最初02:15:11.177 UTCはinput=37818/cached=23040/output=244/reasoning=0/total=38062、最後02:37:01.903 UTCはinput=5906085/cached=5668992/output=32023/reasoning=6117/total=5938108。差分はinput=5868267/cached=5645952/output=31779/reasoning=6117/total=5900046である。初回requestは差分外、末尾応答反映の完全性と親包含は未確認である。
+
+実装担当session `01a12df0-346e-7f83-b56a-f4734b1c4b5d` はstub→本体の同じ担当へ引き継ぐ。工程終了前なので最終集計は後で行う。比較用試験やモデル変更はなく、担当Astra/high・runner Sol/mediumを維持する。
+
 ## I2d-M設計開始時のsnapshot
 
 - 対象HEAD：`b4f100c`、開始tree clean。

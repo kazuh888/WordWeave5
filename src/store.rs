@@ -1418,6 +1418,15 @@ pub fn create_external_directory(root: &Path, dest: &Path) -> Result<(), String>
     create_external_directory_under_guard(root, dest, &guard).map(|_| ())
 }
 
+pub fn write_external_bundle(
+    _root: &Path,
+    _dest: &Path,
+    _files: &[(&str, &[u8])],
+    _completion: (&str, &[u8]),
+) -> Result<(), String> {
+    Err("外部一式出力は未実装です。".to_owned())
+}
+
 #[derive(Debug)]
 pub(crate) struct ExternalExportGuard {
     _guard: ProgressWriteGuard,
@@ -2098,6 +2107,509 @@ mod external_destination_windows {
             }
         }
         Ok(())
+    }
+}
+
+#[cfg(all(test, windows))]
+mod i2_export_bundle_tests {
+    use super::*;
+    use crate::store::i2_gate_tests::{tree, Temp};
+    use std::{
+        cell::{Cell, RefCell},
+        process::{Command, Stdio},
+        time::{Duration, Instant},
+    };
+
+    const FILES: [(&str, &[u8]); 3] = [
+        ("ink.json", b"synthetic ink\x00\xff"),
+        ("background.png", b"synthetic background"),
+        ("composite.png", b"synthetic composite"),
+    ];
+    const COMPLETE: (&str, &[u8]) = ("complete.json", b"opaque completion bytes\n");
+    #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+    pub(super) enum BundleStage {
+        AfterDirectory,
+        BeforeCompletion,
+    }
+    #[derive(Clone, Copy)]
+    enum Fault {
+        None,
+        SecondMemberDirectory,
+        CompletionDirectory,
+        Panic,
+    }
+    struct Observer {
+        fault: Fault,
+        seen: Vec<(BundleStage, PathBuf, usize)>,
+    }
+    thread_local! {
+        static OBSERVER: RefCell<Option<Observer>> = const { RefCell::new(None) };
+        static IN_OBSERVER: Cell<bool> = const { Cell::new(false) };
+    }
+    struct Registration;
+    impl Registration {
+        fn new(fault: Fault) -> Self {
+            assert!(
+                !IN_OBSERVER.with(Cell::get),
+                "observer registration during callback"
+            );
+            OBSERVER.with(|slot| {
+                let mut slot = slot.borrow_mut();
+                assert!(slot.is_none(), "observer already registered");
+                *slot = Some(Observer {
+                    fault,
+                    seen: Vec::new(),
+                });
+            });
+            Self
+        }
+        fn seen(&self) -> Vec<(BundleStage, PathBuf, usize)> {
+            OBSERVER.with(|s| s.borrow().as_ref().unwrap().seen.clone())
+        }
+    }
+    impl Drop for Registration {
+        fn drop(&mut self) {
+            OBSERVER.with(|s| {
+                s.borrow_mut().take();
+            });
+        }
+    }
+    struct Callback;
+    impl Drop for Callback {
+        fn drop(&mut self) {
+            IN_OBSERVER.with(|v| v.set(false));
+        }
+    }
+
+    // The only production-visible test seam. No references escape the call.
+    pub(super) fn observe_bundle(stage: BundleStage, resolved: &Path, guard: &ExternalExportGuard) {
+        assert!(!IN_OBSERVER.with(|v| v.replace(true)), "recursive observer");
+        let _callback = Callback;
+        OBSERVER.with(|slot| {
+            let mut slot = slot.borrow_mut();
+            let Some(observer) = slot.as_mut() else {
+                return;
+            };
+            assert!(
+                resolved.is_absolute(),
+                "M-AC2 resolved output directory must be absolute"
+            );
+            assert!(matches!(
+                acquire_progress_write(),
+                Err(ProgressGateError::Reentrant)
+            ));
+            assert!(matches!(
+                acquire_external_export(),
+                Err(ProgressGateError::Reentrant)
+            ));
+            observer
+                .seen
+                .push((stage, resolved.to_owned(), guard as *const _ as usize));
+            match stage {
+                BundleStage::AfterDirectory => {
+                    assert!(
+                        tree(resolved).is_empty(),
+                        "first observation precedes all members"
+                    );
+                    match observer.fault {
+                        Fault::SecondMemberDirectory => {
+                            fs::create_dir(resolved.join("background.png")).unwrap()
+                        }
+                        Fault::Panic => panic!("synthetic observer unwind"),
+                        _ => (),
+                    }
+                }
+                BundleStage::BeforeCompletion => {
+                    let expected: BTreeMap<PathBuf, Vec<u8>> = FILES
+                        .iter()
+                        .map(|(n, b)| (PathBuf::from(n), b.to_vec()))
+                        .collect();
+                    assert_eq!(
+                        tree(resolved),
+                        expected,
+                        "M-AC2 every member exact, completion absent, no temp"
+                    );
+                    if matches!(observer.fault, Fault::CompletionDirectory) {
+                        fs::create_dir(resolved.join(COMPLETE.0)).unwrap();
+                    }
+                }
+            }
+        });
+    }
+
+    fn paths(temp: &Temp) -> (PathBuf, PathBuf) {
+        let root = temp.root.join("root");
+        let outside = temp.root.join("outside");
+        fs::create_dir(&root).unwrap();
+        fs::create_dir(&outside).unwrap();
+        fs::write(root.join("progress.json"), b"synthetic protected progress").unwrap();
+        fs::write(
+            root.join("pending-material-commit.json"),
+            b"pending must remain",
+        )
+        .unwrap();
+        (root, outside)
+    }
+    fn isolated(name: &str, body: impl FnOnce()) {
+        let case = format!("store::i2_export_bundle_tests::{name}");
+        if std::env::var("WW5_BUNDLE_CHILD").as_deref() == Ok(case.as_str()) {
+            body();
+            return;
+        }
+        let temp = Temp::new();
+        let mut child = Command::new(std::env::current_exe().unwrap())
+            .args([&case, "--exact", "--nocapture", "--test-threads=1"])
+            .env("WW5_BUNDLE_CHILD", &case)
+            .env("WW5_I2_GATE_LIB_ROOT", &temp.root)
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .unwrap();
+        let deadline = Instant::now() + Duration::from_secs(20);
+        while child.try_wait().unwrap().is_none() {
+            if Instant::now() > deadline {
+                child.kill().unwrap();
+                child.wait().unwrap();
+                panic!("child timed out: {case}");
+            }
+            std::thread::sleep(Duration::from_millis(10));
+        }
+        let output = child.wait_with_output().unwrap();
+        let out = String::from_utf8_lossy(&output.stdout);
+        assert!(
+            output.status.success(),
+            "{case}\n{out}\n{}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        assert!(out.contains("running 1 test") && out.contains("1 passed; 0 failed"));
+    }
+    fn stages(reg: &Registration, expected: &[BundleStage]) {
+        let seen = reg.seen();
+        assert_eq!(seen.iter().map(|x| x.0).collect::<Vec<_>>(), expected);
+        assert!(
+            seen.iter().all(|x| x.1 == seen[0].1 && x.2 == seen[0].2),
+            "same resolved directory and guard at both boundaries"
+        );
+    }
+    fn complete_bytes(dest: &Path) {
+        let expected: BTreeMap<PathBuf, Vec<u8>> = FILES
+            .iter()
+            .copied()
+            .chain([COMPLETE])
+            .map(|(n, b)| (PathBuf::from(n), b.to_vec()))
+            .collect();
+        assert_eq!(tree(dest), expected);
+    }
+
+    #[test]
+    fn m06_single_guard_resolved_path_members_then_completion_and_release() {
+        isolated(
+            "m06_single_guard_resolved_path_members_then_completion_and_release",
+            || {
+                let temp = Temp::new();
+                let (root, outside) = paths(&temp);
+                let protected = tree(&root);
+                // Resolve from a relative caller path. Later writes must use the returned path.
+                let old = std::env::current_dir().unwrap();
+                struct Cwd(PathBuf);
+                impl Drop for Cwd {
+                    fn drop(&mut self) {
+                        std::env::set_current_dir(&self.0).unwrap();
+                    }
+                }
+                let _cwd = Cwd(old);
+                std::env::set_current_dir(&outside).unwrap();
+                let registration = Registration::new(Fault::None);
+                write_external_bundle(&root, Path::new("日本語 bundle"), &FILES, COMPLETE).unwrap();
+                stages(
+                    &registration,
+                    &[BundleStage::AfterDirectory, BundleStage::BeforeCompletion],
+                );
+                assert_eq!(
+                    fs::canonicalize(&registration.seen()[0].1).unwrap(),
+                    fs::canonicalize(outside.join("日本語 bundle")).unwrap()
+                );
+                complete_bytes(&outside.join("日本語 bundle"));
+                assert_eq!(tree(&root), protected);
+                drop(acquire_progress_write().unwrap());
+                drop(acquire_external_export().unwrap());
+                drop(registration);
+                assert!(OBSERVER.with(|s| s.borrow().is_none()));
+            },
+        );
+    }
+    #[test]
+    fn m06_second_member_boundary_failure_retains_prefix_and_allows_new_destination_retry() {
+        isolated(
+            "m06_second_member_boundary_failure_retains_prefix_and_allows_new_destination_retry",
+            || {
+                let temp = Temp::new();
+                let (root, outside) = paths(&temp);
+                let protected = tree(&root);
+                let dest = outside.join("partial");
+                let registration = Registration::new(Fault::SecondMemberDirectory);
+                assert!(write_external_bundle(&root, &dest, &FILES, COMPLETE).is_err());
+                stages(&registration, &[BundleStage::AfterDirectory]);
+                let expected: BTreeMap<PathBuf, Vec<u8>> = [
+                    (PathBuf::from("ink.json"), FILES[0].1.to_vec()),
+                    (PathBuf::from("background.png"), Vec::new()),
+                ]
+                .into();
+                assert_eq!(
+                    tree(&dest),
+                    expected,
+                    "only first production member and injected directory remain"
+                );
+                assert!(dest.join("background.png").is_dir());
+                assert_eq!(tree(&root), protected);
+                drop(acquire_progress_write().unwrap());
+                drop(acquire_external_export().unwrap());
+                drop(registration);
+                let before = tree(&temp.root);
+                assert!(write_external_bundle(&root, &dest, &FILES, COMPLETE).is_err());
+                assert_eq!(
+                    tree(&temp.root),
+                    before,
+                    "same destination must not merge/retry"
+                );
+                let retry = outside.join("explicit-retry");
+                write_external_bundle(&root, &retry, &FILES, COMPLETE).unwrap();
+                complete_bytes(&retry);
+                assert_eq!(tree(&dest), expected);
+                assert_eq!(tree(&root), protected);
+            },
+        );
+    }
+    #[test]
+    fn m06_completion_boundary_failure_is_err_with_all_originals_preserved() {
+        isolated(
+            "m06_completion_boundary_failure_is_err_with_all_originals_preserved",
+            || {
+                let temp = Temp::new();
+                let (root, outside) = paths(&temp);
+                let protected = tree(&root);
+                let dest = outside.join("partial");
+                let registration = Registration::new(Fault::CompletionDirectory);
+                assert!(write_external_bundle(&root, &dest, &FILES, COMPLETE).is_err());
+                stages(
+                    &registration,
+                    &[BundleStage::AfterDirectory, BundleStage::BeforeCompletion],
+                );
+                for (name, bytes) in FILES {
+                    assert_eq!(fs::read(dest.join(name)).unwrap(), bytes);
+                }
+                assert!(
+                    dest.join(COMPLETE.0).is_dir(),
+                    "injected directory is not a completed marker"
+                );
+                assert_eq!(tree(&dest).len(), 4, "no temporary or extra output");
+                assert_eq!(tree(&root), protected);
+                drop(acquire_progress_write().unwrap());
+                drop(acquire_external_export().unwrap());
+            },
+        );
+    }
+    #[test]
+    fn m06_observer_unwind_releases_registration_without_clearing_gate_poison() {
+        isolated(
+            "m06_observer_unwind_releases_registration_without_clearing_gate_poison",
+            || {
+                let temp = Temp::new();
+                let (root, outside) = paths(&temp);
+                let result = std::panic::catch_unwind(|| {
+                    let _registration = Registration::new(Fault::Panic);
+                    write_external_bundle(&root, &outside.join("unwind"), &FILES, COMPLETE)
+                        .unwrap();
+                });
+                let panic = result.expect_err("registered observer must unwind");
+                let message = panic
+                    .downcast_ref::<&str>()
+                    .copied()
+                    .or_else(|| panic.downcast_ref::<String>().map(String::as_str));
+                assert_eq!(message, Some("synthetic observer unwind"));
+                assert!(OBSERVER.with(|s| s.borrow().is_none()));
+                assert!(!IN_OBSERVER.with(Cell::get));
+                let _registration = Registration::new(Fault::None);
+                assert!(tree(&outside.join("unwind")).is_empty());
+                assert!(matches!(
+                    acquire_external_export(),
+                    Err(ProgressGateError::Poisoned)
+                ));
+            },
+        );
+    }
+    #[test]
+    fn m07_write_block_allows_bundle_but_remains_after_completion() {
+        isolated(
+            "m07_write_block_allows_bundle_but_remains_after_completion",
+            || {
+                let temp = Temp::new();
+                let (root, outside) = paths(&temp);
+                let protected = tree(&root);
+                let guard = acquire_progress_write().unwrap();
+                guard.block_writes();
+                drop(guard);
+                let dest = outside.join("recovery");
+                write_external_bundle(&root, &dest, &FILES, COMPLETE).unwrap();
+                complete_bytes(&dest);
+                assert_eq!(tree(&root), protected);
+                assert!(matches!(
+                    acquire_progress_write(),
+                    Err(ProgressGateError::WriteBlocked)
+                ));
+                drop(acquire_external_export().unwrap());
+                assert!(matches!(
+                    acquire_progress_write(),
+                    Err(ProgressGateError::WriteBlocked)
+                ));
+            },
+        );
+    }
+    #[test]
+    fn m09_all_invalid_names_are_preflighted_in_first_last_and_completion_positions() {
+        let temp = Temp::new();
+        let (root, outside) = paths(&temp);
+        let invalid = [
+            "",
+            ".",
+            "..",
+            "a/b",
+            "a\\b",
+            "a/",
+            "a\\",
+            "a/.",
+            "a\\.",
+            "/absolute",
+            "\\absolute",
+            "C:\\absolute",
+            "C:relative",
+            "\\\\server\\share",
+            "x:stream",
+            "NUL",
+            "con.txt",
+            "PRN",
+            "AUX",
+            "COM1",
+            "LPT9.txt",
+            "COM¹.txt",
+            "LPT²",
+            "nul\0x",
+            "a\u{1}",
+            "tail.",
+            "tail ",
+            "a<b",
+            "a>b",
+            "a\"b",
+            "a|b",
+            "a?b",
+            "a*b",
+            "LONGNA~1.TXT",
+        ];
+        let before = tree(&temp.root);
+        for name in invalid {
+            for position in 0..3 {
+                let mut files = vec![("one", b"first".as_slice()), ("two", b"second".as_slice())];
+                let mut completion = ("done", b"marker".as_slice());
+                if position == 2 {
+                    completion.0 = name;
+                } else {
+                    files[position].0 = name;
+                }
+                assert!(
+                    write_external_bundle(&root, &outside.join("absent"), &files, completion)
+                        .is_err(),
+                    "invalid {name:?} at {position}"
+                );
+                assert_eq!(
+                    tree(&temp.root),
+                    before,
+                    "whole-name preflight {name:?} at {position}"
+                );
+            }
+        }
+    }
+    #[test]
+    fn m09_member_and_completion_collisions_use_windows_ordinal_case_rules() {
+        let temp = Temp::new();
+        let (root, outside) = paths(&temp);
+        let before = tree(&temp.root);
+        for (left, right) in [
+            ("ink.json", "ink.json"),
+            ("ink.json", "INK.JSON"),
+            ("é.txt", "É.TXT"),
+        ] {
+            assert!(write_external_bundle(
+                &root,
+                &outside.join("absent"),
+                &[(left, b"one"), (right, b"two")],
+                COMPLETE
+            )
+            .is_err());
+            assert_eq!(tree(&temp.root), before);
+            assert!(write_external_bundle(
+                &root,
+                &outside.join("absent"),
+                &[(left, b"one")],
+                (right, b"marker")
+            )
+            .is_err());
+            assert_eq!(tree(&temp.root), before);
+        }
+    }
+    #[test]
+    fn m09_empty_members_empty_bytes_and_distinct_japanese_names_are_valid() {
+        let temp = Temp::new();
+        let (root, outside) = paths(&temp);
+        let protected = tree(&root);
+        let first = outside.join("completion-only");
+        write_external_bundle(&root, &first, &[], ("完了.json", b"")).unwrap();
+        assert_eq!(tree(&first), [(PathBuf::from("完了.json"), vec![])].into());
+        let second = outside.join("日本語");
+        write_external_bundle(
+            &root,
+            &second,
+            &[
+                ("原文.txt", b"".as_slice()),
+                ("筆跡.json", b"{}".as_slice()),
+            ],
+            ("完了.json", b"ok"),
+        )
+        .unwrap();
+        assert_eq!(
+            tree(&second),
+            [
+                (PathBuf::from("原文.txt"), vec![]),
+                (PathBuf::from("筆跡.json"), b"{}".to_vec()),
+                (PathBuf::from("完了.json"), b"ok".to_vec())
+            ]
+            .into()
+        );
+        assert_eq!(tree(&root), protected);
+    }
+    #[test]
+    fn m01_bundle_destination_preflight_preserves_root_existing_directory_and_missing_parent() {
+        let temp = Temp::new();
+        let (root, outside) = paths(&temp);
+        let before = tree(&temp.root);
+        for dest in [
+            root.clone(),
+            root.join("new"),
+            outside.clone(),
+            outside.join("missing/new"),
+        ] {
+            assert!(write_external_bundle(&root, &dest, &FILES, COMPLETE).is_err());
+            assert_eq!(tree(&temp.root), before);
+        }
+        let planned_root = outside.join("future/root");
+        assert!(
+            write_external_bundle(&planned_root, &outside.join("future"), &FILES, COMPLETE)
+                .is_err()
+        );
+        assert_eq!(
+            tree(&temp.root),
+            before,
+            "must not create an ancestor of a future protected root"
+        );
     }
 }
 

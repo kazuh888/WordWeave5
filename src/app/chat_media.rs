@@ -1267,6 +1267,559 @@ impl WordApp {
 }
 
 #[cfg(test)]
+mod i2_export_media {
+    use super::*;
+    use crate::app::settings_ui::i2_export_settings::{ledger, Fixture};
+    use std::{
+        fs,
+        path::Path,
+        process::{Command, Stdio},
+        time::{Duration, Instant},
+    };
+
+    const AUDIO: &[u8] = b"RIFF\x08\x00\x00\x00WAVE\x00\xffsynthetic";
+    const TEXT: &str = "合成原文\r\n末尾空白  \n";
+    #[derive(Clone, Copy, Debug)]
+    enum Media {
+        Audio,
+        Text,
+        Bundle,
+    }
+    const MEDIA: [Media; 3] = [Media::Audio, Media::Text, Media::Bundle];
+
+    fn seed(f: &mut Fixture, media: Media) {
+        f.app.unsaved_chat_audio = Some(("synthetic-conversation".into(), AUDIO.to_vec()));
+        f.app.annotation = Default::default();
+        if matches!(media, Media::Bundle) {
+            f.app
+                .annotation
+                .freeze_blank(&egui::Context::default())
+                .unwrap();
+            f.app.annotation.strokes = vec![vec![[0.0, 0.0]]];
+        }
+        f.app.annotation.text = TEXT.into();
+        f.app.discard_audio_confirm = true;
+        f.app.discard_annotation_confirm = true;
+    }
+    fn export(app: &mut WordApp, media: Media, dest: &Path) -> Result<(), String> {
+        match media {
+            Media::Audio => app.export_unsaved_chat_audio(dest),
+            Media::Text => app.export_chat_annotation_text(dest),
+            Media::Bundle => app.export_chat_annotation(dest),
+        }
+    }
+    fn state(app: &WordApp) -> serde_json::Value {
+        serde_json::json!({
+            "audio": app.unsaved_chat_audio, "text": app.annotation.text,
+            "strokes": app.annotation.strokes, "frozen": app.annotation.frozen(),
+            "files": app.annotation.files().ok(),
+            "discard_audio": app.discard_audio_confirm,
+            "discard_annotation": app.discard_annotation_confirm,
+            "progress": app.progress, "dirty": app.dirty, "message": app.message,
+        })
+    }
+    fn refuse(f: &mut Fixture, media: Media, dest: &Path) {
+        let disk = ledger(&f.root);
+        let memory = state(&f.app);
+        let result = export(&mut f.app, media, dest);
+        assert!(
+            result.is_err(),
+            "M-AC1: {media:?} accepted forbidden destination {dest:?}"
+        );
+        assert_eq!(
+            ledger(&f.root),
+            disk,
+            "M-AC1: refusal must preserve every byte/directory/temp"
+        );
+        assert_eq!(
+            state(&f.app),
+            memory,
+            "M-AC3: refusal must preserve all unsaved state"
+        );
+    }
+    fn success(f: &mut Fixture, media: Media, dest: &Path) {
+        let protected = ledger(&f.dir());
+        let before = state(&f.app);
+        export(&mut f.app, media, dest).unwrap();
+        assert_eq!(ledger(&f.dir()), protected);
+        assert_eq!(
+            serde_json::to_value(&f.app.progress).unwrap(),
+            before["progress"]
+        );
+        assert_eq!(f.app.dirty, before["dirty"].as_bool().unwrap());
+        assert_eq!(f.app.message, before["message"]);
+        match media {
+            Media::Audio => {
+                assert_eq!(fs::read(dest).unwrap(), AUDIO);
+                assert!(f.app.unsaved_chat_audio.is_none());
+                assert!(!f.app.discard_audio_confirm);
+                let after = state(&f.app);
+                for key in ["text", "strokes", "frozen", "files", "discard_annotation"] {
+                    assert_eq!(after[key], before[key], "other media {key}");
+                }
+            }
+            Media::Text | Media::Bundle => {
+                if matches!(media, Media::Text) {
+                    assert_eq!(fs::read(dest).unwrap(), TEXT.as_bytes());
+                } else {
+                    assert_bundle(dest);
+                }
+                assert!(f.app.annotation.text.is_empty());
+                assert!(f.app.annotation.strokes.is_empty());
+                assert!(!f.app.annotation.frozen());
+                assert!(!f.app.discard_annotation_confirm);
+                assert_eq!(
+                    serde_json::to_value(&f.app.unsaved_chat_audio).unwrap(),
+                    before["audio"]
+                );
+                assert!(f.app.discard_audio_confirm);
+            }
+        }
+    }
+    fn assert_bundle(dest: &Path) {
+        let names = ["ink.json", "background.png", "composite.png"];
+        let mut actual_names: Vec<_> = fs::read_dir(dest)
+            .unwrap()
+            .map(|e| e.unwrap().file_name())
+            .collect();
+        actual_names.sort();
+        assert_eq!(
+            actual_names,
+            [
+                "background.png",
+                "complete.json",
+                "composite.png",
+                "ink.json"
+            ]
+            .map(std::ffi::OsString::from)
+        );
+        let ink: serde_json::Value =
+            serde_json::from_slice(&fs::read(dest.join(names[0])).unwrap()).unwrap();
+        assert_eq!(
+            ink,
+            serde_json::json!({"version": 1, "source_text": TEXT,
+            "width": 1200, "height": 700, "strokes": [[[0.0, 0.0]]]})
+        );
+        for (name, painted) in [(names[1], false), (names[2], true)] {
+            let image = image::load_from_memory(&fs::read(dest.join(name)).unwrap())
+                .unwrap()
+                .to_rgba8();
+            assert_eq!(image.dimensions(), (1200, 700));
+            for (x, y, pixel) in image.enumerate_pixels() {
+                let expected = if painted && x <= 2 && y <= 2 {
+                    [180, 35, 35, 255]
+                } else {
+                    [255; 4]
+                };
+                assert_eq!(
+                    pixel.0, expected,
+                    "independent raster oracle: {name} ({x},{y})"
+                );
+            }
+        }
+        // Independent CryptoAPI oracle, checked against the published SHA-256 abc vector.
+        assert_eq!(
+            oracle_sha256(b"abc"),
+            "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        );
+        let members: Vec<_> = names.iter().map(|name| {
+            let bytes = fs::read(dest.join(name)).unwrap();
+            serde_json::json!({"file": name, "bytes": bytes.len(), "sha256": oracle_sha256(&bytes)})
+        }).collect();
+        let marker: serde_json::Value =
+            serde_json::from_slice(&fs::read(dest.join("complete.json")).unwrap()).unwrap();
+        assert_eq!(marker, serde_json::json!({"version": 1, "files": members}));
+    }
+
+    fn oracle_sha256(bytes: &[u8]) -> String {
+        #[link(name = "advapi32")]
+        extern "system" {
+            fn CryptAcquireContextW(
+                provider: *mut usize,
+                container: *const u16,
+                name: *const u16,
+                kind: u32,
+                flags: u32,
+            ) -> i32;
+            fn CryptCreateHash(
+                provider: usize,
+                algorithm: u32,
+                key: usize,
+                flags: u32,
+                hash: *mut usize,
+            ) -> i32;
+            fn CryptHashData(hash: usize, data: *const u8, length: u32, flags: u32) -> i32;
+            fn CryptGetHashParam(
+                hash: usize,
+                parameter: u32,
+                data: *mut u8,
+                length: *mut u32,
+                flags: u32,
+            ) -> i32;
+            fn CryptDestroyHash(hash: usize) -> i32;
+            fn CryptReleaseContext(provider: usize, flags: u32) -> i32;
+        }
+        struct Handles {
+            provider: usize,
+            hash: usize,
+        }
+        impl Drop for Handles {
+            fn drop(&mut self) {
+                // SAFETY: only successfully acquired local handles are released, hash first.
+                unsafe {
+                    if self.hash != 0 {
+                        CryptDestroyHash(self.hash);
+                    }
+                    if self.provider != 0 {
+                        CryptReleaseContext(self.provider, 0);
+                    }
+                }
+            }
+        }
+        let mut handles = Handles {
+            provider: 0,
+            hash: 0,
+        };
+        let mut digest = [0_u8; 32];
+        let mut length = 32_u32;
+        // SAFETY: no persisted key container (VERIFYCONTEXT); pointers refer to live
+        // buffers/handles, input length fits u32, and the output has exactly 32 bytes.
+        unsafe {
+            assert_ne!(
+                CryptAcquireContextW(
+                    &mut handles.provider,
+                    std::ptr::null(),
+                    std::ptr::null(),
+                    24,
+                    0xf0000000
+                ),
+                0,
+                "hash fixture context"
+            );
+            assert_ne!(
+                CryptCreateHash(handles.provider, 0x800c, 0, 0, &mut handles.hash),
+                0,
+                "hash fixture SHA-256"
+            );
+            assert_ne!(
+                CryptHashData(
+                    handles.hash,
+                    bytes.as_ptr(),
+                    u32::try_from(bytes.len()).unwrap(),
+                    0
+                ),
+                0,
+                "hash fixture input"
+            );
+            assert_ne!(
+                CryptGetHashParam(handles.hash, 2, digest.as_mut_ptr(), &mut length, 0),
+                0,
+                "hash fixture output"
+            );
+        }
+        assert_eq!(length, 32);
+        digest.iter().map(|byte| format!("{byte:02x}")).collect()
+    }
+
+    // Parent-owned sandbox contains every child fixture, including after timeout.
+    fn isolated(name: &str, run: impl FnOnce()) {
+        let case = format!("app::chat_media::i2_export_media::{name}");
+        if std::env::var("WW5_MEDIA_CHILD").as_deref() == Ok(case.as_str()) {
+            run();
+            return;
+        }
+        let f = Fixture::new();
+        let sandbox = f.root.join("child-temp");
+        fs::create_dir(&sandbox).unwrap();
+        let mut child = Command::new(std::env::current_exe().unwrap())
+            .args([&case, "--exact", "--nocapture", "--test-threads=1"])
+            .env("WW5_MEDIA_CHILD", &case)
+            .env("TEMP", &sandbox)
+            .env("TMP", &sandbox)
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .unwrap();
+        let deadline = Instant::now() + Duration::from_secs(45);
+        while child.try_wait().unwrap().is_none() {
+            if Instant::now() > deadline {
+                child.kill().unwrap();
+                child.wait().unwrap();
+                panic!("child timed out: {case}");
+            }
+            std::thread::sleep(Duration::from_millis(10));
+        }
+        let output = child.wait_with_output().unwrap();
+        let out = String::from_utf8_lossy(&output.stdout);
+        assert!(
+            output.status.success(),
+            "{case}\n{out}\n{}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        assert!(out.contains("running 1 test") && out.contains("1 passed; 0 failed"));
+    }
+
+    macro_rules! protected_test {
+        ($name:ident, $media:expr) => {
+            #[test]
+            fn $name() {
+                let mut f = Fixture::new();
+                seed(&mut f, $media);
+                let dir = f.dir();
+                for dest in [
+                    dir.clone(),
+                    dir.join("progress.json"),
+                    dir.join("new-export"),
+                    dir.join("custom.tsv"),
+                    dir.join("pending-material-commit.json"),
+                    dir.join("backups/new"),
+                    dir.join("assets/new"),
+                    dir.join("audio-history/new"),
+                    dir.join("app.lock"),
+                ] {
+                    refuse(&mut f, $media, &dest);
+                }
+            }
+        };
+    }
+    protected_test!(m01_audio_protects_root_and_preserves_state, Media::Audio);
+    protected_test!(m01_text_protects_root_and_preserves_state, Media::Text);
+    protected_test!(m01_bundle_protects_root_and_preserves_state, Media::Bundle);
+
+    macro_rules! success_test {
+        ($name:ident, $media:expr) => {
+            #[test]
+            fn $name() {
+                let mut f = Fixture::new();
+                seed(&mut f, $media);
+                let sibling = f.root.join("data-similar");
+                fs::create_dir(&sibling).unwrap();
+                success(&mut f, $media, &sibling.join("日本語 退避"));
+            }
+        };
+    }
+    success_test!(
+        m02_audio_exact_bytes_and_other_state_preserved,
+        Media::Audio
+    );
+    success_test!(m02_text_exact_utf8_and_other_state_preserved, Media::Text);
+    success_test!(
+        m02_bundle_independent_pixels_ink_hashes_and_clear,
+        Media::Bundle
+    );
+
+    #[test]
+    fn m02_existing_single_link_files_are_replaced_and_whitespace_text_survives() {
+        for media in [Media::Audio, Media::Text] {
+            let mut f = Fixture::new();
+            seed(&mut f, media);
+            let dest = f.root.join("existing.txt");
+            fs::write(&dest, b"old sentinel").unwrap();
+            success(&mut f, media, &dest);
+        }
+        let mut f = Fixture::new();
+        seed(&mut f, Media::Text);
+        f.app.annotation.text = " \t\r\n ".into();
+        let dest = f.root.join("spaces.txt");
+        f.app.export_chat_annotation_text(&dest).unwrap();
+        assert_eq!(fs::read(dest).unwrap(), b" \t\r\n ");
+        assert!(f.app.annotation.text.is_empty());
+    }
+    #[test]
+    fn m03_existing_bundle_and_missing_parent_refuse_without_mutation() {
+        for media in MEDIA {
+            let mut f = Fixture::new();
+            seed(&mut f, media);
+            let dest = f.root.join("missing/leaf");
+            refuse(&mut f, media, &dest);
+        }
+        let mut f = Fixture::new();
+        seed(&mut f, Media::Bundle);
+        let dest = f.root.join("existing");
+        fs::create_dir(&dest).unwrap();
+        fs::write(dest.join("ink.json"), b"existing original").unwrap();
+        refuse(&mut f, Media::Bundle, &dest);
+    }
+    #[test]
+    fn m03_invalid_or_absent_payloads_refuse_before_directory_creation() {
+        let mut f = Fixture::new();
+        seed(&mut f, Media::Text);
+        let dest = f.root.join("new");
+        f.app.unsaved_chat_audio = None;
+        refuse(&mut f, Media::Audio, &dest);
+        f.app.annotation.text.clear();
+        refuse(&mut f, Media::Text, &dest);
+        f.app.annotation.text = TEXT.into();
+        refuse(&mut f, Media::Bundle, &dest);
+        seed(&mut f, Media::Bundle);
+        refuse(&mut f, Media::Text, &dest);
+        f.app.annotation.strokes = vec![vec![[1.1, 0.0]]];
+        refuse(&mut f, Media::Bundle, &dest);
+    }
+    #[test]
+    fn m04_external_hardlinks_refuse_and_preserve_both_names() {
+        for media in MEDIA {
+            let mut f = Fixture::new();
+            seed(&mut f, media);
+            let target = f.root.join("original");
+            let alias = f.root.join("alias");
+            fs::write(&target, b"external two-link sentinel").unwrap();
+            fs::hard_link(&target, &alias)
+                .expect("M04 FIXTURE FAILURE: hardlink creation, not behavior RED");
+            refuse(&mut f, media, &alias);
+        }
+    }
+    #[test]
+    fn m04_junction_ancestors_to_protected_and_external_directories_refuse() {
+        for target_protected in [true, false] {
+            let mut f = Fixture::new();
+            let outside = f.root.join("ordinary");
+            fs::create_dir(&outside).unwrap();
+            let target = if target_protected { f.dir() } else { outside };
+            let alias = f.root.join("junction");
+            let output = Command::new("cmd.exe")
+                .args(["/D", "/C", "mklink", "/J"])
+                .arg(&alias)
+                .arg(&target)
+                .output()
+                .unwrap();
+            assert!(
+                output.status.success(),
+                "M04 FIXTURE FAILURE: junction creation"
+            );
+            struct Unlink(PathBuf);
+            impl Drop for Unlink {
+                fn drop(&mut self) {
+                    fs::remove_dir(&self.0).unwrap();
+                }
+            }
+            let _unlink = Unlink(alias.clone());
+            for media in MEDIA {
+                seed(&mut f, media);
+                refuse(&mut f, media, &alias.join("new-export"));
+            }
+        }
+    }
+    #[test]
+    fn m05_actual_storage_precedes_different_or_missing_environment_root() {
+        isolated(
+            "m05_actual_storage_precedes_different_or_missing_environment_root",
+            || {
+                let mut f = Fixture::new();
+                let local = f.root.join("different-local");
+                fs::create_dir(&local).unwrap();
+                let alternate = local.join("WordWeave5");
+                fs::create_dir(&alternate).unwrap();
+                std::env::set_var("LOCALAPPDATA", &local);
+                for (i, media) in MEDIA.into_iter().enumerate() {
+                    seed(&mut f, media);
+                    let protected = f.dir().join("new");
+                    refuse(&mut f, media, &protected);
+                    success(&mut f, media, &alternate.join(format!("external-{i}")));
+                }
+                std::env::remove_var("LOCALAPPDATA");
+                for (i, media) in MEDIA.into_iter().enumerate() {
+                    seed(&mut f, media);
+                    let dest = f.root.join(format!("without-env-{i}"));
+                    success(&mut f, media, &dest);
+                }
+            },
+        );
+    }
+    #[test]
+    fn m05_none_resolves_default_without_creating_root_then_protects_it() {
+        isolated(
+            "m05_none_resolves_default_without_creating_root_then_protects_it",
+            || {
+                let mut f = Fixture::new();
+                drop(f.app.storage.take());
+                let local = f.root.join("local");
+                fs::create_dir(&local).unwrap();
+                std::env::set_var("LOCALAPPDATA", &local);
+                let root = local.join("WordWeave5");
+                for (i, media) in MEDIA.into_iter().enumerate() {
+                    seed(&mut f, media);
+                    let dest = f.root.join(format!("external-{i}"));
+                    success(&mut f, media, &dest);
+                    assert!(!root.exists(), "resolver must not create Storage");
+                }
+                fs::create_dir(&root).unwrap();
+                fs::write(root.join("sentinel"), b"default root protected").unwrap();
+                for media in MEDIA {
+                    seed(&mut f, media);
+                    refuse(&mut f, media, &root.join("new"));
+                }
+                assert!(!root.join("app.lock").exists());
+            },
+        );
+    }
+    #[test]
+    fn m05_missing_environment_and_unknown_root_identity_refuse() {
+        isolated(
+            "m05_missing_environment_and_unknown_root_identity_refuse",
+            || {
+                let mut f = Fixture::new();
+                drop(f.app.storage.take());
+                std::env::remove_var("LOCALAPPDATA");
+                for media in MEDIA {
+                    seed(&mut f, media);
+                    let dest = f.root.join("new");
+                    refuse(&mut f, media, &dest);
+                }
+                let local = f.root.join("local");
+                fs::create_dir(&local).unwrap();
+                std::env::set_var("LOCALAPPDATA", &local);
+                let root = local.join("WordWeave5");
+                fs::write(&root, b"not a directory").unwrap();
+                for media in MEDIA {
+                    seed(&mut f, media);
+                    let dest = f.root.join("new");
+                    refuse(&mut f, media, &dest);
+                }
+            },
+        );
+    }
+    #[test]
+    fn m05_failed_default_storage_open_keeps_the_attempted_default_root_protected() {
+        isolated(
+            "m05_failed_default_storage_open_keeps_the_attempted_default_root_protected",
+            || {
+                let mut f = Fixture::new();
+                let local = f.root.join("local");
+                fs::create_dir(&local).unwrap();
+                std::env::set_var("LOCALAPPDATA", &local);
+                let root = local.join("WordWeave5");
+                let held = Storage::at(root.clone()).unwrap();
+                fs::write(root.join("sentinel"), b"failed-open root").unwrap();
+                let attempted = Storage::open();
+                assert!(
+                    attempted.is_err(),
+                    "fixture must establish real failed open"
+                );
+                f.app = WordApp::new_with_storage(&egui::Context::default(), attempted);
+                assert!(f.app.storage.is_none());
+                for media in MEDIA {
+                    seed(&mut f, media);
+                    refuse(&mut f, media, &root.join("new"));
+                }
+                drop(held);
+            },
+        );
+    }
+    #[test]
+    fn m08_failed_export_retains_payload_for_explicit_external_retry() {
+        for media in MEDIA {
+            let mut f = Fixture::new();
+            seed(&mut f, media);
+            let denied = f.root.join("absent/leaf");
+            refuse(&mut f, media, &denied);
+            let external = f.root.join("retry");
+            success(&mut f, media, &external);
+        }
+    }
+}
+
+#[cfg(test)]
 mod attachment_tests {
     use super::*;
 

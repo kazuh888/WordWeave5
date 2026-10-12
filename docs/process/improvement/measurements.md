@@ -1,5 +1,7 @@
 # 開発タスクの使用量記録
 
+- 2026-10-12 I2d-Mのテスト作成・実装・検証を利用者の明示依頼で再開。開始02:14:41 UTC（JST11:14）、HEAD `a64ede0`、tree clean、週枠93%。独立作者 `media_export_tests` を既定Astra/high・fresh contextで起動し、本体2fileの新cfg(test)だけを逐次所有する。親の開始usage snapshotを[観測記録](../../../tasks/ACOUSTIC-HISTORY-001/usage-observation-20261012.md)へ保存した。終了までのscopeは独立runner/Postまでで、モデル切替待ちを挟まず既定役へ自動引継ぎする。実データ/API・製品EXE更新・比較専用再実行は含まない。
+
 - 同区切りの終了02:02:00 UTC（JST11:02、最終記録/保存push/応答前）：週枠91→93%（同じ7日窓）を観測した。アカウント共通で他作業/反映遅延内訳を未取得のため、当該工程だけの2ポイント消費とは断定しない。親・designer・planner・Pre reviewerの実在snapshot差分を[観測記録](../../../tasks/ACOUSTIC-HISTORY-001/usage-observation-20261012.md)へ保存した。親子包含未確認で合算せず、初回request/最終応答反映の範囲も別記。designer→M-D01→planner限定delta→designer反映→独立Pre PASSまで工程別Astra/high指定で引継ぎ、親Sol/mediumは維持した。source/test/EXE変更0、比較専用再実行0、独立Pre阻止0。今回は運用整備と設計是正が混在する初期サンプルであり、旧方式比の増減・節約率は未判定である。
 
 - 2026-10-12 工程別自動引継ぎと通常開発計測を正式に継続。開始01:46:45 UTC、HEAD `b4f100c`、tree clean、週枠91%（7日窓）。既存7役定義を確認し、新たな重複定義や常駐routerは追加せず、親が既定モデル/effortでdispatchする運用をdevelopment-teamへ記録した。I2d-Mのdesignerを既定Astra/high・fresh contextで起動。親長期ログの末尾usageとturn_contextを取得できたが、親子包含は未確認であり合算しない。開始snapshotと前の2担当の取得範囲は[観測記録](../../../tasks/ACOUSTIC-HISTORY-001/usage-observation-20261012.md)へ保存した。KPIへ通常開発だけを使う比較・週枠粒度・並行作業/リセット・キャッシュ/重複加算の扱いを明記し、削減率は未判定とする。
