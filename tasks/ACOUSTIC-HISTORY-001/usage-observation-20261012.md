@@ -16,6 +16,35 @@
 
 実装担当session `01a12df0-346e-7f83-b56a-f4734b1c4b5d` はstub→本体の同じ担当へ引き継ぐ。工程終了前なので最終集計は後で行う。比較用試験やモデル変更はなく、担当Astra/high・runner Sol/mediumを維持する。
 
+### I2d-M完了時の観測と評価
+
+終了snapshot時計02:58:17 UTC（11:58:17 JST）。開始02:14:41から43分36秒、最終文書保存/commit/push/応答はこの計測後である。週枠は93→98%、windowDurationMins=10080・resetsAt=1792298129不変。アカウント共通・丸め/反映遅延/他作業内訳未取得のため、本作業だけの5ポイント消費とは断定しない。
+
+親終了usageは02:57:55.170 UTC、input=1542661724/cached=1505991936/output=3524442/reasoning=1067676/total=1546186166。各子は以下の実在snapshot間を観測した。cache_writeはすべて0。cachedはinputの、reasoningはoutputの内数である。
+
+| 担当・指定model/effort / UTC観測区間 | input差分（cached内数） | output差分（reasoning内数） | total差分 |
+| --- | --- | --- | --- |
+| 親 Sol/medium、02:14:58.848→02:57:55.170 | 12328069（12182400） | 17923（3975） | 12345992 |
+| 作者 Astra/high、02:15:11.177→02:37:01.903 | 5868267（5645952） | 31779（6117） | 5900046 |
+| 実装 Astra/high、02:28:08.065→02:47:13.515 | 2064651（1950080） | 9064（704） | 2073715 |
+| runner Sol/medium、02:47:44.551→02:56:20.838 | 2809560（2746496） | 11350（1454） | 2820910 |
+| Post Astra/high、02:49:55.977→02:57:55.106 | 1647449（1478656） | 3746（342） | 1651195 |
+
+親子包含は未確認なので行を合算しない。子の最初のrequestは差分に含まず、最終応答反映の完全性も未確認である。turn_contextの指定は各dispatchと一致したがプロバイダー返却model/effortではない。実装はstub/本体2turn、Postは静的/runner照合2turnを同sessionで継続した。
+
+末尾counterと対応：
+
+- 作者 `01a12de4-4b0b-7561-a325-9b8bca07594c`、usage53件、上記checkpointの開始/終了値と同じ。
+- 実装 `01a12df0-346e-7f83-b56a-f4734b1c4b5d`、usage32件。開始input37722/cached0/output167/reasoning0/total37889→終了2102373/1950080/9231/704/2111604。
+- runner `01a12e02-2ac8-7332-ab10-3a52bfa6b9c0`、usage40件。開始38151/37248/142/0/38293→終了2847711/2783744/11492/1454/2859203。
+- Post `01a12e03-feab-79e3-b89f-d7760236d12c`、usage19件。開始38028/37120/337/10/38365→終了1685477/1515776/4083/352/1689560。
+
+成果は新25件15RED/10PASS→25GREEN、[独立114行動PASS/0FAIL/条件不足3](media-export-runner.md)、[最終Post PASS/Closed](media-export-final-review.md)である。ソース2file・独立oracle不変、製品EXE未更新。通常は補助1役、固定sourceのrunner build/runtimeとread-only静的Postだけを独立性・待ち時間削減のため並行した。常駐router・新定義・再帰委任はない。
+
+手戻りは作者のhash fixture修正、unwind assertionの強化1件、実装側の不要なcargo再compile1回と古いEXE hashでの起動前拒否である。既知sandbox制約を実装側で再実行した点は効率改善余地であり、runnerでは再試行せずfresh compile/固定EXEの非管理者runtimeを分離した。比較のためだけの再実行は0、品質gateは変更していない。checkpoint pushはREDと本体GREENの2段階で実施した。
+
+**評価：自動引継ぎと担当別計測は実施できたが、旧方式との使用量増減は未判定である。** この単位は独立fixture/新API scaffoldを含み、前回の設計単位とも条件が異なる。親のusageには接合・記録・checkpoint・待機後の会話継続も含む。低リスク改善として、既知のsandbox実行制約を後続担当へ明示し、不要な再compile/同条件再失敗だけを避ける。必要な独立試験やレビューを削減した値とは比較しない。
+
 ## I2d-M設計開始時のsnapshot
 
 - 対象HEAD：`b4f100c`、開始tree clean。

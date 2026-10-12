@@ -1,6 +1,6 @@
 # 現在のタスク要約
 
-更新：2026-10-12（I2d-Bは独立runner51件成功と最終Post PASS／Closed。工程別自動引継ぎ・通常開発の使用量観測を正式運用へ反映。I2d-Mはcrate境界M-D01を2fileの限定bundle設計へ是正し独立Pre PASS、次は独立作者Astra/high。本体・音声履歴UI・試用EXEは未完成）。詳細は [参照インデックス](context-index.md) を参照する。
+更新：2026-10-12（I2d-M媒体書き出しは新25件を含む独立114行動PASS・最終Post PASS／Closed。条件不足3件は成功へ含めない。工程別モデルdispatchと使用量を記録済み。音声履歴UI・試用EXE・製品全体は未完成）。詳細は [参照インデックス](context-index.md) を参照する。
 
 ## 現在の目標
 
@@ -56,6 +56,6 @@ ACOUSTIC-HISTORY-001：原音・音響解析結果・Qwen助言を保存し、�
 4. M/S/N/R/T/V/Pは最終Post PASS。Pの[最終判定](ACOUSTIC-HISTORY-001/history-pointer-commit-review.md)、[独立269件](ACOUSTIC-HISTORY-001/history-pointer-commit-runner.md)、[初回失敗の環境比較](ACOUSTIC-HISTORY-001/history-pointer-commit-diagnostic.md)を正とし、成功済みの反復は行わない。
 5. I2b-A/B、I2d-H/S/Bは最終Post PASS/Closed。I2d-Bは[独立runner](ACOUSTIC-HISTORY-001/backup-destination-runner.md)が固定source（backup CF035548…／integration 1BCA808E…）から新buildし、integration38＋lib backup::13の51unique成功を確認した。[最終Post](ACOUSTIC-HISTORY-001/backup-destination-review.md)は実名集合・source/EXEhash・guard連続保持・作者oracle不変を照合してClosedと判定した。通常権限administrator=False、native exit0／timeoutなし／子5件終了wait／TEMP残存0。管理者51件への許可はなく、通常権限のsandbox外実行と承認済みsymlink2件の管理者実行を混同しない。次は既定d-Mのdesigner/作者/実装/reviewer Astra/high、runner Sol/mediumへ工程別に引き継ぐ。親のモデル切替待ちは不要である。
 6. [早期試用計画](ACOUSTIC-HISTORY-001/early-trial-plan.md)と[仕様・設計](ACOUSTIC-HISTORY-001/early-trial-contract.md)は、[ET-D01是正後の独立Pre PASS](ACOUSTIC-HISTORY-001/early-trial-review.md)。既承認d-B→d-Mを完了してから試用保存先／Qwen資格情報分離のET1/2へ合流する。通常rootやkeyの自動共有・移行なし、利用者の手動取込は既存確認を維持する。新履歴UIを含まず、全体test/release gate後に既存releaseと別配置する。旧release SHA256は `9B888E9FC923823C59B4C3B0AB1A4DAD2051CA6139DE153B6DE6CA213DD387D3`、今回は置換していない。
-7. d-Mは[限定設計](ACOUSTIC-HISTORY-001/media-export-design.md) SHA256 `F6A1D38A…` と[独立Pre PASS](ACOUSTIC-HISTORY-001/media-export-review.md)。[独立作者](ACOUSTIC-HISTORY-001/media-export-tests.md)の新25件は15行動RED/10PASSから、[本体接合](ACOUSTIC-HISTORY-001/media-export-implementation.md)後25PASSとなった。oracle2hash不変、通常ユーザー権限・timeout0・TEMP残存0。RED checkpoint `24fa10c` はpush済み。本体接合後の独立runner Sol/mediumを起動し、関連回帰を検証中である。次はPost Astra/high。計画deltaの2file境界を維持し、runner/Post未了をClosedと扱わない。製品EXEは未更新。
+7. d-Mは[独立作者](ACOUSTIC-HISTORY-001/media-export-tests.md)の新25件15RED/10PASS→[本体接合](ACOUSTIC-HISTORY-001/media-export-implementation.md)後25PASS→[独立runner](ACOUSTIC-HISTORY-001/media-export-runner.md)の114行動PASS/0FAIL/fixture skip3→[最終Post PASS/Closed](ACOUSTIC-HISTORY-001/media-export-final-review.md)。source/oracle固定、通常ユーザー権限、timeout/子process/TEMP残存0。`24fa10c`（RED）と`81aaf97`（本体）はpush済み。作者/実装/review Astra/high、runner Sol/mediumを自動dispatchし、[usage記録](ACOUSTIC-HISTORY-001/usage-observation-20261012.md)を更新した。条件不足3件と全体test/release/native受入は残る。次回はD2全体gate/早期試用ET1への依存を確認し、既定I2b-S→I2b-Cへ接合する。製品EXEは未更新。
 
 今回の整理は作業用要約から廃案・重複ログ・無関係な履歴・設計本文の転載を除外したものである。根拠資料と旧記録は削除していない。旧版はインデックスに残すが通常再開時には読み込まない。

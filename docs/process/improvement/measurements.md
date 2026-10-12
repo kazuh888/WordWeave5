@@ -1,5 +1,7 @@
 # 開発タスクの使用量記録
 
+- 2026-10-12 I2d-M限定単位は[最終Post PASS/Closed](../../../tasks/ACOUSTIC-HISTORY-001/media-export-final-review.md)。新25件独立PASS、関連込み114行動PASS/0FAIL/fixture skip3、source/oracle固定・通常ユーザー・timeout/子/TEMP残存0である。作者/実装/Post Astra/high、runner Sol/mediumへ自動dispatchした。終了02:58:17 UTC（最終記録/push/応答前）、週枠93→98%はアカウント共通観測、親子usageは[担当別snapshot差分](../../../tasks/ACOUSTIC-HISTORY-001/usage-observation-20261012.md)で別記し合算しない。旧方式比の増減は未判定。hash fixtureとassertionの修正、実装側の不要な再compile/既知sandbox再試行を手戻りとして記録し、runnerではcompile/runtime分離で重複を回避した。製品EXE・全体deliveryは未完了である。
+
 - 2026-10-12 I2d-Mのテスト作成・実装・検証を利用者の明示依頼で再開。開始02:14:41 UTC（JST11:14）、HEAD `a64ede0`、tree clean、週枠93%。独立作者 `media_export_tests` を既定Astra/high・fresh contextで起動し、本体2fileの新cfg(test)だけを逐次所有する。親の開始usage snapshotを[観測記録](../../../tasks/ACOUSTIC-HISTORY-001/usage-observation-20261012.md)へ保存した。終了までのscopeは独立runner/Postまでで、モデル切替待ちを挟まず既定役へ自動引継ぎする。実データ/API・製品EXE更新・比較専用再実行は含まない。
 
 - 同区切りの終了02:02:00 UTC（JST11:02、最終記録/保存push/応答前）：週枠91→93%（同じ7日窓）を観測した。アカウント共通で他作業/反映遅延内訳を未取得のため、当該工程だけの2ポイント消費とは断定しない。親・designer・planner・Pre reviewerの実在snapshot差分を[観測記録](../../../tasks/ACOUSTIC-HISTORY-001/usage-observation-20261012.md)へ保存した。親子包含未確認で合算せず、初回request/最終応答反映の範囲も別記。designer→M-D01→planner限定delta→designer反映→独立Pre PASSまで工程別Astra/high指定で引継ぎ、親Sol/mediumは維持した。source/test/EXE変更0、比較専用再実行0、独立Pre阻止0。今回は運用整備と設計是正が混在する初期サンプルであり、旧方式比の増減・節約率は未判定である。
