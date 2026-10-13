@@ -1,4 +1,150 @@
 //! Recoverable two-file commit. A pending intent blocks unrelated progress saves.
+#[cfg(all(test, windows, feature = "early-trial"))]
+mod early_trial_paths_tests {
+    use super::*;
+    use crate::store::{
+        i2_gate_tests::{tree, Temp},
+        ProgressCheckpoint, ProgressFaultError, ProgressFaults, Storage,
+    };
+    const OLD: &str = r#"{"version":2,"audio_history":null,"settings":{"topic":"synthetic old"},"memories":{},"reviews":[],"suspended":[],"ai_calls":{},"study_seconds":{}}"#;
+    fn history() -> String {
+        OLD.replace(
+            "\"audio_history\":null",
+            &format!(
+                "\"audio_history\":{{\"sha256\":\"{}\",\"bytes\":12}}",
+                "a".repeat(64)
+            ),
+        )
+    }
+    fn seed(root: &Path, old: Option<&str>, next: &str) -> Vec<u8> {
+        let raw = serde_json::to_vec(&serde_json::json!({"old_deck":"synthetic old deck", "old_progress":old, "deck":model::BUILTIN_DECK, "progress":next})).unwrap();
+        fs::write(root.join("custom.tsv"), b"synthetic old deck").unwrap();
+        fs::write(root.join("progress.json"), OLD).unwrap();
+        fs::write(root.join(PENDING), &raw).unwrap();
+        raw
+    }
+
+    #[test]
+    fn et04_pending_preflight_is_read_only_for_absent_and_nonhistory_intents() {
+        let temp = Temp::new();
+        let storage = Storage::at(temp.root.join("trial")).unwrap();
+        let before = tree(&temp.root);
+        assert!(check_early_trial_recovery(&storage.dir).is_ok());
+        assert_eq!(tree(&temp.root), before);
+        for old in [None, Some(OLD)] {
+            seed(&storage.dir, old, OLD);
+            let before = tree(&temp.root);
+            assert!(check_early_trial_recovery(&storage.dir).is_ok());
+            assert_eq!(
+                tree(&temp.root),
+                before,
+                "preflight may not replay or archive"
+            );
+        }
+    }
+
+    #[test]
+    fn et04_pending_preflight_rejects_history_on_either_side_and_strict_decode_errors() {
+        let temp = Temp::new();
+        let storage = Storage::at(temp.root.join("trial")).unwrap();
+        let history = history();
+        let decoded: Progress =
+            serde_json::from_str(&history).expect("FIXTURE_FAILURE: structural history");
+        assert!(decoded.audio_history.is_some());
+        let unknown = OLD.replace("\"version\":2", "\"version\":999");
+        let duplicate = OLD.replacen('{', "{\"audio_history\":null,", 1);
+        for bad in [
+            history.as_str(),
+            unknown.as_str(),
+            duplicate.as_str(),
+            "broken progress",
+        ] {
+            for (old, next) in [(bad, OLD), (OLD, bad)] {
+                seed(&storage.dir, Some(old), next);
+                let before = tree(&temp.root);
+                assert!(check_early_trial_recovery(&storage.dir).is_err());
+                assert_eq!(tree(&temp.root), before);
+            }
+        }
+        fs::write(storage.dir.join(PENDING), b"broken intent").unwrap();
+        let before = tree(&temp.root);
+        assert!(check_early_trial_recovery(&storage.dir).is_err());
+        assert_eq!(tree(&temp.root), before);
+    }
+
+    #[test]
+    fn et04_pending_preflight_enforces_existing_intent_byte_limit_before_read() {
+        let temp = Temp::new();
+        let storage = Storage::at(temp.root.join("trial")).unwrap();
+        let path = storage.dir.join(PENDING);
+        let file = fs::File::create(&path).unwrap();
+        file.set_len(DEFAULT_LIMITS.intent + 1).unwrap();
+        drop(file);
+        assert!(check_early_trial_recovery(&storage.dir).is_err());
+        assert_eq!(
+            fs::metadata(&path).unwrap().len(),
+            DEFAULT_LIMITS.intent + 1
+        );
+        assert_eq!(
+            fs::read_dir(&storage.dir).unwrap().count(),
+            2,
+            "only preexisting app.lock and oversized pending"
+        );
+    }
+
+    #[test]
+    fn et_d01_nonhistory_recovery_fault_after_actual_write_retains_partial_state_then_retries() {
+        struct AfterDeck;
+        impl ProgressFaults for AfterDeck {
+            fn check(&self, point: ProgressCheckpoint) -> Result<(), ProgressFaultError> {
+                if point == ProgressCheckpoint::AfterDeck {
+                    Err(ProgressFaultError::Io)
+                } else {
+                    Ok(())
+                }
+            }
+        }
+        let temp = Temp::new();
+        let storage = Storage::at(temp.root.join("trial")).unwrap();
+        let next = OLD.replace("synthetic old", "synthetic recovered");
+        let raw = seed(&storage.dir, Some(OLD), &next);
+        fs::write(temp.root.join("normal-sentinel"), b"normal preserved").unwrap();
+        let before = tree(&temp.root);
+        // Exercise the real existing postwrite failure independently of the
+        // new read-only preflight (covered by the tests above).
+        let guard = acquire_progress_write().unwrap();
+        let result = recover_with_limits_and_faults_under_guard(
+            &storage.dir,
+            DEFAULT_LIMITS,
+            &guard,
+            &AfterDeck,
+        );
+        assert!(result.is_err());
+        let mut expected = before;
+        expected.insert(
+            "trial/custom.tsv".into(),
+            model::BUILTIN_DECK.as_bytes().to_vec(),
+        );
+        assert_eq!(
+            tree(&temp.root),
+            expected,
+            "actual postwrite failure changes deck only; never claim unchanged"
+        );
+        assert_eq!(fs::read(storage.dir.join(PENDING)).unwrap(), raw);
+        drop(guard);
+        recover(&storage.dir).unwrap();
+        assert_eq!(
+            fs::read(storage.dir.join("progress.json")).unwrap(),
+            next.as_bytes()
+        );
+        assert!(!storage.dir.join(PENDING).exists());
+        assert_eq!(
+            fs::read(temp.root.join("normal-sentinel")).unwrap(),
+            b"normal preserved"
+        );
+    }
+}
+
 use crate::{
     audio_history::{HistoryError, HistoryErrorKind, HistoryLimits, HistoryReader},
     model,
@@ -8,6 +154,12 @@ use crate::{
 };
 use serde::{Deserialize, Serialize};
 use std::{fs, path::Path};
+
+#[cfg(feature = "early-trial")]
+pub(crate) fn check_early_trial_recovery(_root: &Path) -> Result<(), String> {
+    // RED scaffold: the read-only recovery preflight is not implemented yet.
+    Err("early-trial recovery preflight is not implemented".into())
+}
 
 #[derive(Debug, PartialEq, Eq)]
 pub(crate) enum PendingCheckError {

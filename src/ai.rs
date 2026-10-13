@@ -1,4 +1,113 @@
 //! Language generation through ChatGPT-authenticated codex app-server only.
+#[cfg(test)]
+mod early_trial_paths_tests {
+    use super::*;
+    use std::{
+        fs,
+        os::windows::process::CommandExt,
+        process::{Command, Stdio},
+        time::{Duration, Instant, SystemTime, UNIX_EPOCH},
+    };
+
+    #[test]
+    fn et06_config_uses_storage_namespace_without_launch_or_environment_rewrite() {
+        const NAME: &str = "ai::early_trial_paths_tests::et06_config_uses_storage_namespace_without_launch_or_environment_rewrite";
+        const CHILD: &str = "WW5_ET1_AI_CHILD";
+        if std::env::var(CHILD).as_deref() == Ok(NAME) {
+            let local = PathBuf::from(std::env::var_os("LOCALAPPDATA").unwrap());
+            let base = local.parent().unwrap();
+            let executable = base.join("synthetic-codex.exe");
+            // An invalid executable is sufficient for resolve_executable and cannot run Codex.
+            fs::write(&executable, b"synthetic non-executable sentinel").unwrap();
+            let settings = Settings {
+                codex_path: executable.to_string_lossy().into(),
+                codex_model: "synthetic-model".into(),
+                codex_effort: "high".into(),
+                ..Settings::default()
+            };
+            let environment = (
+                std::env::var_os("LOCALAPPDATA"),
+                std::env::var_os("CODEX_HOME"),
+            );
+            let expected = local.join(if cfg!(feature = "early-trial") {
+                "WordWeave5-EarlyTrial"
+            } else {
+                "WordWeave5"
+            });
+            let cfg = Config::from_settings(&settings).unwrap();
+            assert_eq!(cfg.cwd, expected.join("codex-work"));
+            assert_eq!(cfg.model, "synthetic-model");
+            assert_eq!(cfg.effort, "high");
+            assert!(
+                !expected.exists(),
+                "config must not initialize data or run a process"
+            );
+            assert_eq!(
+                (
+                    std::env::var_os("LOCALAPPDATA"),
+                    std::env::var_os("CODEX_HOME")
+                ),
+                environment
+            );
+            #[cfg(feature = "early-trial")]
+            {
+                let storage = wordweave5::store::Storage::open().unwrap();
+                std::env::set_var("LOCALAPPDATA", base.join("changed-local"));
+                std::env::set_current_dir(base).unwrap();
+                let cfg = Config::from_settings(&settings).unwrap();
+                assert_eq!(cfg.cwd, storage.dir.join("codex-work"));
+                assert!(!base.join("changed-local").exists());
+                assert!(!cfg.cwd.exists());
+                assert_eq!(std::env::var_os("CODEX_HOME"), environment.1);
+            }
+            assert_eq!(
+                fs::read(executable).unwrap(),
+                b"synthetic non-executable sentinel"
+            );
+            println!("ET1_AI_COMPLETE");
+            return;
+        }
+        let stamp = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let base = std::env::temp_dir().join(format!("ww5-et1-ai-{}-{stamp}", std::process::id()));
+        fs::create_dir(&base).unwrap();
+        for name in ["local", "temp"] {
+            fs::create_dir(base.join(name)).unwrap();
+        }
+        let mut child = Command::new(std::env::current_exe().unwrap())
+            .args([NAME, "--exact", "--nocapture", "--test-threads=1"])
+            .env(CHILD, NAME)
+            .env("LOCALAPPDATA", base.join("local"))
+            .env("TEMP", base.join("temp"))
+            .env("TMP", base.join("temp"))
+            .current_dir(&base)
+            .creation_flags(0x08000000)
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .unwrap();
+        let deadline = Instant::now() + Duration::from_secs(30);
+        let mut timeout = false;
+        while child.try_wait().unwrap().is_none() {
+            if Instant::now() >= deadline {
+                child.kill().unwrap();
+                timeout = true;
+                break;
+            }
+            std::thread::sleep(Duration::from_millis(10));
+        }
+        let output = child.wait_with_output().unwrap();
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        eprintln!("{stdout}\n{}", String::from_utf8_lossy(&output.stderr));
+        fs::remove_dir_all(&base).unwrap(); // Exclusively created, no links in this fixture.
+        assert!(!timeout, "FIXTURE_FAILURE: child killed/reaped");
+        assert!(output.status.success());
+        assert!(stdout.contains("running 1 test") && stdout.contains("ET1_AI_COMPLETE"));
+    }
+}
+
 use base64::Engine;
 use reqwest::blocking::Client;
 use serde_json::{json, Value};

@@ -1,3 +1,615 @@
+#[cfg(all(test, windows, feature = "early-trial"))]
+mod early_trial_paths_tests {
+    use super::i2_gate_tests::{tree, Temp};
+    use super::*;
+    use std::{
+        os::windows::process::CommandExt,
+        process::{Command, Stdio},
+        time::{Duration, Instant},
+    };
+
+    fn isolated(name: &str, body: impl FnOnce()) {
+        let exact = format!("store::early_trial_paths_tests::{name}");
+        isolated_full(&exact, body);
+    }
+    pub(super) fn isolated_full(exact: &str, body: impl FnOnce()) {
+        if std::env::var("WW5_ET1_STORE_CHILD").as_deref() == Ok(exact) {
+            body();
+            return;
+        }
+        let parent = Temp::new();
+        fs::create_dir(parent.root.join("temp")).unwrap();
+        let mut child = Command::new(std::env::current_exe().unwrap())
+            .args([exact, "--exact", "--nocapture", "--test-threads=1"])
+            .env("WW5_ET1_STORE_CHILD", exact)
+            .env("WW5_I2_GATE_LIB_ROOT", &parent.root)
+            .env("LOCALAPPDATA", parent.root.join("local"))
+            .env("TEMP", parent.root.join("temp"))
+            .env("TMP", parent.root.join("temp"))
+            .creation_flags(0x08000000)
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .unwrap();
+        let deadline = Instant::now() + Duration::from_secs(30);
+        let mut timeout = false;
+        while child.try_wait().unwrap().is_none() {
+            if Instant::now() >= deadline {
+                child.kill().unwrap();
+                timeout = true;
+                break;
+            }
+            std::thread::sleep(Duration::from_millis(10));
+        }
+        let output = child.wait_with_output().unwrap();
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        eprintln!("{stdout}\n{}", String::from_utf8_lossy(&output.stderr));
+        assert!(!timeout, "FIXTURE_FAILURE: child killed/reaped");
+        assert!(output.status.success());
+        assert!(stdout.contains("running 1 test") && stdout.contains("1 passed; 0 failed"));
+    }
+    pub(super) fn roots(temp: &Temp) -> (PathBuf, PathBuf) {
+        let local = temp.root.join("local");
+        fs::create_dir(&local).unwrap();
+        (
+            local.join("WordWeave5-EarlyTrial"),
+            local.join("WordWeave5"),
+        )
+    }
+
+    #[test]
+    fn et01_typed_preflight_rejects_equal_contained_and_relative_roots_before_writes() {
+        isolated(
+            "et01_typed_preflight_rejects_equal_contained_and_relative_roots_before_writes",
+            || {
+                let temp = Temp::new();
+                let (trial, normal) = roots(&temp);
+                for (trial, normal) in [
+                    (trial.clone(), trial.clone()),
+                    (normal.join("child"), normal.clone()),
+                    (trial.clone(), trial.join("child")),
+                    ("relative-trial".into(), normal),
+                ] {
+                    let before = tree(&temp.root);
+                    let error = match open_early_trial(trial, normal) {
+                        Ok(_) => panic!("unsafe root opened"),
+                        Err(error) => error,
+                    };
+                    assert!(matches!(error.stage, TrialOpenStage::BeforeWrites));
+                    assert!(matches!(error.reason, TrialOpenReason::UnsafeRoot));
+                    assert_eq!(tree(&temp.root), before);
+                }
+            },
+        );
+    }
+
+    #[test]
+    fn et01_lock_failure_is_initialization_started_and_retry_preserves_progress() {
+        isolated(
+            "et01_lock_failure_is_initialization_started_and_retry_preserves_progress",
+            || {
+                let temp = Temp::new();
+                let (trial, normal) = roots(&temp);
+                let held = Storage::at(trial.clone()).unwrap();
+                fs::write(trial.join("keep.txt"), b"synthetic unchanged data").unwrap();
+                let before = tree(&temp.root);
+                let error = match open_early_trial(trial.clone(), normal.clone()) {
+                    Ok(_) => panic!("locked store opened"),
+                    Err(error) => error,
+                };
+                assert!(matches!(
+                    error.stage,
+                    TrialOpenStage::StorageInitializationStarted
+                ));
+                assert!(matches!(error.reason, TrialOpenReason::StorageIo));
+                assert_eq!(tree(&temp.root), before);
+                drop(held);
+                assert!(open_early_trial(trial, normal).is_ok());
+            },
+        );
+    }
+
+    #[test]
+    fn et01_registration_rejects_a_different_root_pair_without_creating_it() {
+        isolated(
+            "et01_registration_rejects_a_different_root_pair_without_creating_it",
+            || {
+                let temp = Temp::new();
+                let (trial, normal) = roots(&temp);
+                let storage = open_early_trial(trial.clone(), normal.clone());
+                assert!(storage.is_ok());
+                drop(storage);
+                let before = tree(&temp.root);
+                assert!(open_early_trial(
+                    temp.root.join("other-trial"),
+                    temp.root.join("other-normal")
+                )
+                .is_err());
+                assert_eq!(tree(&temp.root), before);
+                assert!(open_early_trial(trial, normal).is_ok());
+            },
+        );
+    }
+
+    #[test]
+    fn et05_fixed_temp_cannot_create_the_registered_absent_normal_root() {
+        isolated(
+            "et05_fixed_temp_cannot_create_the_registered_absent_normal_root",
+            || {
+                let temp = Temp::new();
+                let (trial, normal) = roots(&temp);
+                let storage = open_early_trial(trial.clone(), normal.clone());
+                assert!(storage.is_ok());
+                assert!(!normal.exists());
+                let caller = temp.root.join("caller");
+                fs::create_dir(&caller).unwrap();
+                let dest = normal.parent().unwrap().join("export.txt");
+                fs::write(&dest, b"old external bytes").unwrap();
+                let guard = acquire_external_export().unwrap();
+                let checked = prepare_external_destination(
+                    &caller,
+                    &dest,
+                    ExternalDestinationKind::File,
+                    &guard,
+                )
+                .unwrap();
+                let before = tree(&temp.root);
+                assert!(publish_external_file(&checked, b"new payload", &normal).is_err());
+                assert_eq!(tree(&temp.root), before);
+                let allowed_temp = dest.with_extension("allowed-temp");
+                publish_external_file(&checked, b"new payload", &allowed_temp).unwrap();
+                assert_eq!(fs::read(&dest).unwrap(), b"new payload");
+                assert!(!allowed_temp.exists());
+                assert!(!normal.exists());
+            },
+        );
+    }
+
+    #[test]
+    fn et05_final_recheck_observes_caller_and_both_registered_root_identities() {
+        isolated(
+            "et05_final_recheck_observes_caller_and_both_registered_root_identities",
+            || {
+                let temp = Temp::new();
+                let (trial, normal) = roots(&temp);
+                fs::create_dir(&normal).unwrap();
+                let storage = open_early_trial(trial.clone(), normal.clone());
+                assert!(storage.is_ok());
+                let caller = temp.root.join("caller");
+                let outside = temp.root.join("outside");
+                fs::create_dir(&caller).unwrap();
+                fs::create_dir(&outside).unwrap();
+                for root in [&caller, &normal, &trial] {
+                    let guard = acquire_external_export().unwrap();
+                    let dest = outside.join("export.txt");
+                    let checked = prepare_external_destination(
+                        &caller,
+                        &dest,
+                        ExternalDestinationKind::File,
+                        &guard,
+                    )
+                    .unwrap();
+                    let moved = root.with_extension("moved");
+                    fs::rename(root, &moved).expect("FIXTURE_FAILURE: rename observed root");
+                    fs::create_dir(root).unwrap();
+                    let before = tree(&temp.root);
+                    assert!(
+                        recheck_external_destination(&checked).is_err(),
+                        "changed root must invalidate final check: {root:?}"
+                    );
+                    assert!(publish_external_file(
+                        &checked,
+                        b"payload",
+                        &outside.join("fixed-temp")
+                    )
+                    .is_err());
+                    assert_eq!(tree(&temp.root), before);
+                    drop(checked);
+                    drop(guard);
+                    fs::remove_dir(root).unwrap();
+                    fs::rename(&moved, root).unwrap();
+                }
+            },
+        );
+    }
+}
+
+#[cfg(all(test, windows, feature = "early-trial"))]
+mod early_trial_probe_tests {
+    use super::*;
+    use super::{
+        early_trial_paths_tests::{isolated_full, roots},
+        i2_gate_tests::{tree, Temp},
+    };
+    use std::{
+        cell::{Cell, RefCell},
+        io,
+        marker::PhantomData,
+        rc::Rc,
+    };
+
+    #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+    pub(super) enum ProbePoint {
+        BeforeCreate,
+        Created,
+        BeforeWrite,
+        Written,
+        BeforeSync,
+        Synced,
+        Closed,
+        BeforeRemove,
+        Removed,
+    }
+    #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+    enum ProbeFault {
+        None,
+        CreateCollision,
+        Write,
+        Sync,
+        Cleanup,
+        WriteAndCleanup,
+        SyncAndCleanup,
+    }
+    #[derive(Clone, Debug, PartialEq, Eq)]
+    struct ProbeEvent {
+        point: ProbePoint,
+        path: PathBuf,
+        injected_error: Option<io::ErrorKind>,
+    }
+    struct Observer {
+        fault: ProbeFault,
+        events: Vec<ProbeEvent>,
+    }
+    thread_local! {
+        static OBSERVER: RefCell<Option<Observer>> = const { RefCell::new(None) };
+        static OBSERVING: Cell<bool> = const { Cell::new(false) };
+    }
+    struct Registration {
+        _local: PhantomData<Rc<()>>,
+    }
+    impl Registration {
+        fn new(fault: ProbeFault) -> Self {
+            assert!(
+                !OBSERVING.with(Cell::get),
+                "FIXTURE_FAILURE: registration during observation"
+            );
+            OBSERVER.with(|slot| {
+                let mut slot = slot.borrow_mut();
+                assert!(slot.is_none(), "FIXTURE_FAILURE: nested registration");
+                *slot = Some(Observer {
+                    fault,
+                    events: vec![],
+                });
+            });
+            Self {
+                _local: PhantomData,
+            }
+        }
+        fn events(&self) -> Vec<ProbeEvent> {
+            OBSERVER.with(|slot| {
+                slot.borrow()
+                    .as_ref()
+                    .expect("registered observer")
+                    .events
+                    .clone()
+            })
+        }
+    }
+    impl Drop for Registration {
+        fn drop(&mut self) {
+            OBSERVER.with(|slot| {
+                slot.borrow_mut().take();
+            });
+        }
+    }
+    struct Observation;
+    impl Drop for Observation {
+        fn drop(&mut self) {
+            OBSERVING.with(|flag| flag.set(false));
+        }
+    }
+
+    pub(super) fn observe_probe(point: ProbePoint, path: &Path) -> io::Result<()> {
+        assert!(
+            !OBSERVING.with(Cell::get),
+            "FIXTURE_FAILURE: recursive observer"
+        );
+        if !OBSERVER.with(|slot| slot.borrow().is_some()) {
+            return Ok(());
+        }
+        assert!(
+            !OBSERVING.with(|flag| flag.replace(true)),
+            "FIXTURE_FAILURE: recursive observer"
+        );
+        let _active = Observation;
+        assert!(
+            path.is_absolute(),
+            "FIXTURE_FAILURE: probe path must be absolute"
+        );
+        // The only observer-side write is a collision sentinel, restricted to
+        // the finite child's exclusively created synthetic root.
+        let fixture =
+            PathBuf::from(std::env::var_os("WW5_I2_GATE_LIB_ROOT").expect("isolated fixture root"));
+        assert!(
+            path.starts_with(&fixture),
+            "FIXTURE_FAILURE: probe escaped synthetic root"
+        );
+        OBSERVER.with(|slot| {
+            let mut slot = slot.borrow_mut();
+            let observer = slot.as_mut().unwrap();
+            use ProbeFault as F;
+            use ProbePoint as P;
+            let injected = matches!(
+                (point, observer.fault),
+                (P::BeforeWrite, F::Write | F::WriteAndCleanup)
+                    | (P::BeforeSync, F::Sync | F::SyncAndCleanup)
+                    | (
+                        P::BeforeRemove,
+                        F::Cleanup | F::WriteAndCleanup | F::SyncAndCleanup
+                    )
+            );
+            observer.events.push(ProbeEvent {
+                point,
+                path: path.to_owned(),
+                injected_error: injected.then_some(io::ErrorKind::Other),
+            });
+            if point == P::BeforeCreate && observer.fault == F::CreateCollision {
+                let mut file = OpenOptions::new()
+                    .write(true)
+                    .create_new(true)
+                    .open(path)
+                    .expect("FIXTURE_FAILURE: create collision sentinel");
+                file.write_all(b"synthetic collision sentinel\n")
+                    .expect("FIXTURE_FAILURE: write collision sentinel");
+            }
+            if injected {
+                Err(io::Error::other("synthetic probe operation failure"))
+            } else {
+                Ok(())
+            }
+        })
+    }
+
+    const PROBE_BYTES: &[u8] = b"WordWeave5 early-trial storage probe\n";
+    fn run_probe(name: &str, fault: ProbeFault, existing: bool) {
+        isolated_full(&format!("store::early_trial_probe_tests::{name}"), || {
+            let temp = Temp::new();
+            let (trial, normal) = roots(&temp);
+            fs::create_dir(&normal).unwrap();
+            fs::write(normal.join("normal.txt"), b"normal exact sentinel").unwrap();
+            if existing {
+                fs::create_dir(&trial).unwrap();
+                fs::write(trial.join("keep.tsv"), b"trial exact sentinel").unwrap();
+            }
+            let before = tree(&temp.root);
+            let observer = Registration::new(fault);
+            let result = open_early_trial(trial.clone(), normal.clone());
+            let events = observer.events();
+            use ProbeFault as F;
+            use ProbePoint as P;
+            let points = match fault {
+                F::None => vec![
+                    P::BeforeCreate,
+                    P::Created,
+                    P::BeforeWrite,
+                    P::Written,
+                    P::BeforeSync,
+                    P::Synced,
+                    P::Closed,
+                    P::BeforeRemove,
+                    P::Removed,
+                ],
+                F::CreateCollision => vec![P::BeforeCreate],
+                F::Write => vec![
+                    P::BeforeCreate,
+                    P::Created,
+                    P::BeforeWrite,
+                    P::Closed,
+                    P::BeforeRemove,
+                    P::Removed,
+                ],
+                F::Sync => vec![
+                    P::BeforeCreate,
+                    P::Created,
+                    P::BeforeWrite,
+                    P::Written,
+                    P::BeforeSync,
+                    P::Closed,
+                    P::BeforeRemove,
+                    P::Removed,
+                ],
+                F::Cleanup => vec![
+                    P::BeforeCreate,
+                    P::Created,
+                    P::BeforeWrite,
+                    P::Written,
+                    P::BeforeSync,
+                    P::Synced,
+                    P::Closed,
+                    P::BeforeRemove,
+                ],
+                F::WriteAndCleanup => vec![
+                    P::BeforeCreate,
+                    P::Created,
+                    P::BeforeWrite,
+                    P::Closed,
+                    P::BeforeRemove,
+                ],
+                F::SyncAndCleanup => vec![
+                    P::BeforeCreate,
+                    P::Created,
+                    P::BeforeWrite,
+                    P::Written,
+                    P::BeforeSync,
+                    P::Closed,
+                    P::BeforeRemove,
+                ],
+            };
+            assert_eq!(events.iter().map(|e| e.point).collect::<Vec<_>>(), points);
+            let path = &events[0].path;
+            assert_eq!(path.parent(), Some(trial.as_path()));
+            assert!(!path.starts_with(&normal));
+            assert!(events.iter().all(|e| &e.path == path));
+            let failures: Vec<_> = events
+                .iter()
+                .filter_map(|e| e.injected_error.map(|kind| (e.point, kind)))
+                .collect();
+            let expected_failures = match fault {
+                F::None | F::CreateCollision => vec![],
+                F::Write => vec![(P::BeforeWrite, io::ErrorKind::Other)],
+                F::Sync => vec![(P::BeforeSync, io::ErrorKind::Other)],
+                F::Cleanup => vec![(P::BeforeRemove, io::ErrorKind::Other)],
+                F::WriteAndCleanup => vec![
+                    (P::BeforeWrite, io::ErrorKind::Other),
+                    (P::BeforeRemove, io::ErrorKind::Other),
+                ],
+                F::SyncAndCleanup => vec![
+                    (P::BeforeSync, io::ErrorKind::Other),
+                    (P::BeforeRemove, io::ErrorKind::Other),
+                ],
+            };
+            assert_eq!(failures, expected_failures);
+            if fault == F::None {
+                assert!(result.is_ok());
+            } else {
+                let error = match &result {
+                    Ok(_) => panic!("probe failure must reject startup"),
+                    Err(error) => error,
+                };
+                assert!(matches!(
+                    error.stage,
+                    TrialOpenStage::StorageInitializationStarted
+                ));
+                assert!(matches!(error.reason, TrialOpenReason::StorageIo));
+            }
+            let mut expected = before;
+            expected.insert(trial.strip_prefix(&temp.root).unwrap().to_owned(), vec![]);
+            expected.insert(
+                trial
+                    .join("app.lock")
+                    .strip_prefix(&temp.root)
+                    .unwrap()
+                    .to_owned(),
+                0_u64.to_le_bytes().to_vec(),
+            );
+            let residue = match fault {
+                F::CreateCollision => Some(b"synthetic collision sentinel\n".as_slice()),
+                F::Cleanup | F::SyncAndCleanup => Some(PROBE_BYTES),
+                F::WriteAndCleanup => Some(b"".as_slice()),
+                _ => None,
+            };
+            if let Some(bytes) = residue {
+                expected.insert(
+                    path.strip_prefix(&temp.root).unwrap().to_owned(),
+                    bytes.to_vec(),
+                );
+            }
+            assert_eq!(
+                tree(&temp.root),
+                expected,
+                "only documented initialization and exact residue may differ"
+            );
+            drop(observer);
+            drop(result);
+            if fault != F::None {
+                // A failed first open must release the lock and must not freeze its pair.
+                drop(Storage::at(trial).unwrap());
+                assert!(open_early_trial(
+                    temp.root.join("retry-trial"),
+                    temp.root.join("retry-normal")
+                )
+                .is_ok());
+            }
+        });
+    }
+
+    #[test]
+    fn et01_probe_new_root_completes_real_io_and_removes_file() {
+        run_probe(
+            "et01_probe_new_root_completes_real_io_and_removes_file",
+            ProbeFault::None,
+            false,
+        );
+    }
+    #[test]
+    fn et01_probe_existing_root_preserves_data_and_removes_file() {
+        run_probe(
+            "et01_probe_existing_root_preserves_data_and_removes_file",
+            ProbeFault::None,
+            true,
+        );
+    }
+    #[test]
+    fn et01_probe_create_collision_preserves_unowned_sentinel() {
+        run_probe(
+            "et01_probe_create_collision_preserves_unowned_sentinel",
+            ProbeFault::CreateCollision,
+            true,
+        );
+    }
+    #[test]
+    fn et_d01_probe_write_failure_closes_and_cleans_once() {
+        run_probe(
+            "et_d01_probe_write_failure_closes_and_cleans_once",
+            ProbeFault::Write,
+            true,
+        );
+    }
+    #[test]
+    fn et_d01_probe_sync_failure_closes_and_cleans_once() {
+        run_probe(
+            "et_d01_probe_sync_failure_closes_and_cleans_once",
+            ProbeFault::Sync,
+            true,
+        );
+    }
+    #[test]
+    fn et_d01_probe_cleanup_failure_retains_exact_synced_bytes() {
+        run_probe(
+            "et_d01_probe_cleanup_failure_retains_exact_synced_bytes",
+            ProbeFault::Cleanup,
+            true,
+        );
+    }
+    #[test]
+    fn et_d01_probe_write_and_cleanup_failure_retains_empty_owned_file() {
+        run_probe(
+            "et_d01_probe_write_and_cleanup_failure_retains_empty_owned_file",
+            ProbeFault::WriteAndCleanup,
+            true,
+        );
+    }
+    #[test]
+    fn et_d01_probe_sync_and_cleanup_failure_retains_exact_written_bytes() {
+        run_probe(
+            "et_d01_probe_sync_and_cleanup_failure_retains_exact_written_bytes",
+            ProbeFault::SyncAndCleanup,
+            true,
+        );
+    }
+    #[test]
+    fn et04_history_current_and_pending_refuse_before_any_probe_event() {
+        isolated_full("store::early_trial_probe_tests::et04_history_current_and_pending_refuse_before_any_probe_event", || {
+            let temp = Temp::new();
+            let (trial, normal) = roots(&temp);
+            fs::create_dir(&trial).unwrap();
+            let plain = r#"{"version":2,"audio_history":null,"settings":{},"memories":{},"reviews":[],"suspended":[],"ai_calls":{},"study_seconds":{}}"#;
+            let history = plain.replace("\"audio_history\":null", &format!("\"audio_history\":{{\"sha256\":\"{}\",\"bytes\":12}}", "a".repeat(64)));
+            assert!(serde_json::from_str::<Progress>(&history).expect("FIXTURE_FAILURE: structural history").audio_history.is_some());
+            for current in [true, false] {
+                fs::write(trial.join("progress.json"), if current { &history } else { plain }).unwrap();
+                if !current { fs::write(trial.join("pending-material-commit.json"), serde_json::to_vec(&serde_json::json!({"old_deck":null,"old_progress":history,"deck":crate::model::BUILTIN_DECK,"progress":plain})).unwrap()).unwrap(); }
+                let before = tree(&temp.root);
+                let observer = Registration::new(ProbeFault::None);
+                let error = match open_early_trial(trial.clone(), normal.clone()) { Ok(_) => panic!("history must reject"), Err(error) => error };
+                assert!(matches!(error.stage, TrialOpenStage::BeforeWrites));
+                assert!(observer.events().is_empty());
+                assert_eq!(tree(&temp.root), before);
+            }
+        });
+    }
+}
+
 use crate::{
     audio_history::{CommittedHistoryHead, HistoryError, HistoryErrorKind, RootRef},
     model::Skill,
@@ -974,6 +1586,39 @@ impl Progress {
 pub struct Storage {
     pub dir: PathBuf,
     _lock: File,
+}
+
+#[cfg(feature = "early-trial")]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum TrialOpenStage {
+    BeforeWrites,
+    StorageInitializationStarted,
+}
+
+#[cfg(feature = "early-trial")]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum TrialOpenReason {
+    RootUnavailable,
+    UnsafeRoot,
+    HistoryPresent,
+    InvalidProgressOrPending,
+    StorageIo,
+}
+
+#[cfg(feature = "early-trial")]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct TrialOpenFailure {
+    stage: TrialOpenStage,
+    reason: TrialOpenReason,
+}
+
+#[cfg(feature = "early-trial")]
+fn open_early_trial(_root: PathBuf, _normal: PathBuf) -> Result<Storage, TrialOpenFailure> {
+    // RED scaffold: no storage initialization or registration is implemented yet.
+    Err(TrialOpenFailure {
+        stage: TrialOpenStage::BeforeWrites,
+        reason: TrialOpenReason::RootUnavailable,
+    })
 }
 
 #[derive(Debug, PartialEq, Eq)]

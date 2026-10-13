@@ -6,6 +6,9 @@ edition = "2021"
 description = "Five-minute contextual English vocabulary practice for Windows"
 license = "MIT"
 
+[features]
+early-trial = []
+
 # Cargo builds this offline fixture for integration tests on Windows and Unix.
 [[bin]]
 name = "wordweave-mock-codex"
