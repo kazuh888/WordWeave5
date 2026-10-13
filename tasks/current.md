@@ -1,6 +1,6 @@
 # 現在のタスク要約
 
-更新：2026-10-12（I2d-M媒体書き出しは新25件を含む独立114行動PASS・最終Post PASS／Closed。条件不足3件は成功へ含めない。工程別モデルdispatchと使用量を記録済み。音声履歴UI・試用EXE・製品全体は未完成）。詳細は [参照インデックス](context-index.md) を参照する。
+更新：2026-10-13（I2d-M最終Post Closed後、D2集約/ET1開始前提を独立PASS。早期試用保存先分離ET1の独立作者Astra/highを起動した。親Sol/mediumを維持し工程別dispatchとusage記録を継続する。音声履歴UI・試用EXE・製品全体は未完成）。詳細は [参照インデックス](context-index.md) を参照する。
 
 ## 現在の目標
 
@@ -59,3 +59,7 @@ ACOUSTIC-HISTORY-001：原音・音響解析結果・Qwen助言を保存し、�
 7. d-Mは[独立作者](ACOUSTIC-HISTORY-001/media-export-tests.md)の新25件15RED/10PASS→[本体接合](ACOUSTIC-HISTORY-001/media-export-implementation.md)後25PASS→[独立runner](ACOUSTIC-HISTORY-001/media-export-runner.md)の114行動PASS/0FAIL/fixture skip3→[最終Post PASS/Closed](ACOUSTIC-HISTORY-001/media-export-final-review.md)。source/oracle固定、通常ユーザー権限、timeout/子process/TEMP残存0。`24fa10c`（RED）と`81aaf97`（本体）はpush済み。作者/実装/review Astra/high、runner Sol/mediumを自動dispatchし、[usage記録](ACOUSTIC-HISTORY-001/usage-observation-20261012.md)を更新した。条件不足3件と全体test/release/native受入は残る。次回はD2全体gate/早期試用ET1への依存を確認し、既定I2b-S→I2b-Cへ接合する。製品EXEは未更新。
 
 今回の整理は作業用要約から廃案・重複ログ・無関係な履歴・設計本文の転載を除外したものである。根拠資料と旧記録は削除していない。旧版はインデックスに残すが通常再開時には読み込まない。
+
+## 最新の実行位置（2026-10-13）
+
+[独立D2集約/ET1依存確認](ACOUSTIC-HISTORY-001/early-trial-dependencies.md)はPASS・阻止0。既存各Postを再実行せずexport迂回残置とsource継続性を照合してD2を閉じた。[早期試用計画](ACOUSTIC-HISTORY-001/early-trial-plan.md)に従いET1の独立テスト作者 `trial_paths_tests`（Astra/high）が5file内の専用試験を所有している。本体/manifestは未変更、必要scaffoldは作者の所有返却後に実装者へ渡す。次はRED→本体→独立runner Sol/medium→Post Astra/high。ET2資格情報/表示とET3製品提供・全体gateは残る。今回の測定は[usage-observation-20261013.md](ACOUSTIC-HISTORY-001/usage-observation-20261013.md)を正とする。

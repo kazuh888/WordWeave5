@@ -1,5 +1,7 @@
 # 開発タスクの使用量記録
 
+- 2026-10-13 ACOUSTIC-HISTORY-001再開。HEAD `186b464`、tree clean、前提D2集約確認→早期試用保存先分離ET1を今回の限定対象とする。開始11:43:45 UTC（20:43 JST）、週枠0%・reset1792496608は前回と異なる窓であり、前回98%からの単純差分を使わない。[親開始snapshotと担当記録](../../../tasks/ACOUSTIC-HISTORY-001/usage-observation-20261013.md)を保存した。親Sol/mediumを維持し、計画指定の各役へ自動dispatchする。ET2/ET3提供・実API受入は今回の開始時点では未完了である。
+
 - 2026-10-12 I2d-M限定単位は[最終Post PASS/Closed](../../../tasks/ACOUSTIC-HISTORY-001/media-export-final-review.md)。新25件独立PASS、関連込み114行動PASS/0FAIL/fixture skip3、source/oracle固定・通常ユーザー・timeout/子/TEMP残存0である。作者/実装/Post Astra/high、runner Sol/mediumへ自動dispatchした。終了02:58:17 UTC（最終記録/push/応答前）、週枠93→98%はアカウント共通観測、親子usageは[担当別snapshot差分](../../../tasks/ACOUSTIC-HISTORY-001/usage-observation-20261012.md)で別記し合算しない。旧方式比の増減は未判定。hash fixtureとassertionの修正、実装側の不要な再compile/既知sandbox再試行を手戻りとして記録し、runnerではcompile/runtime分離で重複を回避した。製品EXE・全体deliveryは未完了である。
 
 - 2026-10-12 I2d-Mのテスト作成・実装・検証を利用者の明示依頼で再開。開始02:14:41 UTC（JST11:14）、HEAD `a64ede0`、tree clean、週枠93%。独立作者 `media_export_tests` を既定Astra/high・fresh contextで起動し、本体2fileの新cfg(test)だけを逐次所有する。親の開始usage snapshotを[観測記録](../../../tasks/ACOUSTIC-HISTORY-001/usage-observation-20261012.md)へ保存した。終了までのscopeは独立runner/Postまでで、モデル切替待ちを挟まず既定役へ自動引継ぎする。実データ/API・製品EXE更新・比較専用再実行は含まない。

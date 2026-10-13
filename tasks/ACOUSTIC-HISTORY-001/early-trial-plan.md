@@ -1,5 +1,7 @@
 # ACOUSTIC-HISTORY-001 早期試用EXE限定計画
 
+2026-10-13再開時点：ET0仕様/設計PASSとd-S/B/Mの最終Post Closedを[独立依存確認](early-trial-dependencies.md)で照合し、ET1開始条件を満たした。以下の過去の「d-B/M未了」は計画作成時の入力記録であり、本最新状態に置き換わる。ET1独立作者Astra/highを起動済み。本体・ET2/ET3提供はまだ未完成である。工程別自動引継ぎの承認により、親モデル切替待ちだけを理由に停止せず、計画指定値を各dispatchで明示する。
+
 2026-10-12 / ET0仕様・設計反映済みの確定計画。入力は[外部契約・設計](early-trial-contract.md) SHA256 `0BC3839A6C6B60E5CD4E7267269FE33D4D898CA704B89609E32E0BB0912A1A6D`。親からcycle 2の仕様/設計ともPASS・ET-D01 Closedを受領した。[独立review記録](early-trial-review.md)を判定正本とし、本文の初回草案表示と後続判定を区別する。source・動作は未実装であり、d-B/M Closed前にET1へ進まない。既承認d-B/Mの着手条件とEXE提供gateは維持する。
 
 ## 完了境界と根拠
@@ -60,9 +62,9 @@ ET0は同一文書の両節が揃った時点で、独立reviewerを1回起動�
 
 ### ET前提: 既定I2d-B/M（各S）
 
-- [ ] d-Bは既定 `src/backup.rs` 本体、`tests/audio_history_backup.rs` と本体cfg(test)を所有し、既定T08/T08b受入・独立runner/Postを完了する
-- [ ] d-Mは既定 `src/app/chat_media.rs` 本体とcfg(test)を所有し、既定3出口・payload保持・marker順の受入と独立runner/Postを完了する
-- [ ] 両単位の既定focused検証を [implementation.md](implementation.md) に従って実行する。対象・件数を固定し0件成功を受入としない
+- [x] d-Bは既定 `src/backup.rs` 本体、`tests/audio_history_backup.rs` と本体cfg(test)を所有し、既定T08/T08b受入・独立runner/Postを完了する
+- [x] d-Mは既定 `src/app/chat_media.rs` 本体とcfg(test)を所有し、既定3出口・payload保持・marker順の受入と独立runner/Postを完了する
+- [x] 両単位の既定focused検証を [implementation.md](implementation.md) に従って実行する。対象・件数を固定し0件成功を受入としない
 
 依存はd-S Closed→d-B→d-Mであり、ET0は着手前提ではない。ET0とd-B/Mの両方をET1開始前に完了する。現行計画の外部guard・独立oracle・レビュー条件はそのままである。
 
