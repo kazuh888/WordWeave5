@@ -1,4 +1,76 @@
 // QWEN-SETTINGS-001: synthetic credentials only, never accesses Windows credentials.
+
+#[cfg(feature = "early-trial")]
+mod early_trial_startup_tests {
+    use super::*;
+    use crate::{
+        app,
+        media::{early_trial_startup_tests::isolated, watch_recording_starts},
+    };
+    use app::qwen_reading_ui::{
+        preview_data::{audio, Reply, Wire},
+        QwenAction, QwenDialog,
+    };
+    use qwen_audio::{ProbeRequest, ProbeTransport, TransportFailure, TransportFuture};
+    use std::sync::{atomic::AtomicUsize, Arc};
+    use wordweave5::qwen_reading::ReadingPhase;
+    #[derive(Default)]
+    struct Probe(AtomicUsize);
+    impl ProbeTransport for Probe {
+        fn send<'a>(&'a self, _: ProbeRequest) -> TransportFuture<'a> {
+            self.0.fetch_add(1, Ordering::SeqCst);
+            Box::pin(async { Err(TransportFailure::Network) })
+        }
+    }
+
+    #[test]
+    fn et06_factory_settings_restore_and_reading_prepare_do_not_record_probe_or_send() {
+        isolated("app::qwen_settings_tests::early_trial_startup_tests::et06_factory_settings_restore_and_reading_prepare_do_not_record_probe_or_send", |base| {
+            let watch = watch_recording_starts().unwrap();
+            let codex_home = std::env::var_os("CODEX_HOME");
+            let (ctx, mut app, _) = app::early_trial_startup_tests::fresh(base);
+            let store = configured_store(); let wire = Wire::new(Reply::Pending); let probe = Arc::new(Probe::default());
+            app.qwen_store = store.clone(); app.qwen_probe_transport = Some(probe.clone());
+            assert!(app.page == app::Page::Home);
+            app.go_to_qwen_settings();
+            app.qwen_settings = Some(QwenConnectionEditor::new_with_transport(store.clone(), probe.clone()).unwrap());
+            for _ in 0..8 { app::harness_tests::frame(&ctx, &mut app, false); }
+            let editor = app.qwen_settings.as_mut().unwrap();
+            assert_eq!(editor.probe_state, app::qwen_settings::ProbeState::Untested);
+            *editor.key = "synthetic-trial-save".into(); editor.save().unwrap();
+            app.finish_qwen_settings();
+            app.settings_editor.draft.minutes = 7; app.save_settings(&ctx).unwrap();
+            let mut restore = app.progress.clone(); restore.settings.minutes = 11; app.restore(restore).unwrap();
+            assert_eq!(app.progress.settings.minutes, 11);
+            assert_eq!(store.saves.load(Ordering::SeqCst), 1);
+            let entry = app.deck[0].clone();
+            let mut dialog = QwenDialog::new(&entry, store.clone(), wire.clone()).unwrap();
+            assert_eq!(dialog.controller.view().phase, ReadingPhase::Input);
+            for _ in 0..3 {
+                let _ = ctx.run(eframe::egui::RawInput::default(), |ctx| { dialog.render(ctx); });
+            }
+            assert_eq!(dialog.controller.view().phase, ReadingPhase::Input);
+            dialog.controller.set_audio("synthetic.wav".into(), audio()).unwrap();
+            dialog.controller.prepare().unwrap();
+            assert_eq!(dialog.controller.view().phase, ReadingPhase::Confirming);
+            assert_eq!(wire.count(), 0, "confirmation is not sending");
+            dialog.dispatch_frame(&[QwenAction::Cancel], &ctx);
+            dialog.controller.poll();
+            assert_eq!(dialog.controller.view().phase, ReadingPhase::Cancelled);
+            dialog.close(); drop(dialog);
+            // This scenario never starts an audio-load/probe/evaluation worker.
+            // The audio job registry is nevertheless drained before watch release.
+            qwen_audio::shutdown_audio_jobs();
+            assert_eq!((wire.count(), probe.0.load(Ordering::SeqCst), watch.calls()), (0, 0, 0));
+            assert!(app.pending.is_none() && app.connection_check.is_none() && app.recorder.is_none());
+            assert!(app.progress.audio_history.is_none());
+            assert!(app.storage.as_ref().unwrap().load().unwrap().audio_history.is_none());
+            assert_eq!(std::env::var_os("CODEX_HOME"), codex_home);
+            drop(app);
+        });
+    }
+}
+
 use super::qwen_reading_ui::preview_data::Store;
 use super::qwen_settings::QwenConnectionEditor;
 use qwen_audio::{ApiHost, ApiKey, Connection, ErrorCode, Region};

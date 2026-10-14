@@ -34,3 +34,9 @@ planner thread `01a13931-36fd-7922-a65d-a60492d90e26`の自己報告観測は06:
 reviewer thread `01a1393b-2c35-74d3-a853-57441be994a3`、指定Astra/high。自己報告counter07:06:07.683→07:09:57.372 UTCはinput38227→924858/cached23040→823168/output174→3905/reasoning0→905。差分input886631/cached800128/output3731/reasoning905。後続検討・最終応答は含まず、最終snapshotを別途取得する。親子包含/返却model未確認、合算しない。
 
 Pre-2は設計PASS/指摘の設計上Closedとなった。design SHA `24B9FEBE…AE687D7E` / plan SHA `82E0A3E8…ADC31AFD`、source6不変、実行解除ではない。reviewerが返した更新counterは07:21:01.509 UTC input=1587858/cached=1459584/output=7611/reasoning=2069であり、Pre-2単独の開始値はなく、この時点以降の最終応答も範囲外。先のsnapshotとの差を追加タスク消費として重複加算しない。
+
+## 独立作者の引継ぎ
+
+作者 `trial_startup_tests`、thread `01a1394d-02e8-7493-84ae-371e9ade04bc`、指定Astra/high・返却model/effort未取得。[試験報告](early-trial-startup-tests.md)で18caseを固定した。pure-lib定数exact1件は目的FAIL、bin一括no-runは不足API28診断で未compile、Recorder runtime0。作者count参照誤り2件は修正済みであり行動REDには数えない。起動中API送信0の直接観測はないという範囲を明記した。source6fileへの追加のみ900行、fmt/diff成功、所有返却済みである。
+
+取得snapshotは07:25:24.180Z input38639/cached23040/output223/reasoning10→07:45:05.745Z input5530507/cached5386368/output32742/reasoning6268。差分input5491868/cached5363328/output32519/reasoning6258。開始前/最終応答分/親子包含は未確認であり別加算しない。待機中に親は起動/録音経路と作者fixtureを統合確認したが、作者と同じ試験を再実行していない。定数試験の作者再実行1回は後続buildで置換されたEXEと識別を結び直すためである。

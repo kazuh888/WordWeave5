@@ -83,3 +83,7 @@ ET2設計は必須の録音開始counter不足で一度STOPしたが、planner `
 独立Pre-1は[ET2-PRE-01/P2の阻止1件](ACOUSTIC-HISTORY-001/early-trial-startup-review.md)。初回正対照自体の実mic到達を防ぐ実行前Gateが不足したため、designerがET2-G0（親のsource読取確認→対応EXE固定→明示実行解除、source/EXE変更やmutation復元後も再確認）を唯一規範へ整備した。design新SHA `24B9FEBE…AE687D7E`。plannerが計画の旧即時実行条件/観測変異範囲を同期中、その後Pre-2を同reviewerへ返す。source編集・実行試験は0のまま、ET2-PRE-01は未Closedである。
 
 独立Pre-2は[設計PASS](ACOUSTIC-HISTORY-001/early-trial-startup-review.md)。design SHA `24B9FEBE…AE687D7E` / plan SHA `82E0A3E8…ADC31AFD`、source6不変。ET2-PRE-01は設計上Closed、実装後closure/実ET2-G0/動的試験/ET2Postは未了である。次は独立作者Astra/highが6file内のtest/署名と期待値を固定する。API不在はcompile blockerとして実装者へ渡し、偽scaffoldを作らず、誰も親のET2-G0解除前にRecorder::startを実行しない。
+
+設計・計画・Pre結果は `abad297` でpush済み。独立作者 `trial_startup_tests`（Astra/high）が6fileの専用試験を作成中であり、本体変更は未開始。既存Qwen定数のpure-lib exact1件はcompile成功後、通常namespaceと試用literalの不一致という目的assertで1FAIL（行動RED）を取得した。録音入口を呼ぶ試験は未実行。残る試験/署名/hash固定→所有返却→別の実装者→ET2-G0→独立runner/Postへ進む。
+
+作者は[ET2試験報告](ACOUSTIC-HISTORY-001/early-trial-startup-tests.md)で18新case（試用bin17+lib1／通常bin6+lib1）と署名・oracle・6source/module hashを固定し所有返却した。最終一括no-runは不足API28診断のみでexit101、行動REDと混同しない。作者のcount参照誤り2件は修正済み、fmt/diff成功。本体・bin/Recorder実行0。factory前からの録音counterとは別に、send/probe spyはfactory後の操作のみであり起動中通信0の直接観測は未取得である。次は別実装者Astra/highが本体接合し、親ET2-G0まで録音を呼ぶ試験を実行しない。

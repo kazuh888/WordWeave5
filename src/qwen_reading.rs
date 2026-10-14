@@ -14,6 +14,19 @@ use tokio_util::sync::CancellationToken;
 use zeroize::Zeroizing;
 
 pub const WORDWEAVE_QWEN_CREDENTIAL_TARGET: &str = "WordWeave5.QwenReading.Connection.v1";
+
+#[cfg(test)]
+mod early_trial_startup_tests {
+    #[test]
+    fn et02_credential_target_matches_independent_feature_literal() {
+        #[cfg(feature = "early-trial")]
+        let expected = "WordWeave5.EarlyTrial.QwenReading.Connection.v1";
+        #[cfg(not(feature = "early-trial"))]
+        let expected = "WordWeave5.QwenReading.Connection.v1";
+        assert_eq!(super::WORDWEAVE_QWEN_CREDENTIAL_TARGET, expected);
+    }
+}
+
 static NEXT_OWNER: AtomicU64 = AtomicU64::new(1);
 fn local(code: ErrorCode) -> SafeError {
     SafeError::new(code, SendDisposition::NotSent)

@@ -1,4 +1,410 @@
 use crate::app::controls::UiControls as _;
+
+#[cfg(all(test, feature = "early-trial"))]
+pub(crate) mod early_trial_startup_tests {
+    use super::*;
+    use crate::media::{early_trial_startup_tests::isolated, watch_recording_starts};
+    use std::{
+        cell::{Cell, RefCell},
+        collections::BTreeMap,
+        fs::{self, OpenOptions},
+        os::windows::fs::{MetadataExt, OpenOptionsExt},
+        path::Path,
+    };
+
+    const OLD: &str = r#"{"version":2,"audio_history":null,"settings":{"topic":"synthetic old"},"memories":{},"reviews":[],"suspended":[],"ai_calls":{},"study_seconds":{}}"#;
+    const NEXT: &str = r#"{"version":2,"audio_history":null,"settings":{"topic":"synthetic recovered"},"memories":{},"reviews":[],"suspended":[],"ai_calls":{},"study_seconds":{}}"#;
+    const OLD_DECK: &str = "id\tbase\tmeaning\tlevel\tbusiness\televated\tregister\tusage\tcontext\texample\ttranslation\tanswers\tquestion\texplanation\ttag\net_old\told\t古い\t中学\told\told\t標準\t合成用法\t合成状況\tIt is ___.\t古い。\told\t合成質問\t合成解説\t合成\n";
+    const NEXT_DECK: &str = "id\tbase\tmeaning\tlevel\tbusiness\televated\tregister\tusage\tcontext\texample\ttranslation\tanswers\tquestion\texplanation\ttag\net_next\tnew\t新しい\t中学\tnew\tnew\t標準\t合成用法\t合成状況\tIt is ___.\t新しい。\tnew\t合成質問\t合成解説\t合成\n";
+    const RECOVERY_ERROR: &str = "試用データの回復または初期化を完了できませんでした。試用内では回復がすでに適用されている場合や、途中で停止している場合があります。";
+    const RESTORE_ERROR: &str =
+        "音声履歴を含むため、早期試用には復元しない。現在の記録は変更していない。";
+    type Ledger = BTreeMap<PathBuf, (u32, Vec<u8>)>;
+
+    pub(crate) fn ledger(root: &Path) -> Ledger {
+        fn visit(base: &Path, dir: &Path, out: &mut Ledger) {
+            for item in fs::read_dir(dir).unwrap() {
+                let path = item.unwrap().path();
+                let meta = fs::symlink_metadata(&path).unwrap();
+                assert_eq!(
+                    meta.file_attributes() & 0x400,
+                    0,
+                    "synthetic fixture must not contain reparse points"
+                );
+                let bytes = if path.file_name().unwrap() == "app.lock" {
+                    meta.len().to_le_bytes().to_vec()
+                } else if meta.is_file() {
+                    fs::read(&path).unwrap()
+                } else {
+                    vec![]
+                };
+                out.insert(
+                    path.strip_prefix(base).unwrap().to_owned(),
+                    (meta.file_attributes() & 0x10, bytes),
+                );
+                if meta.is_dir() {
+                    visit(base, &path, out);
+                }
+            }
+        }
+        let mut result = Ledger::new();
+        visit(root, root, &mut result);
+        result
+    }
+
+    pub(crate) fn seed_roots(base: &Path) -> PathBuf {
+        let normal = base.join("local/WordWeave5");
+        let trial = base.join("local/WordWeave5-EarlyTrial");
+        fs::create_dir(&normal).unwrap();
+        fs::create_dir(&trial).unwrap();
+        for name in [
+            "progress.json",
+            "custom.tsv",
+            "assets/original.wav",
+            "ink/original.json",
+            "codex-work/journal.json",
+            "diagnostics/session.txt",
+        ] {
+            let path = normal.join(name);
+            fs::create_dir_all(path.parent().unwrap()).unwrap();
+            fs::write(path, format!("normal synthetic sentinel {name}")).unwrap();
+        }
+        trial
+    }
+
+    fn seed_pending(trial: &Path) -> Vec<u8> {
+        assert_eq!(
+            model::parse_deck(OLD_DECK).unwrap().len(),
+            1,
+            "FIXTURE: valid old deck"
+        );
+        assert_eq!(
+            model::parse_deck(NEXT_DECK).unwrap().len(),
+            1,
+            "FIXTURE: valid next deck"
+        );
+        let raw = serde_json::to_vec(&serde_json::json!({"old_deck":OLD_DECK,"old_progress":OLD,"deck":NEXT_DECK,"progress":NEXT})).unwrap();
+        fs::write(trial.join("custom.tsv"), OLD_DECK).unwrap();
+        fs::write(trial.join("progress.json"), OLD).unwrap();
+        fs::write(trial.join("pending-material-commit.json"), &raw).unwrap();
+        raw
+    }
+
+    fn recovery_error(result: Result<WordApp, TrialStartupFailure>) {
+        let error = match result {
+            Ok(_) => panic!("fatal app must not be exposed"),
+            Err(error) => error,
+        };
+        assert!(matches!(
+            error,
+            TrialStartupFailure::RecoveryOrInitializationStarted
+        ));
+        assert_eq!(error.to_string(), RECOVERY_ERROR);
+        assert!(!error.to_string().contains("変更していません"));
+    }
+
+    fn assert_recovered(trial: &Path, raw: &[u8]) {
+        assert_eq!(
+            fs::read(trial.join("custom.tsv")).unwrap(),
+            NEXT_DECK.as_bytes(),
+            "FIXTURE_STAGE: actual next deck write must be reached"
+        );
+        assert_eq!(
+            fs::read(trial.join("progress.json")).unwrap(),
+            NEXT.as_bytes(),
+            "FIXTURE_STAGE: actual next progress write must be reached"
+        );
+        assert!(!trial.join("pending-material-commit.json").exists());
+        let archives: Vec<_> = fs::read_dir(trial.join("backups"))
+            .unwrap()
+            .map(|e| e.unwrap().path())
+            .collect();
+        assert_eq!(archives.len(), 1, "one archive, not an invented name");
+        assert_eq!(fs::read(&archives[0]).unwrap(), raw);
+    }
+
+    pub(crate) fn fresh(base: &Path) -> (egui::Context, WordApp, PathBuf) {
+        let trial = seed_roots(base);
+        fs::write(trial.join("progress.json"), OLD).unwrap();
+        let ctx = egui::Context::default();
+        let app =
+            WordApp::new_early_trial_with(&ctx, Storage::open().unwrap(), Storage::load, |_| {})
+                .ok()
+                .expect("trial factory must succeed");
+        (ctx, app, trial)
+    }
+
+    fn assert_no_history(app: &WordApp) {
+        assert!(app.progress.audio_history.is_none());
+        assert!(app
+            .storage
+            .as_ref()
+            .unwrap()
+            .load()
+            .unwrap()
+            .audio_history
+            .is_none());
+    }
+
+    #[derive(Clone, Copy)]
+    enum TestUi {
+        Backup,
+        Material,
+        Chat,
+        Import,
+    }
+    fn draw(
+        ctx: &egui::Context,
+        app: &mut WordApp,
+        kind: TestUi,
+        events: Vec<egui::Event>,
+        dropped_files: Vec<egui::DroppedFile>,
+    ) -> egui::FullOutput {
+        ctx.run(
+            egui::RawInput {
+                screen_rect: Some(egui::Rect::from_min_size(
+                    egui::Pos2::ZERO,
+                    egui::vec2(1250.0, 1000.0),
+                )),
+                events,
+                dropped_files,
+                ..Default::default()
+            },
+            |ctx| match kind {
+                TestUi::Backup => app.backup_confirmation(ctx),
+                TestUi::Import => app.confirmations(ctx),
+                TestUi::Material => {
+                    egui::CentralPanel::default().show(ctx, |ui| app.material_panel(ui));
+                }
+                TestUi::Chat => {
+                    egui::CentralPanel::default().show(ctx, |ui| app.chat_page(ui));
+                }
+            },
+        )
+    }
+    fn click(ctx: &egui::Context, app: &mut WordApp, kind: TestUi, label: &str) {
+        fn find(shape: &egui::epaint::Shape, label: &str) -> Option<egui::Rect> {
+            match shape {
+                egui::epaint::Shape::Text(t) if t.galley.text() == label => {
+                    Some(egui::Rect::from_min_size(t.pos, t.galley.size()))
+                }
+                egui::epaint::Shape::Vec(items) => items.iter().rev().find_map(|s| find(s, label)),
+                _ => None,
+            }
+        }
+        let mut output = draw(ctx, app, kind, vec![], vec![]);
+        for _ in 0..8 {
+            output = draw(ctx, app, kind, vec![], vec![]);
+        }
+        let pos = output
+            .shapes
+            .iter()
+            .rev()
+            .find_map(|s| find(&s.shape, label).filter(|r| s.clip_rect.contains_rect(*r)))
+            .expect("FIXTURE: visible actionable text must exist")
+            .center();
+        for pressed in [true, false] {
+            draw(
+                ctx,
+                app,
+                kind,
+                vec![
+                    egui::Event::PointerMoved(pos),
+                    egui::Event::PointerButton {
+                        pos,
+                        button: egui::PointerButton::Primary,
+                        pressed,
+                        modifiers: egui::Modifiers::NONE,
+                    },
+                ],
+                vec![],
+            );
+        }
+    }
+
+    #[test]
+    fn et04_nonhistory_json_and_settings_survive_trial_reopen() {
+        isolated("app::early_trial_startup_tests::et04_nonhistory_json_and_settings_survive_trial_reopen", |base| {
+            let watch = watch_recording_starts().unwrap(); let (ctx, mut app, trial) = fresh(base);
+            let normal = ledger(&base.join("local/WordWeave5"));
+            let candidate: Progress = serde_json::from_str(r#"{"version":2,"audio_history":null,"settings":{"minutes":7,"topic":"manual synthetic import"}}"#).unwrap();
+            app.restore(candidate).unwrap(); assert_eq!(app.progress.settings.topic, "manual synthetic import"); assert_no_history(&app);
+            app.begin_settings_edit(); app.settings_editor.draft.minutes = 11; app.save_settings(&ctx).unwrap(); assert_no_history(&app);
+            drop(app);
+            let diagnostics = Cell::new(0); let loads = Cell::new(0);
+            let app = WordApp::new_early_trial_with(&egui::Context::default(), Storage::open().unwrap(), |s| { loads.set(loads.get()+1); s.load() }, |path| { assert_eq!(path, trial.join("diagnostics")); diagnostics.set(diagnostics.get()+1); }).ok().expect("reopen saved trial");
+            assert_eq!((loads.get(), diagnostics.get()), (1, 1)); assert_eq!(app.progress.settings.minutes, 11); assert_eq!(app.progress.settings.topic, "manual synthetic import"); assert!(app.page == Page::Home); assert_no_history(&app);
+            assert_eq!(ledger(&base.join("local/WordWeave5")), normal); assert_eq!(watch.calls(), 0); drop(app);
+        });
+    }
+
+    #[test]
+    fn et04_backup_confirmation_cancel_and_approved_restore_keep_history_none() {
+        isolated("app::early_trial_startup_tests::et04_backup_confirmation_cancel_and_approved_restore_keep_history_none", |base| {
+            let watch = watch_recording_starts().unwrap(); let (ctx, mut app, trial) = fresh(base);
+            app.progress.chats.push(wordweave5::chat::Conversation::new()); app.progress.chats[0].draft = "保存済みの合成会話".into(); app.persist(); assert_no_history(&app);
+            let backup = base.join("explicit-backup"); wordweave5::backup::export(&trial, &backup, &app.deck, &app.progress).unwrap();
+            app.progress.chats[0].draft = "現在の未保存会話".into(); let memory = serde_json::to_value(&app.progress).unwrap(); let before = ledger(base);
+            app.backup_restore = Some(wordweave5::backup::prepare(backup.clone()).unwrap());
+            draw(&ctx, &mut app, TestUi::Backup, vec![], vec![]);
+            assert_eq!(ledger(base), before); assert_eq!(serde_json::to_value(&app.progress).unwrap(), memory);
+            click(&ctx, &mut app, TestUi::Backup, "キャンセル"); assert!(app.backup_restore.is_none()); assert_eq!(ledger(base), before); assert_eq!(serde_json::to_value(&app.progress).unwrap(), memory);
+            app.backup_restore = Some(wordweave5::backup::prepare(backup).unwrap());
+            click(&ctx, &mut app, TestUi::Backup, "内容を確認して復元する");
+            assert!(app.backup_restore.is_none()); assert_eq!(app.progress.chats[0].draft, "保存済みの合成会話"); assert_no_history(&app); assert_eq!(watch.calls(), 0); drop(app);
+        });
+    }
+
+    #[test]
+    fn et04_material_import_cancel_then_approval_and_word_cache_keep_history_none() {
+        isolated("app::early_trial_startup_tests::et04_material_import_cancel_then_approval_and_word_cache_keep_history_none", |base| {
+            let watch = watch_recording_starts().unwrap(); let (ctx, mut app, _trial) = fresh(base);
+            let normal = ledger(&base.join("local/WordWeave5"));
+            let items = model::parse_deck(NEXT_DECK).unwrap(); let before = ledger(base); let count = app.deck.len();
+            app.pending_import = Some(items.clone()); draw(&ctx, &mut app, TestUi::Import, vec![], vec![]);
+            assert_eq!(app.deck.len(), count); assert_eq!(ledger(base), before);
+            click(&ctx, &mut app, TestUi::Import, "キャンセル"); assert!(app.pending_import.is_none()); assert_eq!(app.deck.len(), count); assert_eq!(ledger(base), before);
+            app.pending_import = Some(items); click(&ctx, &mut app, TestUi::Import, "取り込む");
+            assert!(app.pending_import.is_none()); assert_eq!(app.deck.iter().filter(|e| e.id == "et_next").count(), 1); assert_no_history(&app);
+            app.cache_words("syntheticword\nextraordinary\n").unwrap(); app.persist(); assert!(app.words.iter().any(|w| w == "syntheticword")); assert_no_history(&app);
+            assert_eq!(ledger(&base.join("local/WordWeave5")), normal); assert_eq!(watch.calls(), 0); drop(app);
+        });
+    }
+
+    #[test]
+    fn et04_generated_proposal_requires_visible_approval_and_keeps_history_none() {
+        isolated("app::early_trial_startup_tests::et04_generated_proposal_requires_visible_approval_and_keeps_history_none", |base| {
+            let watch = watch_recording_starts().unwrap(); let (ctx, mut app, trial) = fresh(base);
+            app.progress.chats.push(wordweave5::chat::Conversation::new());
+            let proposal = harness_tests::material_ui_draft(&app); proposal.ready(&app.deck, false).expect("FIXTURE: valid independent synthetic proposal");
+            let id = proposal.candidate.id.clone(); let old = app.deck.iter().find(|e| e.id == id).unwrap().meaning.clone();
+            app.progress.material_draft = Some(proposal.clone()); app.persist();
+            let disk_before = fs::read(trial.join("progress.json")).unwrap(); let custom_before = fs::read(trial.join("custom.tsv")).ok();
+            draw(&ctx, &mut app, TestUi::Material, vec![], vec![]);
+            assert_eq!(app.deck.iter().find(|e| e.id == id).unwrap().meaning, old); assert_eq!(fs::read(trial.join("progress.json")).unwrap(), disk_before); assert_eq!(fs::read(trial.join("custom.tsv")).ok(), custom_before);
+            click(&ctx, &mut app, TestUi::Material, "教材案を破棄"); assert!(app.progress.material_draft.is_none()); assert_eq!(app.deck.iter().find(|e| e.id == id).unwrap().meaning, old); assert_eq!(fs::read(trial.join("custom.tsv")).ok(), custom_before); assert_no_history(&app);
+            app.progress.material_draft = Some(proposal); click(&ctx, &mut app, TestUi::Material, "内容を確認して教材に登録");
+            assert!(app.progress.material_draft.is_none()); assert_eq!(app.deck.iter().find(|e| e.id == id).unwrap().meaning, "合成の新しい意味🐈"); assert_eq!(app.progress.material_sources.len(), 1); assert_no_history(&app); assert_eq!(watch.calls(), 0); drop(app);
+        });
+    }
+
+    #[test]
+    fn et04_explicit_attachment_and_drop_cancel_approval_keep_history_none() {
+        isolated("app::early_trial_startup_tests::et04_explicit_attachment_and_drop_cancel_approval_keep_history_none", |base| {
+            let watch = watch_recording_starts().unwrap(); let (ctx, mut app, _trial) = fresh(base);
+            app.progress.chats.push(wordweave5::chat::Conversation::new()); app.progress.chats[0].draft = "送信しない合成質問".into(); app.persist();
+            // Q01 permits an explicitly chosen synthetic input inside normal root.
+            let chosen = base.join("local/WordWeave5/chosen-note.txt"); fs::write(&chosen, "synthetic manual input").unwrap();
+            let normal = ledger(&base.join("local/WordWeave5")); let id = app.progress.chats[0].id.clone(); app.attach_chat_file(&id, &chosen).unwrap(); assert_no_history(&app);
+            let dropped = base.join("dropped-note.txt"); fs::write(&dropped, "synthetic drop input").unwrap();
+            let before = ledger(base); let count = app.progress.chats[0].draft_attachments.len();
+            let drop_file = || vec![egui::DroppedFile { path: Some(dropped.clone()), ..Default::default() }];
+            draw(&ctx, &mut app, TestUi::Chat, vec![], drop_file());
+            assert!(app.pending_chat_drop.is_some()); assert_eq!(app.progress.chats[0].draft_attachments.len(), count); assert_eq!(ledger(base), before);
+            click(&ctx, &mut app, TestUi::Chat, "キャンセル"); assert!(app.pending_chat_drop.is_none()); assert_eq!(ledger(base), before); assert_eq!(app.progress.chats[0].draft_attachments.len(), count);
+            draw(&ctx, &mut app, TestUi::Chat, vec![], drop_file()); click(&ctx, &mut app, TestUi::Chat, "メッセージに添付");
+            assert!(app.pending_chat_drop.is_none()); assert_eq!(app.progress.chats[0].draft_attachments.len(), count+1); assert!(app.progress.chats[0].exchanges.is_empty()); assert_eq!(app.progress.chats[0].draft, "送信しない合成質問"); assert!(app.pending.is_none() && app.pending_chat_file_send.is_none()); assert_no_history(&app);
+            assert_eq!(ledger(&base.join("local/WordWeave5")), normal); assert_eq!(watch.calls(), 0); drop(app);
+        });
+    }
+
+    #[test]
+    fn et_d01_real_archive_denial_after_both_writes_then_same_data_retry() {
+        isolated("app::early_trial_startup_tests::et_d01_real_archive_denial_after_both_writes_then_same_data_retry", |base| {
+            let watch = watch_recording_starts().unwrap();
+            let trial = seed_roots(base); let raw = seed_pending(&trial);
+            let normal = ledger(&base.join("local/WordWeave5"));
+            let storage = Storage::open().expect("FIXTURE_STAGE: preflight must accept nonhistory pending");
+            let before = ledger(&trial); // open's directory/lock creation is outside the recovery boundary.
+            let held = OpenOptions::new().read(true).share_mode(3).open(trial.join("pending-material-commit.json")).unwrap();
+            assert_eq!(fs::read(trial.join("pending-material-commit.json")).unwrap(), raw, "FIXTURE: lock must allow reads");
+            let denied = fs::rename(trial.join("pending-material-commit.json"), trial.join("probe-must-not-exist")).unwrap_err();
+            assert_eq!(denied.raw_os_error(), Some(32), "FIXTURE: real delete-sharing denial required");
+            let loads = Cell::new(0); let diagnostics = Cell::new(0);
+            let result = WordApp::new_early_trial_with(&egui::Context::default(), storage, |s| { loads.set(loads.get()+1); s.load() }, |_| diagnostics.set(diagnostics.get()+1));
+            assert_eq!(fs::read(trial.join("custom.tsv")).unwrap(), NEXT_DECK.as_bytes(), "FIXTURE_STAGE: actual next deck write must be reached");
+            assert_eq!(fs::read(trial.join("progress.json")).unwrap(), NEXT.as_bytes(), "FIXTURE_STAGE: actual next progress write must be reached");
+            let mut expected = before;
+            expected.insert("custom.tsv".into(), (0, NEXT_DECK.as_bytes().to_vec()));
+            expected.insert("progress.json".into(), (0, NEXT.as_bytes().to_vec()));
+            expected.insert("backups".into(), (0x10, vec![]));
+            assert_eq!(ledger(&trial), expected, "only real recovery writes and archive directory may change");
+            assert_eq!(fs::read(trial.join("pending-material-commit.json")).unwrap(), raw);
+            assert_eq!((loads.get(), diagnostics.get()), (1, 0)); recovery_error(result);
+            assert!(!trial.join("diagnostics").exists());
+            drop(held);
+            let app = WordApp::new_early_trial_with(&egui::Context::default(), Storage::open().unwrap(), Storage::load, |path| { assert_eq!(path, trial.join("diagnostics")); diagnostics.set(diagnostics.get()+1); }).ok().expect("same-data retry after unlocking must succeed");
+            assert_recovered(&trial, &raw); assert_eq!(diagnostics.get(), 1);
+            assert_eq!(app.progress.settings.topic, "synthetic recovered"); assert_no_history(&app);
+            assert_eq!(ledger(&base.join("local/WordWeave5")), normal);
+            assert_eq!(watch.calls(), 0); drop(app);
+        });
+    }
+
+    #[test]
+    fn et_d01_recovered_ledger_survives_actual_constructor_read_denial() {
+        isolated("app::early_trial_startup_tests::et_d01_recovered_ledger_survives_actual_constructor_read_denial", |base| {
+            let watch = watch_recording_starts().unwrap();
+            let trial = seed_roots(base); let raw = seed_pending(&trial);
+            let normal = ledger(&base.join("local/WordWeave5"));
+            let held = RefCell::new(None); let recovered = RefCell::new(None);
+            let loads = Cell::new(0); let diagnostics = Cell::new(0); let denied = Cell::new(false);
+            let result = WordApp::new_early_trial_with(&egui::Context::default(), Storage::open().unwrap(), |s| {
+                loads.set(loads.get()+1); let progress = s.load()?;
+                assert_recovered(&trial, &raw); *recovered.borrow_mut() = Some(ledger(&trial));
+                *held.borrow_mut() = Some(OpenOptions::new().read(true).share_mode(0).open(trial.join("custom.tsv")).unwrap());
+                assert_eq!(fs::read(trial.join("custom.tsv")).unwrap_err().raw_os_error(), Some(32), "FIXTURE_STAGE: recovery succeeded before actual read denial");
+                denied.set(true); Ok(progress)
+            }, |_| diagnostics.set(diagnostics.get()+1));
+            assert_eq!((loads.get(), diagnostics.get(), denied.get()), (1, 0, true), "FIXTURE_STAGE: loader success and real custom read denial required");
+            recovery_error(result); drop(held.borrow_mut().take());
+            assert_eq!(ledger(&trial), recovered.borrow().as_ref().unwrap().clone());
+            assert!(!trial.join("diagnostics").exists());
+            let app = WordApp::new_early_trial_with(&egui::Context::default(), Storage::open().unwrap(), |s| { loads.set(loads.get()+1); s.load() }, |_| diagnostics.set(diagnostics.get()+1)).ok().expect("unlocked constructor control");
+            assert_eq!((loads.get(), diagnostics.get()), (2, 1)); assert_recovered(&trial, &raw);
+            assert_eq!(ledger(&trial), recovered.borrow().as_ref().unwrap().clone());
+            assert_eq!(ledger(&base.join("local/WordWeave5")), normal); assert_eq!(watch.calls(), 0); drop(app);
+        });
+    }
+
+    #[test]
+    fn et_d01_raw_loader_error_cannot_change_failure_stage_or_safe_text() {
+        isolated("app::early_trial_startup_tests::et_d01_raw_loader_error_cannot_change_failure_stage_or_safe_text", |base| {
+            let watch = watch_recording_starts().unwrap(); let trial = seed_roots(base);
+            let normal = ledger(&base.join("local/WordWeave5"));
+            for raw in ["synthetic-secret-key=DO-NOT-DISPLAY", "起動前の検査で停止しました。元データは変更していません。", ""] {
+                let diagnostics = Cell::new(0); let loads = Cell::new(0);
+                recovery_error(WordApp::new_early_trial_with(&egui::Context::default(), Storage::open().unwrap(), |_| { loads.set(loads.get()+1); Err(raw.into()) }, |_| diagnostics.set(diagnostics.get()+1)));
+                assert_eq!((loads.get(), diagnostics.get()), (1, 0)); assert!(!trial.join("diagnostics").exists());
+            }
+            assert_eq!(ledger(&base.join("local/WordWeave5")), normal); assert_eq!(watch.calls(), 0);
+        });
+    }
+
+    #[test]
+    fn et04_history_json_rejected_before_backups_drafts_epoch_or_disk_change() {
+        isolated("app::early_trial_startup_tests::et04_history_json_rejected_before_backups_drafts_epoch_or_disk_change", |base| {
+            let watch = watch_recording_starts().unwrap(); let (_ctx, mut app, trial) = fresh(base);
+            app.progress.chats.push(wordweave5::chat::Conversation::new());
+            app.progress.chats[0].draft = "未保存の日本語会話".into();
+            app.progress.japanese_drafts.insert(app.deck[0].id.clone(), "日本語の回答下書き".into());
+            app.progress.material_draft = Some(harness_tests::material_ui_draft(&app));
+            app.material_selection_epoch = 41; app.message = "既存の通知".into(); app.dirty = true;
+            let mut candidate = serde_json::to_value(&app.progress).unwrap();
+            candidate["audio_history"] = serde_json::json!({"sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","bytes":12});
+            let candidate: Progress = serde_json::from_value(candidate).expect("FIXTURE: valid structural history JSON");
+            assert!(candidate.audio_history.is_some());
+            let before = ledger(base); let state = serde_json::to_value(&app.progress).unwrap();
+            assert_eq!(app.restore(candidate).unwrap_err(), RESTORE_ERROR);
+            assert_eq!(ledger(base), before, "includes all retirement-file counts and bytes");
+            assert_eq!(serde_json::to_value(&app.progress).unwrap(), state);
+            assert_eq!(app.material_selection_epoch, 41); assert_eq!(app.message, "既存の通知"); assert!(app.dirty);
+            assert!(app.storage.as_ref().unwrap().load().unwrap().audio_history.is_none());
+            assert!(!trial.join("backups").exists()); assert_eq!(watch.calls(), 0); drop(app);
+        });
+    }
+}
+
 use crate::{
     ai,
     ink::Ink,

@@ -1,4 +1,200 @@
 //! Qwen credentials are edited and explicitly committed independently of Progress.
+
+#[cfg(test)]
+mod early_trial_startup_tests {
+    use super::*;
+    use qwen_audio::{
+        ProbeRequest, ProviderRequest, Transport, TransportFailure, TransportFuture,
+        WindowsCredentialStore,
+    };
+    use std::{
+        collections::BTreeMap,
+        sync::{
+            atomic::{AtomicUsize, Ordering},
+            Mutex,
+        },
+    };
+    use wordweave5::qwen_reading::{ReadingController, ReadingPhase, ReadingTarget};
+    const NORMAL: &str = "WordWeave5.QwenReading.Connection.v1";
+    const TRIAL: &str = "WordWeave5.EarlyTrial.QwenReading.Connection.v1";
+    const TOOL: &str = "WordWeave5.QwenAudio.Connection.v1";
+    const TOKYO: &str = "https://et2.ap-northeast-1.maas.aliyuncs.com/compatible-mode/v1";
+    const SINGAPORE: &str = "https://et2.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1";
+    fn expected() -> &'static str {
+        if cfg!(feature = "early-trial") {
+            TRIAL
+        } else {
+            NORMAL
+        }
+    }
+    #[derive(Default)]
+    struct Namespaces {
+        values: Mutex<BTreeMap<&'static str, Connection>>,
+        calls: Mutex<Vec<(&'static str, &'static str)>>,
+    }
+    struct Store {
+        target: &'static str,
+        shared: Arc<Namespaces>,
+    }
+    impl CredentialStore for Store {
+        fn load(&self) -> Result<Option<Connection>, SafeError> {
+            self.shared
+                .calls
+                .lock()
+                .unwrap()
+                .push((self.target, "load"));
+            Ok(self.shared.values.lock().unwrap().get(self.target).cloned())
+        }
+        fn save(&self, value: &Connection) -> Result<(), SafeError> {
+            self.shared
+                .calls
+                .lock()
+                .unwrap()
+                .push((self.target, "save"));
+            self.shared
+                .values
+                .lock()
+                .unwrap()
+                .insert(self.target, value.clone());
+            Ok(())
+        }
+    }
+    #[derive(Default)]
+    struct Wire {
+        sends: AtomicUsize,
+        probes: AtomicUsize,
+    }
+    impl Transport for Wire {
+        fn send<'a>(&'a self, _: ProviderRequest) -> TransportFuture<'a> {
+            self.sends.fetch_add(1, Ordering::SeqCst);
+            Box::pin(async { Err(TransportFailure::Network) })
+        }
+    }
+    impl ProbeTransport for Wire {
+        fn send<'a>(&'a self, _: ProbeRequest) -> TransportFuture<'a> {
+            self.probes.fetch_add(1, Ordering::SeqCst);
+            Box::pin(async { Err(TransportFailure::Network) })
+        }
+    }
+    fn connection() -> Connection {
+        Connection::new(
+            ApiHost::parse(TOKYO).unwrap(),
+            ApiKey::new("synthetic-et2-key".into()).unwrap(),
+        )
+    }
+
+    #[test]
+    fn et02_production_selector_constructs_exact_windows_target_without_credential_io() {
+        let selected =
+            configured_store_with(|target| WindowsCredentialStore::for_target(target).unwrap());
+        assert_eq!(selected.target(), expected());
+        assert_eq!(
+            WindowsCredentialStore::for_target(NORMAL).unwrap().target(),
+            NORMAL
+        );
+        assert_eq!(
+            WindowsCredentialStore::for_target(TRIAL).unwrap().target(),
+            TRIAL
+        );
+        assert_eq!(WindowsCredentialStore::new().target(), TOOL);
+        // No CredentialStore::load/save on any WindowsCredentialStore above.
+    }
+
+    #[test]
+    fn et02_selector_editor_controller_use_only_selected_namespace_and_no_send() {
+        let shared = Arc::new(Namespaces::default());
+        shared.values.lock().unwrap().insert(NORMAL, connection());
+        shared.values.lock().unwrap().insert(TOOL, connection());
+        let store: Arc<dyn CredentialStore> = configured_store_with(|target| {
+            Arc::new(Store {
+                target,
+                shared: shared.clone(),
+            }) as Arc<dyn CredentialStore>
+        });
+        let wire = Arc::new(Wire::default());
+        let mut editor =
+            QwenConnectionEditor::new_with_transport(store.clone(), wire.clone()).unwrap();
+        if cfg!(feature = "early-trial") {
+            assert_eq!(
+                editor.summary().unwrap(),
+                None,
+                "normal-only credential must not become trial baseline"
+            );
+        } else {
+            assert_eq!(
+                editor.summary().unwrap(),
+                Some((Region::Tokyo, TOKYO.into()))
+            );
+        }
+        assert!(editor.key.is_empty());
+        editor.host = TOKYO.into();
+        *editor.key = "synthetic-trial-key".into();
+        editor.save().unwrap();
+        assert!(editor.saved);
+        assert!(editor.key.is_empty());
+        assert!(editor.probe_job.is_none());
+        drop(editor);
+        let editor = QwenConnectionEditor::new(store.clone()).unwrap();
+        assert_eq!(
+            editor.summary().unwrap(),
+            Some((Region::Tokyo, TOKYO.into()))
+        );
+        let mut controller = ReadingController::new(
+            ReadingTarget::new("synthetic-et2".into(), vec![1], "The sun is bright.".into())
+                .unwrap(),
+            store,
+            wire.clone(),
+        )
+        .unwrap();
+        let view = controller.begin_settings().unwrap();
+        assert!(view.credential_present);
+        assert_eq!(view.host, TOKYO);
+        controller
+            .set_settings_draft(SINGAPORE.into(), None)
+            .unwrap();
+        assert!(
+            controller.save_settings().is_err(),
+            "changed destination cannot reuse the opaque old key"
+        );
+        controller.cancel_settings();
+        assert_eq!(controller.view().phase, ReadingPhase::Input);
+        controller.begin_settings().unwrap();
+        controller
+            .set_settings_draft(SINGAPORE.into(), Some("synthetic-explicit-new-key".into()))
+            .unwrap();
+        controller.save_settings().unwrap();
+        controller.close();
+        drop(controller);
+        assert_eq!(
+            *shared.calls.lock().unwrap(),
+            [
+                (expected(), "load"),
+                (expected(), "save"),
+                (expected(), "load"),
+                (expected(), "load"),
+                (expected(), "save")
+            ]
+        );
+        let values = shared.values.lock().unwrap();
+        assert_eq!(values.get(expected()).unwrap().host().as_str(), SINGAPORE);
+        assert_eq!(values.get(TOOL).unwrap().host().as_str(), TOKYO);
+        if cfg!(feature = "early-trial") {
+            assert_eq!(values.get(NORMAL).unwrap().host().as_str(), TOKYO);
+        }
+        assert_eq!(
+            (
+                wire.sends.load(Ordering::SeqCst),
+                wire.probes.load(Ordering::SeqCst)
+            ),
+            (0, 0)
+        );
+        assert!(
+            editor.probe_job.is_none(),
+            "no probe worker was spawned; none remains to join"
+        );
+    }
+}
+
 use super::{controls::UiControls as _, settings_ui::SettingsSection, ux, Page, WordApp};
 use eframe::egui;
 #[cfg(not(test))]

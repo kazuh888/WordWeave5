@@ -1,4 +1,181 @@
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
+
+// ET2 author-owned tests. Recorder calls require the parent's ET2-G0 release.
+#[cfg(test)]
+pub(crate) mod early_trial_startup_tests {
+    use super::*;
+    use std::{
+        fs,
+        os::windows::process::CommandExt,
+        path::Path,
+        process::{Command, Stdio},
+        time::Instant,
+    };
+
+    /// One exact case per child: isolates the trial registry and poison state.
+    pub(crate) fn isolated(exact: &str, body: impl FnOnce(&Path)) {
+        const CHILD: &str = "WW5_ET2_CHILD";
+        const BASE: &str = "WW5_ET2_BASE";
+        if std::env::var(CHILD).as_deref() == Ok(exact) {
+            #[link(name = "shell32")]
+            extern "system" {
+                fn IsUserAnAdmin() -> i32;
+            }
+            assert_eq!(
+                unsafe { IsUserAnAdmin() },
+                0,
+                "FIXTURE_FAILURE: Administrator must be False"
+            );
+            let base = PathBuf::from(std::env::var_os(BASE).expect("isolated child base"));
+            assert!(base.is_absolute());
+            assert_eq!(
+                std::env::var_os("LOCALAPPDATA").unwrap(),
+                base.join("local")
+            );
+            body(&base);
+            println!("ET2_CASE_COMPLETE:{exact}:Administrator=False");
+            return;
+        }
+        let base = std::env::temp_dir().join(format!(
+            "ww5-et2-{}-{}",
+            std::process::id(),
+            chrono::Utc::now().timestamp_nanos_opt().unwrap()
+        ));
+        fs::create_dir(&base).unwrap();
+        for name in ["local", "temp", "cwd"] {
+            fs::create_dir(base.join(name)).unwrap();
+        }
+        let mut child = Command::new(std::env::current_exe().unwrap())
+            .args([exact, "--exact", "--nocapture", "--test-threads=1"])
+            .env(CHILD, exact)
+            .env(BASE, &base)
+            .env("LOCALAPPDATA", base.join("local"))
+            .env("TEMP", base.join("temp"))
+            .env("TMP", base.join("temp"))
+            .current_dir(base.join("cwd"))
+            .creation_flags(0x08000000)
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .unwrap();
+        let deadline = Instant::now() + Duration::from_secs(45);
+        let mut timed_out = false;
+        while child.try_wait().unwrap().is_none() {
+            if Instant::now() >= deadline {
+                child.kill().unwrap();
+                timed_out = true;
+                break;
+            }
+            std::thread::sleep(Duration::from_millis(10));
+        }
+        let output = child.wait_with_output().unwrap();
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        eprintln!(
+            "ET2_CHILD:{exact}:{}:timeout={timed_out}\n{stdout}\n{}",
+            output.status,
+            String::from_utf8_lossy(&output.stderr)
+        );
+        // Only this uniquely created synthetic tree is removed, after child reap.
+        fs::remove_dir_all(&base).expect("FIXTURE_FAILURE: synthetic fixture cleanup");
+        assert!(!base.exists(), "FIXTURE_FAILURE: fixture remains");
+        assert!(
+            !timed_out,
+            "FIXTURE_FAILURE: child timed out and was reaped"
+        );
+        assert!(output.status.success(), "child case failed");
+        assert!(stdout.contains("running 1 test") && stdout.contains("1 passed; 0 failed"));
+        assert!(stdout.contains(&format!("ET2_CASE_COMPLETE:{exact}:Administrator=False")));
+    }
+
+    #[test]
+    fn et2s_active_watch_catches_entry_worker_and_rejects_duplicate() {
+        isolated(
+            concat!(
+                module_path!(),
+                "::et2s_active_watch_catches_entry_worker_and_rejects_duplicate"
+            )
+            .trim_start_matches("wordweave5::"),
+            |_| {
+                let watch = watch_recording_starts()
+                    .expect("watch must be installed before Recorder::start");
+                assert_eq!(watch.calls(), 0);
+                assert_eq!(
+                    Recorder::start().err().as_deref(),
+                    Some("ET2: recording start intercepted")
+                );
+                assert_eq!(
+                    watch.calls(),
+                    1,
+                    "actual entry must increment, never a disconnected zero"
+                );
+                assert!(
+                    watch_recording_starts().is_err(),
+                    "duplicate watch must not replace the first"
+                );
+                let worker = std::thread::spawn(|| Recorder::start().err());
+                assert_eq!(
+                    worker.join().unwrap().as_deref(),
+                    Some("ET2: recording start intercepted")
+                );
+                assert_eq!(
+                    watch.calls(),
+                    2,
+                    "worker must use the same process-global observer"
+                );
+                drop(watch);
+                let next = watch_recording_starts().expect("normal Drop must release registration");
+                assert_eq!(next.calls(), 0);
+            },
+        );
+    }
+
+    #[test]
+    fn et2s_unwind_releases_only_owned_watch() {
+        isolated(
+            "media::early_trial_startup_tests::et2s_unwind_releases_only_owned_watch",
+            |_| {
+                let result = std::panic::catch_unwind(|| {
+                    let watch = watch_recording_starts().unwrap();
+                    assert_eq!(
+                        Recorder::start().err().as_deref(),
+                        Some("ET2: recording start intercepted")
+                    );
+                    assert_eq!(watch.calls(), 1);
+                    panic!("synthetic scoped unwind");
+                });
+                assert!(result.is_err());
+                let watch = watch_recording_starts().expect("unwind must release registration");
+                assert_eq!(watch.calls(), 0);
+                assert_eq!(
+                    Recorder::start().err().as_deref(),
+                    Some("ET2: recording start intercepted")
+                );
+                assert_eq!(watch.calls(), 1);
+            },
+        );
+    }
+
+    #[test]
+    fn et2s_poison_is_fail_closed_and_drop_does_not_clear_poison() {
+        isolated("media::early_trial_startup_tests::et2s_poison_is_fail_closed_and_drop_does_not_clear_poison", |_| {
+            let watch = watch_recording_starts().unwrap();
+            assert!(std::thread::spawn(|| {
+                let _held = RECORDING_START_WATCH.lock().unwrap();
+                panic!("synthetic observer poison");
+            }).join().is_err());
+            assert!(RECORDING_START_WATCH.is_poisoned());
+            assert_eq!(Recorder::start().err().as_deref(), Some("ET2: recording watch poisoned"));
+            assert!(watch_recording_starts().is_err());
+            drop(watch);
+            assert!(RECORDING_START_WATCH.is_poisoned());
+            let held = RECORDING_START_WATCH.lock().unwrap_err().into_inner();
+            assert!(held.is_none(), "Drop may release only its own registration");
+            drop(held);
+            assert_eq!(Recorder::start().err().as_deref(), Some("ET2: recording watch poisoned"));
+        });
+    }
+}
+
 use std::{
     io::Cursor,
     path::PathBuf,

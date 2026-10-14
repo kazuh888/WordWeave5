@@ -1,5 +1,41 @@
 #![cfg_attr(target_os = "windows", windows_subsystem = "windows")]
 
+#[cfg(all(test, windows))]
+mod early_trial_startup_tests {
+    #[test]
+    fn et03_title_matches_independent_feature_literal() {
+        #[cfg(feature = "early-trial")]
+        let expected = "WordWeave 5 — 早期試用・専用データ";
+        #[cfg(not(feature = "early-trial"))]
+        let expected = "WordWeave 5 — 使い分ける英語";
+        assert_eq!(super::WINDOW_TITLE, expected);
+    }
+
+    #[cfg(feature = "early-trial")]
+    #[test]
+    fn et_d01_creator_preserves_open_rejection_without_creating_closure() {
+        crate::media::early_trial_startup_tests::isolated("early_trial_startup_tests::et_d01_creator_preserves_open_rejection_without_creating_closure", |base| {
+            use wordweave5::store::Storage;
+            use crate::app::{early_trial_startup_tests::{ledger, seed_roots}, TrialStartupFailure};
+            let trial = seed_roots(base);
+            let history = r#"{"version":2,"audio_history":{"sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","bytes":12}}"#;
+            std::fs::write(trial.join("progress.json"), history).unwrap();
+            let before = ledger(base);
+            let result = super::early_trial_creator(Storage::open());
+            let failure = match result { Ok(_) => panic!("creator closure must not exist after open refusal"), Err(e) => e };
+            let expected = "音声履歴を含むため、早期試用では開けません。\n起動前の検査で停止しました。元データは変更していません。";
+            assert!(matches!(&failure, TrialStartupFailure::StorageOpenRejected { safe_message } if safe_message == expected));
+            assert_eq!(failure.to_string(), expected);
+            assert_eq!(ledger(base), before);
+            assert!(!trial.join("diagnostics").exists());
+
+            let after_open = "試用保存先の初期化を完了できませんでした。試用内に作成済みのフォルダーや確認用ファイルが残っている場合があります。";
+            let failure = super::early_trial_creator(Err(after_open.into())).err().expect("Err must not create a closure");
+            assert_eq!(failure.to_string(), after_open, "safe Storage String must not be reclassified as BeforeWrites");
+        });
+    }
+}
+
 #[cfg(windows)]
 mod ai;
 #[cfg(windows)]
