@@ -1,5 +1,40 @@
 # ET3 試用EXE提供・独立レビュー記録
 
+## ET3-G 独立Pre-2：PASS
+
+同reviewer Astra/highは計画 `06E880E7…1463C7F2`／設計 `CC72A435…62E8313`の現物一致を確認し、Pre-1の入口parse/G0回収所有のP1二件を設計上解消と判定した。新たな確定矛盾/受入阻止/要回答質問0。任意argvのbinder非通過、UTF-16保持、同ps1所有木と登録ACK、aggregate600秒と単一10秒回収、証明不能時CleanupIncomplete/full禁止が具体化された。
+
+PASSは設計Preのみであり、独立作者→実装→runner→Postでargv/stream/exit、EXE lock、ACK競合/単独監督喪失/有限回収を実証する必要がある。全source G0再認証、native残件、製品full/提供解除ではない。編集/build/runtime/再委譲0、usage/provider返却metadata等は欠測である。
+
+独立Pre-2へ返却：計画 `06E880E7BD1C387278DE20ECD5573F6F308C01A2417B1313E676305E1463C7F2`／設計 `CC72A435CAF840E94F06F5704D95822BDAF57A19C10A91E579CE3ACB062E8313`。native入口が任意argvをUTF-16整数JSONへ保持し、PSには固定parameterだけ渡す。G0はRunOwner→Supervisor→SafetyWorker所有木・登録ACK・単一期限の回収へ接続した。作者2file/実装2file、製品source/既存helper/合否は不変。親が現物SHA一致を確認し、同reviewer Astra/highへ返した。未Closed・実装/runtime未解除である。
+
+## ET3 native RootUnavailable：DPI100%外観・focus確認、keyboard未確認
+
+独立runner Sol/mediumの最終所有窓PNG `target/early-trial-build/et3/native-refusal/ru-final-20261014-225110/owned-refusal.png`（SHA `79A18A944717CE06AA63EE975DD0EE22CAEE42F3033A5EABC18DA9FDD119B40B`）を親も直接確認した。420×192、actual monitor100%/HRESULT0、日本語title/bodyの折返しと全文、error icon、OKの文字配置、focus点線を確認し、見える欠け/重なりなしである。Win32実測OK control ID=2・所有一致・focus一致であり、UIAのPane/HasFocusfalseとの違いは観測providerの制約として保持する。
+
+先行2回はobserver側の未確認ControlType/IDOK前提で停止したものであり、製品不具合とは判定しない。標準keyboardは未確認、keymessage送信0である。最終補充後は再起動停止、3組の所有process残存0、source170差0、旧2EXEと試用E3のhash不変をrunnerが報告した。通常起動/保存再起動/音読導線等を含む全native gateのPASSではない。詳細は既存delivery-runner記録を正とする。
+
+## ET3-G 独立Pre：CHANGES_REQUIRED
+
+独立reviewer `et3_gate_review`（指定Astra/high）は計画SHA `6E368E648D919AC40C56B8606BAAB8ADFE8A45B2C0EDE971DBC9E792E5BB4A9E`、設計SHA `92E370C131AAF46201BD9D575ADEC1DC0A8E119450587D8DB33966043B07A09C`を照合し、確定した設計不足2件を報告した。実装/runtimeの欠陥を実測した判定ではない。
+
+1. P1：必須のCmdletBinding/paramとCargo runnerの任意argv保持が両立する入口宣言・境界が未確定である。未知option、空文字、Common Parameter名が入口で拒否/消費されない具体契約が必要である。
+2. P1：親が別起動するG0/V2Caseに、aggregate600秒・cancel・監督喪失からの有限回収が接続されていない。実processの所有・登録前起動禁止・開始許可・残り時間・kill/wait責任を固定する必要がある。
+
+計画者へ方式判断を返した。追加の利用者承認は不要であるが、再Preが通るまでwrapper実装・製品full実行を解除しない。旧承認の再利用、対象縮小、待機期限の自動延長をしない。reviewerの編集/runtime/再委譲0、usage/provider返却metadataは欠測である。
+
+## 2026-10-14 22:18 JST 再開：利用者承認を受領
+
+利用者は(1)今回のコマンドだけの一時的な検証用Cargo runner追加、(2)rfdのWindows DPI150/200%確認だけを利用者の試用時確認へ移すことを明示承認した。通常設定/OS/製品source/対象test/合否は変更しない。以下の以前の「未回答」は当時の履歴となる。DPI100%・日本語/狭幅/focus/keyboard・直接起動/保存/再起動/既存音読導線・通常/試用fullと関連crate・最終独立Postは提供前に残す。提供時は「DPI確認未完了」を明記する。
+
+現HEAD6fb6da3、tree cleanから再開し、親の完了境界は一時runnerの安全設計/対照検証→新EXE照合付き全体検証→既定native→最終提供Post→既存製品を置き換えない試用EXE提供である。planner Astra/highが限定手順と役割を確定する。承認だけで未知EXE実行や未検証wrapperを解除せず、再build後のsource/構成/実EXEを照合する。
+
+### 独立したnative限定確認の解除
+
+親はrelease source-afterの170項目を全現物照合し不一致0、試用EXE SHA E3A0A87861D835C1E142072A14F3EBF7CF9DA0A8B95D404F4BF99402D4B1BBD2と旧通常EXE不変を確認した。store.rsのresolve→Storage::openとmainの失敗分岐を読取確認した。processのLOCALAPPDATAを相対値にした新processではBeforeWrites/RootUnavailableからrfdへ進み、WordApp/diagnostics/資格情報/録音へ到達しない。GetScaleFactorForMonitorの読取はHRESULT0/primary100%、OS変更/アプリ起動0である（[API資料](https://learn.microsoft.com/en-us/windows/win32/api/shellscalingapi/nf-shellscalingapi-getscalefactorformonitor)）。
+
+この固定EXEでRootUnavailable拒否dialogだけのordinary-user/Hidden/有限期限/所有PID回収確認を解除する。観測/PNGは所有dialogだけに限定し、他app/デスクトップ全体の撮影・操作やユーザーprocess停止をしない。未知のtoken/EXE/source/画面では中断する。正常起動・音読・実API等はこの解除に含めない。wrapper設計とnative拒否確認はsource不変・別出力の独立作業であり、この区間だけ2補助を並行する。
+
 ## ET3-FX1 Pre：PASS（2026-10-14）
 
 独立reviewer `trial_delivery_review`（指定 `gpt-6-astra/high`、read-only）は、all-targets compile blockerを是正する限定設計をPASSと判定した。確定欠陥/受入阻止/要回答質問/任意提案0。実装・compile・runtime・G0解除・提供の成功を意味しない。

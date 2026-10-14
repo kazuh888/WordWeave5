@@ -1,5 +1,7 @@
 # 現在のタスク要約
 
+直近：ET3-Gの再PreはPASS（入口parse/G0回収の2件を設計上解消）。独立作者 `et3_gate_tests`（Astra/high）がignored内Test-CargoGate.ps1/fake.rsだけを作成中であり、製品full/提供は未解除である。詳細と正本は末尾リンクを参照する。
+
 更新：2026-10-14（ET1/FX1とET2は独立Post PASS/Closed。利用者指定のET2完了境界で停止。ET3・音声履歴UI・試用EXE・製品全体は未完成）。詳細は [参照インデックス](context-index.md) と末尾の最新位置を参照する。
 
 ## 現在の目標
@@ -104,4 +106,4 @@ V1自己検証は両構成各P01 20＋録音3の46PASS。しかしA09が内部as
 
 2026-10-14 20:07 JST：利用者の明示依頼でET3試用EXE提供を開始した。HEAD d446c5d clean、通常release保全SHA一致。既定ET3のrunner Sol/medium `trial_delivery_runner` が別targetの通常/試用all-targetsと関連crateのno-runを担当中。親は使用説明/current/usage/レビュー記録を担当する。source編集なし、test EXEのsource/構成/SHA対応が親へ返るまでlist/runtime不可。全体gate・独立Post・別配置EXE提供を今回範囲とし、実データ/実key/API/mic/管理者/OS設定変更は行わない。[ET3使用量記録](ACOUSTIC-HISTORY-001/usage-observation-20261014-et3.md)に開始値と欠測を保存した。
 
-最新：ET3は承認待ち・未完了である。ET3-FX1は[独立最終Post PASS/Closed](ACOUSTIC-HISTORY-001/early-trial-delivery-review.md)、source保全cb88203 push済み、限定84PASSは当時のsnapshot証拠である。通常fullの再compileで旧EXE解除を失効し所有processだけ停止/回収、Cargo dep-infoがU+3000手前でpathを誤分割する局所原因を確認した。source170/G0/旧通常＆単独EXE不変、背景process残存0。未影響の試用/通常/単独qwen release3buildは成功、[runner報告](ACOUSTIC-HISTORY-001/early-trial-delivery-runner.md)とignored full2-release-summary.jsonにsource/構成/EXE SHAを固定した。試用EXE build SHA E3A0A878…B1BBD2は親照合済みだが未起動・提供copy0である。一時process限定Cargo runner導入と、rfdのDPI150/200確認を利用者試用へ移す承認は未回答・未導入・基準未変更。次は利用者回答→承認範囲の検証手順整備→通常/試用full・関連crate→native→最終提供Post→別folder提供。source/依存/fingerprint/OS/global設定の無承認変更、test除外、旧EXE代用をしない。[ET3使用量](ACOUSTIC-HISTORY-001/usage-observation-20261014-et3.md)は共有週枠58→区切り65%、旧方式比未判定。
+最新：ET3を利用者の2件承認で再開した（22:18 JST）。一時process限定Cargo runner導入とDPI150/200だけの利用者試用確認への移管を承認、他gate/OS/通常Cargo/source/対象testは不変である。[限定計画](ACOUSTIC-HISTORY-001/early-trial-gate-plan.md)は独立Preで入口parse/G0有限回収の2件が阻止され、planner/designer Astra/highがnative入口＋SafetyWorkerの4file案へ是正した。計画SHA06E880E7／設計SHACC72A435へ同期済み、独立Pre-2 Astra/highへ返却中、コード/対照は再Pre後である。[native限定確認](ACOUSTIC-HISTORY-001/early-trial-delivery-review.md)ではrunner Sol/mediumがRootUnavailable拒否窓の所有PNGを取得し、親も100%で日本語/折返し/OK配置/focusを直接確認した。標準keyboardと正常起動/保存再起動/音読導線等は未確認、観測前提による中断2回を製品失敗には数えない。source170差0/3EXE不変/所有process残存0。FX1 84PASSとsource cb88203保全、release3buildの証拠は保持し、full/関連crate/native残部/最終提供Post/copyは未了である。[ET3使用量](ACOUSTIC-HISTORY-001/usage-observation-20261014-et3.md)に再開65%・中間共有70%と欠測を記録した。

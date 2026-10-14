@@ -201,3 +201,62 @@ Cargoが依存を含む再compileに入り、新EXE対応前にruntimeへ進む�
 native DPI条件と新Cargo runner導入のユーザー回答は親で未受領である。新runner/harness、OS/global設定、source/依存/fingerprintの修正、関連test/no-run反復、全体runtime再開、native、提供folderへのcopyは開始していない。実IME/pen/TTS/mic/Codex/Qwen等の受入も未検証のままであり、mock/旧ログ/今回buildで解消したとは扱わない。
 
 今回区間の週枠64→65%（window10080/reset1792496607、終了21:39頃取得、最終応答前）は共有account観測であり本工程消費へ換算しない。子token開始/終了counter/log session ID/provider返却model・effort/親子包含は未取得。planner指定Sol/mediumは維持した。今回の許可作業は3release buildまで終了し、残るgateと未回答事項を親へ返して所有を返却する。
+
+## 22:18再開・RootUnavailable native限定観測（部分取得、中断）
+
+親からユーザーの一時Cargo runner/DPI150・200試用時移管の承認と、delivery-review冒頭のRootUnavailableだけのnative Gateを受領した。正常起動・資格情報・実API/mic・音読・OS設定・他app/desktop全体capture・提供copyを解除したものではない。指定runner Sol/mediumを維持した。HEADは `6fb6da3b568eb8e4e902f66260ee5df48f9a00a2`、共有の文書dirtyは保持した。
+
+PowerShell automationとversion-compatibility/coding-style/error-handlingを全文読了した。既存PowerShell7監督とStart-Process Environmentの証拠に合わせTarget=ps7（実機7.6.6）、単発のoperational commandだけとし、repo source/期待値/shared script/汎用native harnessを作成しない。skillは明示encoding/StrictMode/Stop/期限/try-finally/所有子回収へ適用した。UIAutomationClient/System.Drawingのassembly読込み能力は起動前に確認した。
+
+storeのresolve→Storage::open、mainのearly_trial_creator→show_early_trial_failureを現物読取した。相対LOCALAPPDATAはBeforeWrites/RootUnavailableでrfdへ行き、WordApp factory/diagnosticsの前に戻る。170sourceとrelease SHA `E3A0A87861D835C1E142072A14F3EBF7CF9DA0A8B95D404F4BF99402D4B1BBD2` を非管理者tokenと共に実行直前に照合した。通常/試用dataを読ませる正常rootを渡していない。
+
+出力正本は `target/early-trial-build/et3/native-refusal/ru-20261014-224121/`。最初のobserver EncodedCommandはWindows command-line長制限でprocess起動前に拒否された（アプリ起動0）。同じoperational commandをメモリ内GZip/EncodedCommandへ圧縮し、source/harness fileの追加なしでobserverを起動した。commandそのものは `operational-command.log`、転送長/hash/起動前failureは `command-transport.json` に記録した。
+
+実アプリ起動は今回 **1回**、22:42:26.929→22:42:28.655 JST。observer PID19940、native PID12880、所有HWND854890、class=#32770。Start-ProcessはHidden、cwd/TEMP/TMPは新合成tree、LOCALAPPDATAは相対literal `ww-et3-relative-native-refusal`。outer observer40秒期限、未知要素で停止して所有windowへWM_CLOSE→wait、強制kill不要。observer exit1（観測不成立）、native exit1（StorageOpenRejectedの期待拒否）、timeoutfalse/Waitedtrue/cwd・TEMP残存0。global input/他app操作/desktop capture/user process停止0である。
+
+| 観測対象 | 新nativeで取得した事実 |
+| --- | --- |
+| caption | `早期試用を開始できない` 完全一致 |
+| body | RootUnavailable/BeforeWrites/通常版fallbackしない日本語3文をUIA Nameで全文一致確認 |
+| native stderr | `AppCreation(StorageOpenRejected { safe_message: ... })` の同じ拒否reason/stageを確認 |
+| OK | 所有HWND44171330、Name=`OK`、Win32 ClassName=`Button`、rect1080,603,75,23、offscreen=false |
+| dialog rect | UIA rect758,452,420,192 |
+| 中断理由 | UIA ControlTypeがOK/Staticとも`ControlType.Pane`、HasKeyboardFocus/IsKeyboardFocusable=false。observerのButton型条件と一致せず停止した。製品ボタン欠陥とは確定しない |
+| 未取得 | PNG/実window monitor scale/focus/keyboard。処理はこれらへ進んでいない |
+
+`uia-elements.json` / `native.stdout.log` / `native.stderr.log` / `result.json` / `observer-{start,result}.json` がraw正本。この部分取得をnative全受入PASSへ数えない。nativeケースPASS0/未完了1、製品FAILは未確定である。実credential/API/micのcounterをこのreleaseへ新設しておらず、その非到達は固定sourceのRootUnavailable分岐と観測した拒否状態の根拠へ限定する。
+
+source後170差0、試用release/旧通常/旧standaloneの各SHA不変を `source-after.json` / `exe-after.json` に保存した。22:44:17 JSTのread-only `process-after.json` は記録PIDと時刻範囲の所有process/直接子live0。アプリ/observerは終了し無期限processはない。
+
+親へUIA provider分類の観測制約を報告した。同source/EXE/RootUnavailableに限定し、UIA分類へ依存せずWin32 Class=Button/IDOK/GetGUIThreadInfoでfocus、PrintWindow、所有HWNDへのkeyboard messageを補充する案を返した。新しい指示前に再起動しない。PNGのためにdesktop captureやglobal inputへ切り替えない。
+
+開始週枠は親の65%/13:18UTC引継ぎ、終了取得69%（window10080/reset1792496608、22:44JST・最終応答前）。共有・並行工程を含むため単独消費量ではない。子token counter/log session ID/provider返却model・effort/親子包含は未取得である。
+
+### 親許可のWin32補充と最後のread/capture補充
+
+親が同source/EXE/RootUnavailableだけのWin32 one-off補充を許可した。`ru-supp-20261014-224728/` はnative PID6152/observer17188、22:47:29.186→22:47:29.868 JST、caption/body/所有Buttonの一致後、GetDlgCtrlID=1という未確認のobserver条件で中断した。ID実測値をassert前へ保存しなかったoperational loggingの欠落も報告した。PNG/DPI/focus/keyboardへ進まず、所有WM_CLOSE/wait、native exit1/observer exit1、timeoutfalse/cwd・TEMP残存0である。製品の失敗と数えない。
+
+局所rfd0.15.3 backend sourceではOk→TDCBF_OK_BUTTONとTaskDialogIndirect戻値IDOKの扱いを確認したが、子HWNDのcontrol IDを1と保証する根拠は確認できなかった。観測commandの前提を製品契約と取り違えないため、親へ値を先に保存するread/capture補充を提案し、最後1回だけ明示許可を受領した。root source/期待値/汎用harnessやrfd依存を変更したものではない。
+
+最終正本は `native-refusal/ru-final-20261014-225110/`。native PID20092/observer39072、22:51:11.447→22:51:12.320 JST。caption/body/owner一致で撮影対象を同定し、未確認のUIA型/control ID/focusを撮影前gateへ追加せず、PrintWindow/DPI/全actual ID/focusを取得した。操作は所有WM_CLOSE cleanupだけで、key messageも標準keyboardも実行していない。
+
+| 最終新native実測 | 結果 |
+| --- | --- |
+| caption/body | 前記日本語全文一致、Win32 Static全文も一致 |
+| 所有window | HWND1183230/#32770、rect左758/上452/幅420/高192 |
+| 所有window monitor | GetScaleFactorForMonitor HRESULT0、100% |
+| PrintWindow | true、所有windowだけの420×192 PNG |
+| OK | HWND44302402、Win32 Class=Button、Text=OK、**actual control ID=2**。public semantic IDOK=1との同一視はしない |
+| body/icon control | Static ID65535（日本語全文）、Static ID20（icon）、root ID0 |
+| Win32 focus | GetGUIThreadInfo=true、focus HWND44302402、owner一致、Button/OKである |
+| UIA providerの限界 | 同じOKをPane/HasKeyboardFocusfalseとして返す。Win32実測と別記する |
+| keyboard | 標準操作未確認。WM_KEYDOWN補助操作も今回実行0 |
+| 終了 | native exit1（拒否Err）、observer exit0、timeoutfalse/Waitedtrue/TEMP・cwd残存0。kill不要 |
+
+PNGは `owned-refusal.png`、SHA256 `79A18A944717CE06AA63EE975DD0EE22CAEE42F3033A5EABC18DA9FDD119B40B`。このPNGを直接表示して、日本語title/body、折返し、error icon、右下OKとfocus点線が420px幅内で重なりや見える範囲の欠けなく描画されていることを確認した。desktop全体や他appを撮影した画像ではない。RootUnavailable以外の拒否原因・長いpath表示や通常WordAppの狭幅はこの一枚から判定しない。
+
+最終 `result.json` のPassed=trueは `ScopeOfPassed` に明記した所有拒否windowの画像/metadata取得だけの成功であり、native全gate PASSではない。観測commandは成功1/中断2、実アプリ起動3回、標準keyboard未確認、製品native全面PASS未判定である。以前の中断ログを消去・成功へ書き換えていない。
+
+最終source170差0/HEAD6fb6da3と試用E3A0…BBD2/旧通常9B888…387D3/旧standalone57A3…4506E不変を `source-after.json` / `exe-after.json` / `final-audit.json` に保存した。22:53:17 JSTの `native-refusal-process-summary.json` は今回3組のnative/observerと所有子のlive0、全Waitedtrue/timeoutfalse/残存0。ユーザーprocess停止/global input/他app操作/desktop capture/実資格情報/API/mic/提供copy/再委譲/commitは0。
+
+最後の許可補充を終了し、再起動しない。RootUnavailableの新PNG/DPI100/本文/OK/focusと、残る標準keyboard/他native gateを親へ返して所有返却する。終了週枠70%（window10080/reset1792496607、22:53JST・最終応答前）、開始65%との差は共有並行区間の観測であり本工程単独量ではない。子token/log session/provider返却model・effort/親子包含の欠測は継続する。

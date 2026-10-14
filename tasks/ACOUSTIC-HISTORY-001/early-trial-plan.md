@@ -1,5 +1,7 @@
 # ACOUSTIC-HISTORY-001 早期試用EXE限定計画
 
+2026-10-14 ET3再開承認：一時的なprocess限定Cargo runnerの追加と、DPI150/200%だけの利用者試用時確認への移管を利用者が承認した。[提供判定記録](early-trial-delivery-review.md)冒頭を正本とし、本文の他gateと製品source不変を維持する。以前の状態/hashは工程履歴として保持する。
+
 2026-10-14最新：ET1と限定fixture是正ET1-FX1は[独立最終Post PASS/Closed](early-trial-paths-review.md)。通常250/試用281行動PASS、各fixtureSKIP3を保持した。未変更範囲の証拠接合を含み全件再実行ではない。ET2/ET3・製品EXEは未完成である。以下の過去時点の未了/Pre待ち表記は工程履歴である。Pre承認snapshotのhashは最終Postへ記録し、今回の計画変更は完了状態だけであり契約/検証条件を変更しない。
 
 2026-10-13再開時点：ET0仕様/設計PASSとd-S/B/Mの最終Post Closedを[独立依存確認](early-trial-dependencies.md)で照合し、ET1開始条件を満たした。以下の過去の「d-B/M未了」は計画作成時の入力記録であり、本最新状態に置き換わる。ET1独立作者Astra/highを起動済み。本体・ET2/ET3提供はまだ未完成である。工程別自動引継ぎの承認により、親モデル切替待ちだけを理由に停止せず、計画指定値を各dispatchで明示する。

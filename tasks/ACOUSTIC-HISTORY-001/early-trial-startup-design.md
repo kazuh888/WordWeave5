@@ -1,5 +1,7 @@
 # ET2 起動接合の限定設計
 
+2026-10-14最新承認：本文のET3 DPI150/200%だけを利用者試用時確認へ移すことを利用者が承認した。DPI100%・他native確認は維持し、提供時に未確認を明示する。正本は[提供判定記録](early-trial-delivery-review.md)冒頭である。今回の一時Cargo runnerは製品source/本設計の動作を変更せず、別の限定検証手順として設計する。
+
 現行追加Packetは末尾の **ET2-P01-V（通信観測、独立Pre待ち）** である。以下のET2-PR1/Pre-2の状態・6source表は当時の履歴であり、現在のsource凍結や実行解除ではない。ET2-P01-Vの所有追加は末尾に限定し、実行前条件の正本は本書ET2-G0を8source/通信へ同期した一節だけとする。
 
 2026-10-14 / ACOUSTIC-HISTORY-001 / designer指定 `gpt-6-astra/high`。状態は **ET2-PR1設計是正案：Pre-2未判定・計画同期待ち** である。[独立Pre-1](early-trial-startup-review.md) はCHANGES REQUIRED、ET2-PRE-01をAcceptedとした。本書の修正だけでClosedとしない。ET2-Sの限定所有は [計画ET2追補](early-trial-plan.md) SHA256 `38C5486BF336465C85EEC18985EA68CC0890DE02F27A6E215494DEF045E409A9` の採用・親受領済みである。実装着手、seam安全性、動作合格を意味しない。製品契約は [early-trial-contract.md](early-trial-contract.md) SHA256 `0BC3839A6C6B60E5CD4E7267269FE33D4D898CA704B89609E32E0BB0912A1A6D` のままとする。[仕様・設計cycle 2 PASS](early-trial-review.md)、[ET1/FX1最終Post](early-trial-paths-review.md)も入力とする。正本の元の機能所有5fileをET2-F、追加test専用境界1fileをET2-Sとして区別し、モデル・製品仕様・既定検証gateは変更しない。前版の所有不足によるSTOPは解消済みだが、今回の実行前安全Gate不足はPre-2の独立判定を要する。

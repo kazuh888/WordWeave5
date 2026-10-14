@@ -1,5 +1,11 @@
 # ET3 試用EXE提供の使用量観測
 
+再開区間の中間記録：限定計画/設計/独立PreはAstra/high、native拒否窓runnerはSol/medium。Preで入口parseとG0回収所有の2件が不足し、実装前に計画へ返した。設計是正はfresh `et3_gate_design_fix` Astra/highが担当する。native observerの未確認ControlType/IDOK前提による中断2回と、実値先行取得による最終観測1回を手戻りとして保持する。nativeの終了共有週枠70%はrunner受領値であり、開始65%との差を当工程だけの消費や旧方式比へ換算しない。各子counter/provider返却metadata/親子包含は欠測である。製品source変更0、取得済みrelease3buildを反復せず保持した。
+
+## 22:18 JST 再開区間
+
+利用者が一時Cargo runnerとDPI150/200%の利用者試用時確認への移管を承認したため再開する。親モデル不変、planner `et3_gate_plan` は明示Astra/high・fresh context、他役は限定計画の割当に従う。開始時計13:18:04 UTC、週枠65%/10080/reset1792496607/ordinaryUsageAllowed=true（共有）。親の開始側観測は13:21:12.832Z、input1701881516/cached1661940608/output3885579/reasoning1227411/total1705767095/cache_write0。着手から観測まで欠測、親子包含/子counter/provider返却値は未取得。前区切りとの差を今回単独消費とせず、終了時に同一sessionのこの観測との差だけ別記する。
+
 2026-10-14。利用者の「ET3を進めて、Windowsで動作確認できる試用EXEを作成」の依頼で再開した。開始HEAD `d446c5dd32177815ee322a39cf51ab84a99ee458`、tree clean。既定ET3計画を再利用し、仕様/設計/実装/作者の再起動は非該当。runner `trial_delivery_runner` をfresh context・指定 `gpt-6.1-sol/medium` で起動、独立reviewは計画指定 `gpt-6-astra/high` とする。親の選択は変更しない。
 
 完了境界は固定ソースの通常/試用全体test・release/関連crate gate、合成native確認の取得可能範囲、独立Post、通常版を上書きしないローカル試用EXEと使用説明の提供である。未実施native/実API/実マイク等の受入を成功にしない。実データ/実資格情報loadsave/API送信/OS設定変更/管理者実行は範囲外。製品EXE保全SHAは `9B888E9FC923823C59B4C3B0AB1A4DAD2051CA6139DE153B6DE6CA213DD387D3`。
