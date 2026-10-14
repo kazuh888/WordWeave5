@@ -1,4 +1,8 @@
 //! Language generation through ChatGPT-authenticated codex app-server only.
+#[cfg(all(test, windows))]
+#[path = "early_trial_test_support.rs"]
+mod early_trial_test_support;
+
 // Test-only, process-wide rejection at the application's eight egress boundaries.
 #[cfg(test)]
 pub(crate) mod trial_egress {
@@ -160,7 +164,7 @@ pub(crate) mod trial_egress {
     #[cfg(test)]
     mod tests {
         use super::*;
-        use crate::{ai::Config, media::early_trial_startup_tests::isolated};
+        use crate::ai::{early_trial_test_support::isolated, Config};
         use qwen_audio::{Connection, CredentialStore, SafeError};
         use std::{
             fs,

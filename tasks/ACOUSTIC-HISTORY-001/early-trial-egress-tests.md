@@ -135,3 +135,37 @@ V1→V2でai sourceは `A7A202579ABEE7C6F1B56DCC754101BDCAE73A4ABF71568600650353
 | qwen_settings_tests.rs | `3099EF8852606374FF55206D15A9AB94677CF31CD92F5260CFFDFD36D778F9A6` |
 
 V2 source所有を親へ返却する。本是正工程の開始token snapshotは未取得であり、同sessionの先行工程と混ぜて単独使用量を推定しない。
+
+## ET3-FX1：隔離helperの同体抽出・作者引継ぎ（2026-10-14）
+
+独立作者 `/root/trial_delivery_fix_author`、指定 `gpt-6-astra/high`。計画者の割当、3file限定所有、独立Pre PASS（指摘0）を受領した。入力HEADは `d446c5dd32177815ee322a39cf51ab84a99ee458`、計画SHA256 `4DACB561260B32D15570C07D7F202E82B0D6719149D1EDE194CB0057DA61100F`、設計SHA256 `B2FEFA5C9E1B10F509939F5235C2B45DBFA58F6455B83C58F19D6298F8422969` を実物照合した。AGENTS/team/KPIと `agent-skills:test-driven-development` を全文読了し、既存期待値とfixture保存の工程に適用した。
+
+変更は `src/media.rs` の既存 `isolated` を新 `src/early_trial_test_support.rs` へ抽出し、ai/mediaファイル直下のprivate `cfg(all(test, windows))` moduleから参照する3fileだけである。mediaの旧pub(crate)参照pathはre-exportで保持し、ai作者領域はhelper import一箇所だけを変更した。新fileの明示std importsは従来helper内importsとmediaのPathBuf/Durationから導いた。本体・監視global・全assert・実名・guard/worker寿命・Cargo/依存・他consumerは変更していない。
+
+### 同体性・保存の証拠
+
+長い比較結果と12項目の前後snapshotは `target/early-trial-build/et3/fix-author/ignored/` の `evidence.json`、`source-before.json`、`source-after.json`、`markers-after.json` に保存した。9source（新helperの変更前は不存在）＋ `tests/codex_process.rs` ＋ Cargo.toml/lockを含む。変更前の既存ET3 snapshotは168/168一致し、変更後はai/media以外166/166がraw SHA256一致した。
+
+旧関数のdoc・署名・本文を抽出し、各非空行先頭の4スペースだけを取り除き、CRLF→LFだけを正規化して新関数範囲と完全比較した。関数範囲外の区切り空行・最終改行は比較へ含めない。内部文字列・コメント・空白・式・順序は変更せず、比較diffは空である。旧/新の同一正規化SHA256は `2C5A41C49D78717C41A8118738F5F8ACFEF73FB1121D90C95C62F9E357A17B0F`。ai/media全体も承認済みmodule宣言・import・抽出/re-exportの変換だけと一致したため、録音3caseと通信/録音globalを含む残りの本文保存を確認した。
+
+| 変更source | 修正後raw SHA256 |
+| --- | --- |
+| src/media.rs | `A3EC60D795C63052E6E3EEAC45EE7903CAAD97752242C005DBFE801EE6DF2673` |
+| src/ai.rs | `94B85460696455D8D9D48593B0C299B5E849B10A45C2039E43F18D057E062A99` |
+| src/early_trial_test_support.rs | `40A43200CE106B555E4688716179BA88C972D104AF401F059A86A15FF33FE34C` |
+
+ai作者markerの新hashは `190D951624F470071F5E013591A59B476A23F451FF6C984BCF5D2F6DE390F407` である。検査用文字列の許可importだけを旧importへ逆置換すると、旧 `E99CF0CC0C81160A0055A608F6843655A8BB3CD8A9A6566080373351D65329F7` へ一致する。marker範囲の改行は正規化していない。他3markerは既存V2表と完全一致した。旧release EXE SHA256 `9B888E9FC923823C59B4C3B0AB1A4DAD2051CA6139DE153B6DE6CA213DD387D3` も不変である。
+
+上記全本文/marker保存と7consumerの静的照合により、P01 A01–D04の20case、録音3case、試用限定のmain1/app9を保持した。予定集合は通常bin23、試用bin33、integration各11で変わらない。これはsource上の保存証拠であり、新EXEのlist件数・動的成功ではない。新fixtureは既存の合成LOCALAPPDATA/TEMP/TMP/cwd、Admin=False、Hidden、45秒、kill/wait、子回収後の固有tree cleanup、exact1と完了marker判定をそのまま持つ。
+
+### RED分類・確認・次工程
+
+既存 `et3/default-errors.json` の `codex_process` E0433（aiのmedia import先がintegration crateに存在しない）を現物確認した。これはfixtureのcompile REDであり、行動REDではない。今回の作者によるcargo build/test/no-run・EXE list/runtimeは0である。既存の不具合再現を重複実行せず、親指定のsource G0確認待ちで停止する。修正後compile成功もまだ主張しない。
+
+`cargo fmt --all -- --check` は初回、新helper末尾の余分な空行だけで失敗した。関数外の空行をapply_patchで除去し、再検査はexit0。`git diff --check` もexit0である。期待値の新作成・assert緩和・感度25回の反復は行っていない。
+
+親は上記snapshotと同体証拠をsource G0へ接合し、runnerへFX-R1–3/ET-01・04・06・07を引き継ぐ。次は構成別の隔離target-dirで `cargo test --all-targets --locked --no-run --message-format=json` と同コマンドの `--features early-trial` を実行する。新helperを含む12項目をbuild前後照合し、全artifactとbin/integrationのEXE絶対path・SHA・features/profileを固定する。期待するcompile回帰は旧E0433の解消であり、別のcompile errorは行動FAILと混同せず停止報告する。
+
+両構成compile成功後、親が構成・EXE別にET2-G0を解除してからlist→bin録音3→既定P01安全順20、integration独立A群11→従来関連回帰へ進む。各helper利用caseは `--exact --nocapture --test-threads=1`、exact1/内部完了marker/AdminFalse/timeoutなし/回収/残存なしを確認する。0件・予期しないFAIL・未知worker・timeoutは停止条件である。既存fixtureの失敗文言や期待値を実結果へ合わせて変更しない。通常bin23/試用bin33/integration各11の不減と独立Postを要し、既定ET3全体/release/native/提供は未完了である。
+
+開始側週枠61%、終了側62%（20:34:42 JST、最終応答前）、window10080分、reset1792496608。共有週枠の差を本工程の消費と推定しない。token counter、固有log session ID、親子包含、provider返却model/effortは未取得であり、指定値と区別する。親のdocs dirtyを保持し、本追補以外の文書・本体実装・実API/資格情報/mic・OS・再委譲・公開の変更は0。指定3sourceと本追補の所有を親へ返却する。

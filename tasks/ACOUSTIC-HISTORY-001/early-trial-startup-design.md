@@ -282,3 +282,90 @@ HEADは `9a7eb5c94041f0937f8bc3cfac35bdee2f8280e1`。mainはC1実行失敗後の
 現時点で追加製品判断はない。Store選択の所有不足はplanner/親受領で解消した。残る危険は接合漏れ、poisonをNoneに扱う誤り、保持Transportからの復帰、runtime背景終了、fixture/構成の誤帰属であり、上記Gateと独立oracleへ対応した。これらの実装compile・動的実証・Postは未了である。新しい通信入口/追加所有/終了不能worker/正本矛盾はSTOPして親へ返す。rollbackは各ownerが本Packet差分だけを個別patchで撤回し、ET2-P01を未解消へ戻す。C1本体・作者是正・実データ・既存EXEを巻き戻さない。
 
 担当threadは `01a13975-8bd4-7d32-84b7-1ce794b5d6ca`（`/root/trial_egress_design`）。指定Astra/high、実行model/effort返却metadataは未取得。開始側の取得済みtoken snapshotは2026-10-14T08:09:41.886Z、input88977/cached61440/output363/reasoning13であり、開始直後までの欠測がある。終了値と本書hashはhandoffへ返す。親子包含は未確認、週枠は親測定へ接合し、usage/currentは編集しない。検証は文書diff/参照・実型/consumer照合・入力hashの読取のみ、source/test編集・build/runtime・再委譲・公開は0である。
+
+## ET3-FX1：隔離helperのcrate依存除去（2026-10-14）
+
+状態は **限定設計案・planner精緻化／独立Pre待ち、source未変更** である。冒頭のET2時点の状態表記は履歴とし、今回の追加範囲は本節だけである。入力は[限定是正計画](early-trial-delivery-fix-plan.md) SHA256 `1D64A7FDB0756F4570F23839C9517E1098F356041FABA63B031A0ACF6BF3126E` と親による3file限定所有受領、[承認済みET-01–07](early-trial-contract.md)（hashは上記cycle 2と同一）、[ET3 runner停止報告](early-trial-delivery-runner.md)である。指定designerは `gpt-6-astra/high`。本書追補だけを所有し、AGENTS/team/KPIと `api-and-interface-design` を全文確認してRust内部契約へ適用した。UI変更がないため `wordweave-egui-ui` は今回非該当であり、日本語・ボタン両軸中央・拡大率・狭幅の既定ET3受入は残す。
+
+現物根拠は `tests/codex_process.rs:15–17` のWindows限定 `#[path = "../src/ai.rs"] mod ai` と `src/ai.rs:163` のmedia importである。integrationにはmediaがなく、`target/early-trial-build/et3/default-errors.json` はE0433をこのimportへ帰属させる。compile FAIL1／runtime0を維持し、行動REDとは数えない。HEAD `d446c5dd32177815ee322a39cf51ab84a99ee458`、現8sourceを同所 `source-before.json` と再照合して8/8一致した。これはV2固定表に一致する修正前snapshotである。親のdocs-only dirtyと旧release SHA256 `9B888E9FC923823C59B4C3B0AB1A4DAD2051CA6139DE153B6DE6CA213DD387D3` を保持する。
+
+### 配置・型・所有
+
+作者の変更は `src/ai.rs`、`src/media.rs`、新 `src/early_trial_test_support.rs` のtest/fixtureだけで足りる設計である。ai/mediaそれぞれの**ファイル直下**（inline `trial_egress`／`early_trial_startup_tests` の外）へ次を置く。aiでは先頭のinner doc commentの後に置く。
+
+```rust
+#[cfg(all(test, windows))]
+#[path = "early_trial_test_support.rs"]
+mod early_trial_test_support;
+
+// ai::trial_egress::tests 内の既存media importだけを次へ置換する。
+use crate::ai::{early_trial_test_support::isolated, Config};
+
+// media::early_trial_startup_tests 内。関数定義を移し、同じ旧pathを維持する。
+pub(crate) use super::early_trial_test_support::isolated;
+```
+
+新fileは以下の明示importと既存のdoc comment／関数定義だけを持つ。関数本体は `media.rs:16–88` から同体抽出し、署名・可視性・返値 `()` を保持する。mediaのtest module内のhelper専用std import群は除くが、`use super::*` と録音3caseは保持する。media本体の `PathBuf`／`Duration` importは本体の所有であり削除しない。
+
+```rust
+use std::{
+    fs,
+    os::windows::process::CommandExt,
+    path::{Path, PathBuf},
+    process::{Command, Stdio},
+    time::{Duration, Instant},
+};
+// 定義の型（本文は既存のまま移す）：
+// pub(crate) fn isolated(exact: &str, body: impl FnOnce(&Path)) { ... }
+```
+
+`PathBuf`／`Duration` は従来mediaの `super::*` 経由、他名は従来test内std import由来である。`chrono::Utc` は既存の完全修飾参照と既存依存を維持する。新fileに `super::*`、ai/media/app参照、global、test case、watch型、別frameworkを入れない。
+
+| 構成 | 解決・可視性・状態の所在 |
+| --- | --- |
+| Windows bin test | `src/ai.rs`／`src/media.rs` のfile-relative pathはともに `src/early_trial_test_support.rs`。同一sourceをprivateな `ai::early_trial_test_support` と `media::early_trial_test_support` に取り込む。複製されるのは状態を持たない関数だけである |
+| Windows `codex_process` test | path指定で読まれた `src/ai.rs` のファイル直下から同じsibling fileを解決する。`tests/early_trial_test_support.rs` や `src/ai/trial_egress/…` は使わない。`crate::ai::Config` とその子moduleだけでA群が閉じる |
+| 非Windows／非test | 現mainのai/mediaとintegrationのaiは既に `cfg(windows)`。新宣言も `all(test, windows)` であり、非WindowsでCommandExt/shell32を取り込まず、非testでfixtureを取り込まない。既存testのcfg／feature／ignoreは変更しない |
+
+private support moduleをai子孫のtestsから参照でき、関数の `pub(crate)` をmediaの旧pub(crate) moduleから再公開できる。`isolated` の移動でtestのmoduleは動かない。`GLOBAL: Mutex<Option<Arc<State>>>` は `ai::trial_egress`、`RECORDING_START_WATCH: Mutex<Option<Arc<AtomicUsize>>>` はmediaの原位置に各crate/process内で一つのままである。binとintegrationは別EXEであり、互いのglobalや解除を共有しない。integrationへmediaを新設しない。
+
+### 受入対応・既存consumer・同体証拠
+
+| 要求 | 保持対象と検証口 |
+| --- | --- |
+| FX-R1／ET-07 | 通常／early-trialのall-targets no-runでbinと `codex_process` を含む全artifactを識別する。新support moduleにはtestがなく、既存実名集合を減らさない |
+| FX-R2／ET-01、04、06 | 入力はexact実名とchild内だけ呼ぶ `FnOnce(&Path)`。helperが固有合成base・Child・stdout/stderrを所有する。既存1実名1子、環境、Admin=False、Hidden、timeout／回収／cleanup／成功markerの順を同体比較する |
+| FX-R3／ET-06 | [P01作者のA01–D04表](early-trial-egress-tests.md)のprefix＋suffix、全20oracle、A09の型付き意図的unwindをそのまま維持。bin両構成20件、integration両構成は同じA prefixのA01–A11の11件。helper内部でtest名を生成・変換しない |
+| ET-02、03、05／ET-07残件 | 資格情報selector、title／日本語UI、export保護の本体と既存caseは無変更。全体・関連crate・release・native・提供gateは本限定修正で代替しない |
+
+全consumerは次の7moduleである。`rg` に出るstore/commit/backup/chat_media/settings_uiやintegration固有の同名 `isolated` は別定義であり、この共有helperのconsumerではない。
+
+| 呼出元 | 保持する実名集合（下記参照の実名を現sourceと照合済み） |
+| --- | --- |
+| `ai::trial_egress::tests` | P01 A01–A11。変更はimportだけ |
+| `app::qwen_reading_ui::trial_egress_tests` | P01 B01–B03。旧media importのまま |
+| `app::qwen_settings::trial_egress_tests` | P01 C01–C02。旧media importのまま |
+| `app::qwen_settings_tests::trial_egress_tests` | P01 D01–D04。旧media importのまま |
+| `media::early_trial_startup_tests` | [起動作者表](early-trial-startup-tests.md) #4–6：`et2s_active_watch_catches_entry_worker_and_rejects_duplicate`、`et2s_unwind_releases_only_owned_watch`、`et2s_poison_is_fail_closed_and_drop_does_not_clear_poison` |
+| `app::early_trial_startup_tests` | 同表 #7–15の9実名。既存early-trial限定を維持 |
+| `early_trial_startup_tests`（main） | 同表 #3 `et_d01_creator_preserves_open_rejection_without_creating_closure`。既存early-trial限定を維持 |
+
+従って共有helper利用caseはWindows通常bin23／試用bin33、integration各11が予定集合である。title／namespace selector等の非利用caseに内部完了markerを要求しない。旧起動表#18は既にP01 D群へ置換済みであり復活させない。aiの既存ET1 config testもその名前・独自fixtureを保持する。件数の根拠はsource集合であり、新EXE listは未取得である。
+
+作者は修正前raw bytes／hashを `d446c5d` とET3開始snapshotに固定し、既存8source＋新file＋読取対象 `tests/codex_process.rs` を修正後snapshotへ含める。本文同体の証明は旧関数doc／signature／bodyを一つの範囲として抽出し、移動による各行先頭4 spaceだけを除去して新関数範囲と比較する。改行形式をそろえる場合はCRLF→LFだけを別記し、内部空白・文字列・コメント・式・順序を除去して一致を作らない。比較hashと差分を記録し、必要なimportの由来も上記表現へ照合する。関数本文の不一致が出たらSTOPであり、同体抽出を理由に改善を混ぜない。
+
+ai作者markerは既定のBEGIN先頭 `/`〜END末尾 `S` のUTF-8範囲で新hashを計算する。旧 `E99CF0CC0C81160A0055A608F6843655A8BB3CD8A9A6566080373351D65329F7` へ一致とは記録しない。新marker内の許可importを旧importへ逆置換した検査用文字列だけが旧hashと一致することを確認し、全assert／body／実名不変を示す。他3markerは `et3/markers-before.json` の全hash一致を要求する。新module宣言はmarker外、mediaの3case／録音watch本体・aiの通信watch本体は無変更としてdiffを照合する。
+
+### 状態・失敗・引継ぎ
+
+helperの親状態は固有base作成→子spawn→最大45秒poll→必要時kill→wait_with_output→固有tree削除→timeout／exit／exact1／完了marker判定である。子状態はCHILD実名一致→IsUserAnAdmin()==0／base・LOCALAPPDATA検査→body→完了marker出力である。既存unwrap/panicを含む失敗契約を維持し、spawn／wait／cleanup障害で成功へ進めない。子bodyのunwind、kill失敗等に新たな回復・自動再試行・広域削除を加えない。helperが利用者データを所有・回復することはない。
+
+非同期と取消しは既存caseが所有する。A08のjoin、B群OwnedDialogの同期runtime drop、D群のdialog終了→audio job drain→app/Store解放→最後のsnapshot→watch解除を維持する。未知workerでは登録を子終了まで保持して失敗とする。helper移設をwatch寿命の変更にしない。製品のload/recover/save/restoreと資格情報saveの順、worker/cancellation型、回復・再起動契約は無変更である。
+
+不採用は偽media（監視の所在を偽る）、full media取込み（不要な依存・試験・録音境界がintegrationへ増える）、feature／ignoreによるA群除外（欠陥を隠し件数を落とす）、新lib公開helper（所有と公開契約を広げる）である。inline nested moduleへrelative pathを置く案も不要な解決基準の変化を避けるため採用しない。
+
+次はplanner精緻化→同じplan/design/sourceで独立Pre→作者の3file fixture修正と同体／marker証拠固定である。実装役の本体変更は不要。3file不足・本文変更・新しいユーザー動作判断が必要なら親／plannerへSTOPを返す。runnerは親のsource確認後に通常／試用all-targets no-run JSONを取得し、前後snapshot、bin／integrationのEXE絶対path・SHA・features・profileと全artifactを返す。唯一のET2-G0を適用する固定入力には**従来8sourceに新helperを加え、integrationのinclude元も含める**。8sourceだけ一致して新helperを照合しない解除は認めない。
+
+両構成compile成功後、親が構成・EXEごとにG0対応を明示する。解除後list→bin録音安全3→既定順P01 bin20、integration自身の通信遮断を確認した同EXEのA群11→既存関連回帰→限定Post→既定ET3全体gateへ戻す。integrationに録音3を仮設せず、bin対照と独立EXEのA群証拠を分ける。旧FAIL後の部分artifact、V2の旧解除、bin解除をintegrationへ流用しない。source/EXE/構成/集合の変更で解除失効、予期しないFAIL・0件・timeout・未終了workerで停止する。今回の設計成立をcompile成功／G0解除／ET3完了とは扱わない。
+
+測定範囲は子 `/root/trial_delivery_fix_design` の文書設計である。開始側週枠59%、window10080分、reset1792496607。入力/cache/出力/推論counter、固有session ID、親子包含、provider返却model/effortは未取得であり、指定値と区別する。終了側観測と本書hashはhandoffへ返す。source/test編集・build/runtime・再委譲・公開は0である。
