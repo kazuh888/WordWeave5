@@ -1,6 +1,6 @@
 # 現在のタスク要約
 
-直近：ET3-Gの再PreはPASS（入口parse/G0回収の2件を設計上解消）。独立作者 `et3_gate_tests`（Astra/high）がignored内Test-CargoGate.ps1/fake.rsだけを作成中であり、製品full/提供は未解除である。詳細と正本は末尾リンクを参照する。
+直近：ET3-Gの再Pre/局所追加/接合追補レビューはPASS。独立作者Astra/highが80case固定/fake自己検証7/7PASS、最終設計SHA91650B87の具体JSON/同期点へdriverを接合中。実装者 `et3_gate_impl` Astra/highが別2fileを同時作成する（固定interface/非重複所有による限定並行）。両者返却前の混在runtimeは禁止、製品full/提供は未解除。書式検査3件PASS、source170差0。native残部の試用時移管は10分以上無応答のため未承認とし、独立wrapper作業だけ継続している。詳細と正本は末尾リンクを参照する。
 
 更新：2026-10-14（ET1/FX1とET2は独立Post PASS/Closed。利用者指定のET2完了境界で停止。ET3・音声履歴UI・試用EXE・製品全体は未完成）。詳細は [参照インデックス](context-index.md) と末尾の最新位置を参照する。
 

@@ -1,5 +1,27 @@
 # ET3 試用EXE提供・独立レビュー記録
 
+局所接合追補も独立PASS：最終設計SHA `91650B87DD9BDC8752658DCEA2646A9FED1B02BD8655E4F6A28E3A0C116523F9`の役別scope束縛/参照欠落時有限停止、V2出力の固定例外、payload読取前の正常OSchain hookと目的拒否段階の識別を同reviewerが確認し、確定矛盾なしと判定した。GATE18はRequest非上書き対照でnativeUUID衝突実証とは別である。編集/build/runtime/再委譲0、動的成功の判定ではない。親は作者/実装へ追補の接合を解除した。native残部移管質問は10分以上無応答のため承認とせず、利用者既定どおり依存しないwrapper作業だけを継続する。
+
+並行接合でscopeId事前指定、fixtureのcase出力境界、正常OS親子での不正payload/重複ID対照の局所不足が判明した。designerを既存設計だけの短い具体化へ戻し、この接合点を解除する間だけ作者/実装/設計の3補助とする。親は指定model/effortを変えず、各所有fileは非重複。未知のscope wildcardやfixture例外を実装者が独断導入せず、該当部のみ保留し普通のdriver/実装作成は継続する。混在runtimeは解除しない。
+
+## ET3-G 局所追加レビュー：PASS、作者/実装並行
+
+同独立reviewer Astra/highは新設計SHA `6DBF6D8C6961F4E89BEEFF8ECD33B73A892B47317076918507A1FE54B973C04A`と作者2fileの現物を照合し、局所追加に確定blockingなしと判定した。製品cfg5値/既定command一致、既存marker4/4の同算法再計算一致、G0固定12項目差0、fixture閉境界/hold後再照合/同期限/negative観測と独立OS oracleを確認した。元Pre-2と別の判定であり、行動試験0/80case/動的Post未了を保持する。
+
+親は固定された80caseと具体interfaceに対し、独立作者Astra/highのTest-CargoGate.ps1/fake.rsと実装者Astra/highのInvoke-CargoGate.ps1/cargo_gate_entry.rsの並行を限定許可した。各2fileの所有が重ならず、期待値を実装者が変更できず、同じ確定schemaを用いるためである。混在snapshotのruntimeは解除せず、両者の所有返却・現物固定後にfocused/独立実行する。生成fakeは作者だけが扱い、製品source/共有helper/full/native/実API等は触れない。通常の補助1役既定をこの固定interface区間だけ2役へ拡張した。
+
+native残部の扱いを利用者へ追加確認した：正常起動、学習/設定保存・再起動、音読画面の導線、標準keyboardを未確認と明記して試用時確認へ移すかを質問した。DPI150/200承認だけではこれらを免除しない。回答待ちの間は独立した一時wrapperの作業を継続できるが、提供解除はしない。実資格情報IOを避ける制約と現操作手段の限界を、製品の動作不良とは区別する。
+
+## ET3-G 独立作者：契約固定、driver未実装
+
+`et3_gate_tests` Astra/highがignored R配下のTest-CargoGate.ps1（SHA `424207EC8058DE0719384A5700611B0E4DEBEF39F973B44B18383712B9B46F5A`）とfake.rs（SHA `46FA412A04F6151AFB2C23B0259C72E2549C48686A70AAB7CB744568825A90DE`）を作成し所有返却した。ENV6/GATE26/RACE5/TRANSPARENT15/LIFETIME19/ORDER9の80caseを固定。通常入口は契約保存後BlockedPrerequisite/exit2であり、wrapper行動試験0である。
+
+作者fakeの自己検証は7/7PASS・skip0、UTF-16/孤立surrogate、raw stream、32bit exit各値、FileShare.Read下の実行を確認した。Pester初回の自動Registry/CIM初期化拒否はfixture未実行で行動REDではない。テスト局所で未使用自動fixtureを無効化して再検証し、global/registry変更0。parser0、analyzer未使用注入parameter警告3件はPost判定へ保持する。
+
+Run等の具体key/cfg/digest/sidecar名、承認read後/ACK境界、V2Case Start後登録前、unknown/cleanup不能の合成観測境界の4局所事項をdesignerへ返した。caseを弱化せず、確定runへfixture bypassを作らない。製品full/native解除なし。自己検証7を80caseや製品PASSへ換算せず、usage counter等欠測・共有週枠73%を保持する。
+
+ET3書式検査：親が `cargo fmt --all -- --check`、音響解析/Qwen各manifestの `cargo fmt --manifest-path tools/<crate>/Cargo.toml --all -- --check` を実行し、3件ともexit0・診断出力0であった。書式の自動修正は実施していない。release固定source-afterの170項目を現物へ再照合し不一致0。全体test/native/提供Postは別の未了項目である。
+
 ## ET3-G 独立Pre-2：PASS
 
 同reviewer Astra/highは計画 `06E880E7…1463C7F2`／設計 `CC72A435…62E8313`の現物一致を確認し、Pre-1の入口parse/G0回収所有のP1二件を設計上解消と判定した。新たな確定矛盾/受入阻止/要回答質問0。任意argvのbinder非通過、UTF-16保持、同ps1所有木と登録ACK、aggregate600秒と単一10秒回収、証明不能時CleanupIncomplete/full禁止が具体化された。

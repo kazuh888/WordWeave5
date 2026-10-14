@@ -1,5 +1,7 @@
 # ET3 試用EXE提供の使用量観測
 
+追加手戻り：Pre-2 PASS後の独立作者が、意味契約はあるが具体JSON key/cfg/digestと決定的race同期点が未固定でdriverへ進めないことを報告した。80case/fake自己検証7/7を固定して返却し、designerへ局所4点を戻した。共有週枠の作者終了受領値は73%。改善候補は、同種の複数担当interfaceでは作者へ渡す前に最小入力例/具体命名/同期点を一緒に固定することである。今回の再handoffを効率改善として隠さず、追加frameworkや検証削減で解消したとは扱わない。
+
 再開区間の中間記録：限定計画/設計/独立PreはAstra/high、native拒否窓runnerはSol/medium。Preで入口parseとG0回収所有の2件が不足し、実装前に計画へ返した。設計是正はfresh `et3_gate_design_fix` Astra/highが担当する。native observerの未確認ControlType/IDOK前提による中断2回と、実値先行取得による最終観測1回を手戻りとして保持する。nativeの終了共有週枠70%はrunner受領値であり、開始65%との差を当工程だけの消費や旧方式比へ換算しない。各子counter/provider返却metadata/親子包含は欠測である。製品source変更0、取得済みrelease3buildを反復せず保持した。
 
 ## 22:18 JST 再開区間

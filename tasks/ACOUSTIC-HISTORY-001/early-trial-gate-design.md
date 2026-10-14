@@ -1,6 +1,6 @@
 # ET3-G：同一Cargo実行のEXE承認境界
 
-2026-10-14。状態はPre-1のP1二件を反映した設計案・計画同期／独立Pre-2待ちである。[計画](early-trial-gate-plan.md) SHA256 `EDA787512F47F24A360C068ED3C78C38C2BD1B687DA7C37869DC0D5F397C0E1F`末尾の是正方針、[Pre指摘正本](early-trial-delivery-review.md)冒頭、[承認済みET契約](early-trial-contract.md)と同reviewの利用者承認を入力とする。指定designerは `gpt-6-astra/high`。今回process限定runner導入だけを具体化する。製品sourceは親受領のcb882031同体、HEAD6fb6da3。着手時git statusで既存dirty文書8件と未追跡の本書／計画を確認した。所有は本書だけ、実装・テスト編集・runtime・再委譲・公開は0である。旧設計SHA `92E370C131AAF46201BD9D575ADEC1DC0A8E119450587D8DB33966043B07A09C`へのPre不合格は履歴として保持し、本書だけで解除しない。
+2026-10-14。Pre-1のP1二件を反映した本書SHA `CC72A435CAF840E94F06F5704D95822BDAF57A19C10A91E579CE3ACB062E8313`は独立Pre-2 PASSとなった。現在の追加は末尾「作者handoff後の局所具体化」だけであり、キー名確定と合成fixtureの同期／観測契約を区別する。初回入力は[計画](early-trial-gate-plan.md) SHA256 `EDA787512F47F24A360C068ED3C78C38C2BD1B687DA7C37869DC0D5F397C0E1F`末尾の是正方針、[Pre指摘正本](early-trial-delivery-review.md)冒頭、[承認済みET契約](early-trial-contract.md)と同reviewの利用者承認である。指定designerは `gpt-6-astra/high`。今回process限定runner導入だけを具体化する。製品sourceは親受領のcb882031同体、HEAD6fb6da3。初回着手時git statusで既存dirty文書8件と未追跡の本書／計画を確認した。所有は本書だけ、実装・テスト編集・runtime・再委譲・公開は0である。旧設計SHA `92E370C131AAF46201BD9D575ADEC1DC0A8E119450587D8DB33966043B07A09C`へのPre不合格は履歴として保持し、製品runtimeを本書だけで解除しない。
 
 AGENTS、development-team、KPI、`agent-skills:api-and-interface-design`全文を確認した。入力・承認・実行結果の型を分け、外部境界で検証する。REST層は不要である。UI変更なしのためwordweave-egui-uiは非該当。日本語折返し、ボタン両軸中央、DPI100%、狭幅、focus/keyboard、直接起動・保存・再起動・音読導線は既定native未了として保持する。DPI150/200%だけは利用者承認どおり試用時へ移す。
 
@@ -145,7 +145,7 @@ Supervisorのabort/cancelを受けたRunOwnerは同じcleanupDeadlineを共有�
 | G5 LIFETIME | 承認待ち/子実行timeout、G0中cancel／aggregate期限、RunOwner／Supervisor／SafetyWorker／native entryの個別強制終了、ACK公開前／後／V2Case Start後登録前を合成する。残ったownerの回収、10秒単一wait予算、full0、同じPIDの別開始時刻拒否、無関係sentinel不変を確認する。所有不明／回収不能対照はCleanupIncomplete＋非zero＋fixture保持でありPASSへ換算しない |
 | G6 ORDER | fake G0が未完了/失敗/旧Manifestならfullなし、登録ACK前の対象起動0、同run G0成功後だけ一括解除。g0→全case→親full確認まで同じ600秒であり最終case後も延長0。複数artifactで後続照合とargv保持、full対象不減を実Cargoの小fixtureで確認 |
 
-検証入口は `& 'F:/Program Files/PowerShell/7/pwsh.exe' -NoLogo -NoProfile -NonInteractive -File R/Test-CargoGate.ps1 -GateScript R/Invoke-CargoGate.ps1 -OutputRoot R/verification/<new-id>`（Rは上記絶対pathへ置換）と固定する。作者がcase実名/件数を先に確定し、runnerは同commandを新しい証拠先で実行する。テストseamはRun／EntryPayload／親承認／Ready・ACK・case開始sidecarとsynthetic processであり、製品sourceへのseam追加や実V2Caseの改変をしない。race caseは観測したsidecarで指定ownerを停止し、登録直後の窓は作者fakeの同期点で再現する。caseごとの有限時間対照は合成Runで短い絶対期限を使うが、製品の3600/1800/600/65/45/10秒を変えない。implementer/作者はPowerShell作成skill、Post reviewerはPowerShell review skillを計画どおり読む。本設計はスクリプトを生成しない。
+検証入口は `& 'F:/Program Files/PowerShell/7/pwsh.exe' -NoLogo -NoProfile -NonInteractive -File R/Test-CargoGate.ps1 -GateScript R/Invoke-CargoGate.ps1 -OutputRoot R/verification/<new-id>`（Rは上記絶対pathへ置換）と固定する。作者がcase実名/件数を先に確定し、runnerは同commandを新しい証拠先で実行する。テストseamはRun／EntryPayload／親承認／Ready・ACK・case開始sidecarとsynthetic processであり、製品sourceへのseam追加や実V2Caseの改変をしない。作者fakeだけではspawn前／登録前を停止できないため、その窓は末尾の限定同期契約で再現する。caseごとの有限時間対照は合成Runで短い絶対期限を使うが、製品の3600/1800/600/65/45/10秒を変えない。implementer/作者はPowerShell作成skill、Post reviewerはPowerShell review skillを計画どおり読む。本設計はスクリプトを生成しない。
 
 標準静的検査は固定pwsh上、Rをcwdとして両ps1を対象にする。各fileで`$tokens=$null; $parseErrors=$null; [System.Management.Automation.Language.Parser]::ParseFile($path,[ref]$tokens,[ref]$parseErrors)`のerror0を確認する。analyzer commandは`Import-Module PSScriptAnalyzer -RequiredVersion 1.25.0; @('./Invoke-CargoGate.ps1','./Test-CargoGate.ps1') | ForEach-Object { Invoke-ScriptAnalyzer -Path $_ }`とし、全指摘を保存・修正又は根拠付き判定する。Pester5.7.1は導入済みだが必須framework追加とはせず、作者の固定case入口を維持する。新規インストール/既存設定変更はない。
 
@@ -158,3 +158,70 @@ Supervisorのabort/cancelを受けたRunOwnerは同じcleanupDeadlineを共有�
 本修正ではV2Case全文・共有isolated helper全文・ET2-G0を再確認し、V2Caseの無期限Wait／helperの45秒と単体kill／固定markerを根拠に外側責任を具体化した。製品source全体の静的G0再認証を代行したものではない。native UIの安全な観測手段は別runner所有であり、本書で解決済みにしない。新たな利用者動作の未決は0、独立Pre／Windows実証は未了である。
 
 測定は子 `/root/et3_gate_design_fix`、指定Astra/high。開始時counterは未取得、作業途中22:51:44 JST近傍の共有週枠は70%／10080分／reset1792496608である。他作業並行のため本工程の消費率に換算しない。固有session/provider返却model/effort・token counter・親子包含は未取得であり推定しない。旧design担当の測定欠測も解消したと扱わない。
+
+## 作者handoff後の局所具体化（Pre-2 PASS後）
+
+入力は作者`Test-CargoGate.ps1` SHA `424207EC8058DE0719384A5700611B0E4DEBEF39F973B44B18383712B9B46F5A`の80case／schemaCandidateと、`fake.rs` SHA `46FA412A04F6151AFB2C23B0259C72E2549C48686A70AAB7CB744568825A90DE`全文である。fake自己検証7/7は親受領証拠であり、本担当は再実行していない。以下の名前／型は既存semanticの具体化、fixtureControlによる停止／観測障害は合成試験専用の新しい内部semanticである。Pre-2 PASSをこの追加への判定として遡及適用しない。80caseの期待値・件数・期限・4file所有を維持する。
+
+### 1. JSON実キーと証拠名
+
+作者候補のRunキーを次の型で確定する。大文字小文字を区別し、旧別名を受け付けない。`runId,cfg,repo,cargoVersion,pwshVersion,startedUtc,deadlineUtc,buildDeadlineUtc`は文字列、`cargoArgv`は文字列配列、`envMap`は固定key→文字列map、`cargo,sourceInput,g0Input,markerInput,gateScript,nativeSource,nativeExe,pwsh,v2Case`は`{path,sha256}`、`sourceFiles,g0Files,markerFiles`は同shapeの配列、`expectedArtifacts,safetyCases`は下記配列である。時刻はUTCの`yyyy-MM-ddTHH:mm:ss.fffffffZ`、identityの開始時刻は実Process handleのStartTimeを基準とし、CIMの低精度表示から捏造しない。
+
+| 対象 | 確定するfield／照合 |
+| --- | --- |
+| cfg | 製品は`default`,`early-trial`,`acoustic-analysis`,`qwen-audio`,`qwen-audio-no-default`の5値。順に本書の既定5Cargo commandへ一対一対応。合成試験だけ`fixture`を追加し、下記閉じたfixture境界を必須とする。任意の新cfgは拒否 |
+| source/g0/marker digest | sourceInput等はそのrun用に保存するUTF-8 JSON配列のPathHash snapshot。各fileの**保存済み全bytes SHA**を`sourceDigest/g0Digest/markerDigest`とし、再serializeしない。decodeした順序・path/hash集合はRunの対応配列と一致必須。source/g0は全file bytes、markerは一意の`// BEGIN ET2-P01 AUTHOR TESTS`先頭`/`から`// END ET2-P01 AUTHOR TESTS`末尾`S`までの現行UTF-8 bytesをhashする。旧marker snapshotの値を復活させない |
+| expectedArtifacts | `{packageId,manifestPath,targetName,targetKind,profile,features,allowExecution}`。targetKind/featuresは重複なしordinal順配列、profileはCargo JSONの実field名と型を保持し構造比較する。Manifestのartifact行はこれに`executable:{path,sha256}`を加える。allowExecution=trueだけが候補であり親承認は別途必要 |
+| safetyCases | `{caseId,order,artifactKey,list,exactName,requireChildMarker,expectedListNames}`。orderは0開始の連続整数、artifactKeyは`{packageId,manifestPath,targetName,targetKind}`、caseIdはrun内一意のASCII英数／`-`／`_`。list=trueのexactNameは`::`、expectedListNamesは作者固定実名集合。exactはexpectedListNames=[]。製品のlist2＋録音3→P01 20→integration11を変更しない |
+| process identity | `{pid,startTimeUtc,path,parentPid,commandLineUtf16}`。前3fieldは作者候補を採用し、OS親子照合に後2fieldを加える。commandLineUtf16はOSのcommand line全体のcode unit配列であり、target argvとは区別する。identityの等価性はPID＋StartTime、path/command/parentは追加の所有根拠である |
+| Approval | 作者候補の`phase,decision,runId,runSha256,manifestSha256,cfg,sourceDigest,g0Digest,markerDigest,publishedUtc,expiryUtc,g0DeadlineUtc,recordReference,safetyEvidenceSha256`を採用。recordReferenceは非空文字列。g0のsafetyEvidenceSha256だけnull、fullでは同runの成功証拠file SHA必須。fullの受領はg0Deadline以前、実行有効期限expiryUtcはRun期限以下であり、G0期限経過後に全full実行を直ちに失効させる意味ではない |
+| G0成功証拠 | Supervisorが`safety-evidence.json`へ`{runId,manifestSha256,cfg,cases}`を保存。casesはRun順に`{caseId,order,invocationSha256,workerIdentity,v2Identity,targetIdentities,result,v2Result,stdout,stderr,listNames,passed,gateStatus}`。result/v2Result/stdout/stderrはPathHash、listNamesはlist時だけ実名集合、exact時[]。全行passed=true／gateStatus=Completed、V2のPassed／exact1・marker・wait／残存0と原文証拠が一致して初めて親full承認へ進む。SHAは保存済み全bytesから取り、順序や件数を再構成して省略しない |
+
+sidecarは作者候補を採用し、run rootの`run.json,manifest.json,approval-g0.json,approval-full.json,cancel.json,safety-evidence.json`、`invocations/<invocationId>/{payload,request,intent,registration,ready,ack,result}.json`、`safety/<caseId>/{invocation,intent,registration,ready,ack,result}.json`に固定する。RunOwner／Supervisor／Cargoの起動情報は`processes/<role>/{intent,registration,ready,ack}.json`、V2CaseのStart意図／登録は`safety/<caseId>/v2-{intent,registration}.json`とする。V2Case専用OutputDirectoryは`safety/<caseId>/v2-output`であり、既存V2の`result.json/stdout.log/stderr.log`はここに保持する。root監督のterminalは`result-<role>-<pid>.json`、worker／Runnerのterminalは各固有directoryの`result.json`である。roleは`RunOwner,Supervisor,Cargo,Entry,Runner,SafetyWorker,V2Case,Target`。同名はCreateNew、既存内容の差替え／第二承認は拒否し、同じimmutable fileの再読だけは重複発行としない。
+
+Manifestのtop keyは`runId,runSha256,cfg,cargoIdentity,sourceDigest,g0Digest,markerDigest,jsonPrefixBytes,jsonPrefixSha256,artifacts,createdUtc`、Requestは`runId,invocationId,cfg,cargoIdentity,entryIdentity,runnerIdentity,payloadSha256,executable,argvUtf16`である。Registration／Readyは`runId,role,scopeId,intentSha256,identity,ownerIdentity`、ACKはこれに`readySha256,manifestSha256,caseId,deadlineUtc`を加え、非caseではcaseId=null、Manifest作成前のSupervisor登録ではmanifestSha256=nullとする。開始Intentは`runId,role,scopeId,ownerIdentity,path,argvUtf16,deadlineUtc`を持つ。SafetyInvocationは`runId,runSha256,manifestSha256,g0ApprovalSha256,caseId,order,executable,exactName,list,requireChildMarker,v2Case,outputDirectory,g0DeadlineUtc,deadlineUtc`であり、executable/v2CaseはPathHash。Resultは本書の既定内容を`runId,role,scopeId,identity,manifestSha256,requestSha256,ackSha256,argvUtf16,childExitInt32,childExitU32,gateStatus,startedUtc,endedUtc,timeout,cancelled,cleanupDeadlineUtc,processes,fixtureResiduals,sourceMatched`へ対応させる。未到達のidentity／hash／exitはnull、未取得配列はnullと空配列（取得済み0件）を区別する。processesの行は`{identity,killRequested,waited,hasExited,ownership,error}`、ownershipは`Owned,Unrelated,Unprovable`である。
+
+scopeIdはRunOwner／Supervisor／CargoでrunId、SafetyWorker／V2CaseでcaseId、Entry／RunnerでinvocationIdとする。Targetは所有branchを継承し、fullではinvocationId、G0ではcaseIdである（G0に存在しないinvocationIdを新設しない）。processの識別は`runId＋role＋scopeId＋PID/開始時刻`、ACKはさらに既定のintent／Ready SHAへ束縛する。以下のfixture参照は同期対象の後決めだけであり、このlifecycle scopeを変更しない。
+
+### 2. 合成fixtureの閉じた境界
+
+cfg=fixtureではRunへ必須`fixtureControl:{path,sha256}`を加える。それ以外のcfgではfixtureControl、`ET3_FAKE_*`環境、下記hook／fault指定を副作用前に拒否する。合成RunでもRunPathはR/runs/<runId>/run.jsonのままである。descriptorは`{runId,suiteId,fixtureRoot,controllerIdentity,cargoKind,cargoFixture,syncPoints,observationFaults}`、fixtureRootはR/verification/<suiteId>配下の専用directory、cargoKindは`fake`又は`real`である。cargoFixtureは生成Cargo.toml等のPathHash配列（fake時[]）。controllerIdentityは独立作者driverの実processであり、gateの承認権限を製品Runへ移すものではない。
+
+RunOwnerと各childはdescriptor SHA／runId、同rootの`fixture-owner.txt`内容、解決済みpath／reparse境界を検証する。repo、source/g0/markerの現物とsnapshot、LOCALAPPDATA/TEMP/TMP/CARGO_TARGET_DIR、全artifact EXE/manifest、fake cargo実体はこのfixtureRoot内だけを許す。共通Run証拠root、固定gate source/native EXE/pwshと**変更しない既存V2Case**は既存固定path/hashの例外である。case出力の例外も共通Run証拠rootに限定し、既定`R/runs/<runId>/safety/<caseId>/v2-output`とV2Case自身がその下に作る`local,temp,cwd`を許す。V2Caseへ渡すOutputDirectory／子環境はこの固定case所有pathであり、fixtureRootへ再配置しない。その他のfixture作業pathはfixtureRoot内に保ち、別run／case／reparse先への拡張は拒否する。cargoKind=realでは固定実Cargoだけを例外とし、repoと生成workspace／manifest／targetはfixtureRoot内、commandは作者の`test --all-targets --locked --offline --message-format=json`だけとする。fakeは標準library fixture、realは依存なしの作者固定crateを使う。製品repo／source／EXEをfixtureへ指す、junction等で境界を迂回する、fakeを製品cfgで起動する入力は拒否する。
+
+fixtureでもsource/hash／artifact／g0/full承認／登録ACK／期限／OS identity／image lock／回収の同じ本体経路を通す。hookは許可・hash・exit・test結果を生成せず、faultは観測を良好に変えない。製品Runのkey省略や短い時計をfixtureだから自動補完する経路を作らない。合成の対象集合と短い絶対期限は作者がRunへ明示し、既存fakeのmarker／独立OS handleがoracleとなる。
+
+### 3. 決定的同期点（RACE03/04、LIFE09/10/11）
+
+既存Runner／SafetyWorker／Supervisorに同一のprivate helperを置き、descriptor.syncPointsの`{pointId,role,scopeId,hook,deadlineUtc}`に完全一致する一回だけ停止する。hookは次表の閉じた集合である。同期点の到達は`fixtureRoot/control/<pointId>/arrived.json`へ`{runId,runSha256,pointId,role,scopeId,hook,actorIdentity,scopeReferenceSha256}`をatomic公開し、作者driverだけが同directoryの`release.json`へ`{runId,pointId,role,scopeId,hook,arrivedSha256}`をCreateNewする。scopeReferenceSha256は直接scope指定時null、下記参照時は読んだ全bytesのSHAである。到達を見てから変異／指定OS identity停止を行いreleaseするので、sleepの長短や確率的kill反復を使わない。
+
+Runner同期点だけは、nativeが生成するinvocationIdを事前には指定できないため、descriptorのscopeIdを`scopeIdReference`へ置き換えてよい（両方／両方なしは禁止）。参照先は事前固定の`fixtureRoot/control/<pointId>/scope.json`である。controllerは対象Request観測後・対応phase承認前に`{runId,pointId,role:"Runner",scopeId:<invocationId>,requestSha256}`を一度atomic CreateNew公開する。readerは同runの`invocations/<scopeId>/request.json`の実bytes SHA／invocationId／runnerIdentityと照合し、参照bytesとSHAを保持する。下記payload読取前hookだけはRequestがまだ存在しないため、requestSha256を`captureReadySha256`へ置き換え、同scopeのcapture-ready.jsonへ同様に束縛する（両SHAの併記／両方欠落は禁止）。descriptorは更新しない。解決したrole＋scopeId＋hookが現在のactorと完全一致する場合だけ当該点へ到達し、別の有効invocationならその点は対象外である。未知ID／参照差替え／破損／重複keyはRejectedであり、最初に来たRunnerへの自動割当やwildcard照合はない。
+
+参照の公開が遅れ、同role/hookへ先に到達した場合は、arrived／spawnへ進まず既定250ms loopで参照を待つ。owner liveness／cancel／最初から固定されたmin(point期限,phase期限,Run期限)は継続監視し、欠落のまま期限ならTimedOutで当該target0、期限後公開では復帰しない。解決後のarrived／release／hook検証には具体scopeIdを必ず使う。releaseはarrived SHAと全identity fieldが一致した時だけ有効であり、参照pathそのものをscopeの代わりにしない。これは既定の有限停止点の入力具体化であり、承認・ACK・実行期限を追加解除しない。
+
+| case／hook | 固定する停止位置と検証順 |
+| --- | --- |
+| TRANS08–15／GATE18補助／`payload-read-before-validation` | Runnerが固定Run／fixture descriptor／InvocationPath境界と実Cargo→固定native entry→自身のOS親子・開始時刻を確認した後、payload bytesを読む前。invocationIdは検証済みinvocations directory名から一旦取り、payload内IDとの一致はその後必須とする。fixture時だけ同directoryへ`capture-ready.json:{runId,invocationId,cargoIdentity,entryIdentity,runnerIdentity,payloadPath}`を公開し、scope参照解決後に既定arrived/releaseで有限停止する。driverはpayloadを変異するか下記Request衝突を準備し、release後の本物のpayload validator／CreateNewへ進ませる |
+| RACE03/04／`approval-read-before-recheck` | Runnerがfull承認bytesを読み、そのSHAを内部確定した直後、spawn前の全再照合より前。作者がapproval又はsynthetic sourceを変更してreleaseする。再照合から開始し、不一致ならtarget0 |
+| LIFE09／`ready-validated-before-ack` | 起動ownerがReadyとOS identityを検証した後、ACK公開前。作者がそのownerを停止。子はACKを受けずtarget0。Supervisor自身の子ならRunOwner、workerならSupervisorを止める |
+| LIFE10／`ack-read-before-recheck` | 子が対応ACKを読みSHAを固定した後、owner liveness／cancel／期限／source等の最終再照合前。作者がownerを停止。release又は喪失検出から拒否へ進みtarget0 |
+| LIFE11／`v2-started-before-registration` | SafetyWorkerのV2Case Process.Start成功後、handleを手元に保持したままv2-registration.jsonを書く前。v2-intent.jsonは既に公開済み。arrivedにはV2のPID／handle／commandを入れず、回収者へ欠けた登録情報を供給しない。作者がworkerだけを停止し、Supervisorは既定のOS親子鎖／生存区間から回収する。証明不能なら既定CleanupIncomplete |
+| RACE05補助／`image-lock-acquired` | workerが独自EXE read handleを取得した直後。arrivedは取得時点の観測だけであり、Supervisor喪失後もlockが生存するとの推定には使わない。作者は別handleの書込／差替え拒否と生存identityを併記する |
+
+停止中も250ms以内でowner liveness／cancel／min(point期限,phase期限,Run期限)を監視する。期限をリセットせず、owner喪失／cancelならreleaseを待たず既定abortへ進む。release欠落も有限TimedOutである。再開時には**必ず既存の最終再照合**を行い、停止前の判定でspawnしない。V2 Start済みhookだけはabort時に手元handleを回収する。hookのenv単独有効化、任意script callback、fakeによる承認代理は実装しない。
+
+TRANS08–15はcapture-readyにより正常bootstrap identityを実OSと確認し、各不正payloadを公開してからreleaseする。Resultへ限定診断`failureBoundary`を加え、実payload validatorで拒否した時だけ`PayloadValidation`、RequestのCreateNew衝突だけ`RequestCreateNew`、それ以外はnullとする。driverはRejected／target0に加えてこの値を照合し、外側の親子拒否やhook timeoutを目的validatorの成功に数えない。早期hook自身のscopeはcapture-readyへ束縛済みであり、破損payloadから得たIDで同期先や所有者を差し替えない。
+
+GATE18は同じ早期hookで**valid payloadを保持**し、controllerが現在のinvocationId／正常identityを持つrequest.jsonを最初のCreateNewで占有してbytes/SHAを保存する。release後、正常Runnerが同pathへ二度目のCreateNewを行い、`RequestCreateNew`で拒否、既存request／承認bytes不変、target0を確認する。重複invocationの永続Request非上書き対照であり、nativeのUUID衝突再生成を強制した実証とは記録しない。scopeId・payload・正常OSchainを共用し、別Runnerの直起動やnativeの再呼出bypassを追加しない。作者のGATE18／TRANS08–15行の期待値は維持し、同期／観測方法だけをこの形へ接合する。
+
+### 4. 観測不能の合成（LIFE16/17）とhandoff
+
+同ps1の既存所有照合／終了観測を、それぞれ`ObserveOwnership(identity)`／`ObserveTermination(identity)`のprivate境界へ集約する。通常は実OS証拠だけを返す。fixture descriptor.observationFaultsは`{faultId,kind,targetIdentity,activeUntilUtc}`で、kindは`ownership-unavailable`と`termination-unavailable`だけである。対象はcontrollerが実際に起動したfixtureRoot内のfake／その子の正確なPID＋開始時刻に限定し、OS照合で確認できない指定はfixture自体の失敗とする。候補processが生まれた後にdriverがdescriptorを変える必要を避けるため、descriptorには先に`targetIdentity`の代わりに`targetReference`（fixtureRoot/control/<faultId>/target.jsonの新規path）を固定してよい。driverがそこへ実identityを一度公開し、各監督は読み込んだbytes/SHAを保存し差替えを拒否する。faultが適用された事実は`fault-<faultId>-<role>-<pid>.json`へ記録する。
+
+LIFE16は独立controller所有sentinelを同じ合成root／fake imageで動かし、gateがabort時に監査する候補へ加える。`ownership-unavailable`はそのidentityの親子edge観測を`Unprovable`として返すだけで、Ownedへの昇格や停止権限を作らない。gateはunknown candidateを記録してCleanupIncomplete／full0／fixture保持とし、sentinelをkillしない。driverの別OS handleで同PID＋開始時刻の生存を確かめ、gate終了後にdriverが自分のsentinelだけを回収する。
+
+LIFE17は実owned fake targetの終了観測を`Unavailable`とし、kill自体は通常経路で行う。driverは既存fakeのrelease待ちでtargetを生存させ、targetReference公開とfault適用証拠を確認してからcancelを出すため、終了後にfaultを後付けしない。これは`HasExited=false`の偽造でもwait成功の偽造でもなく、「終了を証明する観測が得られない」という欠測である。全ownerが同じfaultを適用し、別監督の正常な列挙結果で当該欠測を成功へ書き換えない。activeUntilUtcはcleanupDeadline以後、Run期限以下に置き、単一10秒内に終了証拠が成立せずCleanupIncomplete／fixture保持となることを確認する。driverは独立handleで実終了を確認し、未終了なら自分が所有するfixture treeを回収する。これらは意図したnegative対照であり、gateのCleanupIncompleteを製品PASSに数えない。
+
+実装者は固定キー／sidecarと同ps1の限定hook／negative observerだけを実装し、既存V2Case・作者oracle・native captureの責務を変更しない。作者は80caseを維持したままdriverを確定キーへ接合し、対象hook到達→変異／停止→release→外側markerとOS handleで結果を判定する。未実装を行動REDにせず、欠けたcaseをskip/PASSにしない。この新fixture契約は親が局所レビュー対象として識別し、その後の独立実行／Postへ渡す。追加の製品semanticは0、合成試験専用の新semanticは有限停止とnegative観測の二つである。
+
+局所作業の測定は23:19:16 JST近傍の共有週枠73%／10080分／reset1792496607。開始token／provider返却metadataは未取得である。現物hashは上記入力2fileと一致、作者fileの編集・fixture実行・再委譲・公開は0である。
