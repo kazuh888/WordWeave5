@@ -75,3 +75,11 @@ ET1-FX1 Pre-1はplan hash `3E698E4B…6A591312`に対し独立PASS。計画/失�
 ET1とET1-FX1は[独立最終Post PASS/Closed](ACOUSTIC-HISTORY-001/early-trial-paths-review.md)。残るrecheck1件・本体sticky段階修正・試用保存先/外部保護/AI cwd接合を確認した。独立回帰で発見した既存fixtureの構成前提不整合5件も是正し、期待値緩和なく解消した。[独立runner](ACOUSTIC-HISTORY-001/early-trial-paths-runner.md)は影響範囲を両構成83raw件で再検証し、未変更範囲のhash一致/実名証拠を接合した。通常250行動PASS/試用281行動PASS・各fixtureSKIP3、失敗0。全件を今回再実行した結果ではない。symlink権限不足2件と別drive alias未用意1件は未実証のまま、TEMP/LOCAL/テストprocess残存0。親Sol/medium、作者/計画/レビューAstra/high、runnerSol/mediumを維持し[usage](ACOUSTIC-HISTORY-001/usage-observation-20261013.md)を記録した。
 
 次回は[計画ET2](ACOUSTIC-HISTORY-001/early-trial-plan.md)の直接起動・失敗表示・Qwen資格情報分離・識別表示を進める。ET3の通常/試用all-targets・release・関連crate・native gate後に試用EXEを提供する。製品EXEは今回未更新、実data/credential/API/管理者/OS変更なし。今回の依頼範囲はET1最終レビューまでで完了した。
+
+2026-10-14 15:40 JST再開：利用者の続行指示によりET2を開始した。完了境界は上記ET2の本体接合・独立検証/Postまで、ET3製品提供は後続である。HEAD `97d2c72` cleanから、designer `trial_startup_design`（Astra/high）が承認済み設計の起動factory/失敗段階と独立試験接合を具体化している。source所有は未開始、資格情報の実load/saveやAPI送信は行わない。[ET2 usage](ACOUSTIC-HISTORY-001/usage-observation-20261014-et2.md)へ開始snapshotを保存した。次は必要な限定設計Pre→作者Astra/high→実装Astra/high→runnerSol/medium→PostAstra/highである。
+
+ET2設計は必須の録音開始counter不足で一度STOPしたが、planner `trial_startup_plan`（Astra/high）がET2-Sとしてsrc/media.rsのcfg(test)監視・実mic前拒否だけを6file目に限定採用し親が受領した。元の機能5fileはET2-Fとして維持する。[更新設計](ACOUSTIC-HISTORY-001/early-trial-startup-design.md) SHA `D9E044C4…DDBBB42A`、[計画追補](ACOUSTIC-HISTORY-001/early-trial-plan.md) SHA `38C5486B…5E409A9`を独立reviewer `trial_startup_review`（Astra/high）へPre提出済み。実回復後rename拒否・回復後教材read拒否で同一factoryを検査する。未実装APIのcompile不能を行動REDにせず、試験/署名固定→実装者接合→録音安全正対照を最初に実行する方針である。基準を静的証拠へ弱めず、独立Preまでsource編集しない。
+
+独立Pre-1は[ET2-PRE-01/P2の阻止1件](ACOUSTIC-HISTORY-001/early-trial-startup-review.md)。初回正対照自体の実mic到達を防ぐ実行前Gateが不足したため、designerがET2-G0（親のsource読取確認→対応EXE固定→明示実行解除、source/EXE変更やmutation復元後も再確認）を唯一規範へ整備した。design新SHA `24B9FEBE…AE687D7E`。plannerが計画の旧即時実行条件/観測変異範囲を同期中、その後Pre-2を同reviewerへ返す。source編集・実行試験は0のまま、ET2-PRE-01は未Closedである。
+
+独立Pre-2は[設計PASS](ACOUSTIC-HISTORY-001/early-trial-startup-review.md)。design SHA `24B9FEBE…AE687D7E` / plan SHA `82E0A3E8…ADC31AFD`、source6不変。ET2-PRE-01は設計上Closed、実装後closure/実ET2-G0/動的試験/ET2Postは未了である。次は独立作者Astra/highが6file内のtest/署名と期待値を固定する。API不在はcompile blockerとして実装者へ渡し、偽scaffoldを作らず、誰も親のET2-G0解除前にRecorder::startを実行しない。

@@ -219,3 +219,83 @@ Request status: READY FOR PRE-REVIEW（親dispatch待ち、Pre未判定）。Cyc
 開始source hash: settings_ui `C7C7C9D17DD24FC3FDF5762F7CD0E649A1A07E3E7237D31FE6C5A1FB63D1BF9B`、chat_media `24171BE283A1D856A2752FA9CEE60D3AE4D43EE4386EFAC6C1B1C5C09C47D5F3`、progress_export_destination `176709E152A6D26D6676B3424E673AD5B28987C423A8865C0358F5472D2E0324`。初回Pre提出時にこの3hash/HEADと本書hashを再照合する。
 
 plannerはplanning-and-task-breakdown、execute-review-remediationとprotocol、review-project-conventions、review-reliability-data-integrityを自身の計画/self-check範囲で適用した。独立Gateを代替しない。KPI子threadは `01a13810-6d05-7140-8f62-bff0aa4ae790`、親session環境値は `01a08550-055c-7aa1-9834-905e4a7ce148`。指定Astra/high、runtime metadata未取得。最初の観測usageは2026-10-14T01:39:35.437Z、input 38027 / cached 23040 / output 309 / reasoning 19であり、作業開始より後のsnapshotである。週枠開始17%/10080分/reset1792496607。最終応答分、開始前区間、親子包含関係は不明。終了snapshotは親handoffで報告し、所有外の測定文書は編集しない。
+
+## ET2追補: 録音開始oracleの限定所有と起動設計Pre（2026-10-14）
+
+状態は **ET2-PR1計画同期済み・READY FOR PRE-REVIEW・Pre-2未判定** である。初期の5file案を、[起動接合設計](early-trial-startup-design.md) のSTOP返却を受けて次の2単位へ精緻化し、親は限定所有を受領済みである。[独立Pre-1](early-trial-startup-review.md) のET2-PRE-01/P2はAccepted、実行前条件の是正はPlannedでありClosedではない。ET2全体の追加所有は `src/media.rs` 1fileに限る。ET1/FX1 Closed、製品正本 [early-trial-contract.md](early-trial-contract.md) SHA256 `0BC3839A6C6B60E5CD4E7267269FE33D4D898CA704B89609E32E0BB0912A1A6D` と [cycle 2 PASS](early-trial-review.md) は不変である。本文/契約/設計の過去の「5file」は元の機能所有を表し、本追補が追加テスト用境界の所有判断を補う。製品仕様の再承認や検証基準の緩和ではない。
+
+完了境界はET-02/03/04/06とET-D01の実装・独立自動検証・ET2 Postまでである。native直接起動/改名/異cwd/再起動、拒否dialogのDPI/keyboard、全体releaseとEXE提供はET3へ残す。新形式・新履歴機能・production公開API・依存/Cargo設定・OS/管理者設定・実資格情報/API/マイク操作・context/harness設定・LLM routerの変更は対象外である。plannerは本追補のみ所有し、他の未完了計画・親所有current/usage・設計本文を変更しない。
+
+### 採用根拠・所有
+
+HEAD `97d2c72a9adec4f1904c6deb2b18e92c50262923` で `Recorder::start` の最初の処理は `cpal::default_host().default_input_device()` である。現行3callerは `app.rs:1497`、`app/chat_media.rs:1200`、`app/qwen_reading_ui.rs:307` にあり、すべて同じ入口を通る。src内の入力stream構築も `media.rs` に集約されている。既存の入力状態/recorder=None/wire.count=0だけでは録音開始試行0を測れないため、次のET2-Sを採用する。静的非到達は補助証拠のままとする。
+
+| 単位・依存 | 実装者の所有 | 独立作者の所有・受入 |
+| --- | --- | --- |
+| ET2-S（S、1file）／ET1 Closed・本追補受領・設計Pre PASS | `src/media.rs` の全体がcfg(test)のprocess-global watch/counterと、`Recorder::start` の先頭cfg(test)接合だけ。非test本体、既存録音制御/3callerを変更しない | 同fileの専用cfg(test)試験/fixtureのみ。watch正対照、重複拒否、別threadの捕捉、RAII解除を固定する。入口接合・observer本体は作者が実装しない |
+| ET2-F（M、元の5file）／設計Pre PASS、行動試験はET2-G0とET2-S安全対照後 | `src/main.rs` のtitle/creator/拒否、`src/app.rs` の共通loader/factory/試用bool/restore先頭拒否、`src/qwen_reading.rs` のtarget定数、`src/app/qwen_settings.rs` のprivate selector/production store接合 | 元4本体の専用cfg(test)と `src/app/qwen_settings_tests.rs` の試験/fixtureのみ。下記ET2受入集合を固定する。production factory/loader/selectorの抽出は実装者が担当する |
+
+同じfileの本体/テストは作者→実装者→作者の順に所有を返却し、同時編集しない。`chat_media.rs`、`qwen_reading_ui.rs`、store/commit/diagnostics、既存shared harnessは読取再利用だけであり追加編集を許可しない。公開範囲拡大や追加fileが必要ならSTOPして親へ返す。
+
+ET2-Sは全てtest構成内の `Mutex<Option<Arc<counter>>>` とし、登録中のstartは同じlock内で判定/加算して固定合成Errを返し、cpalへ進まない。登録重複はErr、RAII Dropは同一Arcの登録だけ解除、任意reset口は設けない。lock異常を無監視扱いして実micへ流さないこともPre対象である。未登録testは既存経路、非test構成は追加動作なしを差分/cfg条件で照合し、無監視の実録音を対照実行しない。process-globalはworker経由も観測するためであり、各監視caseを有限timeout子processの実名1件に隔離する。発生したworkerの完了/wait前にはwatchを解除しない。
+
+この追加は、既承認ET-06の受入を本物の共通入口で観測するためのrepository内の通常テスト開発である。実行環境・agent定義・Skill・モデルrouter・CI・OS設定・既存検証条件を変更せず、試験時だけ実録音到達を阻止する。したがって運用harness/settings変更の権限を必要とする提案ではない。この理由を、未知の共有helperや公開API変更まで許可する根拠には使わない。
+
+### 必須の試験集合と順序
+
+新実名/件数/filterは独立作者が固定し、以下の集合とET-IDへ対応付ける。新名の想定だけを実行証拠にしない。
+
+1. ET2-Sの安全対照：設計の **ET2-G0を満たし親が実行解除した固定組だけ** で、active watchで実 `Recorder::start` を1回呼びErr/calls=1、別threadでも1回を捕捉してjoin、重複watch拒否後も既存watchが有効、正常/捕捉panic後のRAII解除と再登録を確認する。全てcpal前で拒否する。これが成立するまで録音入口を通る後続caseは実行しない。
+2. ET-D01：実Storage::openの書込前拒否で全bytes/dir不変とcreatorなし。非履歴pendingの実deck/progress書込後にshare_mode(3)でarchive rename拒否し、next bytes・pending元bytes・D=0・操作Appなしを確認する。解除後同一データでarchive成功/D=1を対照とする。回復成功後はloader内で回復ledgerを確認してからcustom.tsvをshare_mode(0)で保持し、実初期化read拒否/D=0・回復済みledger保持を確認する。通常root不変/fallback0、回復後2状態に未変更断言がないこと、任意raw error文字列から型/定型文が変わらないこと、成功時loader1/D1・試用diagnostics pathも必須である。OS faultの前提不成立は受入SKIPへせずSTOPする。
+3. ET-02/03：private selectorと独立literalの3namespace spy、通常のみ設定済み→試用未設定、試用save/reopen、宛先変更時空key拒否、通常/tool load/save0、実WindowsCredentialStoreは構築/target()だけ、feature別title、既存導線を確認する。cfg(test) default_storeだけの成功をproduction selector証拠としない。
+4. ET-04：history restore拒否前後の全tree/current Progress/日本語draft/material draft/epoch/message/dirtyと退避file数不変、非history JSON成功、backup・教材・語彙・承認済み生成・添付/dropの既存入口からsave/reload後もdisk/UI head=None、承認前/cancelで適用0を確認する。history付きbackup拒否の既存証拠、通常constructor/通常構成の回帰も保持する。
+5. ET-06：watch登録→共通factory起動/設定表示/save/restore/既存音読準備→発生workerの完了確認→calls=0→解除の順で実入口の0を観測する。send/probe spyも0、入力状態/pending/recorderなしを併記し、Codex認証/CODEX_HOME不変更は経路照合を伴わせる。0counterだけで実API/native受入を主張しない。
+
+現在の依存順は **設計/計画同期→独立Pre-2→独立作者→実装者→ET2-G0の親解除→動的安全対照→機能試験/独立runner→独立Post** である。限定所有の親受領とdesignerの反映は完了済みである。録音入口を呼ぶ試験の実行解除条件は設計ET2-G0だけを正本とし、本書に別の解除規範を設けない。詳細は次のチェックリストに固定する。
+
+- [ ] ET2-0：独立reviewerが更新設計全体（factoryのload1回、fatal拒否、diagnostics0/成功1、creator所有移譲、実回復archive拒否、回復後read拒否、private selector、録音watch/ET2-G0）と同期後の本追補/正本/source hashをPre-2判定する。Pre-1はCHANGES REQUIREDであり、旧cycle 2 PASSでも具体接合Preを省略しない。同一snapshotのPre-2 PASS前はsource/testへ着手しない。
+- [ ] ET2-1：独立作者がET2-S/Fの期待値・実名・隔離fixture・不足seam一覧を固定する。既存入口で安全に実行できるfeature target等は変更前の行動REDを取得する。新API不在のcompile失敗は準備不足として記録し、行動REDに数えない。未接続Recorderを実行してREDを取らない。
+- [ ] ET2-2：所有返却後、実装者がET2-SとET2-Fを依存順に接合する。新API不在は下記compile blocker方式を採り、REDを作るためだけの偽factory/stubや一時公開APIは追加しない。署名と全testを先に固定し、ET2-G0に従うsource固定/親読取確認と実行なしの一括compileへ渡す。compile成功だけでは安全正対照を実行しない。作者の期待値を実装者が書き換えない。
+- [ ] ET2-3：親がET2-G0で固定組への解除を明示した後にET2-S動的安全対照、続いてET2-Fのfocused試験を実行しGREENにする。ET2-S/Fを合わせた6sourceと作者期待値hash、差分、自己確認、解除記録を固定して所有を返却する。未取得REDや実失敗注入不成立は隠さずreviewへ渡す。必要な試験欠落は作者へ戻す。
+- [ ] ET2-4：独立runnerが通常/試用で新ET2全実名、既存qwen_settings/qwen_reading/媒体録音・fatal-close/restore/取込関連、ET1の起動/recovery接合回帰を固定EXEで実行する。ET2-G0の順で `cargo test --locked --bin wordweave5 --lib --no-run --message-format=json` に試用だけ `--features early-trial` を加え、別target-dirでJSONのEXE絶対path/SHAを確定する。構成ごとに親の有効な解除と安全対照を確認し、`--list` と実名selected/成功を照合する。0件成功除外、exit/timeout/wait/Administrator=False/fixture残存、PASSとfixture SKIPを分けて記録し、fmt/diff検査も行う。実名/件数不足は実行前に作者へ戻す。
+- [ ] ET2-5：独立PostがPreからの差分、ET2-G0の読取証拠/対応EXE/親解除と変更後の再Gate、録音counterの接続/正対照/worker寿命、全失敗ledger、両構成回帰、通常動作不変、source/EXE hashと未検証範囲を判定する。PASS後にET2とET2-PRE-01のclosureを更新し、既定ET3へ渡す。本書の通常/試用all-targets・release・関連crate・native・提供gateは全て維持し、ET2 focused PASSで代替しない。
+
+**REDの分類とコンパイル依存**：`new_early_trial_with`、`TrialStartupFailure`、main creator、private selector、watchは現sourceにない。作者全testが同じtargetへ入ると既存入口のcaseもcompile不能になるため、採用方式は「全test/署名を固定→API不在をcompile blockerとして明示→実装者へ渡す」である。既存入口だけで先に安全に取得できた行動REDは保存するが、そのためだけにtestを出し入れして多数のbuildを繰り返さない。不在API診断、stub由来のPASS、未実行caseを行動RED/受入成功にしない。ET2-S単独成功のために未完成ET2-Fを偽実装する必要はなく、一括compileと実行解除をET2-G0で区別する。誰の自己確認/RED取得もこの解除条件を迂回しない。
+
+**RED未取得分の感度確認**：作者は受入集合に対し、(a)誤namespace/title、(b)history restore拒否の欠落、(c)fatal時にAppを返す又はDを開始する誤り、(d)実回復/初期化の目的段階へ達しないfixture、(e)録音counter未接続/誤0をそれぞれ検出する実名assertを対応付ける。変更前の安全な行動REDで同じ欠陥を検出済みなら重複実験は不要。残りは実装後、作者が固定した期待値に対する限定感度実験をET2-3/4で行う。実装者だけが所有6file内の一時的な欠陥差分を作り、独立runnerが指定caseの意図したassert FAILを確認し、実装者が元の受入候補hashへ復元する。作者/runner/reviewerは本体を書き換えない。compile FAIL、目的外のfixture前提FAIL、0件、目的assert以外のpanicを代用しない。
+
+感度用差分はsource所有内の小変更に限り、作者実名と実装差分から一時変更箇所/選択case/目的assertを実行前に確定して親が受領する。相互に隠蔽しない変異は1snapshot/1compileへまとめる。録音の変異は設計ET2-G0どおり遮断とactive時加算を保持して `calls()` の観測返値だけを誤らせる。遮断撤去/別global化/実資格情報load/save/API送信/native window開始は実験でも禁止する。(d)は早すぎる失敗を注入して「next到達」又は「回復成功後read拒否」の前提assertが拒むことを確認し、これを本来の回復後受入PASSと数えない。変異snapshotと全hash逆復元後の受入候補はそれぞれET2-G0へ戻し、旧解除を再利用しない。親の再解除後に目的assert FAIL又は最終focused GREENを取得し、受入候補だけをPost/ET3へ渡す。compile blocker・行動RED未取得・感度確認済み/未実施の範囲を別記し、候補に挙げただけの全変異を実証済みとしない。安全に成立する感度差分が所有内で作れなければPre/親へ返し、試験基準を下げない。
+
+### 割当・リスク・停止
+
+plannerとexternal-spec authorは `gpt-6-astra/high` 固定である。仕様担当は既存正本再利用につき本追補では追加起動非該当。新しい製品判断が出た場合だけ親から戻す。次の両組合せは今回のcallable一覧に存在し、high/medium対応を確認した。親は明示dispatchし、実行metadata未取得を指定値で埋めない。
+
+| 単位 | 難易度/危険と選定理由 | designer | implementer | test author | test runner | reviewer |
+| --- | --- | --- | --- | --- | --- | --- |
+| ET2-S | 中/高。global監視寿命、並行捕捉、cpal前拒否の誤りが実録音/偽0を生むため判断役はAstra。runnerは固定隔離手順を独立実行 | `gpt-6-astra/high` | `gpt-6-astra/high` | `gpt-6-astra/high` | `gpt-6.1-sol/medium` | `gpt-6-astra/high` |
+| ET2-F | 高/高。回復後副作用、認証namespace、初期化/画面公開の境界を扱うため設計/期待値/実装/独立判定はAstra。runnerはhash/実名/ledgerの固定手順 | `gpt-6-astra/high` | `gpt-6-astra/high` | `gpt-6-astra/high` | `gpt-6.1-sol/medium` | `gpt-6-astra/high` |
+
+再委譲なし、通常補助1役ずつ、作者/実装者/runner/reviewerを独立させる。親モデル、quality gate、既存未完了作業を変更しない。モデル/Skill不在、hash競合、実mic/API/資格情報到達、watch迂回入口、未wait worker、別のOS権限要求、追加source/shared helper、公開API/製品仕様への影響が判明したらSTOP・ASKである。技術上の未検証はOS共有拒否の成立と全取込入口の動的証拠であり、設計可否の判断で成功へ置換しない。
+
+rollbackは親が固定差分を照合し各ownerが自身の未コミット差分だけを個別patchで戻す。counterを外したまま録音0受入を完了にせず、関連ET2を未了へ戻す。実データ/既存EXE削除や全体resetはしない。回復後失敗の試用fixtureを自動修復するproduction処理も追加しない。
+
+### Pre入力の固定と次handoff
+
+Pre-2対象の設計snapshotは SHA256 `24B9FEBE6F83528EF1B4D55EF9890B00FC9846E9F50B5BB446F48A2FAE687D7E` である。親はこの設計と本書保存後hash、正本hash、ET1/FX1最終Post、独立Pre-1記録と次の6sourceを一組でreviewerへ渡す。変更前plan SHA `38C5486BF336465C85EEC18985EA68CC0890DE02F27A6E215494DEF045E409A9` のPre-1 requestは履歴であり、現行判定へ流用しない。
+
+| source | 基準SHA256 |
+| --- | --- |
+| src/main.rs | `188C3C04365ED587872C049611F5E3F7F763538B69DFB6F5CC93439D9EECC94F` |
+| src/app.rs | `C1706E880A27C44BDD205D1BA3FD0E01E8D7D43FF0D3F8543F3D62AE251EDA0A` |
+| src/qwen_reading.rs | `D337E8C2308DEA99D776BB5D3A51E40034A997DB5D41F97EC5A048CB8F5FDC75` |
+| src/app/qwen_settings.rs | `6E0EDE27082E4AE21FA41C177B93627E9A000D78EAD853EE24DAD73AFE4BD387` |
+| src/app/qwen_settings_tests.rs | `B33126247A03016E503F07215FCDD2E6760551DD349882B4700EBC64D6111E17` |
+| src/media.rs | `8585149F7ABF9CEACC480DAF2147B263C35C52840D2DF1C75A08010B8455D4B9` |
+
+ET2-PR1 Packet Briefとclosure matrixの正本はそれぞれ設計の「ET2-PR1 Packet / Pre-2提出準備」と [独立review記録](early-trial-startup-review.md) である。ET2-PRE-01の原因はcompile可能なwatch定義と実遮断接合の混同であり、本書は旧「compile後そのまま正対照」と加算を崩す感度条件を削除してET2-G0へ同期した。規範ownerはdesigner、計画consumerは作者/実装者/runner、source/EXEの読取確認と解除は親が担当する。watchだけで入口接合なし、別global、poison流出、EXE不一致、変更後の旧解除はいずれも正対照未実行で止まることがPreのoracleであり、動的counterの証拠を代替しない。是正計画はPlanned、Pre-2 PASS・実装後のGate証拠・独立PostまでClosedとしない。
+
+Request status=`READY FOR PRE-REVIEW`、Cycle=`ET2-PR1 Pre-2`、branch=`codex/development-agent-team`、HEAD=`97d2c72a9adec4f1904c6deb2b18e92c50262923`。対象は本ET2追補と上記設計全体、hashは本書handoffと上記設計値へ固定する。Review class=設計/規約/信頼性、Requested Gate=Pre-implementation。依存はET1/FX1 Closed・ET2-S親受領・設計/計画同期済み、製品判断なし。scope/owner/型/失敗状態/除外は設計ET2-PR1の一意なBriefに従い、source6fileと未監視test/非test動作は不変、実装/実行/ET3は未了である。親がこの組で独立reviewer `gpt-6-astra/high` をdispatchする。同原因2回連続CHANGES REQUIREDは3回目の局所追記をせず正本再構成へ戻す。本同期のrollbackはownerが今回の文書差分だけを個別patchで撤回し、finding未解消・実行禁止へ戻す。sourceや他者dirtyを巻き戻さず、残存artifactは計画/設計/review記録である。
+
+是正にはexecute-review-remediation/protocol全文と、review-project-conventions、review-reliability-data-integrityを文書self-checkへ適用した。独立Gateを代行しない。確認は現HEADのstart先頭/3consumer、source固定前後・実行解除失効・worker寿命・poisonの境界、競合する旧条件の除去、参照/diff検査であり、実行試験0である。今回の是正は配布/復旧手順を変更しないためrelease運用の追加reviewは非該当である。
+
+本追補の確認はplanning-and-task-breakdown全文とDefinition of Done、AGENTS/development-team/KPIに基づく文書・参照・差分検査のみである。planner threadは `01a13931-36fd-7922-a65d-a60492d90e26`、指定Astra/high、runtime model/effort未取得。対象sessionのtoken counterは取得可能で、最初の観測は2026-10-14T06:55:11.381Z、input 38145/cached 23040/output 294/reasoning 0。開始前・最終応答・親子包含は未確認、終了値は親handoffへ返し、usage/currentは親が記録する。
