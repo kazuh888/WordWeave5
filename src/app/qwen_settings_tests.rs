@@ -1,75 +1,364 @@
 // QWEN-SETTINGS-001: synthetic credentials only, never accesses Windows credentials.
 
-#[cfg(feature = "early-trial")]
-mod early_trial_startup_tests {
+// BEGIN ET2-P01 AUTHOR TESTS: replaces the unconnected ET06 spy, both configurations.
+mod trial_egress_tests {
     use super::*;
     use crate::{
+        ai::trial_egress::{self, Entry, Watch},
         app,
         media::{early_trial_startup_tests::isolated, watch_recording_starts},
     };
-    use app::qwen_reading_ui::{
-        preview_data::{audio, Reply, Wire},
-        QwenAction, QwenDialog,
+    use app::qwen_reading_ui::{preview_data::audio, QwenAction};
+    use eframe::egui::{self, Event, Id, Key, Modifiers};
+    use qwen_audio::{CredentialStore, SendDisposition};
+    use std::{
+        fs,
+        path::Path,
+        sync::Arc,
+        time::{Duration, Instant},
     };
-    use qwen_audio::{ProbeRequest, ProbeTransport, TransportFailure, TransportFuture};
-    use std::sync::{atomic::AtomicUsize, Arc};
-    use wordweave5::qwen_reading::ReadingPhase;
-    #[derive(Default)]
-    struct Probe(AtomicUsize);
-    impl ProbeTransport for Probe {
-        fn send<'a>(&'a self, _: ProbeRequest) -> TransportFuture<'a> {
-            self.0.fetch_add(1, Ordering::SeqCst);
-            Box::pin(async { Err(TransportFailure::Network) })
+    use wordweave5::{
+        qwen_reading::ReadingPhase,
+        store::{Progress, Storage},
+    };
+
+    const INITIAL: &str = r#"{"version":2,"audio_history":null,"settings":{"topic":"synthetic initial","minutes":5},"memories":{},"reviews":[],"suspended":[],"ai_calls":{},"study_seconds":{}}"#;
+    const RESTORED: &str = r#"{"version":2,"audio_history":null,"settings":{"topic":"synthetic restored","minutes":11},"memories":{},"reviews":[],"suspended":[],"ai_calls":{},"study_seconds":{}}"#;
+    fn zero(watch: &Watch, stage: &str) {
+        let snapshot = watch.snapshot().ok().expect("live cumulative snapshot");
+        for (index, entry) in [
+            Entry::CodexCheck,
+            Entry::CodexChat,
+            Entry::CodexMaterial,
+            Entry::CodexGenerate,
+            Entry::CodexReadInk,
+            Entry::CodexTranscribe,
+            Entry::QwenSend,
+            Entry::QwenProbe,
+        ]
+        .into_iter()
+        .enumerate()
+        {
+            assert_eq!(
+                snapshot.calls(entry),
+                0,
+                "{stage}: cumulative counter {index}"
+            );
         }
     }
-
-    #[test]
-    fn et06_factory_settings_restore_and_reading_prepare_do_not_record_probe_or_send() {
-        isolated("app::qwen_settings_tests::early_trial_startup_tests::et06_factory_settings_restore_and_reading_prepare_do_not_record_probe_or_send", |base| {
-            let watch = watch_recording_starts().unwrap();
-            let codex_home = std::env::var_os("CODEX_HOME");
-            let (ctx, mut app, _) = app::early_trial_startup_tests::fresh(base);
-            let store = configured_store(); let wire = Wire::new(Reply::Pending); let probe = Arc::new(Probe::default());
-            app.qwen_store = store.clone(); app.qwen_probe_transport = Some(probe.clone());
+    fn with_app(
+        base: &Path,
+        configured: bool,
+        expected_send: usize,
+        body: impl FnOnce(
+            &egui::Context,
+            &mut app::WordApp,
+            &Arc<Store>,
+            &Watch,
+            &crate::media::RecordingStartWatch,
+        ),
+    ) {
+        // Every normal JSON goes through the same strict ProgressWire/normalize as restore.
+        for (name, raw) in [("INITIAL", INITIAL), ("RESTORED", RESTORED)] {
+            let fixture: Progress =
+                serde_json::from_str(raw).unwrap_or_else(|_| panic!("FIXTURE: invalid {name}"));
+            assert!(fixture.audio_history.is_none());
+        }
+        let store = if configured {
+            configured_store()
+        } else {
+            Store::new(None)
+        };
+        let erased: Arc<dyn CredentialStore> = store.clone();
+        let recording = watch_recording_starts().unwrap();
+        let watch = trial_egress::watch(erased.clone()).ok().unwrap();
+        let codex_home = std::env::var_os("CODEX_HOME");
+        zero(&watch, "before constructor");
+        assert_eq!(recording.calls(), 0);
+        let normal = base.join("local/WordWeave5");
+        let trial = base.join("local/WordWeave5-EarlyTrial");
+        for root in [&normal, &trial] {
+            fs::create_dir(root).unwrap();
+            fs::write(root.join("progress.json"), INITIAL).unwrap();
+            fs::create_dir(root.join("assets")).unwrap();
+            fs::write(
+                root.join("assets/preservation.wav"),
+                b"synthetic preservation sentinel",
+            )
+            .unwrap();
+        }
+        let ctx = egui::Context::default();
+        #[cfg(feature = "early-trial")]
+        let mut app = app::WordApp::new_early_trial_with(
+            &ctx,
+            Storage::open().unwrap(),
+            Storage::load,
+            |_| {},
+        )
+        .ok()
+        .expect("real trial factory");
+        #[cfg(not(feature = "early-trial"))]
+        let mut app = app::WordApp::new_with_storage(&ctx, Storage::open());
+        let selected_root = if cfg!(feature = "early-trial") {
+            &trial
+        } else {
+            &normal
+        };
+        let other_root = if cfg!(feature = "early-trial") {
+            &normal
+        } else {
+            &trial
+        };
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            assert!(
+                Arc::ptr_eq(&app.qwen_store, &erased),
+                "constructor owns registered synthetic store"
+            );
+            assert_eq!(&app.storage.as_ref().unwrap().dir, selected_root);
+            assert!(app.fatal.is_none());
             assert!(app.page == app::Page::Home);
-            app.go_to_qwen_settings();
-            app.qwen_settings = Some(QwenConnectionEditor::new_with_transport(store.clone(), probe.clone()).unwrap());
-            for _ in 0..8 { app::harness_tests::frame(&ctx, &mut app, false); }
-            let editor = app.qwen_settings.as_mut().unwrap();
-            assert_eq!(editor.probe_state, app::qwen_settings::ProbeState::Untested);
-            *editor.key = "synthetic-trial-save".into(); editor.save().unwrap();
-            app.finish_qwen_settings();
-            app.settings_editor.draft.minutes = 7; app.save_settings(&ctx).unwrap();
-            let mut restore = app.progress.clone(); restore.settings.minutes = 11; app.restore(restore).unwrap();
-            assert_eq!(app.progress.settings.minutes, 11);
-            assert_eq!(store.saves.load(Ordering::SeqCst), 1);
-            let entry = app.deck[0].clone();
-            let mut dialog = QwenDialog::new(&entry, store.clone(), wire.clone()).unwrap();
-            assert_eq!(dialog.controller.view().phase, ReadingPhase::Input);
-            for _ in 0..3 {
-                let _ = ctx.run(eframe::egui::RawInput::default(), |ctx| { dialog.render(ctx); });
-            }
-            assert_eq!(dialog.controller.view().phase, ReadingPhase::Input);
-            dialog.controller.set_audio("synthetic.wav".into(), audio()).unwrap();
-            dialog.controller.prepare().unwrap();
-            assert_eq!(dialog.controller.view().phase, ReadingPhase::Confirming);
-            assert_eq!(wire.count(), 0, "confirmation is not sending");
-            dialog.dispatch_frame(&[QwenAction::Cancel], &ctx);
-            dialog.controller.poll();
-            assert_eq!(dialog.controller.view().phase, ReadingPhase::Cancelled);
-            dialog.close(); drop(dialog);
-            // This scenario never starts an audio-load/probe/evaluation worker.
-            // The audio job registry is nevertheless drained before watch release.
-            qwen_audio::shutdown_audio_jobs();
-            assert_eq!((wire.count(), probe.0.load(Ordering::SeqCst), watch.calls()), (0, 0, 0));
-            assert!(app.pending.is_none() && app.connection_check.is_none() && app.recorder.is_none());
-            assert!(app.progress.audio_history.is_none());
-            assert!(app.storage.as_ref().unwrap().load().unwrap().audio_history.is_none());
-            assert_eq!(std::env::var_os("CODEX_HOME"), codex_home);
-            drop(app);
+            assert_eq!(app.progress.settings.topic, "synthetic initial");
+            zero(&watch, "startup");
+            assert_eq!(recording.calls(), 0);
+            body(&ctx, &mut app, &store, &watch, &recording);
+        }));
+        if let Some(dialog) = app.qwen_dialog.as_mut() {
+            dialog.finish_egress_test();
+        }
+        qwen_audio::shutdown_audio_jobs();
+        // Unknown workers have no join contract in this packet. Keep both global
+        // registrations alive until the failed isolated process exits.
+        if app.pending.is_some() || app.connection_check.is_some() || app.recorder.is_some() {
+            std::mem::forget(watch);
+            std::mem::forget(recording);
+            panic!("unexpected worker: observer held until isolated process termination");
+        }
+        assert!(app.progress.audio_history.is_none());
+        assert!(app
+            .storage
+            .as_ref()
+            .unwrap()
+            .load()
+            .unwrap()
+            .audio_history
+            .is_none());
+        drop(app);
+        drop(erased);
+        drop(store);
+        let snapshot = watch
+            .snapshot()
+            .ok()
+            .expect("snapshot after synchronous worker/app cleanup");
+        assert_eq!(snapshot.calls(Entry::QwenSend), expected_send);
+        for entry in [
+            Entry::CodexCheck,
+            Entry::CodexChat,
+            Entry::CodexMaterial,
+            Entry::CodexGenerate,
+            Entry::CodexReadInk,
+            Entry::CodexTranscribe,
+            Entry::QwenProbe,
+        ] {
+            assert_eq!(snapshot.calls(entry), 0);
+        }
+        assert_eq!(recording.calls(), 0);
+        assert_eq!(std::env::var_os("CODEX_HOME"), codex_home);
+        assert_eq!(
+            fs::read(other_root.join("progress.json")).unwrap(),
+            INITIAL.as_bytes()
+        );
+        for root in [&normal, &trial] {
+            assert_eq!(
+                fs::read(root.join("assets/preservation.wav")).unwrap(),
+                b"synthetic preservation sentinel"
+            );
+        }
+        if let Err(panic) = result {
+            std::panic::resume_unwind(panic);
+        }
+    }
+    fn matrix(
+        ctx: &egui::Context,
+        app: &mut app::WordApp,
+        store: &Arc<Store>,
+        watch: &Watch,
+        recording: &crate::media::RecordingStartWatch,
+        configured: bool,
+    ) {
+        let zero = |watch: &Watch, stage: &str| {
+            self::zero(watch, stage);
+            assert_eq!(recording.calls(), 0, "{stage}: cumulative recording starts");
+        };
+        app.go_to_qwen_settings();
+        for _ in 0..8 {
+            app::harness_tests::frame(ctx, app, false);
+        }
+        zero(watch, "settings shown");
+        assert!(
+            store.loads.load(Ordering::SeqCst) > 0,
+            "actual panel reads selected store"
+        );
+        assert!(app.qwen_settings.is_none());
+        let id = ctx
+            .data(|data| data.get_temp::<Id>(Id::new("qwen-settings-button-id")))
+            .expect("actual edit button");
+        ctx.memory_mut(|memory| memory.request_focus(id));
+        for pressed in [true, false] {
+            settings_input_frame(
+                ctx,
+                app,
+                vec![Event::Key {
+                    key: Key::Enter,
+                    physical_key: None,
+                    pressed,
+                    repeat: false,
+                    modifiers: Modifiers::NONE,
+                }],
+            );
+        }
+        let editor = app
+            .qwen_settings
+            .as_mut()
+            .expect("actual button created editor");
+        assert_eq!(editor.probe_state, app::qwen_settings::ProbeState::Untested);
+        assert_eq!(editor.host, if configured { TOKYO } else { "" });
+        assert!(editor.key.is_empty());
+        zero(watch, "editor opened");
+        editor.host = TOKYO.into();
+        *editor.key = "synthetic-et2-explicit-key".into();
+        editor.save().unwrap();
+        zero(watch, "connection saved");
+        app.finish_qwen_settings();
+        assert_eq!(store.saves.load(Ordering::SeqCst), 1);
+        assert_eq!(stored_host(store).as_deref(), Some(TOKYO));
+        assert!(app.qwen_settings.is_none());
+        app.settings_editor.draft.minutes = 7;
+        app.save_settings(ctx).unwrap();
+        assert_eq!(
+            app.storage
+                .as_ref()
+                .unwrap()
+                .load()
+                .unwrap()
+                .settings
+                .minutes,
+            7
+        );
+        zero(watch, "general settings saved");
+        let restored: Progress =
+            serde_json::from_str(RESTORED).expect("FIXTURE: complete normal restore JSON");
+        app.restore(restored).unwrap();
+        assert_eq!(app.progress.settings.minutes, 11);
+        assert_eq!(app.progress.settings.topic, "synthetic restored");
+        let disk = app.storage.as_ref().unwrap().load().unwrap();
+        assert_eq!(disk.settings.minutes, 11);
+        assert_eq!(disk.settings.topic, "synthetic restored");
+        zero(watch, "JSON restored");
+        #[cfg(feature = "early-trial")]
+        {
+            let state = serde_json::to_value(&app.progress).unwrap();
+            let ledger = app::early_trial_startup_tests::ledger(&app.storage.as_ref().unwrap().dir);
+            let mut value: serde_json::Value = serde_json::from_str(RESTORED).unwrap();
+            value["audio_history"] = serde_json::json!({"sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","bytes":12});
+            let history: Progress =
+                serde_json::from_value(value).expect("FIXTURE: complete structural history JSON");
+            assert_eq!(
+                app.restore(history).unwrap_err(),
+                "音声履歴を含むため、早期試用には復元しない。現在の記録は変更していない。"
+            );
+            assert_eq!(serde_json::to_value(&app.progress).unwrap(), state);
+            assert_eq!(
+                app::early_trial_startup_tests::ledger(&app.storage.as_ref().unwrap().dir),
+                ledger
+            );
+            zero(watch, "history JSON rejected");
+        }
+        // Restore updates progress; refresh the saved general editor before opening.
+        app.begin_settings_edit();
+        let entry = app.deck[0].clone();
+        app.open_qwen_reading(&entry);
+        let dialog = app
+            .qwen_dialog
+            .as_mut()
+            .expect("real app owns reading dialog");
+        assert_eq!(dialog.controller.view().phase, ReadingPhase::Input);
+        for _ in 0..3 {
+            let _ = ctx.run(egui::RawInput::default(), |ctx| {
+                dialog.render(ctx);
+            });
+        }
+        assert_eq!(dialog.controller.view().phase, ReadingPhase::Input);
+        zero(watch, "reading Input");
+        dialog
+            .controller
+            .set_audio("synthetic.wav".into(), audio())
+            .unwrap();
+        dialog.controller.prepare().unwrap();
+        assert_eq!(dialog.controller.view().phase, ReadingPhase::Confirming);
+        zero(watch, "reading prepared");
+        dialog.dispatch_frame(&[QwenAction::Cancel], ctx);
+        assert_eq!(dialog.controller.view().phase, ReadingPhase::Cancelled);
+        zero(watch, "reading cancelled");
+        dialog.finish_egress_test();
+        qwen_audio::shutdown_audio_jobs();
+        zero(watch, "reading synchronously finished");
+    }
+    #[test]
+    fn etp01_unconfigured_startup_five_operations_remain_silent() {
+        isolated("app::qwen_settings_tests::trial_egress_tests::etp01_unconfigured_startup_five_operations_remain_silent", |base| {
+            with_app(base,false,0,|ctx,app,store,watch,recording| matrix(ctx,app,store,watch,recording,false));
+        });
+    }
+    #[test]
+    fn etp01_configured_startup_five_operations_remain_silent() {
+        isolated("app::qwen_settings_tests::trial_egress_tests::etp01_configured_startup_five_operations_remain_silent", |base| {
+            with_app(base,true,0,|ctx,app,store,watch,recording| matrix(ctx,app,store,watch,recording,true));
+        });
+    }
+    #[test]
+    fn etp01_unconfigured_real_dialog_prepare_is_not_sent() {
+        isolated("app::qwen_settings_tests::trial_egress_tests::etp01_unconfigured_real_dialog_prepare_is_not_sent", |base| {
+            with_app(base,false,0,|ctx,app,_,watch,_| {
+                app.open_qwen_reading(&app.deck[0].clone());
+                let dialog = app.qwen_dialog.as_mut().expect("real unconfigured app dialog");
+                assert_eq!(dialog.controller.view().phase,ReadingPhase::Input);
+                dialog.controller.set_audio("synthetic.wav".into(),audio()).unwrap();
+                let error = dialog.controller.prepare().unwrap_err();
+                assert_eq!(error.code(),ErrorCode::InvalidKey);
+                assert_eq!(error.disposition(),SendDisposition::NotSent);
+                dialog.dispatch_frame(&[QwenAction::Cancel],ctx);
+                zero(watch,"unconfigured prepare rejection/cancel");
+            });
+        });
+    }
+    #[test]
+    fn etp01_actual_app_dialog_send_is_observed_before_real_transport() {
+        isolated("app::qwen_settings_tests::trial_egress_tests::etp01_actual_app_dialog_send_is_observed_before_real_transport", |base| {
+            with_app(base,true,1,|ctx,app,_,watch,_| {
+                app.open_qwen_reading(&app.deck[0].clone());
+                let dialog = app.qwen_dialog.as_mut().expect("real app dialog transport connection");
+                dialog.controller.set_audio("synthetic.wav".into(),audio()).unwrap();
+                let preview = dialog.controller.prepare().unwrap();
+                zero(watch,"actual app before send");
+                dialog.dispatch_frame(&[QwenAction::Send(preview.id)],ctx);
+                let deadline = Instant::now()+Duration::from_secs(5);
+                loop {
+                    dialog.controller.poll();
+                    if dialog.controller.view().phase != ReadingPhase::Running { break; }
+                    assert!(Instant::now()<deadline,"synthetic send rejection deadline");
+                    std::thread::sleep(Duration::from_millis(2));
+                }
+                let view=dialog.controller.view();
+                assert_eq!(view.phase,ReadingPhase::Failed);
+                let error=view.error.unwrap();
+                assert_eq!(error.code(),ErrorCode::Network);
+                assert_eq!(error.disposition(),SendDisposition::MayHaveBeenSent);
+                assert_eq!(watch.snapshot().ok().unwrap().calls(Entry::QwenSend),1);
+            });
         });
     }
 }
+// END ET2-P01 AUTHOR TESTS
 
 use super::qwen_reading_ui::preview_data::Store;
 use super::qwen_settings::QwenConnectionEditor;

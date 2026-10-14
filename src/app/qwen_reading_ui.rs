@@ -1,5 +1,131 @@
 //! Session-only reading dialog. A decoder may use a short-lived 3GP inspection copy.
 //! Paid sends originate only from its send button.
+// BEGIN ET2-P01 AUTHOR TESTS
+#[cfg(test)]
+mod trial_egress_tests {
+    use super::*;
+    use crate::{
+        ai::trial_egress::{self, Entry as Egress, Watch},
+        media::early_trial_startup_tests::isolated,
+    };
+    use preview_data::{audio, Reply, Store, Wire};
+    use std::sync::atomic::{AtomicBool, Ordering};
+
+    struct OwnedDialog(QwenDialog);
+    impl Drop for OwnedDialog {
+        fn drop(&mut self) {
+            self.0.finish_egress_test();
+            qwen_audio::shutdown_audio_jobs();
+        }
+    }
+    fn entry() -> Entry {
+        wordweave5::model::parse_deck("id\tbase\tmeaning\tlevel\tbusiness\televated\tregister\tusage\tcontext\texample\ttranslation\tanswers\tquestion\texplanation\ttag\net_qwen\tbright\t明るい\t中学\tbright\tbright\t標準\t合成用法\t合成状況\tThe sun is ___.\t太陽は明るい。\tbright\t合成質問\t合成解説\t合成\n").unwrap().remove(0)
+    }
+    fn assert_counts(watch: &Watch, send: usize) {
+        let snapshot = watch.snapshot().ok().expect("live snapshot");
+        assert_eq!(snapshot.calls(Egress::QwenSend), send);
+        for entry in [
+            Egress::CodexCheck,
+            Egress::CodexChat,
+            Egress::CodexMaterial,
+            Egress::CodexGenerate,
+            Egress::CodexReadInk,
+            Egress::CodexTranscribe,
+            Egress::QwenProbe,
+        ] {
+            assert_eq!(snapshot.calls(entry), 0);
+        }
+    }
+    fn send(dialog: &mut QwenDialog) {
+        dialog
+            .controller
+            .set_audio("synthetic.wav".into(), audio())
+            .unwrap();
+        let prepared = dialog.controller.prepare().unwrap();
+        dialog.dispatch_frame(&[QwenAction::Send(prepared.id)], &egui::Context::default());
+        let deadline = Instant::now() + Duration::from_secs(5);
+        loop {
+            dialog.controller.poll();
+            if dialog.controller.view().phase != ReadingPhase::Running {
+                break;
+            }
+            assert!(
+                Instant::now() < deadline,
+                "synthetic rejection result deadline"
+            );
+            std::thread::sleep(Duration::from_millis(2));
+        }
+        let view = dialog.controller.view();
+        assert_eq!(view.phase, ReadingPhase::Failed);
+        let error = view.error.expect("existing conservative transport error");
+        assert_eq!(error.code(), ErrorCode::Network);
+        assert_eq!(error.disposition(), SendDisposition::MayHaveBeenSent);
+        assert_eq!(view.disposition, SendDisposition::MayHaveBeenSent);
+    }
+    #[test]
+    fn etp01_qwen_inner_send_counts_once_and_never_reaches_wire() {
+        isolated("app::qwen_reading_ui::trial_egress_tests::etp01_qwen_inner_send_counts_once_and_never_reaches_wire", |_| {
+            let store = Store::configured();
+            let watch = trial_egress::watch(store.clone()).ok().unwrap();
+            let wire = Wire::new(Reply::Pending);
+            let mut dialog = OwnedDialog(QwenDialog::new(&entry(), store, wire.clone()).unwrap());
+            assert_counts(&watch, 0);
+            send(&mut dialog.0);
+            // Receiver completion is deliberately followed by synchronous Runtime destruction.
+            dialog.0.finish_egress_test();
+            assert!(dialog.0.runtime.is_none());
+            qwen_audio::shutdown_audio_jobs();
+            assert_counts(&watch, 1);
+            assert_eq!(wire.count(), 0);
+            drop(dialog);
+        });
+    }
+    #[test]
+    fn etp01_retained_dialog_after_watch_drop_still_blocks_inner_send() {
+        isolated("app::qwen_reading_ui::trial_egress_tests::etp01_retained_dialog_after_watch_drop_still_blocks_inner_send", |_| {
+            let store = Store::configured();
+            let owner = trial_egress::watch(store.clone()).ok().unwrap();
+            let wire = Wire::new(Reply::Pending);
+            let mut dialog = OwnedDialog(QwenDialog::new(&entry(), store.clone(), wire.clone()).unwrap());
+            drop(owner); // Deliberate lifetime boundary: only this Ended control may do this.
+            let next = trial_egress::watch(store).ok().unwrap();
+            let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| send(&mut dialog.0)));
+            dialog.0.finish_egress_test();
+            qwen_audio::shutdown_audio_jobs();
+            assert_eq!(wire.count(), 0);
+            assert_counts(&next, 0);
+            drop(dialog);
+            if let Err(panic) = result { std::panic::resume_unwind(panic); }
+        });
+    }
+    #[test]
+    fn etp01_panic_cleanup_waits_for_runtime_before_watch_release() {
+        isolated("app::qwen_reading_ui::trial_egress_tests::etp01_panic_cleanup_waits_for_runtime_before_watch_release", |_| {
+            let store = Store::configured();
+            let watch = trial_egress::watch(store.clone()).ok().unwrap();
+            let wire = Wire::new(Reply::Pending);
+            let completed = Arc::new(AtomicBool::new(false));
+            let flag = completed.clone();
+            let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                let mut dialog = OwnedDialog(QwenDialog::new(&entry(), store, wire.clone()).unwrap());
+                send(&mut dialog.0);
+                // A blocking worker outlives the received rejection. Runtime drop must wait for it.
+                dialog.0.runtime.as_ref().unwrap().spawn_blocking(move || {
+                    std::thread::sleep(Duration::from_millis(30));
+                    flag.store(true, Ordering::SeqCst);
+                });
+                panic!("synthetic assertion unwind after send");
+            }));
+            assert!(result.is_err());
+            assert!(completed.load(Ordering::SeqCst), "runtime synchronously joined blocking worker");
+            assert_eq!(wire.count(), 0);
+            assert_counts(&watch, 1);
+            drop(watch);
+            assert!(trial_egress::watch(Store::new(None)).is_ok());
+        });
+    }
+}
+// END ET2-P01 AUTHOR TESTS
 use super::{
     controls::{Button, UiControls},
     WordApp,
@@ -61,12 +187,43 @@ pub(super) fn recording_stop_due(elapsed: Duration, device_failed: bool) -> bool
 pub(super) fn original_audio_playing(snapshot: Option<&crate::media::PlaybackSnapshot>) -> bool {
     snapshot.is_some_and(|state| state.playing && !state.loading)
 }
+
+#[cfg(test)]
+struct WatchedTransport {
+    lease: crate::ai::trial_egress::Lease,
+    // Keep the original transport alive, but never dispatch to it from this wrapper.
+    _inner: Arc<dyn Transport>,
+}
+
+#[cfg(test)]
+impl Transport for WatchedTransport {
+    fn send<'a>(&'a self, _: qwen_audio::ProviderRequest) -> qwen_audio::TransportFuture<'a> {
+        let lease = self.lease.clone();
+        let _block = lease.reject(crate::ai::trial_egress::Entry::QwenSend);
+        Box::pin(async move {
+            // The future retains the old registration even after its Watch is dropped.
+            let _lease = lease;
+            Err(qwen_audio::TransportFailure::Network)
+        })
+    }
+}
+
 impl QwenDialog {
     pub(super) fn new(
         entry: &Entry,
         store: Arc<dyn CredentialStore>,
         transport: Arc<dyn Transport>,
     ) -> Result<Self, SafeError> {
+        #[cfg(test)]
+        let transport: Arc<dyn Transport> = match crate::ai::trial_egress::capture()
+            .map_err(|_| SafeError::new(ErrorCode::InvalidState, SendDisposition::NotSent))?
+        {
+            Some(lease) => Arc::new(WatchedTransport {
+                lease,
+                _inner: transport,
+            }),
+            None => transport,
+        };
         let reference = entry.completed();
         let version = serde_json::to_vec(entry)
             .map_err(|_| SafeError::new(ErrorCode::InvalidState, SendDisposition::NotSent))?;
@@ -213,6 +370,13 @@ impl QwenDialog {
         if let Some(runtime) = self.runtime.take() {
             runtime.shutdown_background();
         }
+    }
+    #[cfg(test)]
+    pub(super) fn finish_egress_test(&mut self) {
+        let runtime = self.runtime.take();
+        self.close();
+        // Synchronous destruction waits for worker shutdown while the test still owns Watch.
+        drop(runtime);
     }
     fn finish_recording(&mut self) {
         self.recording_started = None;

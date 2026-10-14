@@ -65,3 +65,15 @@ egress_designer開始snapshot08:09:41.886Zはinput88977/cached61440/output363/re
 低リスク効率化として、試用cfg(test)のfixtureとコメントだけを直したC3の焦点検査はtrial binのみno-run/実行とし、通常/lib成功は元snapshotに限定した。最終独立runner両構成とET3全体gateは維持する。cache再利用でC2build時間が減った証拠はなく、incremental hard-link失敗→compiler copy warningを記録した。fixture点検を一件ずつでなく全18へまとめ、source凍結build中に独立設計/静的reviewだけを並行した。今後の改善候補は正常fixtureの必須field確認を作者引継ぎ前に行うこと、長い旧ログ/本文転載を避け短いartifact参照で引き継ぐことである。常駐監視・運用harness・モデルrouter変更は行わない。
 
 C3試用bin新17件は現固定source/EXEで全PASS、実名一致/毎起動Admin=FalseとSHA確認/timeoutなし/wait済/残存0。通常/libは再実行なし。P01独立PreはPASSだが実装/動的観測/感度/runner/Postは未了。実装者の最新自己報告counter08:37:16.029Zは同session累積input16047921/cached15808384/output42474/reasoning4645、記録追記と最終応答は未反映である。初回観測07:48:59.445Zとの差はinput16009258/cached15785344/output42304/reasoning4645。開始前/最終応答分/親子包含不明を維持する。C1/C2の停止・是正・再Gateを含み、C3単独消費とは呼ばない。
+
+## P01専用fresh contextへの引継ぎ
+
+`fef8bd2`でC3本体/設計Pre記録をpush後、P01専用作者と別実装者をfresh contextで起動した。旧C1–C3の長いrole履歴をforkせず、承認済みの限定節/接合箇所/必要証拠だけを渡した。役割モデルはplanner指定Astra/highを維持し、親やquality gateを変えていない。
+
+作者`trial_egress_tests`、session `01a13995-0994-7fc2-b085-cca36d93e390`。開始側実在snapshot08:45:34.235Zはinput569416/cached506496/output1719/reasoning199、最終応答前08:58:28.786Zはinput3259401/cached3156992/output25347/reasoning4438。差分input2689985/cached2650496/output23628/reasoning4239。着手直後まで/最終応答/親子包含の欠測あり、返却model/effort未取得である。20case/両構成予定集合を固定、no-run1回の71不足API診断はcompile blocker、runtime0。新APIのため隠れる後続型検査を未了と記録した。source所有を別実装者へ返却済み。
+
+作者終了時の共有週枠usedPercent=45（同window/reset、ordinaryUsageAllowed=true）。工程完了まで継続/50%目安/60%目安の任意選択は未回答であり、既存の続行依頼に基づいて依頼済み工程を継続する。選択を提出したとは扱わず、アカウント変化をP01専有消費へ換算しない。
+
+その後、利用者は「現在のET2工程の独立検証・レビュー完了まで継続する」を明示回答した。50/60%の数値上限は選択されていない。ET3は別の区切りとする。P01実装の通常/試用no-run成功と独立静的指摘0を取得し、同じ固定source/EXEのfocused自己検証を依頼した。
+
+P01実装session `01a139a4-14c3-7402-834c-3e219e5feb55` のno-run終了観測09:16:30.391Zはinput4100291/cached3990016/output15348/reasoning1249。P01 reviewer session `01a139ac-f26e-7fb2-bf3a-c7d827f8e3bc` の09:13:49.355Zはinput1266517/cached1166208/output4094/reasoning528。いずれも最終応答前まで、工程開始欠測・親子包含不明・provider返却model/effort未取得を保持し、合算しない。

@@ -208,6 +208,69 @@ use tokio_util::sync::CancellationToken;
 use wordweave5::qwen_reading::WORDWEAVE_QWEN_CREDENTIAL_TARGET;
 use zeroize::Zeroizing;
 
+// BEGIN ET2-P01 AUTHOR TESTS
+#[cfg(test)]
+mod trial_egress_tests {
+    use super::*;
+    use crate::app::qwen_reading_ui::preview_data::Store;
+    use crate::{
+        ai::trial_egress::{self, Entry},
+        media::early_trial_startup_tests::isolated,
+    };
+    use std::sync::atomic::{AtomicUsize, Ordering};
+    struct Probe(AtomicUsize);
+    impl ProbeTransport for Probe {
+        fn send<'a>(&'a self, _: qwen_audio::ProbeRequest) -> qwen_audio::TransportFuture<'a> {
+            self.0.fetch_add(1, Ordering::SeqCst);
+            Box::pin(async { Err(qwen_audio::TransportFailure::Network) })
+        }
+    }
+    #[test]
+    fn etp01_probe_rejects_before_inputs_resolution_or_worker_creation() {
+        isolated("app::qwen_settings::trial_egress_tests::etp01_probe_rejects_before_inputs_resolution_or_worker_creation", |_| {
+            let store = Store::configured();
+            let watch = trial_egress::watch(store.clone()).ok().unwrap();
+            let probe = Arc::new(Probe(AtomicUsize::new(0)));
+            let mut editor = QwenConnectionEditor::new_with_transport(store.clone(), probe.clone()).unwrap();
+            // A changed, invalid destination would invalidate the old probe state if
+            // refresh/resolve ran. The watch must reject before either operation.
+            editor.probe_state = ProbeState::Completed(Err(ProbeError::Cancelled));
+            editor.revision = 41;
+            editor.probe_inputs = Some((editor.region, editor.host.clone(), editor.key.clone()));
+            editor.host = "synthetic invalid destination".into();
+            let before_inputs = editor.probe_inputs.clone();
+            let before_reads = store.loads.load(Ordering::SeqCst);
+            let error = editor.start_probe(&egui::Context::default()).unwrap_err();
+            assert_eq!(error.code(), ErrorCode::InvalidState);
+            assert_eq!(error.disposition(), SendDisposition::NotSent);
+            assert_eq!(editor.revision, 41);
+            assert_eq!(editor.probe_state, ProbeState::Completed(Err(ProbeError::Cancelled)));
+            assert_eq!(editor.probe_inputs, before_inputs);
+            assert!(editor.probe_job.is_none(), "first-statement rejection creates no worker");
+            assert_eq!(probe.0.load(Ordering::SeqCst), 0);
+            assert_eq!(store.loads.load(Ordering::SeqCst), before_reads);
+            let snapshot = watch.snapshot().ok().unwrap();
+            assert_eq!(snapshot.calls(Entry::QwenProbe), 1);
+            for entry in [Entry::CodexCheck,Entry::CodexChat,Entry::CodexMaterial,Entry::CodexGenerate,
+                Entry::CodexReadInk,Entry::CodexTranscribe,Entry::QwenSend] { assert_eq!(snapshot.calls(entry), 0); }
+            drop(editor);
+        });
+    }
+    #[test]
+    fn etp01_default_store_selects_registered_arc_without_io() {
+        isolated("app::qwen_settings::trial_egress_tests::etp01_default_store_selects_registered_arc_without_io", |_| {
+            let store = Store::configured();
+            let selected: Arc<dyn CredentialStore> = store.clone();
+            let watch = trial_egress::watch(selected.clone()).ok().unwrap();
+            assert!(Arc::ptr_eq(&default_store(), &selected));
+            assert_eq!(store.loads.load(Ordering::SeqCst), 0);
+            assert_eq!(store.saves.load(Ordering::SeqCst), 0);
+            drop(watch);
+            assert!(default_store().load().unwrap().is_none(), "unwatched fixture remains unconfigured");
+        });
+    }
+}
+// END ET2-P01 AUTHOR TESTS
 pub(super) type Summary = Result<Option<(Region, String)>, SafeError>;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -233,7 +296,11 @@ where
 pub(super) fn default_store() -> Arc<dyn CredentialStore> {
     #[cfg(test)]
     {
-        super::qwen_reading_ui::preview_data::Store::new(None)
+        match crate::ai::trial_egress::selected_store() {
+            Ok(Some(store)) => store,
+            Ok(None) => super::qwen_reading_ui::preview_data::Store::new(None),
+            Err(_) => panic!("ET2 synthetic credential fixture registry unavailable"),
+        }
     }
     #[cfg(not(test))]
     {
@@ -377,6 +444,15 @@ impl QwenConnectionEditor {
         }
     }
     pub fn start_probe(&mut self, ctx: &egui::Context) -> Result<(), SafeError> {
+        #[cfg(test)]
+        if crate::ai::trial_egress::reject_if_watched(crate::ai::trial_egress::Entry::QwenProbe)
+            .is_err()
+        {
+            return Err(SafeError::new(
+                ErrorCode::InvalidState,
+                SendDisposition::NotSent,
+            ));
+        }
         self.refresh_probe_inputs();
         if self.probe_state == ProbeState::Running {
             return Ok(());
