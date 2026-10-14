@@ -157,3 +157,59 @@ cargo fmt --manifest-path tools/qwen-audio/Cargo.toml --all -- --check
 次は親がd-Bの自己確認整理後、既定独立runner/Postへ渡し、続いて既定d-Mを完了する。ET0文書検査専用runnerは起動しない。その後のET1独立作者は **ww-test-author / gpt-6-astra / high**、入力は本書・上記契約hash・cycle 2 PASS/Closedとd-B/M Closedの証拠、所有はET1の新test/専用cfg(test)だけである。期待値と必要な未接続seamを先に固定し、API不在のcompile失敗を行動REDに数えない。新履歴機能、実データ、再委任、公開は対象外である。親のモデル切替運用・独立runner Sol/medium・全体gateを変更しない。
 
 KPIはこのplanner子の開始/終了usage counterおよび実行model/effort metadataが未取得である。指定はAstra/high、出力は本書、検証は文書のみ、再委任0である。測定記録は所有外のため編集せず、親へ欠測として引き継ぐ。
+
+## ET1追補: feature別namespaceの既存fixture補修（2026-10-14、Pre提出版）
+
+本追補だけが今回のplanner所有である。既存ET0/ET1/ET2/ET3の未完了事項、モデル、正本契約、品質gateは維持する。依頼当初のS06だけの案から、runnerの追加4FAILと独立reviewerの同系原因判定を受けて3test-fileへ精緻化した。本体欠陥は未検出である。以下のET1-FX1は独立Pre待ちであり、test編集の開始許可ではない。先行本文のET1「5file」は元実装単位の所有である。今回の追加所有は独立test補修の別Change Setとして下記3file/5symbolに限る技術判断であり、ET1本体所有を広げない。親がこの限定所有を受領しPre PASS後にdispatchする。
+
+### Closure matrix
+
+finding全文欄は親から受領した報告文である。追加4件の独立reviewer判定は同系fixture不整合、本体欠陥未検出である。既存Post予備確認の「確定欠陥0」はrunner前の観測であり、今回のFAILを閉じる判定ではない。
+
+| Finding ID / 原文・位置 | Root cause / state | Packet / canonical artifact / evidence | Oracle | Reviewer record / residual |
+| --- | --- | --- | --- | --- |
+| ET1-FX-S06: 「S06が常にlocal/WordWeave5固定。StorageNone書出しはresolve_storage_root callerを使用。fixtureはStorage::atだけでTRIAL_ROOTS未登録。P2受入阻止fixture不整合」settings_ui.rs:442/453 | feature別caller rootと固定通常rootの不一致。Planned | ET1-FX1 / 本追補 / s06、write_settings_export、harness_tests::fixture。通常25PASS、試用24PASS/1FAIL | S06両構成成功、外部成功と拒否後不変を保持 | 独立reviewer Astra/highの原因分類を親から受領。Pre/Post未了 |
+| ET1-FX-M05A: 「m05_none_resolves_default_without_creating_root_then_protects_it FAIL、assert:1331」chat_media.rs:1736 | normal拒否対象とtrial caller不一致。Planned | ET1-FX1 / 本追補 / 同名test→refuse | 両構成、3媒体の外部成功/拒否/ledger・memory保持 | 独立reviewer Astra/highの同系判定を親から受領。Pre/Post未了 |
+| ET1-FX-M05B: 「m05_missing_environment_and_unknown_root_identity_refuse FAIL、assert:1331」chat_media.rs:1763 | normal名fileがtrial rootの不正fixtureにならない。Planned | ET1-FX1 / 本追補 / 同名test→refuse | 名前付き環境欠落/file分岐で3媒体拒否・不変 | 同上。file分岐での失敗位置はsource制御flowからの推論であり旧log markerの観測ではない |
+| ET1-FX-M05C: 「m05_failed_default_storage_open_keeps_the_attempted_default_root_protected FAIL、chat_media.rs:1801」 | normalをlockしてtrialをopenし実失敗前提が成立しない。Planned | ET1-FX1 / 本追補 / 同名test、Storage::at/open | 実同rootのopen失敗、Storage=None、3媒体拒否・不変 | 同上。failed-open前提を弱めない |
+| ET1-FX-H03: 「h03_resolver_is_side_effect_free_and_tracks_environment_only_in_child FAIL、tests/progress_export_destination.rs:580 left WordWeave5-EarlyTrial/right WordWeave5」 | 2root期待値と欠落Err全文が通常構成固定。Planned | ET1-FX1 / 本追補 / 同名test、resolve_storage_root | 2環境のliteral一致・副作用0、構成別Err全文一致 | 同上。登録後の固定root契約は別受入 |
+
+### Packet Brief: ET1-FX1
+
+1. **Objective**: 承認済みの通常/試用namespace契約と既存fixtureの期待rootを一致させ、上記5ケースを同じ強さのoracleで両構成へ適用する。製品動作変更は0である。
+2. **In-scope / Out-of-scope**: 追加所有は `src/app/settings_ui.rs` のcfg(test)内S06、`src/app/chat_media.rs` のcfg(test)内上記M05の3ケース、`tests/progress_export_destination.rs` の上記H03だけである。独立test作者1名が同一責務で順に編集する。production、他case、shared helper、skip/ignore、assert削除、事前登録/OnceLock reset、環境隔離方式、ET2/ET3、Cargo/lock、正本契約の変更は対象外。通常rootを単なる任意外部宛先として扱う既存成功caseのliteralは一括置換しない。
+3. **Current evidence**: HEAD `30fc43c074e21cf5b989722dce4fb48c08cddbcf`、branch `codex/development-agent-team`。S06の通常PASS/試用FAILは `target/early-trial-build/et1-runner/{default,trial}-settings-runtime.{stdout,stderr}.log`。追加4件は同runnerのmedia/dest記録と親報告であり、現在同じsourceの通常同名全PASS・試用新35全PASSを受領した。settings fixtureは `harness_tests.rs:199` のStorage::atであり、登録成功を前提にしない。全91対象の基準は同runner `source-before.log` である。
+4. **Observable contract**: 唯一の製品正本は [early-trial-contract.md](early-trial-contract.md) SHA256 `0BC3839A6C6B60E5CD4E7267269FE33D4D898CA704B89609E32E0BB0912A1A6D`、root検査と外部出口2root保護の節である。登録前generic APIはcaller rootを保護し、Storage::atは任意root契約を保持する。Storage=Noneのcallerはresolverの選択rootである。通常literal `WordWeave5`、feature時literal `WordWeave5-EarlyTrial` をtest側で選び、その期待pathとresolver返値の一致をassertする。resolver返値から期待pathを作らない。登録済み2root保護の新35ケースをこのfixtureへ複製しない。削除する旧契約はなく、修正するのは無条件通常namespaceというtest前提だけである。
+5. **Canonical owner and consumers**: test作者が上記3file/5symbolのみを所有する。plannerは本追補、runnerは既存runner報告とignoredログ、reviewerはread-only、親は統合/dispatchを所有する。対象のproduction consumerはsettingsの `write_settings_export`（教材TSV、Progress JSON、診断export）、mediaの音声・annotation text・annotation bundleの3出口、H03の `resolve_storage_root` である。全て読取確認対象であり本体は変更しない。他担当のdirtyを保持する。
+6. **Input / output / error types**: 入力はcompile-time feature、合成LOCALAPPDATA、`PathBuf`、媒体fixture/payloadである。resolverは `Result<PathBuf, String>`、settings書出しとmedia exportは既存の `Result<(), String>` 境界を使う。H03の環境欠落Errは通常の全文 `LOCALAPPDATAが見つかりません。` を維持し、試用の全文は `試用専用の保存先を決定できません。\n起動前の検査で停止しました。元データは変更していません。`（`\n`は改行1文字）をtest側literalに固定する。これは既存RootUnavailable/BeforeWrites安全文である。`is_err`だけの検査へ弱めず、新型/API/seamを導入しない。
+7. **State transition / failure-after-state**: S06/M05AはStorageをdrop→合成環境設定→不存在の期待rootに対する外部export成功→root未作成→期待rootを合成作成→内部leaf拒否→ledger/未保存memory不変・app.lock未作成。S06は既存leafと新leafの両方を保持する。M05Bは環境欠落拒否と期待rootがfileのidentity拒否を両方保持する。M05Cは期待rootをStorage::atで保持→Storage::openの実Errを必須assert→Storage=None→3媒体拒否と既存ledger/memory不変、held drop。H03は2つの環境変更と欠落の各段階でsnapshot不変を維持する。失敗はtest FAILとして残し、途中成功を完了に数えない。
+8. **Security / privacy / data boundary**: 既存の有限timeout子process、合成fixture、通常ユーザー実行、終了wait/残存記録を維持する。実データ・資格情報・実API・OS権限・モデル/設定変更は0。製品既定値/UX/新API/保存形式/互換性/risk acceptanceの判断を追加しない。今回の差分はtestのみなので配布/運用変更は非該当であり、ET3配布gateは残る。
+9. **Dependencies / stop**: 本追補の親受領→独立Pre PASS/hash一致→作者→独立runner→独立Postの順である。追加4件の独立原因分類は受領済み、runnerの現snapshot実行終了と所有返却は作者dispatch前に親が確認する。別原因、本体/契約修正、6件目のcase、shared helper変更、追加file/権限、baselineに帰属不明なFAIL、source/hash競合が出た時点で停止し親へ戻す。同一原因で2回連続CHANGES REQUIREDなら3回目の局所追記をせず正本/owner/oracleを再構成する。
+10. **Deterministic oracle**: 下記検証境界を必須とする。旧snapshotの通常PASS/試用5FAILを変更前証拠とし、修正後は同じ5実名が両構成で成功すること、変更diffが期待literalのfeature分岐、resolver一致assert、M05Bの名前付きfixture前提assert/messageだけであることを独立照合する。M05Bはmissing分岐のresolver Err、file分岐のresolver==expected rootかつexpected root.is_fileをそれぞれ名前付きassertで動的識別する。共通refuse helperは変えず、両分岐の3媒体拒否を維持する。行動assert、子process成否assert、失敗後不変、件数を削減しない。
+11. **Rollback / remaining artifacts**: 未コミットの作者所有5symbolの差分だけを、親の差分照合後に個別patchで戻す。reset/checkoutで他者差分を戻さない。rollback時は旧FAILが再び有効となりET1 Postは未完了になる。合成fixtureとbuild/log残存はrunnerが既存規則で確認し、診断証拠はignored配下に保持する。利用者dataや既存EXEの削除を行わない。
+12. **Traceability**: 上記5finding→ET1-FX1→ET-01/05/06と既存d-S/d-M/H03回帰。本PacketのPost PASSはET1全体・ET2/ET3・音声履歴全体のClosedを意味しない。matrixは独立Post記録後にのみClosedへ更新する。
+
+### 作業単位・モデル・検証
+
+ET1-FX1はS（test 3file、production 0file）、難易度中/危険中である。差分は小さいが、正常なcaller契約を誤変更しないことと独立oracle維持が判断点である。planner/external-spec authorは `gpt-6-astra/high`。外部仕様と内部設計は承認済み正本を再利用し、追加仕様作成・設計変更・本体実装は非該当である。
+
+| designer | implementer | test author | test runner | reviewer |
+| --- | --- | --- | --- | --- |
+| `gpt-6-astra/high`（既存設計再利用、追加起動なし） | `gpt-6-astra/high`（本体変更なし、起動なし） | `gpt-6-astra/high`（既存受入とfeature期待値の独立整合判断） | `gpt-6.1-sol/medium`（固定EXE/実名/件数/hashの独立照合） | `gpt-6-astra/high`（caller/登録済み契約・oracle非弱化のPre/Post判定） |
+
+両model/effort組合せは現在の呼出可能一覧に存在する。runtime返却値は別途未取得として記録する。親モデル/quality gateを変えず、モデル/Skill不在で停止する。作者、runner、reviewerは別担当、再委譲なしである。
+
+- [ ] FX1-0（依存: 独立原因分類受領済み、runner旧snapshot完了/所有返却確認済み）: 親が3test-file所有追加を受領した後、独立Preが同じplan/source hashでPASSする。製品仕様矛盾があればSTOP・ASKとし、期待値を先取り変更しない。
+- [ ] FX1-1（依存: FX1-0、所有: 上記3file/5symbol）: 作者がroot/Errのfeature別literal、resolver一致assert、M05Bの名前付き前提assertを設定し、既存assert全保持をdiffで提示する。新3file hash、91対象中それ以外88件不変、既存store/commit/ai作者oracle不変、変更前FAILと変更後focused結果を固定する。
+- [ ] FX1-2（依存: FX1-1、所有: 既存runner報告/ログのみ）: 独立runnerが通常/試用を別々に `cargo test --locked --bin wordweave5 --test progress_export_destination --no-run --message-format=json`（試用だけ `--features early-trial`）で構築し、各確定JSONから2EXEのpath/SHAを固定する。両構成でbinの `i2_export_settings` 25件、`chat_media::` 23件、既定fatal-close 5filter、`ai::early_trial_paths_tests` 1件、integration全29件を既存隔離方式で実行する。対象EXE `--list` とselected/成功実名を照合し、5対象caseを含むこと・0件成功でないこと・件数/exit/timeout/wait/Administrator=False/残存を記録する。合計は各構成raw83件であり、fixture SKIPを行動PASSへ混ぜない。
+- [ ] FX1-3（依存: FX1-2、所有: reviewer read-only）: 独立PostがPre hash、3file diff、全91source継続、作者oracle差分、両構成結果、既存無変更範囲の証拠接合を確認する。PASS後に親がmatrixとET1 Post資料へ接合する。本追補の変更後には `git diff --check` とローカル参照確認を行う。
+
+sourceの影響があるbin/settings/mediaと変更integrationを新EXEで再検証する。未変更のlib/他integration、新試用lib/integrationのPASSは全91対象のhashと構成/依存が不変なら再実行不要である。ai1も同一新binへ固定し、旧binとの混在を避ける。これは限定補修の検証境界であり、ET3のall-targets、release、関連crate、native gateを削減しない。権限依存fixtureのSKIPは従来どおり未実証として保持し、昇格許可を拡大しない。
+
+### Review request / 次handoff
+
+Request status: READY FOR PRE-REVIEW（親dispatch待ち、Pre未判定）。Cycle: ET1-FX1 Pre-1、未提出provisional-1を置換。Target branch/HEADは上記。Target artifactは本書の追補、対象sourceは上記3file/5symbol。Review classはfixture契約/規約/信頼性、Requested GateはPre-implementation。Dependencyは既存ET0/d-S/B/M Closed、追加4件分類受領済み、runner旧snapshot完了/所有返却確認済み（親報告10:41:45 JST、91source hash不変、全process終了/EXE残存0/TEMP0）。Product decisionはなし。Out-of-scopeはPacket Brief 2/8のとおりである。target planのSHA256は最終保存後の親handoffに添付し、後続編集で旧hash/requestを失効させる。次は同じ独立reviewer `gpt-6-astra/high` へPreを渡す。PASSとsource所有返却後だけ独立作者 `gpt-6-astra/high` を起動する。
+
+開始source hash: settings_ui `C7C7C9D17DD24FC3FDF5762F7CD0E649A1A07E3E7237D31FE6C5A1FB63D1BF9B`、chat_media `24171BE283A1D856A2752FA9CEE60D3AE4D43EE4386EFAC6C1B1C5C09C47D5F3`、progress_export_destination `176709E152A6D26D6676B3424E673AD5B28987C423A8865C0358F5472D2E0324`。初回Pre提出時にこの3hash/HEADと本書hashを再照合する。
+
+plannerはplanning-and-task-breakdown、execute-review-remediationとprotocol、review-project-conventions、review-reliability-data-integrityを自身の計画/self-check範囲で適用した。独立Gateを代替しない。KPI子threadは `01a13810-6d05-7140-8f62-bff0aa4ae790`、親session環境値は `01a08550-055c-7aa1-9834-905e4a7ce148`。指定Astra/high、runtime metadata未取得。最初の観測usageは2026-10-14T01:39:35.437Z、input 38027 / cached 23040 / output 309 / reasoning 19であり、作業開始より後のsnapshotである。週枠開始17%/10080分/reset1792496607。最終応答分、開始前区間、親子包含関係は不明。終了snapshotは親handoffで報告し、所有外の測定文書は編集しない。

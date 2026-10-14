@@ -31,3 +31,13 @@ probe故障seamはdesignerへ限定して具体化し、[独立Pre](early-trial-
 親の再開usage snapshotは00:49:03.055 UTC、input=1571434790/cached=1534156928/output=3567375/reasoning=1079497/total=1575002165、cache_write=0、turn_contextはSol/medium指定である。再開直後の読取/dispatchからsnapshotまでの区間は差分外。親子包含とruntime返却値は引き続き未確認である。
 
 前回の子エージェントは現在の実行一覧に存在せず、`trial_recheck_resume`（独立作者/Astra/high/fresh context）へ1caseだけ再dispatchした。現storeにはStorage dropと失敗root識別messageのfixture修正が残り、diagnosticはtrial rootだけのrename OS5を示す。修正版compileログはあるがruntime成功証拠はないため、この1caseを新EXEで実行する。本体と他の成功済み試験はこの作者が変更/反復しない。その後、Started遷移を初回I/O直前へ置くsticky修正を実装役へ渡し、独立runner Sol/medium/Post Astra/highへ進む。製品EXE・ET2/ET3提供は対象外のままである。
+
+### 作者返却と本体checkpoint
+
+残るexact1と新stage回帰2件は作者が各成功を確認した。新2件はfixture修正前後のmixed snapshotであり、最終全件成功ではない。本体sticky修正と作者証拠を`30fc43c`で保存・pushした。次の1条件mutationによる試験感度確認はレビュー手順の検証であり、通常開発の性能比較でも受入PASS件数でもない。逆差分と全source hash復元後、固定sourceの通常4/試用35→独立回帰→Postへ進む。
+
+作者session `01a137e2-5701-7692-a8e2-78b0a6f5871a`の45usageイベントを取得した。最初00:49:14.040 UTCはinput=37974/cached=0/output=251/reasoning=0/total=38225、最後01:05:25.621 UTCはinput=3759325/cached=3647104/output=16138/reasoning=1312/total=3775463、cache_write=0。差分はinput=3721351/cached=3647104/output=15887/reasoning=1312/total=3737238である。最初のrequest以前と最後のcounter後の応答反映は保証外、親子包含未確認で合算しない。turn_contextはAstra/high指定と一致するがruntime返却モデルを示すものではない。
+
+実装担当sessionは `01a137e7-ed3a-7bd0-8a38-cfd71e56a966`（Astra/high）である。source1条件のmutation/逆復元とfocusedを逐次所有し、作者sourceは返却済み。次の独立runnerとread-only reviewを並行する場合、source固定後の実行と静的照合という異なる責任に限定し、最終Postはrunner証拠受領後に判定する。
+
+実装担当の62usageイベントを取得した。最初00:55:16.845 UTCはinput=38196/cached=23040/output=138/reasoning=10/total=38334、最後01:23:30.654 UTCはinput=5871441/cached=5676672/output=16167/reasoning=1525/total=5887608。差分はinput=5833245/cached=5653632/output=16029/reasoning=1515/total=5849274、cache_write=0である。初回request以前・最終counter後の応答反映は保証外、親子包含未確認のため合算しない。最終fixed通常4/試用35PASS、感度確認1FAILとhash復元を記録した。mutationは受入PASSへ加算しない。
