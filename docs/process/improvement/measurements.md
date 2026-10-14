@@ -1,5 +1,7 @@
 # 開発タスクの使用量記録
 
+- 2026-10-14 ACOUSTIC-HISTORY-001 ET3は承認待ち・未完了である。[使用量記録](../../../tasks/ACOUSTIC-HISTORY-001/usage-observation-20261014-et3.md)に開始/区切りcounterと取得範囲を保存した。FX1のintegration compile blockerはtest補助3fileの同体抽出で是正、独立84PASS/最終Post PASS、cb88203 push済み。全体Cargoの再compileでは旧EXE解除を失効して停止し、U+3000を含むprofile pathのCargo dep-info誤分割という局所原因を診断した。未影響のrelease3buildだけ成功、full/関連test/native/提供は未了。一時runnerとDPI確認移管は利用者未回答・未導入で、品質基準を変更していない。共有週枠58→65%は当工程専有ではなく、親counter差は内数を重複加算せず子と別記、旧方式比は未判定である。常時再buildでもbuild後・実行前のEXE照合を可能にする案を効率化候補にし、未承認のharness変更や効果の推定は行っていない。
+
 - 2026-10-14 ACOUSTIC-HISTORY-001 ET2は[独立最終Post PASS/Closed](../../../tasks/ACOUSTIC-HISTORY-001/early-trial-egress-review.md)。独立252PASS、感度25目的FAIL、完全逆復元後36PASSを確認し、重複/目的FAILをunique製品PASSへ合算しない。A09試験のpanic混同を作者が是正し、実装者の重複V2自己検証は省略、既定3snapshotへ感度をまとめた。[使用量記録](../../../tasks/ACOUSTIC-HISTORY-001/usage-observation-20261014-et2.md)に親/子別の取得値・欠測・手戻りを保存した。共通週枠22→終了側58%は当工程専有量ではなく、親子包含/runner token欠測/長い親文脈/検証密度差のため旧方式比未判定。終了側counterは最終応答/記録push前まで。利用者指定のET2完了境界で停止、ET3/release/製品EXE/nativeは次回である。
 
 - 2026-10-14 15:40 JST、ET1/FX1 Closed後の続行指示でACOUSTIC-HISTORY-001 ET2を開始。HEAD `97d2c72` clean、範囲は起動/資格情報/識別/JSON拒否の接合と独立検証/Postまで、ET3製品提供は後続。[ET2観測記録](../../../tasks/ACOUSTIC-HISTORY-001/usage-observation-20261014-et2.md)へ開始週枠22%・親counter・取得範囲を保存した。親Sol/medium維持、計画指定Astra/highでdesignerを起動し既存承認契約の試験可能な接合だけを具体化する。親子を合算せず旧方式比を未判定とする。

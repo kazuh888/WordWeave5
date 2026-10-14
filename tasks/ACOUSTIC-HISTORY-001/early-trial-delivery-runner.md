@@ -104,3 +104,100 @@ HEADは同じ `d446c5dd32177815ee322a39cf51ab84a99ee458`＋作者のai/media/new
 `git diff --check` はexit0（runtime中の文書追加を含む確認）。同じsource snapshotに対する作者の `cargo fmt --all -- --check` exit0証拠を保持し、入力不変のため反復していない。source/tests/期待値/settings/追加harness編集0、変異0。終了週枠63%（10080分/reset1792496607、最終応答前）。counter/log session ID/返却model・effort/親子包含は未取得であり、指定Sol/mediumと混同しない。
 
 FX1の新動的証拠を親へ返し、独立Post判定を待つ。本84実行はET3 all-targets runtime、関連crate、release、native/実音声/実認証、提供完了を意味しない。これらはまだ未解除・未実施である。
+
+## 既定ET3 full gate：環境境界で再compileを検出し停止
+
+FX1独立Post PASS/Closedと親の全24artifact照合後、保全commit `cb882031385796eb35c3049856371cebe5be084f`（source bytesはFX1と同じ、着手clean）で通常 `cargo test --all-targets --locked` を開始した。`full-start.json` と `full-source-before.json` が入力正本。旧main SHAは既定保全値、旧standalone `target/qwen-audio/release/qwen-audio.exe` SHAは `57A3BE5B10F117E146E1C8AAC77616AA4A0F0873D74D68D858BD8C6E9A64506E` と固定した。
+
+外側の既存Start-Process型監督を使い、非管理者/Hidden、合成 `full-default-runtime/{local,temp}`、process限定CARGO_TARGET_DIR=既定default、JOBS=2、600秒上限/必要時kill+waitで開始した。Cargo自身のcwdは親が了承したrepo rootであり、Cargo既定package cwdとexact gateを維持した。個別isolatedの合成child cwdや後段の任意cwd native受入とは別である。
+
+Cargoが依存を含む再compileに入り、新EXE対応前にruntimeへ進む可能性を親へ報告した。親の明示停止指示後、今回wrapper PID22180のcommandに `full-default-runtime` が含まれ、Cargo PID13248の実command/開始時刻/親PIDが一致することをCIMで再確認した。PID13248→実Cargo28588→今回のrustc/link等の所有treeだけをKill(true)/Waitした。`stop-owned-tree-before.json` / `stop-result.json` に照合と回収を記録し、所有tree残存0、ユーザーprocess停止0。新たなbuildを自動開始しなかった。
+
+| 観測 | 結果 |
+| --- | --- |
+| Cargo実行期間 | 21:04:00.783→21:08:03.881 JST |
+| 終了 | Cargo exit=-1、外側command exit1（親指示による中断。test FAILへの換算なし） |
+| 外側安全条件 | Admin=False/Hidden=true/Timeout=false/Waited=true/合成TEMP残存0 |
+| raw stdout | 0 byte |
+| raw stderr | compile進行あり、Cargo Running/Finished行0 |
+| test実行の観測 | running/test-result marker0、PASS0/FAIL0/SKIP0。実行未観測であり、全生涯process追跡による未実行証明とは区別する |
+| source | 170項目前後差0、HEAD cb882031、source dirty0 |
+| 旧製品2EXE | 両SHA不変 |
+| 旧default artifact | 24中23はbytes変更、1（test-bin）は不変。欠落0 |
+
+正本は `full-default-runtime/{stdout.log,stderr.log,result.json,stop-result.json,stopped-execution-audit.json}`、`full-source-after-stop.json`、`full-default-old-artifacts-after-stop.json`、`full-old-products-after-stop.json`。session56929は終了済み。空stdoutをregex集計した最初の診断でnull-input例外が出たため、raw byte長と空文字を明示したauditへ修正した。これはテスト失敗ではない。旧default artifact Gateを新bytesへ流用しない。全体gateはPASS0/中断1で未完了、試用full/関連no-run/release/nativeは未開始である。
+
+### 限定read-only環境/fingerprint診断
+
+秘密を含むenv全文を取得していない。cargo/rustc path/version、RUSTUP_TOOLCHAIN/RUSTUP_HOME/CARGO_HOME/RUSTFLAGS/CARGO_ENCODED_RUSTFLAGS/RUSTC_WRAPPER/RUSTC/CARGO_TARGET_DIRとLOCALAPPDATA/TEMP/TMPだけを調べた。`full-sandbox-environment-audit.json` / `full-ordinary-environment-audit.json`、さらに停止時と同じStart-Process/合成環境で-Vvだけを実行した `full-default-runtime/environment-probe-versions.json` に記録した。version probeはbuild/testではない。
+
+| 軸 | 確認済みの比較と限界 |
+| --- | --- |
+| source/HEAD | FX1 no-runはd446c5d＋限定差分、fullはcb882031。全170bytesは一致。commit hook再書込の根拠なしは親の独立診断を接合し再読しない |
+| command | no-runは`test --all-targets --locked --no-run --message-format=json`、fullは既定`test --all-targets --locked`。default target pathは同じ。JSON/no-runの差だけで原因を断定しない |
+| toolchain | 着手と今回のsandbox/ordinary/同合成Start-Processでcargo1.98.1 commit797e8a9bc、rustc1.98.1 commit48a229cea/LLVM22.1.8が一致。RUSTUP_TOOLCHAIN等とRustFlags/Wrapperはnull |
+| config | user Cargo config前後log差0。repo/親directoryのCargo config8候補は現時点全不存在（`full-ancestor-config-audit.json`）。祖先の変更前snapshotは未取得 |
+| process環境 | no-runはsandbox、fullはordinary-userで合成LOCAL/TEMP/TMPを明示。現在のsandbox auditではAppContainer配下、ordinary親はユーザーLOCALとF:/TEMPCO~1、full子は指定target配下。旧no-run開始時のLOCAL/TEMP/TMPの完全snapshotは未取得なので、現在値を過去実測値へ読み替えない。通常no-run JOBS未指定→full JOBS2も差として残す |
+| fingerprint | 現root25項目はrustc数値15335473461698482004/config9396254390672932401が一致、test profileは1722584277633009122/RustFlags=[]。残る旧test-bin fingerprint mtime20:44:14、再compile済みlib21:06:26/int21:06:49で実更新を確認（`full-fingerprint-after-stop.json`）。proc-macro2のbuildscript/libも21:04:08–09へ更新し、現在RerunIfEnvChangedはRUSTC_BOOTSTRAP=null。旧fingerprint全体snapshotとdirty理由logがなく、個別の初発原因は未確定 |
+
+`.rustc_info.json` はmtime20:14:44、内容を `full-rustc-info-after-stop.json` に保存した。再compileとEXE bytes変更は観測事実であるが、ENVpath変更だけを確定原因とはしない。Cargo fingerprintの上書き前証拠不足を残す。設定変更、OS変更、source/harness編集による是正は行っていない。
+
+### 親へ返す再開案（未実行）
+
+構成ごとに固定した合成環境rootを使い、ordinary-user/同cwd/同LOCALAPPDATA/TEMP/TMP/同target/JOBS2/同toolchainでno-run→親の新全artifact対応Gate→exact fullを行う。環境treeのcleanupは両command終了後だけとし、ログは別prefixへ保存してこの中断証拠を保持する。固定環境のmapと実command/versionをログへ残し、no-run/full間に変えない。
+
+既存Invoke-V2Case.ps1はRust exact1/List専用であり、Cargo全体commandをそのまま受け付けない。今回のStart-Process型監督はEnvironment hashとcwd/targetを固定して再利用でき、script file/shared harnessの編集は不要である。親の次解除後のno-runにprocess限定 `CARGO_LOG=cargo::core::compiler::fingerprint=info` を追加してdirty理由を取得する案を提案する。同一性を優先するならそのlog設定もfullへ同じ値を渡す。現在は提案までで、診断no-run/全体再開/related/releaseを実行していない。
+
+終了週枠64→64%（window10080/reset1792496607、最終応答前）。token counter/log session ID/provider返却model・effort/親子包含は未取得。指定Sol/mediumを維持し、停止結果と原因未確定を親へ返す。
+
+## full2：固定ordinary環境 no-run と局所dep-info診断
+
+親が構成別の同一ordinary-user/合成環境/cwd/target/JOBS2/toolchainとprocess限定fingerprint logを許可した。`full2-fixed-envs.json` は再開用のログであり永続Cargo設定ではない。環境IDは `ET3-full2-{default,trial}-20261014`、LOCALAPPDATA/TEMP/TMPは `target/early-trial-build/et3/full2-env/{default,trial}/{local,temp}`、cwdはrepo root、targetは既定default/trial、JOBS=2、CARGO_LOG=`cargo::core::compiler::fingerprint=info`、WW5_ET2_CHILD/BASEは空と固定した。cleanupはno-runと親解除後fullの両終了・所有process終了後だけとし、待機中のprocessは残さない。
+
+通常 `cargo test --all-targets --locked --no-run --message-format=json` はexit0/build-finished=true、全24executable artifact/うちtest profile22、compiler error0/warning22。正本は `full2-default-no-run/{start.json,result.json,artifacts.jsonl,stderr.log,artifacts-fixed.json,summary.json,toolchain.json}`。Hidden/AdminFalse/期限内/Waitedtrue/TEMP残存0、session33504終了、list/runtime0である。source170/12G0/4markerは前後差0（`full2-source-after-default-no-run.json`、G0/markerの同prefix）。before markerはFX1同raw sourceのreference由来で、そのprovenanceを別記した。
+
+新通常test-bin SHA `7C5F5B089E4AC9A63770D5D4959879454B8982C1219358919C198E370586A0E6`、codex_process SHA `F3C72D1743083C5C0A1436CF90A3CC4A169DE3C85C63A84CFED418098FE1CEF2`、lib SHA `7B3319BF9CAC496B3530F4395B131F45D093FC353B4C59F7B4AB83020FD26E9B`。全path/profile/featuresは上記JSONへ固定し、まだruntime解除されていない。
+
+### 初発原因の限定：Cargoが不存在のprefixを依存fileへ保持
+
+新INFO logはserde/serde_core/proc-macro2/bytes等へ `dirty: FsStatusOutdated(StaleItem(MissingFile { path: "C:\\Users\\安井" }))`、その依存先へStaleDepFingerprintを明示した（`full2-default-fingerprint-reasons.log`）。この時点で単にENVpathだけを原因とする説明は不足する。
+
+対応proc-macro2のRustc `.d`ではユーザーpathの空白がU+3000（UTF-8 `E38080`）、直前は`井`でbackslash escapeがない。Cargo binary dep-infoには正常なfull profile path11件と、**正確な `C:\Users\安井`＋NUL終端のentry1件** が共存する。このprefix pathは不存在である。新固定ENVの通常compileで21:17に再生成されたdep-infoにも同entryが残り、既存試用dep-infoにも同じentry/無escape空白を確認した。実bytesの限定証拠は `full2-dep-info-path-audit.json`、`full2-dep-info-bytes-audit.json`、`full2-both-dep-info-prefix-audit.json`。
+
+確認できたのは、Cargoの依存file解釈で不存在prefixを持ちMissingFileとなる局所機構と、その再生成である。上流parserのコード位置は調査していない。最初の中断fullにはdirty理由logがなかったので、その初発を同logで直接観測したとは扱わない。同一ENVだけで次のexact fullの再compileを防げるとは主張しない。
+
+親は同原因の試用no-run反復を不要と判断し、未開始を維持した（試用PASSへ換算しない）。通常no-run以外のfull/related runtime/runner導入/nativeは実行していない。process限定Cargo target runnerの機構に関する公式根拠は親が取得し、導入はユーザー回答待ちである。source/依存/fingerprint/OS/global設定の修正やpath alias作成は0。親の公式調査を重複していない。
+
+### release buildだけの追加解除
+
+親が通常no-run成功・証拠固定後の未影響作業として試用→通常→別related targetの単独qwen release **build only** を許可した。必須release/locked/bin/featuresを保持し、出力形式だけ `--message-format=json` の追加を親が明示許可した。native/全体runtime/newrunner/提供先copyは未許可のままである。各buildで同sourceHEAD cb882031/170項目を固定し、JOBS2/ordinary/Hidden/固定合成環境/有限期限/回収/旧mainとstandalone保全を維持する。
+
+試用commandは `cargo build --release --locked --bin wordweave5 --features early-trial --message-format=json`、targetは既定trial、logは `full2-trial-release/`。環境IDは上記固定trialを再利用し、1800秒上限で開始した。build成果物の存在を全体検証PASSや提供完了へ代用しない。
+
+試用releaseは21:24:11→21:28:00 JST、exit0/build-finished=true、compiler error0/warning6。EXEは `F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/trial/release/wordweave5.exe`、SHA `E3A0A87861D835C1E142072A14F3EBF7CF9DA0A8B95D404F4BF99402D4B1BBD2`。JSONのfeatures=[early-trial]、profileはopt3/debuginfo0/debug_assertions=false/overflow_checks=false/test=false。AdminFalse/Hidden/期限内/Waitedtrue/TEMP残存0、source170/G0差0、旧製品2SHA不変、session39083終了済み。正本は同dirの `artifacts-fixed.json` / `start.json` / `result.json` / `summary.json` / `source-after.json` / toolchainログ。EXE起動/copy0。
+
+次の通常 `cargo build --release --locked --bin wordweave5 --message-format=json` は固定default環境、別default target、log `full2-default-release/` で逐次開始した。試用と競合するbuildはない。
+
+通常releaseは21:29:23→21:32:58 JST、exit0/build-finished=true、compiler error0/warning5。EXEは `F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/default/release/wordweave5.exe`、SHA `661156D57067404BE8A5C232CED6A19442BF5D3F6487EF4B905AF4848AE4F2C2`。JSON features=[]、profileは試用と同じopt3/debuginfo0/assertionsfalse/overflowfalse/testfalse。source170/G0差0、旧製品2SHA不変、AdminFalse/Hidden/期限内/Waitedtrue/TEMP残存0、session35827終了済み。正本は同dirのartifact/start/result/summary/source-after各JSON。EXE起動/copy0。
+
+単独qwenの `cargo build --manifest-path tools/qwen-audio/Cargo.toml --release --locked --bin qwen-audio --message-format=json` を逐次開始した。出力は解決済みignored `F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/related`、logは `full2-qwen-release/`、環境ID `ET3-full2-related-20261014` は `full2-related-fixed-env.json` に固定した。default/trialの固定EnvMapを変更せず、relatedの合成LOCAL/TEMP、JOBS2/同CARGO_LOG/cwd/ordinary/Hidden/1800秒上限を別記した。旧standalone出力先を使わない。
+
+単独qwen releaseは21:34:27→21:37:16 JST、exit0/build-finished=true、compiler error0/warning6。EXEは `F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/related/release/qwen-audio.exe`、SHA `DD93326B164661A74CDF498852DF19DF471C7A3AFBED65980D5AAA45A30526AA`。features=[default,gui,mcp,windows-credentials,windows-job]、profileはopt3/debuginfo0/assertionsfalse/overflowfalse/testfalse。AdminFalse/Hidden/期限内/Waitedtrue/TEMP残存0、source170/G0差0、旧製品2SHA不変、session77215終了済み。正本は同dirのartifact/start/result/summary/source-after/toolchain各JSON。native/API/資格情報/mic/copy0。
+
+### build-only最終返却
+
+| 今回許可されたrelease build | exit / 結果 | EXE SHA256 |
+| --- | --- | --- |
+| 試用WordWeave5 | 0 / build PASS | `E3A0A87861D835C1E142072A14F3EBF7CF9DA0A8B95D404F4BF99402D4B1BBD2` |
+| 通常WordWeave5 | 0 / build PASS | `661156D57067404BE8A5C232CED6A19442BF5D3F6487EF4B905AF4848AE4F2C2` |
+| 単独qwen-audio | 0 / build PASS | `DD93326B164661A74CDF498852DF19DF471C7A3AFBED65980D5AAA45A30526AA` |
+
+3build PASS/FAIL0、各実command/env/profile/features/絶対path/時刻/exitの統合正本は `full2-release-summary.json`。これはtest PASS数ではない。full2通常no-runはcompile PASS1、試用no-runは親の同原因反復不要指示で未実施、全体runtimeは中断のまま未完了である。
+
+最終 `full2-final-preservation.json` はHEAD cb882031、source170/G0 12/marker4差0、full2通常debug24artifact SHA変化0、旧main `9B888E9FC923823C59B4C3B0AB1A4DAD2051CA6139DE153B6DE6CA213DD387D3` と旧standalone `57A3BE5B10F117E146E1C8AAC77616AA4A0F0873D74D68D858BD8C6E9A64506E` 不変を記録した。各新release EXEの最終現物SHAも統合JSONと一致した。
+
+21:40:09 JSTのread-only `full2-final-process-audit.json` は記録済みno-run/release4root PIDと同時刻の直接子、対象targetのcompiler候補、新release3EXEのlive候補が各0である。4commandは全Waitedtrue、sessions33504/39083/35827/77215は全exit0で終了した。ユーザーprocess停止0、無期限background process0。固定合成環境treeとraw logはignored配下に保持し、後続full/relatedの親解除待ちのためcleanup境界を早めていない。
+
+native DPI条件と新Cargo runner導入のユーザー回答は親で未受領である。新runner/harness、OS/global設定、source/依存/fingerprintの修正、関連test/no-run反復、全体runtime再開、native、提供folderへのcopyは開始していない。実IME/pen/TTS/mic/Codex/Qwen等の受入も未検証のままであり、mock/旧ログ/今回buildで解消したとは扱わない。
+
+今回区間の週枠64→65%（window10080/reset1792496607、終了21:39頃取得、最終応答前）は共有account観測であり本工程消費へ換算しない。子token開始/終了counter/log session ID/provider返却model・effort/親子包含は未取得。planner指定Sol/mediumは維持した。今回の許可作業は3release buildまで終了し、残るgateと未回答事項を親へ返して所有を返却する。

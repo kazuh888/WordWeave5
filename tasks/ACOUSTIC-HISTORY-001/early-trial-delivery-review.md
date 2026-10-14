@@ -60,3 +60,33 @@ build前後/runtime後170項目と現物差0、G0の12項目/4marker/Cargo設定
 親は通常/試用それぞれ全24artifactの現在SHAを保存JSONへ全照合した（各不一致0、test profile各22、features通常[]/試用[early-trial]）。固定source不変とFX1独立Postを受領し、この組で既定の通常/試用all-targets runtimeを解除する。各構成の既定Cargoコマンドを省略せず、合成環境・非管理者・有限timeout・終了/残存確認を維持する。full run中の非test artifactを起動する許可ではない。新source/EXE変化、未説明の失敗では停止する。
 
 関連crateの既定no-runと通常/試用/単独qwen-audioの別target release buildも許可する（buildのみ）。関連test EXEの対応照合までruntime不可、releaseのnative起動/最終提供も未解除である。native条件の未回答承認を推定で埋めず、旧製品releaseを上書きしない。
+
+### 通常full開始時の再compileによる解除失効
+
+既定Cargo full commandは固定sourceのまま再compileを開始した。原因を環境差と断定せず、親は所有する検証Cargoだけの停止/回収を指示した。runnerは所有treeを親子/時刻/commandで照合し、21:08:03 JSTにkill/wait、対象残存0・ユーザーprocess停止0を確認した。wrapper exit1/Cargo exit-1は意図した停止であり、製品テストFAILとして数えない。raw test result/Running/Finished行の観測0、実行成功証拠へ流用しない。旧通常24artifactは23件が変更又は不存在となったため、旧通常EXEの実行解除は失効する。source170項目差0、旧製品/単独tool EXE不変である。
+
+次は再compileの限定診断と、fullと同一process環境・同一合成rootでのno-run固定→親の新artifact照合である。現時点、再build/runtime/related/releaseはrunnerへ停止返却し、native/提供も未解除のままとする。FX1の既取得・独立確認済み84件は当時のsnapshot証拠として保持し、新EXEの成功へ読み替えない。
+
+### 再compileの局所原因と許可待ち
+
+runnerのfingerprint診断は複数依存crateについて `MissingFile { path: "C:\\Users\\安井" }` を明示した。対応Rustc dep-infoではプロフィール名のU+3000が無escape、Cargo binary dep-infoには切れた不存在prefix1件と正しいfull path11件が共存する。固定環境の通常no-runで再生成したdep-infoにも同entryが残り、既存試用側にも同じ問題を確認した（`full2-both-dep-info-prefix-audit.json`）。少なくとも同一環境だけでは次の再buildを防げないことが分かった。Cargo全般/全日本語pathへの一般化はしない。source、主要fingerprint、toolchain/configの不一致やGit hookは検出していない。
+
+親はprocess限定Cargo target runnerによる「build後・実行前の新EXE照合」の一時ラッパー導入許可を利用者へ質問した。公式[Cargo runner仕様](https://doc.rust-lang.org/cargo/reference/config.html#targettriplerunner)で機構の存在は確認したが、適用設計・実装・承認は別であり未着手。source/依存/fingerprint/OS/global Cargo設定の書換えや、テスト/合否基準の緩和はしない。原因既知の試用no-runの無用な反復は行わず、進行中の通常no-runだけ安全に終了して返却する。
+
+承認待ちの間も未影響の既定release build（試用→通常→別target単独qwen）だけは追加解除した。新EXE/構成/hash/source保全を返すまで起動不可、全体runtime/native/提供は依然未解除である。build成功を全体テスト成功の代用にしない。
+
+親の代替案read-only確認では、既存`.cargo`/`.rustup`の8.3短縮pathにもユーザー名部分のU+3000が残った。短縮名へのprocess環境切替だけではこの空白を回避できないため採用していない。alias作成/移動/環境変更0である。
+
+### 配布用buildの進捗（提供判定ではない）
+
+試用releaseはexit0/build-finished=true、features=[early-trial]/opt3/debuginfo0/debug_assertions=false/overflow_checks=false/test=falseである。`full2-trial-release/artifacts-fixed.json` のEXE SHA `E3A0A87861D835C1E142072A14F3EBF7CF9DA0A8B95D404F4BF99402D4B1BBD2` を親が現物へ照合した。旧通常製品SHAは保全値一致。source170/G0不変・非管理者/Hidden/有限期限/wait/TEMP残存0はrunner記録を参照する。試用EXEのnative起動・提供用copyは0、全体gate成功を意味しない。
+
+通常releaseもrunnerからbuild成功が返った（EXE SHA `661156D57067404BE8A5C232CED6A19442BF5D3F6487EF4B905AF4848AE4F2C2`、features=[]）。単独qwenの別target buildを継続している。全EXEの最終親照合と提供Postは未了である。
+
+### 今回の区切り：3build成功・承認待ち（ET3未完了）
+
+単独qwenもexit0で完了した。親は通常/単独qwenのartifact JSONと現物SHAを照合し、単独SHA `DD93326B164661A74CDF498852DF19DF471C7A3AFBED65980D5AAA45A30526AA`、features=[default,gui,mcp,windows-credentials,windows-job]を確認した。試用と合わせ3release build成功であり、製品test成功件数へ数えない。親がG0全12項目差0、旧通常EXE保全SHA、旧単独 `target/qwen-audio/release/qwen-audio.exe` SHA `57A3BE5B10F117E146E1C8AAC77616AA4A0F0873D74D68D858BD8C6E9A64506E` 不変も再確認した。
+
+runnerの最終source170/marker4/新通常debug24artifact差0、全所有process残存0/wait済み、実API/credential/mic/native/提供copy0は `full2-final-preservation.json` / `full2-final-process-audit.json` と報告末尾へ固定した。runnerの許可作業は終了して所有返却済み、背景で続行するprocessはない。
+
+一時Cargo runner導入とDPI150/200確認の移管は未回答であるため、ここで承認待ちにする。残りは承認範囲の計画/設計と検証手順整備→通常/試用full/関連crate gate→native確認→最終提供Post→ignored提供folderへEXE/使用説明/manifestのcopyである。release buildとFX1の84PASSだけでET3をClosed又は提供済みとしない。実API/実マイク等の利用者受入は引き続き別項目である。

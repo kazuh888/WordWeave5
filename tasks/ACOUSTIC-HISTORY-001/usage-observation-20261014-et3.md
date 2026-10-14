@@ -15,3 +15,13 @@
 FX1はplanner/designer/test author/reviewerを各Astra/high、runnerをSol/mediumへ限定割当した。製品実装/外部仕様変更の担当追加は非該当である。helper同体抽出3fileのPre PASS→作者→親source確認→独立静的指摘0→両構成all-targets no-run PASS2と進み、親が新4EXEを照合して限定回帰を解除した。別targetの試用初回compileはprocess限定CARGO_BUILD_JOBS=2で資源使用を抑え、永続設定/検証範囲は変えていない。
 
 共有週枠の中間観測はplanner59→59（精緻化60→60）、designer59→60、Pre reviewer61→61、作者61→62、静的reviewer62→62、native条件の限定判断62→63、FX1 no-run runner開始62→終了63%である。再利用agentの前工程を含むことがあり、これらを加算/担当別費用換算しない。各子のsession/token/返却model・effort/親子包含は未取得である。全体終了値は未取得であり、効果比較の結論はまだ出さない。
+
+## 承認待ちの区切り（ET3未完了）
+
+FX1限定回帰84/84PASS・独立Post PASSでsource保全commit cb88203をpushした。full開始時の再compileで旧通常EXE解除が失効し、所有Cargoだけを停止/回収した。製品test FAILとして数えず、full成功にも数えない。固定環境no-runと限定診断により、Cargo binary dep-infoにU+3000手前で切れた不存在prefixが再生成される局所原因を確認した。手戻りは[runner報告](early-trial-delivery-runner.md)と[親判定](early-trial-delivery-review.md)を正とする。環境差だけという初期仮説は確定原因にしない。
+
+未影響の試用/通常/単独qwen release build3件は成功し、source/旧製品を保持した。全体runtime/関連test/native/最終提供は未了である。一時Cargo runner導入とDPI150/200確認の移管は未回答・未導入・基準未変更。比較専用再実行0、不要と分かった試用no-run反復0。今後の改善候補は、always-dirty環境でもbuild直後の新EXEを実行前に照合できる一時runnerであり、利用者承認と安全設計前に導入しない。節約効果は未測定である。
+
+区切りの時計12:40:16 UTC（21:40:16 JST）、共有週枠65%/10080分/reset1792496607/ordinaryUsageAllowed=true。開始58→65はアカウント共通観測で、当工程専有量に換算しない。FX1最終review63→64、後段runner64→65も共有値である。子counter/session/返却model・effort/親子包含は欠測のままである。
+
+親の終了側snapshotは12:40:41.533Z、input1697478705/cached1657576064/output3874599/reasoning1222622/total1701353304/cache_write0。開始側11:08:50.836Zとの差はinput25890152/cached25498112/output79742/reasoning48174/total25969894/cache_write0である。cached/reasoningは内数、親子を合算しない。着手から開始snapshotまで、ここから記録commit/push/最終応答までは欠測範囲となる。旧方式の同条件baselineがなく、使用量の増減・削減率は未判定である。
