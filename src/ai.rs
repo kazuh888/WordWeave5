@@ -135,10 +135,10 @@ pub struct Config {
 }
 impl Config {
     pub fn from_settings(s: &Settings) -> Result<Self, String> {
-        let root = std::env::var_os("LOCALAPPDATA").ok_or("LOCALAPPDATAがありません。")?;
+        let root = wordweave5::store::resolve_storage_root()?;
         Ok(Self {
             exe: codex::resolve_executable(&s.codex_path)?,
-            cwd: PathBuf::from(root).join("WordWeave5/codex-work"),
+            cwd: root.join("codex-work"),
             model: s.codex_model.clone(),
             effort: s.codex_effort.clone(),
             examples: s.examples_per_word,

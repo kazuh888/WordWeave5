@@ -84,6 +84,76 @@ mod early_trial_paths_tests {
     }
 
     #[test]
+    fn et_d01_stage_readonly_recheck_failure_remains_before_writes() {
+        isolated(
+            "et_d01_stage_readonly_recheck_failure_remains_before_writes",
+            || {
+                let temp = Temp::new();
+                let (trial, normal) = roots(&temp);
+                fs::create_dir(&trial).unwrap();
+                fs::create_dir(&normal).unwrap();
+                fs::write(normal.join("keep.txt"), b"synthetic normal data").unwrap();
+                let mut checked =
+                    external_destination_windows::trial_preflight(&trial, &normal).unwrap();
+                assert!(checked.root_exists());
+                checked.recheck().unwrap();
+                let mut stage = TrialOpenStage::BeforeWrites;
+                fs::rename(&trial, trial.with_extension("moved"))
+                    .expect("FIXTURE_FAILURE: replace observed trial identity");
+                fs::create_dir(&trial).unwrap();
+                let before = tree(&temp.root);
+
+                assert!(checked.create_root(&mut stage).is_err());
+                assert!(matches!(stage, TrialOpenStage::BeforeWrites));
+                assert_eq!(tree(&temp.root), before);
+                assert!(!trial.join("app.lock").exists());
+            },
+        );
+    }
+
+    #[test]
+    fn et_d01_stage_readonly_failure_after_real_mkdir_keeps_started() {
+        isolated(
+            "et_d01_stage_readonly_failure_after_real_mkdir_keeps_started",
+            || {
+                let temp = Temp::new();
+                let (trial, normal) = roots(&temp);
+                fs::create_dir(&normal).unwrap();
+                fs::write(normal.join("keep.txt"), b"synthetic normal data").unwrap();
+                let normal_before = tree(&normal);
+                let mut checked =
+                    external_destination_windows::trial_preflight(&trial, &normal).unwrap();
+                assert!(!checked.root_exists());
+                assert!(!trial.exists());
+                let mut stage = TrialOpenStage::BeforeWrites;
+
+                checked.create_root(&mut stage).unwrap();
+                assert!(trial.is_dir());
+                assert_eq!(fs::read_dir(&trial).unwrap().count(), 0);
+                assert!(matches!(
+                    stage,
+                    TrialOpenStage::StorageInitializationStarted
+                ));
+                assert_eq!(tree(&normal), normal_before);
+                // Reuse the same checked state after a real mkdir. This directly
+                // checks sticky stage, not a race within one production call.
+                fs::rename(&trial, trial.with_extension("moved"))
+                    .expect("FIXTURE_FAILURE: replace created trial identity");
+                fs::create_dir(&trial).unwrap();
+                let before = tree(&temp.root);
+
+                assert!(checked.create_root(&mut stage).is_err());
+                assert!(matches!(
+                    stage,
+                    TrialOpenStage::StorageInitializationStarted
+                ));
+                assert_eq!(tree(&temp.root), before);
+                assert!(!trial.join("app.lock").exists());
+            },
+        );
+    }
+
+    #[test]
     fn et01_lock_failure_is_initialization_started_and_retry_preserves_progress() {
         isolated(
             "et01_lock_failure_is_initialization_started_and_retry_preserves_progress",
@@ -175,6 +245,9 @@ mod early_trial_paths_tests {
                 fs::create_dir(&normal).unwrap();
                 let storage = open_early_trial(trial.clone(), normal.clone());
                 assert!(storage.is_ok());
+                // Keep the registered roots, but release app.lock so this
+                // fixture can replace the trial directory after prepare.
+                drop(storage);
                 let caller = temp.root.join("caller");
                 let outside = temp.root.join("outside");
                 fs::create_dir(&caller).unwrap();
@@ -190,7 +263,9 @@ mod early_trial_paths_tests {
                     )
                     .unwrap();
                     let moved = root.with_extension("moved");
-                    fs::rename(root, &moved).expect("FIXTURE_FAILURE: rename observed root");
+                    fs::rename(root, &moved).unwrap_or_else(|error| {
+                        panic!("FIXTURE_FAILURE: rename observed root {root:?}: {error}")
+                    });
                     fs::create_dir(root).unwrap();
                     let before = tree(&temp.root);
                     assert!(
@@ -1586,6 +1661,8 @@ impl Progress {
 pub struct Storage {
     pub dir: PathBuf,
     _lock: File,
+    #[cfg(feature = "early-trial")]
+    early_trial: bool,
 }
 
 #[cfg(feature = "early-trial")]
@@ -1613,12 +1690,186 @@ struct TrialOpenFailure {
 }
 
 #[cfg(feature = "early-trial")]
-fn open_early_trial(_root: PathBuf, _normal: PathBuf) -> Result<Storage, TrialOpenFailure> {
-    // RED scaffold: no storage initialization or registration is implemented yet.
-    Err(TrialOpenFailure {
-        stage: TrialOpenStage::BeforeWrites,
-        reason: TrialOpenReason::RootUnavailable,
+fn open_early_trial(root: PathBuf, normal: PathBuf) -> Result<Storage, TrialOpenFailure> {
+    #[cfg(windows)]
+    {
+        // Serialize validation/initialization/registration with existing storage operations.
+        let _guard = acquire_progress_write().map_err(|_| TrialOpenFailure {
+            stage: TrialOpenStage::BeforeWrites,
+            reason: TrialOpenReason::StorageIo,
+        })?;
+        let before = |reason| TrialOpenFailure {
+            stage: TrialOpenStage::BeforeWrites,
+            reason,
+        };
+        if TRIAL_ROOTS
+            .get()
+            .is_some_and(|registered| registered.trial != root || registered.normal != normal)
+        {
+            return Err(before(TrialOpenReason::UnsafeRoot));
+        }
+        let mut checked = external_destination_windows::trial_preflight(&root, &normal)
+            .map_err(|_| before(TrialOpenReason::UnsafeRoot))?;
+        if checked.root_exists() {
+            check_early_trial_contents(&root).map_err(before)?;
+        }
+        checked
+            .recheck()
+            .map_err(|_| before(TrialOpenReason::UnsafeRoot))?;
+
+        let mut stage = TrialOpenStage::BeforeWrites;
+        checked
+            .create_root(&mut stage)
+            .map_err(|error| TrialOpenFailure {
+                stage,
+                reason: match error {
+                    ExternalDestinationError::Io => TrialOpenReason::StorageIo,
+                    _ => TrialOpenReason::UnsafeRoot,
+                },
+            })?;
+        checked.recheck().map_err(|_| TrialOpenFailure {
+            stage,
+            reason: TrialOpenReason::UnsafeRoot,
+        })?;
+        // Existing roots have not performed I/O that can modify storage yet.
+        // Once a mkdir or lock operation starts, keep that stage on every error.
+        stage = TrialOpenStage::StorageInitializationStarted;
+        let started = |reason| TrialOpenFailure { stage, reason };
+        let lock = OpenOptions::new()
+            .create(true)
+            .truncate(false)
+            .read(true)
+            .write(true)
+            .open(root.join("app.lock"))
+            .map_err(|_| started(TrialOpenReason::StorageIo))?;
+        fs2::FileExt::try_lock_exclusive(&lock).map_err(|_| started(TrialOpenReason::StorageIo))?;
+        checked
+            .recheck()
+            .map_err(|_| started(TrialOpenReason::UnsafeRoot))?;
+        let path = atomic_temp_path(&root.join(".ww5-early-trial-probe"));
+        #[cfg(all(test, windows, feature = "early-trial"))]
+        use early_trial_probe_tests::{observe_probe, ProbePoint as P};
+        #[cfg(all(test, windows, feature = "early-trial"))]
+        observe_probe(P::BeforeCreate, &path).expect("observation only");
+        let mut probe = OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&path)
+            .map_err(|_| started(TrialOpenReason::StorageIo))?;
+        #[cfg(all(test, windows, feature = "early-trial"))]
+        observe_probe(P::Created, &path).expect("observation only");
+        let written = (|| -> std::io::Result<()> {
+            #[cfg(all(test, windows, feature = "early-trial"))]
+            observe_probe(P::BeforeWrite, &path)?;
+            probe.write_all(b"WordWeave5 early-trial storage probe\n")?;
+            #[cfg(all(test, windows, feature = "early-trial"))]
+            observe_probe(P::Written, &path).expect("observation only");
+            #[cfg(all(test, windows, feature = "early-trial"))]
+            observe_probe(P::BeforeSync, &path)?;
+            probe.sync_all()?;
+            #[cfg(all(test, windows, feature = "early-trial"))]
+            observe_probe(P::Synced, &path).expect("observation only");
+            Ok(())
+        })();
+        drop(probe);
+        #[cfg(all(test, windows, feature = "early-trial"))]
+        observe_probe(P::Closed, &path).expect("observation only");
+        let removed = (|| -> std::io::Result<()> {
+            #[cfg(all(test, windows, feature = "early-trial"))]
+            observe_probe(P::BeforeRemove, &path)?;
+            fs::remove_file(&path)?;
+            #[cfg(all(test, windows, feature = "early-trial"))]
+            observe_probe(P::Removed, &path).expect("observation only");
+            Ok(())
+        })();
+        if written.is_err() || removed.is_err() {
+            return Err(started(TrialOpenReason::StorageIo));
+        }
+        checked
+            .recheck()
+            .map_err(|_| started(TrialOpenReason::UnsafeRoot))?;
+        // The guard prevents competing open calls from registering a different pair.
+        if TRIAL_ROOTS.get().is_none() {
+            TRIAL_ROOTS
+                .set(TrialRoots {
+                    trial: root.clone(),
+                    normal,
+                })
+                .map_err(|_| started(TrialOpenReason::UnsafeRoot))?;
+        }
+        Ok(Storage {
+            dir: root,
+            _lock: lock,
+            early_trial: true,
+        })
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = (root, normal);
+        Err(TrialOpenFailure {
+            stage: TrialOpenStage::BeforeWrites,
+            reason: TrialOpenReason::UnsafeRoot,
+        })
+    }
+}
+
+#[cfg(feature = "early-trial")]
+struct TrialRoots {
+    trial: PathBuf,
+    normal: PathBuf,
+}
+
+#[cfg(feature = "early-trial")]
+static TRIAL_ROOTS: std::sync::OnceLock<TrialRoots> = std::sync::OnceLock::new();
+
+#[cfg(feature = "early-trial")]
+fn resolve_early_trial_roots() -> Result<TrialRoots, TrialOpenFailure> {
+    if let Some(roots) = TRIAL_ROOTS.get() {
+        return Ok(TrialRoots {
+            trial: roots.trial.clone(),
+            normal: roots.normal.clone(),
+        });
+    }
+    let local = std::env::var_os("LOCALAPPDATA")
+        .map(PathBuf::from)
+        .filter(|path| path.is_absolute())
+        .ok_or(TrialOpenFailure {
+            stage: TrialOpenStage::BeforeWrites,
+            reason: TrialOpenReason::RootUnavailable,
+        })?;
+    Ok(TrialRoots {
+        trial: local.join("WordWeave5-EarlyTrial"),
+        normal: local.join("WordWeave5"),
     })
+}
+
+#[cfg(feature = "early-trial")]
+fn check_early_trial_contents(root: &Path) -> Result<(), TrialOpenReason> {
+    let progress = read_progress_typed(root, crate::commit::PROGRESS_LIMIT)
+        .map_err(|_| TrialOpenReason::InvalidProgressOrPending)?;
+    if progress.is_some_and(|decoded| decoded.progress.audio_history.is_some()) {
+        return Err(TrialOpenReason::HistoryPresent);
+    }
+    crate::commit::check_early_trial_recovery(root)
+        .map_err(|_| TrialOpenReason::InvalidProgressOrPending)
+}
+
+#[cfg(feature = "early-trial")]
+impl TrialOpenFailure {
+    fn message(self) -> String {
+        let reason = match self.reason {
+            TrialOpenReason::RootUnavailable => "試用専用の保存先を決定できません。",
+            TrialOpenReason::UnsafeRoot => "試用専用の保存先を安全に利用できません。",
+            TrialOpenReason::HistoryPresent => "音声履歴を含むため、早期試用では開けません。",
+            TrialOpenReason::InvalidProgressOrPending => "試用の学習記録または保存途中の記録を確認できません。音声履歴を含む記録にも対応していません。",
+            TrialOpenReason::StorageIo => "試用専用の保存先を読み書きできません。",
+        };
+        let stage = match self.stage {
+            TrialOpenStage::BeforeWrites => "起動前の検査で停止しました。元データは変更していません。",
+            TrialOpenStage::StorageInitializationStarted => "試用保存先の初期化を完了できませんでした。試用内に作成済みのフォルダーや確認用ファイルが残っている場合があります。",
+        };
+        format!("{reason}\n{stage}")
+    }
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -1980,6 +2231,12 @@ impl Storage {
     }
 
     pub fn open() -> Result<Self, String> {
+        #[cfg(feature = "early-trial")]
+        {
+            let roots = resolve_early_trial_roots().map_err(TrialOpenFailure::message)?;
+            open_early_trial(roots.trial, roots.normal).map_err(TrialOpenFailure::message)
+        }
+        #[cfg(not(feature = "early-trial"))]
         Self::at(resolve_storage_root()?)
     }
     pub fn at(dir: PathBuf) -> Result<Self, String> {
@@ -1993,10 +2250,37 @@ impl Storage {
             .map_err(|e| e.to_string())?;
         fs2::FileExt::try_lock_exclusive(&lock)
             .map_err(|_| "ほかのWordWeave 5が起動中です。閉じてから再起動してください。")?;
-        Ok(Self { dir, _lock: lock })
+        Ok(Self {
+            dir,
+            _lock: lock,
+            #[cfg(feature = "early-trial")]
+            early_trial: false,
+        })
     }
     pub fn load(&self) -> Result<Progress, String> {
         let guard = acquire_progress_write().map_err(ProgressGateError::message)?;
+        #[cfg(feature = "early-trial")]
+        if self.early_trial {
+            #[cfg(windows)]
+            {
+                let roots = TRIAL_ROOTS.get().ok_or("試用保存先を確認できません。")?;
+                let checked =
+                    external_destination_windows::trial_preflight(&self.dir, &roots.normal)
+                        .map_err(ExternalDestinationError::message)?;
+                check_early_trial_contents(&self.dir).map_err(|reason| {
+                    TrialOpenFailure {
+                        stage: TrialOpenStage::BeforeWrites,
+                        reason,
+                    }
+                    .message()
+                })?;
+                checked
+                    .recheck()
+                    .map_err(ExternalDestinationError::message)?;
+            }
+            #[cfg(not(windows))]
+            return Err("試用保存先を確認できません。".into());
+        }
         crate::commit::recover_under_guard(&self.dir, &guard)?;
         self.read_progress()
     }
@@ -2049,8 +2333,17 @@ fn atomic_write_with_temp(path: &Path, bytes: &[u8], temp: &Path) -> Result<(), 
 }
 
 pub fn resolve_storage_root() -> Result<PathBuf, String> {
-    let root = std::env::var_os("LOCALAPPDATA").ok_or("LOCALAPPDATAが見つかりません。")?;
-    Ok(Path::new(&root).join("WordWeave5"))
+    #[cfg(feature = "early-trial")]
+    {
+        return resolve_early_trial_roots()
+            .map(|roots| roots.trial)
+            .map_err(TrialOpenFailure::message);
+    }
+    #[cfg(not(feature = "early-trial"))]
+    {
+        let root = std::env::var_os("LOCALAPPDATA").ok_or("LOCALAPPDATAが見つかりません。")?;
+        Ok(Path::new(&root).join("WordWeave5"))
+    }
 }
 
 pub fn write_external_file(root: &Path, dest: &Path, bytes: &[u8]) -> Result<(), String> {
@@ -2200,7 +2493,17 @@ fn prepare_external_destination<'g>(
     #[cfg(windows)]
     {
         let cwd = std::env::current_dir().map_err(|_| ExternalDestinationError::Io)?;
-        external_destination_windows::prepare(root, dest, kind, guard, &cwd)
+        let roots = vec![root.to_owned()];
+        #[cfg(feature = "early-trial")]
+        let roots = {
+            let mut roots = roots;
+            if let Some(registered) = TRIAL_ROOTS.get() {
+                roots.push(registered.trial.clone());
+                roots.push(registered.normal.clone());
+            }
+            roots
+        };
+        external_destination_windows::prepare(&roots, dest, kind, guard, &cwd)
     }
     #[cfg(not(windows))]
     {
@@ -2234,7 +2537,7 @@ fn publish_external_file(
     #[cfg(windows)]
     {
         let checked_temp = external_destination_windows::prepare(
-            &checked.state.root,
+            &checked.state.roots,
             temp,
             ExternalDestinationKind::File,
             checked._guard,
@@ -2370,7 +2673,7 @@ mod external_destination_windows {
     }
 
     pub(super) struct CheckedState {
-        pub(super) root: PathBuf,
+        pub(super) roots: Vec<PathBuf>,
         pub(super) cwd: PathBuf,
         pub(super) parent_identity: FileIdentity,
         pub(super) leaf_present: bool,
@@ -2733,21 +3036,26 @@ mod external_destination_windows {
     }
 
     pub(super) fn prepare<'g>(
-        root: &Path,
+        roots: &[PathBuf],
         dest: &Path,
         kind: ExternalDestinationKind,
         guard: &'g ExternalExportGuard,
         cwd: &Path,
     ) -> Result<CheckedExternalDestination<'g>, Error> {
-        validate_path(root)?;
         validate_path(dest)?;
-        let absolute_root = absolute_unobserved(root, cwd)?;
         let absolute_dest = absolute_unobserved(dest, cwd)?;
-        validate_path(&absolute_root)?;
         validate_path(&absolute_dest)?;
         let mut observations = Vec::new();
-        let normalized_root = walk(&absolute_root, true, true, &mut observations)?;
-        let protected = protected_root(&normalized_root, &observations)?;
+        let mut absolute_roots = Vec::new();
+        let mut protected = Vec::new();
+        for root in roots {
+            validate_path(root)?;
+            let absolute_root = absolute_unobserved(root, cwd)?;
+            validate_path(&absolute_root)?;
+            let normalized_root = walk(&absolute_root, true, true, &mut observations)?;
+            protected.push(protected_root(&normalized_root, &observations)?);
+            absolute_roots.push(absolute_root);
+        }
         let normalized_dest = walk(&absolute_dest, false, false, &mut observations)?;
         let leaf = observations.last().ok_or(Error::UnsafePath)?.fingerprint;
         match (kind, leaf) {
@@ -2787,7 +3095,9 @@ mod external_destination_windows {
         {
             return Err(Error::Changed);
         }
-        check_region(&protected, &destination, &resolved_ancestors)?;
+        for root in &protected {
+            check_region(root, &destination, &resolved_ancestors)?;
+        }
         observations.extend(resolved_ancestors);
         let resolved_leaf = observe(&destination)?;
         if resolved_leaf.fingerprint != leaf {
@@ -2800,7 +3110,7 @@ mod external_destination_windows {
             destination,
             state: CheckedState {
                 // Preserve the original traversal (including '..') for temp preparation.
-                root: absolute_root,
+                roots: absolute_roots,
                 cwd: cwd.to_owned(),
                 parent_identity,
                 leaf_present: leaf.is_some(),
@@ -2810,7 +3120,11 @@ mod external_destination_windows {
     }
 
     pub(super) fn recheck(state: &CheckedState) -> Result<(), Error> {
-        for prior in &state.observations {
+        recheck_observations(&state.observations)
+    }
+
+    fn recheck_observations(observations: &[Observation]) -> Result<(), Error> {
+        for prior in observations {
             let now = observe(&prior.path).map_err(|error| match error {
                 Error::UnsafePath => Error::Changed,
                 other => other,
@@ -2820,6 +3134,116 @@ mod external_destination_windows {
             }
         }
         Ok(())
+    }
+
+    #[cfg(feature = "early-trial")]
+    pub(super) struct TrialPreflight {
+        root: PathBuf,
+        missing_directories: Vec<PathBuf>,
+        observations: Vec<Observation>,
+    }
+
+    #[cfg(feature = "early-trial")]
+    impl TrialPreflight {
+        pub(super) fn root_exists(&self) -> bool {
+            self.missing_directories.is_empty()
+        }
+
+        pub(super) fn recheck(&self) -> Result<(), Error> {
+            recheck_observations(&self.observations)
+        }
+
+        pub(super) fn create_root(
+            &mut self,
+            stage: &mut super::TrialOpenStage,
+        ) -> Result<(), Error> {
+            // Only the trial traversal contributes creation targets. Normal-root
+            // observations remain read-only, including an absent normal root.
+            for path in std::mem::take(&mut self.missing_directories) {
+                self.recheck()?;
+                *stage = super::TrialOpenStage::StorageInitializationStarted;
+                fs::create_dir(&path).map_err(|_| Error::Io)?;
+                let created = observe(&path)?;
+                if !created.fingerprint.is_some_and(|value| value.directory) {
+                    return Err(Error::Changed);
+                }
+                // Replace only absences changed by this successful mkdir. Keep
+                // every pre-existing handle and identity through initialization.
+                self.observations
+                    .retain(|prior| prior.path != path || prior.fingerprint.is_some());
+                self.observations.push(created);
+            }
+            self.recheck()?;
+            // An existing lock was inspected with the tree. Observe an absent
+            // lock as well before the caller opens it, without reading its bytes.
+            let lock = observe(&self.root.join("app.lock"))?;
+            if lock
+                .fingerprint
+                .is_some_and(|value| value.directory || value.links != 1)
+            {
+                return Err(Error::UnsafePath);
+            }
+            if lock.fingerprint.is_some() {
+                self.observations.push(lock);
+            }
+            Ok(())
+        }
+    }
+
+    #[cfg(feature = "early-trial")]
+    pub(super) fn trial_preflight(root: &Path, normal: &Path) -> Result<TrialPreflight, Error> {
+        if !root.is_absolute() || !normal.is_absolute() {
+            return Err(Error::UnsafePath);
+        }
+        validate_path(root)?;
+        validate_path(normal)?;
+        let mut trial_observations = Vec::new();
+        let root = walk(root, true, true, &mut trial_observations)?;
+        let mut normal_observations = Vec::new();
+        let normal = walk(normal, true, true, &mut normal_observations)?;
+        let trial_region = protected_root(&root, &trial_observations)?;
+        let normal_region = protected_root(&normal, &normal_observations)?;
+        // Include the existing leaf itself, not only its parents. Planned roots
+        // compare suffixes at a verified identity anchor (case-insensitively).
+        let check = |protected: &ProtectedRoot, path: &Path, observed: &[Observation]| {
+            for ancestor in observed.iter().filter(|value| value.fingerprint.is_some()) {
+                check_region(protected, path, std::slice::from_ref(ancestor))?;
+            }
+            Ok::<(), Error>(())
+        };
+        check(&normal_region, &root, &trial_observations)?;
+        check(&trial_region, &normal, &normal_observations)?;
+        let missing_directories: Vec<_> = trial_observations
+            .iter()
+            .filter(|value| value.fingerprint.is_none())
+            .map(|value| value.path.clone())
+            .collect();
+        let existing = missing_directories.is_empty();
+        trial_observations.extend(normal_observations);
+        let mut checked = TrialPreflight {
+            root: root.clone(),
+            missing_directories,
+            observations: trial_observations,
+        };
+        if existing {
+            let mut directories = vec![root];
+            while let Some(directory) = directories.pop() {
+                checked.recheck()?;
+                for entry in fs::read_dir(directory).map_err(|_| Error::Io)? {
+                    let path = entry.map_err(|_| Error::Io)?.path();
+                    let observed = observe(&path)?;
+                    let fingerprint = observed.fingerprint.ok_or(Error::Changed)?;
+                    if fingerprint.directory {
+                        directories.push(path);
+                    } else if fingerprint.links != 1 {
+                        return Err(Error::UnsafePath);
+                    }
+                    checked.observations.push(observed);
+                }
+            }
+        }
+        checked.recheck()?;
+        Ok(checked)
     }
 }
 

@@ -156,9 +156,36 @@ use serde::{Deserialize, Serialize};
 use std::{fs, path::Path};
 
 #[cfg(feature = "early-trial")]
-pub(crate) fn check_early_trial_recovery(_root: &Path) -> Result<(), String> {
-    // RED scaffold: the read-only recovery preflight is not implemented yet.
-    Err("early-trial recovery preflight is not implemented".into())
+pub(crate) fn check_early_trial_recovery(root: &Path) -> Result<(), String> {
+    if !pending_checked(root).map_err(PendingCheckError::message)? {
+        return Ok(());
+    }
+    let bytes = read_recovery_bytes(&root.join(PENDING), DEFAULT_LIMITS.intent)
+        .map_err(recovery_error_message)?
+        .ok_or_else(|| recovery_error_message(recovery_error(HistoryErrorKind::Io)))?;
+    let intent: Intent =
+        serde_json::from_slice(&bytes).map_err(|_| "保存途中の記録が不正です。".to_owned())?;
+    if intent.deck.len() as u64 > DEFAULT_LIMITS.deck
+        || intent.progress.len() as u64 > DEFAULT_LIMITS.progress
+        || intent
+            .old_deck
+            .as_ref()
+            .is_some_and(|s| s.len() as u64 > DEFAULT_LIMITS.deck)
+        || intent
+            .old_progress
+            .as_ref()
+            .is_some_and(|s| s.len() as u64 > DEFAULT_LIMITS.progress)
+    {
+        return Err("保存途中の記録が読取上限を超えています。".into());
+    }
+    for raw in std::iter::once(intent.progress.as_str()).chain(intent.old_progress.as_deref()) {
+        let (_, progress) = crate::store::decode_progress_for_material(raw.as_bytes())
+            .map_err(recovery_error_message)?;
+        if progress.audio_history.is_some() {
+            return Err("音声履歴を含むため、早期試用では開けません。".into());
+        }
+    }
+    Ok(())
 }
 
 #[derive(Debug, PartialEq, Eq)]

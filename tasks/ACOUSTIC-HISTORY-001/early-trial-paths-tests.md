@@ -186,3 +186,83 @@ RED工程の完了境界は独立oracle、最小fixture、compile/list、上記�
 実装者は確定契約とprobe限定設計どおりroot/preflight/登録/外部保護/ai cwd/読取専用pending検査を接合する。新testを変更せず、BeforeWrites/Started、probe pathと9points、retry/保持の期待値を使う。本体不足を解消後は上記focusedコマンドと既定関連回帰を行う。独立runnerは最終source/EXEを固定して通常4・試用33の新集合と計画gateをfresh検証する。新たな仕様/API判断が必要なら親へ返す。
 
 source所有は段階2の親宛明示messageで再度返却する。計画済みGREEN/runner/レビューを作者は担当しない。runtime model/effort metadataと開始/終了usage counterは引き続き未取得である。
+
+## 段階3：最終recheck fixtureの作者再開確認（2026-10-14）
+
+親から残る `store::early_trial_paths_tests::et05_final_recheck_observes_caller_and_both_registered_root_identities` 1ケースと本節だけを受領した。planner指定は `gpt-6-astra/high`、役は `ww-test-author`、受入は承認済みET-05である。AGENTS、開発7役、KPI、TDD skill全文を確認した。開始HEADは `61d0ef54a0d021db915773f038f8973673d96e79`、既存dirtyのstore/commit/ai本体と親usage記録を保持した。本再開ではRust sourceを追加編集していない。
+
+### 旧証拠と今回の差
+
+親受領の前回実装担当結果は試用32PASS/fixture1FAIL・通常4PASSであり、今回の新規実測とは区別する。旧 `recheck-diagnostic.stderr.log` はcaller/normalの後、trial root renameで `FIXTURE_FAILURE` / OS5になっていた。trialのrecheck/publish oracleへは未到達であり、製品挙動のREDとは数えない。原因はStorageの生存中app.lockであり、前回作者はStorageだけをdropするfixture修正とroot名付き失敗表示を適用した。登録OnceLockの解除や本体観測handleの変更、期待値の緩和はしていない。旧 `recheck-fixed-compile.log` は完了記録がなく、成功証拠に使用しない。
+
+今回、修正済みsourceからfresh no-runを実施しexit0、2m25sで完了した。既存の警告はあるがcompile errorなしである。固定EXEのexact listは1 test/0 benchmarks、exact runtimeは **1PASS/0FAIL/0ignored**、exit0である。外側wrapperと隔離childの各1PASSは同じ1ケースであり、2件に合算しない。caller/normal/trialの各rootについてprepare後に実rename・別identityのdirectory作成を行い、recheck拒否、publish拒否、変更後ledger不変をすべて通過した。旧app.lock保持状態の再実行はせず、旧失敗ログを根拠に保持する。
+
+```text
+cargo test --locked --features early-trial --lib store::early_trial_paths_tests::et05_final_recheck_observes_caller_and_both_registered_root_identities --no-run
+target/debug/deps/wordweave5-1e58dd7001d62083.exe store::early_trial_paths_tests::et05_final_recheck_observes_caller_and_both_registered_root_identities --exact --list
+target/debug/deps/wordweave5-1e58dd7001d62083.exe store::early_trial_paths_tests::et05_final_recheck_observes_caller_and_both_registered_root_identities --exact --nocapture --test-threads=1
+```
+
+runtimeはWindowsIdentity/WindowsPrincipal取得成功、`Administrator=False`を起動前に確認し、true/取得不能を拒否するguard付きでsandbox外の通常権限にて実行した。list/runtimeそれぞれ固定SHA照合、Hidden、45秒上限とtimeout時kill/reapを使用し、実測timeoutなしである。隔離child側は既存30秒上限を維持する。`target/early-trial-build/et1-author/recheck-resume-runtime/{temp,local}` の合成環境だけを使用し、終了時temp/local直下とも残存0。実データ・鍵・API・RunAs/UAC・OS設定変更はない。
+
+ログは `target/early-trial-build/et1-author/` 配下の `recheck-resume-compile.log`、`recheck-resume-list.{stdout,stderr}.log`、`recheck-resume-runtime.{stdout,stderr}.log`。同directoryがignoredであることを確認した。失敗の期待値は「root差し替え後にrecheckとpublishがErr」であり、fixture自体の失敗は今回0である。
+
+### 固定snapshot・返却
+
+以下は今回のsource/EXE識別である。store source/moduleはcompile開始前からruntime後まで不変、他sourceはcompile中とruntime後で不変、EXEはcompile完了後からruntime後まで不変を確認した。moduleは `src/store.rs` 先頭から本体 `use crate::{` 直前までのUTF-8 bytes（既存改行を保持）であり、先頭のpaths/probe両moduleを含む。
+
+| 対象 | SHA256 |
+| --- | --- |
+| Cargo.toml | 65FA8ECDFF905F73E0B7DCD94CF5465A7288C8EEC4E67B3CB24245FA0350B95E |
+| src/store.rs | 0B7F5D2B295FF1A1BC26F8D70586452E7762C9F492E4FAB5A5B5E582BFE9649B |
+| store作者module | D2E3225B03A398FC7B2275F49B45010B85F9E5BD5A3F0DD6B4FFBFF3F733C23A |
+| src/commit.rs | 7D2720329860CEB3DCE1D2B1B8A5F85DED14EFBDE20FDF556173EF861CDBA95E |
+| src/ai.rs | 2AF7BE14882F9496BB1860179CF2B3D3FAC2F68DE39F1941DB056E1927925B6C |
+| tests/early_trial_paths.rs | 0CF6249630FACED5687206FBAF0C96378D5E2E6082E97D56E3DC05601B083E16 |
+| target/debug/deps/wordweave5-1e58dd7001d62083.exe | B95E14BE4EFAC1A3BBF0282B1C51F0AC993F0A45082ED041912AA4CDA3AACAEE |
+
+本再開の完了はこの1件のfixture成立と受入oracle到達の確認までである。親へ所有を返却し、本体担当によるStarted遷移のsticky化、最終sourceでの独立runner/Postへ進める。今回の1PASSを試用33件の同一snapshotでの全集合成功や全体gate成功に置き換えない。
+
+collaboration taskは `/root/trial_recheck_resume`、環境で取得したthread IDは `01a137e2-5701-7692-a8e2-78b0a6f5871a`、compile exec sessionは `73903` である。指定model/effortと実行metadataを区別し、実行model/effort metadata、開始/終了token counterは未取得。runtime後のhash照合時刻は2026-10-14 09:53:20 JST、compile所要はCargo実測2m25s、開始時計は未記録である。usage集計は親へ欠測を引き継ぎ、作者から親記録を変更しない。
+
+## 段階4：Started保持の独立小回帰（2026-10-14）
+
+同じ作者・planner指定Astra/highで、親からstore paths test moduleの新2ケースと本節だけを追加受領した。本体は[実装記録](early-trial-paths-implementation.md)のsticky修正後、SHA256 `767D92D5649D4B1B09E2ED5D2492F3327DA578AB861CD15ADFF767D65FEE5BBD` で固定されていた。根拠は承認契約ET-01/ET-D01の「最初のmkdir/app.lock/probe直前にStartedへ移り、以後戻さない」である。
+
+新private署名 `TrialPreflight::create_root(&mut self, stage: &mut TrialOpenStage)` と既存trial_preflight、実Windows identity、Temp/tree/有限childだけを使った。新seam、fake identity、検査bool、OnceLock resetはない。新2ケース以外のsourceと本体は変更していない。
+
+| 実在test名（prefixは `store::early_trial_paths_tests::`） | AC | oracle |
+| --- | --- | --- |
+| et_d01_stage_readonly_recheck_failure_remains_before_writes | ET-01/ET-D01 | 既存の空trialをpreflight後に実rename/再作成し、create_root拒否でもBeforeWrites・ledger不変・app.lock未作成 |
+| et_d01_stage_readonly_failure_after_real_mkdir_keeps_started | ET-01/ET-D01 | 不在trialへcreate_rootの実mkdir成功・Started・空dir・通常sentinel不変を確認。同じchecked/stageを保持してtrialのidentityを差し替え、2回目のcreate_root拒否でもStarted・ledger不変・app.lock未作成 |
+
+後者はsticky状態の直接検査であり、single-call途中の競争を再現したものではない。旧版には新署名がなく、本作者は旧版のcompile不能をREDに数えず、旧不具合の動的再現済みとも主張しない。Startedの期待値は現実装から導出せず承認契約を使用した。
+
+### focused実測とfixture修正
+
+初回 `cargo test --locked --features early-trial --lib store::early_trial_paths_tests::et_d01_stage_readonly --no-run` はexit0（1m54s）。固定EXEでlist2件を確認し、runtimeはStartedケース1PASS、BeforeWritesケース1fixtureFAILであった。BeforeWrites fixtureはtrial内sentinelもpreflightで観測した状態でroot renameがOS5となり、段階oracleへ到達しなかった。失敗はcompile errorでも行動REDでもない。
+
+試験用trial sentinel作成だけを除き、空の既存trialを差し替えるfixtureへ限定した。通常root sentinel、stage、ledger、app.lockのassertはすべて維持した。修正後の該当1件だけをfresh no-run（exit0、1m30s）→固定EXE/list1→exact runtimeで確認し、**1PASS/0FAIL/0ignored**となった。成功済みStartedケースは変更も反復もしていない。したがって新2ケースはそれぞれPASSの証拠を持つが、**作者の最終証拠はmixed snapshot**であり、同一最終EXEの2PASSではない。最終sourceの試用全件/通常GREENと独立runnerは後続担当へ引き継ぐ。
+
+最終fixtureの再compileコマンドは以下である。list/runtimeは固定したEXEに同じ完全名と `--exact --list`、または `--exact --nocapture --test-threads=1` を渡した。初回だけは上記2件共通prefixを使用した。
+
+```text
+cargo test --locked --features early-trial --lib store::early_trial_paths_tests::et_d01_stage_readonly_recheck_failure_remains_before_writes --no-run
+```
+
+両runtimeはWindowsIdentity/WindowsPrincipal取得成功・Administrator=Falseを起動前に確認し、true/取得不能で拒否するguard、固定SHA照合、Hidden、45秒上限（child30秒）、終了wait付きである。timeoutなし、各回の合成TEMP/LOCALAPPDATA直下残存0。通常ユーザーのsandbox外実行であり、実データ、鍵、API、UAC/RunAs、OS設定変更は使用していない。今回の既存sentinel保持時rename拒否のOS内部原因までは特定していない。
+
+ログはignoredの `target/early-trial-build/et1-author/` 内で、初回が `sticky-author-compile.log`、`sticky-author-list.{stdout,stderr}.log`、`sticky-author-runtime.{stdout,stderr}.log`、fixture修正後が `sticky-author-fixture-compile.log`、`sticky-author-fixture-list.{stdout,stderr}.log`、`sticky-author-fixture-runtime.{stdout,stderr}.log` である。元の失敗ログを保持した。
+
+### 固定sourceと所有返却
+
+最終sourceから新2テストの連続範囲だけを除いたUTF-8 bytesのSHA256は、受領source `767D92D5649D4B1B09E2ED5D2492F3327DA578AB861CD15ADFF767D65FEE5BBD` と一致した。これにより本体・既存test・共有helperの不変を照合した。`cargo fmt --all -- --check`、`git diff --check` は成功である。
+
+| snapshot | store source SHA256 | store作者prefix SHA256 | libtest EXE SHA256 |
+| --- | --- | --- | --- |
+| 初回2件（Started PASS、BeforeWrites fixtureFAIL） | 8C114A1DE1CCD01E7C4EE727038100A25C1987AA581667BFF5A6EB747E077083 | 9A7B7DDA5034B028AC55006784C5CF6A17C4350AAE797F82BA4CC79F0A6E5E1E | C53A4C977C1BC273823C6B337D74FCE23A913783E062815E35B6DA71C76DD4B8 |
+| 最終fixture（BeforeWrites exact PASS） | 20C1498B540395164076CECAF9B5ACA56568DE648D0712C3D9F487C53C0AF3F8 | 05DECCA1466F3E77627A7296ECFB782543CC5F91DF0F07F21328949C67CB5660 | E4D86950F31F61F6E6539BB3F80DA3FFDE925419C86391F0648FDF73CCD37867 |
+
+EXE pathは両snapshotとも `target/debug/deps/wordweave5-1e58dd7001d62083.exe`、prefix境界は段階3と同じである。Cargo/integration/commit/aiの全file hashは段階3から不変。新しいsource宣言は合計36、試用構成は35（lib20、integration14、ai1）、通常は4のままである。この構成別予定集合を今回の実行件数に加算しない。
+
+追加2テストと本節の所有を親へ返却する。実装役が最終sourceの試用全件/通常GREEN、次に独立runner/Postを担当する。collaboration task/thread IDは段階3と同じ、compile exec sessionは初回26194・fixture修正版50426である。指定model/effortはAstra/high、実行model/effort metadataと開始/終了usage counterは引き続き未取得である。
