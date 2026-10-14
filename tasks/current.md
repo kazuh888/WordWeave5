@@ -1,6 +1,6 @@
 # 現在のタスク要約
 
-更新：2026-10-14（早期試用保存先分離ET1とfixture是正FX1は独立Post PASS/Closed。次はET2の起動・資格情報・識別表示。音声履歴UI・試用EXE・製品全体は未完成）。詳細は [参照インデックス](context-index.md) と末尾の最新位置を参照する。
+更新：2026-10-14（ET1/FX1とET2は独立Post PASS/Closed。利用者指定のET2完了境界で停止。ET3・音声履歴UI・試用EXE・製品全体は未完成）。詳細は [参照インデックス](context-index.md) と末尾の最新位置を参照する。
 
 ## 現在の目標
 
@@ -99,3 +99,5 @@ C3本体とP01設計Preのcheckpointは`fef8bd2`でpush済み。fresh作者`tria
 最新位置：利用者は区切りを「現在のET2工程の独立検証・レビュー完了まで」と明示選択した。P01-V1接合後の通常/試用bin no-runは両成功、8source/作者4marker不変、独立静的指摘0。親がJSON構成と両EXE SHAを照合し、[V1限定解除](ACOUSTIC-HISTORY-001/early-trial-egress-review.md)の固定組だけlist/録音安全対照/通信対照/実app matrixの自己検証を許可した。実装者が検証中であり、感度試験・独立runner・最終Postは未了。ET3・製品EXE更新へは今回の区切り後に進めない。
 
 V1自己検証は両構成各P01 20＋録音3の46PASS。しかしA09が内部assert panicを意図unwindと混同する感度欠落を発見し、独立作者が専用panic型識別/未知payload再送出でV2に是正した。[V2 Gate/静的追加確認](ACOUSTIC-HISTORY-001/early-trial-egress-review.md)では是正欠陥0、親source確認後に独立runner Sol/mediumの通常/試用bin+lib no-runを再開した。runtimeは新EXE対応解除待ち。感度案は3snapshotを保ちS1へ是正A09を戻す修正を受領済み、変異sourceは未作成。独立検証・感度・Post未了。共有週枠はrunner開始側中間51%、タスク専有消費ではない。
+
+最新位置：ET2は[独立最終Post PASS/Closed](ACOUSTIC-HISTORY-001/early-trial-egress-review.md)。[独立runner](ACOUSTIC-HISTORY-001/early-trial-egress-runner.md)でV2 252件PASS、感度S1–3計25目的assert FAIL、完全逆復元後trial36件PASSを確認した。252と36をunique合算せず、25を製品PASSへ数えない。全8source/4markerはV2へ完全逆復元、ee84f8e源差分0・変異残存0・対象process/fixture残存0。A09のpanic混同と感度計画A09欠落P2もClosed。source保全commit ee84f8eはpush済み、最終記録を別commitで保存する。使用量終了側共有週枠58%（タスク専有量/旧方式比は未判定）。利用者指定どおりここで停止、ET3全体test/release/試用EXE提供/native受入は次回であり今回実施しない。製品EXEは未更新。再開時はこの最終Postとearly-trial-planのET3だけを参照し、成功済みET2や履歴を全面再実行しない。

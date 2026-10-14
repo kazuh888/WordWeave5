@@ -77,3 +77,25 @@ C3試用bin新17件は現固定source/EXEで全PASS、実名一致/毎起動Admi
 その後、利用者は「現在のET2工程の独立検証・レビュー完了まで継続する」を明示回答した。50/60%の数値上限は選択されていない。ET3は別の区切りとする。P01実装の通常/試用no-run成功と独立静的指摘0を取得し、同じ固定source/EXEのfocused自己検証を依頼した。
 
 P01実装session `01a139a4-14c3-7402-834c-3e219e5feb55` のno-run終了観測09:16:30.391Zはinput4100291/cached3990016/output15348/reasoning1249。P01 reviewer session `01a139ac-f26e-7fb2-bf3a-c7d827f8e3bc` の09:13:49.355Zはinput1266517/cached1166208/output4094/reasoning528。いずれも最終応答前まで、工程開始欠測・親子包含不明・provider返却model/effort未取得を保持し、合算しない。
+
+## V2独立検証と感度是正の中間記録
+
+V1自己46PASS後、感度準備で作者A09のcatch_unwindがcount assertの失敗を意図panicと混同する隙間を発見した。作者が専用panic型識別と未知payload再送出へ最小是正し、独立静的確認を受けた。実装者のV2重複build/自己検証は行わず、runnerの両構成bin/lib独立no-runと252件focused回帰へ集約した。252PASS/FAILskiptimeout残存0で、ET3全体gateを代替しない。source保全checkpoint ee84f8eをpush済みである。
+
+感度は既定3snapshotへ相互隠蔽しない変異をまとめた。S1目的FAIL17、S2目的FAIL6を独立確認、S3目的2件は実行中。各変異/復元のsourceG0とEXE対応照合は保持し、基準や実遮断を弱めていない。A09是正とno-run一回分の中断は実際の手戻りとして記録し、compile成功/通常PASSだけでoracleが十分とは扱わない。改善候補は意図したpanicの型識別を作者段階で点検することであり、今回そのためのharness/settings/Skill変更はしていない。
+
+共有週枠の観測はrunner開始49→V2開始51/終了52→S1開始53/終了54→S2開始55/終了55%。同じ10080分窓、reset値1792496607/1792496608の1秒差を含む。並行する親/子/他作業と整数粒度のため工程専有量へ換算しない。runner session/token counterとprovider metadataは未取得で欠測を保持する。実装者の最新S3 no-run観測10:24:33.845Zはinput16104536/cached15852672/output50360/reasoning5958、同session累積でありS3単独量ではない。
+
+## 終了側取得（最終focused GREEN・Post・報告前）
+
+S3は2/2目的FAIL、S1–3計25目的FAILを独立確認した。一時変異はV2全8source/4markerへ完全逆復元し、親の現hash/ee84f8e差分0/変異残存0を確認済み。復元trial no-run成功後、新EXE対応Gateを経て独立focused36件を実行中である。最終Post未了なので、この時点を完了や最終応答までの総量とは呼ばない。
+
+親の共有読取末尾token eventは10:36:19.664Z、input1667451930/cached1628204672/output3782274/reasoning1170166/total1671234204。開始実在snapshotとの差はinput67338178/cached65883392/output161535/reasoning75151/total67499713。inputはcachedを、outputはreasoningを含むため再加算しない。着手前後欠測・最終応答/最終review後の未反映・親子包含不明は維持する。子と合算しない。
+
+終了側の共通週枠は58%/10080分/resetsAt1792496608、ordinaryUsageAllowed=true。開始22%からの表示変化36ポイントはアカウント共有値であり、このET2だけの消費量・料金・旧方式比には換算しない。利用者が指定したET2完了境界を維持し、次工程ET3には進めない。
+
+役割累積の最新取得：実装者10:34:41.375Z input17759993/cached17468416/output56366/reasoning6147、reviewer10:33:46.329Z input3879052/cached3482624/output10325/reasoning1785、作者A09是正後09:28:37.564Z input4135479/cached4019456/output28823/reasoning5629。いずれも同role session累積、各工程開始/末尾応答/親子包含/provider実行metadataは未取得部分を含む。runner token/sessionは引き続き欠測であり、取得漏れを0や推定値で埋めない。
+
+今回の記録だけでは自動役割切替が旧方式より使用量を増減したかは未判定である。既定の安全Gateや試験基準を下げず、復元後はtrial36だけを再確認し、同一bytesの通常/lib/関連252を再走させない。長い親文脈、検証密度、A09手戻りを含むため、小修正の基準測定と同条件とは扱わない。
+
+最終結果：復元後36/36PASS、最終Post PASS/ET2 Closed。最終reviewerの10:40:34.586Z取得はinput4815373/cached4402304/output13010/reasoning2209。同session累積/開始欠測/最終応答と記録push後未反映/親子包含不明/provider metadata未取得である。runnerの終了週枠は58%、token/session欠測を保持する。成功済み252を反復せず、感度25を製品PASSへ加算していない。利用者指定の完了境界で終了しET3/製品EXEは未着手。最終判定正本は[egress-review](early-trial-egress-review.md)、実行正本は[runner](early-trial-egress-runner.md)である。

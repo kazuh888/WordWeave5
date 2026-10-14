@@ -82,3 +82,82 @@ S1=(title/history拒否欠落/fatalApp/録音誤0/P01誤0)、S2=(fatalD開始/P0
 | 試用lib | `trial-target/debug/deps/wordweave5-1e58dd7001d62083.exe` | `9920760395F7EF4BE4A50A569B9A91C9C93B62BB7766FB0E33953D73594DFBF1` |
 
 独立runnerの上記4EXEだけlist/実行を解除する。list照合→録音安全3→P01入口/寿命→境界/実app matrix→従来ET2・関連回帰の順、実名集合はlist後に固定する。毎起動Administrator=False/SHA/Hidden/bounded/exact件数/合成TEMP LOCAL cwd/worker子終了wait/残存を要求し、最初の予期しない失敗・timeout・未知worker・source/EXE変更で停止する。実key/API/mic/native/管理者/追加build/感度変異は解除しない。
+
+## V2独立252件成功・感度前の所有返却
+
+独立runnerは通常bin120/試用bin130/lib資格情報定数各1の252PASS、FAIL/SKIP/timeout0を返却した。親も`v2-runtime`の全result.jsonを独立集計し、256記録（4list＋252case）全Passed、timeout/Waited不足/Administrator不一致/fixture残存が0であることを確認した。実名集合/source前後/4marker/4EXE/終了processの正本は[runner報告](early-trial-egress-runner.md)。18:48:35の最終8source＋Cargo設定不変、全command終了・所有返却を受領した。ET3全体gateではない。
+
+この後、親は実装担当へ元ET2所有内のmain/app/mediaとP01 aiについて、既定S1の最小変異sourceだけを許可した。trial構成title、history拒否欠落、fatalApp、録音観測誤0、通信観測誤0に限定する。normal titleと作者marker・実遮断・実加算は不変。新sourceG0前のbuild/list/runtimeは禁止、S2/S3/復元は別指示とする。変異をcommitせず、感度完了後にV2全hashへ逆復元する。独立Post/P01 Closedは未了。
+
+## S1 sourceG0・no-run限定解除
+
+親がee84f8eからの実diff全体を読取確認した。trial title誤literal、fatal時Ok(app)、history条件false、RecordingStartWatch.callsとSnapshot.calls返値0の5箇所だけである。実入口/同global/poison/実加算/拒否/guard寿命/作者assertは未変更。変更4sourceの現物SHAを再計算し[実装報告S1表](early-trial-egress-implementation.md)へ一致、他4source/4markerは同報告で不変を確認した。
+
+S1固定sourceに対するtrial bin no-runのみ解除する。前後8source/4marker、JSON由来構成/profile/EXE絶対path/SHAを返すまでlist/runtime不可。予定17exact（A09込み）のみ対象。通常/製品build、S2/S3、復元、commitは禁止のままである。no-runは既存impl専用trial-targetで行い、独立runnerのV2受入EXEを上書きしない。
+
+S1 no-run成功後、親がJSON現物のearly-trial/profile.test=true/EXE対応と実SHA `CD5313E3214F2833B920290C3278D192915980EB66EE4455BE517D653B0B80C6`、現8sourceがS1表一致を確認した。独立runnerにこのEXEだけlistと予定17exactの目的FAIL確認を解除する。各目的assertのFAIL（exit101、1case、特定期待値/箇所）を独立判定した場合に限り次の予定caseへ進んでよい。予期しないPASS、目的外FAIL、0case、timeout、未知worker、source/EXE差異で停止する。毎起動Admin=False/SHA/Hidden/bounded/合成環境/wait/残存0は正常検証と同じ。作者oracle・実遮断・実加算変更、S2/S3/復元・追加buildは禁止のままである。
+
+S1独立runnerは17/17目的assert FAIL、予期しない結果0を返した。これは誤り検出成功であり、製品試験PASS17とは数えない。A09のcounter期待1失敗の未知payload伝播、B03のworker終了確認後のcount期待1失敗も確認した。全17exit101/exact1、timeout/wait不足/Admin不一致/fixture残存0、最終source/marker/EXE不変、全command/対象process終了を受領した。正本はrunner報告と`s1-runtime`である。
+
+親はS1所有返却後、実装担当へS1全5変異のV2逆復元と既定S2（fatal時Dを1回開始して元Err、通信観測実0だけ1）だけのsource変更を許可した。予定6件、sourceG0前のbuild/runtime、S3/最終復元/commitは禁止する。
+
+## S2 sourceG0・no-run限定解除
+
+実装者はS1逆復元後の全8source V2一致を確認してからS2を適用した。親は現在の実diff（app fatal分岐のD1回→元Err、ai Snapshot実0だけ1）を全て読み、両changed source SHA `677993F91D842D0F33955CCC0DE1249A3C7F93A6639D00E6A54F0F2995E1E2A6` / `7936322B33982B6CEDE940722F0A2FCF71D32B3E21EC501FBBD90494223DD22C`、main/mediaのV2復元を現物照合した。他source/作者marker不変は実装報告表を正とする。Dは指定raw-loader試験の合成closureだけを実行し、実診断開始関数/nativeは呼ばない。
+
+このS2 fixed sourceのtrial bin no-runだけを解除する。8source/4marker前後一致とJSON構成/EXE SHAの返却前はlist/runtime禁止。予定6exact、D群は最初のbefore-constructor全0検査の検出力のみを確認する。実遮断/実加算/作者assert/安全条件は維持し、S3/復元/commitは許可しない。
+
+S2 no-run成功後、親がJSON現物のearly-trial/test=true/EXE対応・実SHA `F66B82F50088953612AB863A36140514EF10209364581464EC7FA8D7616CE5A9`、changed2source現hashのS2一致を確認した。他source/4marker前後一致は実装報告を照合した。独立runnerに同impl trial EXEのlist→S2予定6exactだけ目的FAIL確認を解除する。目的FAIL（exit101/exact1/指定assert）の場合だけ次予定caseへ進み、予期しない結果・timeout・未終了・source/EXE不一致で停止する。毎起動Admin=False/SHA/Hidden/bounded/合成環境/子終了wait/残存0、S3/復元/追加build/source変更/commit不可を維持する。
+
+S2独立runnerは6/6目的FAIL、予期しない結果0、全exit101/exact1/timeout・wait不足・Admin不一致・残存0を返却した。fatalの実(1,1)/期待(1,0)、新ownerの実1/期待0、D群before-constructorの実1/期待0が目的箇所であった。最終source/marker/EXE不変と全process終了を受領した。後続stageごとの検出力実測とは解釈しない。
+
+親はS2所有返却後、V2全8hashへ逆復元確認→既定S3のapp共通loader呼出前での合成早期失敗だけを実装担当へ許可した。予定2件は実archive拒否後の到達検査と回復後read拒否の到達検査。sourceG0前build/runtime、最終復元、commitは禁止する。
+
+## S3 sourceG0・no-run限定解除
+
+親がV2との差分全体を読み、app共通loader呼出を型付き合成Errへ置き換える1箇所だけであることを確認した。app現SHA `3EE539727A4AD238983F407F6102CD5A201711BA2662692B39B94741B346D89A`、ai V2復元の現hashを照合、他7source/4marker V2一致は実装報告表を確認した。実録音/通信遮断・実加算・作者fixture/assertは無変更である。
+
+S3固定sourceのtrial bin no-runのみ解除する。前後8source/4marker、JSON構成/profile/EXE絶対path/SHAの返却前list/runtime不可。予定2exactは必要段階未到達をfixture-stage assertionが拒むことだけを対象とする。最終復元/commit/他buildは禁止する。
+
+S3 no-run成功後、親がJSON early-trial/test=true/EXE対応・現SHA `42DBBEBC565C55EE9B1B9E3B0639FDC7B7EAB42904D91DC7B648BCA5332583CB` とapp現hashのS3一致を確認した。他7source/4marker前後一致は実装報告を照合した。独立runnerに同EXEのlistと予定2exactだけを解除する。指定FIXTURE_STAGE assertionのFAIL（exit101/exact1）を確認した場合だけ次へ進行可、別原因/予期しないPASS/0case/timeout/未終了/sourceEXE差異は停止する。毎起動Admin=False/SHA/Hidden/bounded/合成環境/子終了wait/残存0、source編集/追加build/最終復元/commit禁止を維持する。
+
+S3独立runnerは2/2目的FIXTURE_STAGE FAILを確認した。次教材bytesへの未到達と実loader/read拒否の実(0,0,false)/期待(1,0,true)が目的箇所である。全exit101/exact1/timeout・wait不足・Admin不一致・残存0、最終source/marker/EXE不変、全command終了を受領した。S1–3の計25目的FAILは製品PASSへ加算しない。
+
+親は最終V2完全逆復元だけを実装担当へ許可した。8source/4marker一致とsource差分0、変異残存0を返すまでbuild/list/runtime不可。復元後も旧解除を復活させず、新sourceG0→trial bin no-run→新EXE対応解除→独立focused GREEN→最終Postへ進む。
+
+## 最終V2復元sourceG0・no-run限定解除
+
+実装者の復元後、親が全8sourceの現SHAを再計算しV2固定表一致、ee84f8eとの差分0、S1/S2/S3変異文字列残存0を確認した。実装者の4marker一致と照合し、作者是正A09を含むV2本体/安全接合を完全保持する。復元後のsource変更はなく、これまでのsource読取確認を同一bytesの根拠として保持する。
+
+同sourceのtrial bin no-runだけを実装担当へ解除する。まだimpl EXEはS3版であり、そのまま起動しない。前後8source/4markerとJSON構成/EXE SHAを親へ返し、独立runnerの復元後focused GREEN解除を別に行う。通常/libの独立V2証拠は同一bytesの範囲で保持し、製品build/ET3は行わない。
+
+## 復元後GREEN待ちの独立証拠audit
+
+独立reviewerはV2全256 result（4list＋252case）とraw exact1成功、S1–3全25目的FAILの個別診断、変異diff/前後source/構成EXE/親解除、現ee84f8e源差分0を照合し、受入阻止0と判定した。A09目的FAILと前回S1 A09欠落P2の是正を確認済み。最終focused GREEN未了なのでPost/Closedは未判定である。
+
+記述補足：namespaceのbin/lib2case×2構成は内部isolatedを使わずchild完了markerがない。外側wrapperのAdmin/SHA/Hidden/timeout/wait/残存とexact1成功は確認済みであり、内部marker必須の総称は内部isolated利用caseだけへ限定する。実検証不足の指摘ではなく、runner報告の記述を最終時に修正する。
+
+## 復元V2新EXE対応・最終focused36解除
+
+復元no-run成功後、親が`restored-v2-trial-build.jsonl`現物のearly-trial/profile.test=true/EXE対応と実SHA `F3C602DBE2EEA404573E14D1BD3835A908668ECC4A1DB06172CE5C5240447618`、全8sourceのee84f8e差分0を再確認した。実装報告の全8source/4marker前後V2一致を照合した。独立runnerにこのimpl trial EXEだけlistとfocused36件（P01 20＋従来ET2 16、録音安全3含む）の正常GREENを解除する。
+
+list実名とV2独立selected集合の対応を固定し、録音安全3→P01既定安全順→従来ET2残りの順。毎起動Admin=False/SHA/Hidden/bounded/合成環境/exact1/適用caseの内部child完了/子worker終了wait/残存0を要求する。今回は全PASSが期待であり、最初のFAIL/0case/timeout/未知worker/sourceEXE差異で停止する。source編集/追加build/製品EXE/ET3/commitは禁止する。
+
+復元後の独立focused36件は全PASS、FAIL/SKIP/timeout0を取得した。親もfinal-runtimeの37result（1list＋36case）を再集計し、FAIL/timeout/wait不足/Admin不一致/fixture残存0と全8sourceのee84f8e差分0を確認した。内部isolated33件にだけ完了markerを適用し、非isolatedのtitle1＋namespace selector2は外側安全/exact1を確認した。runnerは全command/対象process終了を返却済みである。これで最終Postへ必要な新動的証拠を提出した。独立判定は後述する。
+
+## 最終Post：PASS / ET2 Closed（2026-10-14）
+
+独立reviewer `trial_egress_review`（指定Astra/high）は最終新証拠を照合し、確定指摘・受入阻止・要回答質問0でPASSと判定した。既確認の静的レビュー、独立V2 252PASS、S1–3の25目的FAIL、復元後36/36PASSを接合し、既定startupを含むET2の今回の独立検証範囲をClosedとする。252と36は重複を含むので288 uniqueとは数えず、25目的FAILも製品PASSへ加算しない。
+
+| 対象 | 最終状態 / 根拠 |
+| --- | --- |
+| ET2 / ET2-P01 | Closed。起動/識別/資格情報分離/history拒否、factory前通信観測と操作別ゼロ、全8入口の保護/寿命を既定試験と固定source/EXEで確認 |
+| V1 A09のpanic混同 | Closed。独立作者の型識別/未知payload再送出、S1 counter期待1の目的FAIL、復元後GREEN |
+| 感度計画のS1 A09欠落P2 | Closed。S1実名集合と目的FAILにA09を追加し、独立audit確認 |
+| ET2-PRE-01 / G0 | Closed。承認済み唯一Gateに沿い、source変更/各構成EXE/変異/逆復元それぞれ親の対応確認と個別実行解除を記録 |
+
+最終reviewerもraw exact1成功、33適用marker、37起動のexit0/AdminFalse/SHA/timeout・wait不足・残存0、実名集合差0、復元no-run JSON/新EXE SHA/親解除の対応を確認した。現8source/Cargo/4markerはV2一致、ee84f8e源差分0で変異なし。reviewerの編集/実行/再委譲0。
+
+残る境界はS2 D群のbefore-constructor限定、S3の段階未到達検出限定、実Codex/Reqwest自身の未設置counter、実資格情報/API/mic等のnative受入、ET3 all-targets/release/製品EXE、AcousticHistory全体である。これらを本PASSに含めない。利用者指定どおりET2完了で停止し、ET3へ進めない。
+
+reviewer終了側10:40:34.586Zは同session累積input4815373/cached4402304/output13010/reasoning2209。今回開始値/末尾応答/親子包含/provider返却model・effort未取得を維持する。

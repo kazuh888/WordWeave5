@@ -1,5 +1,7 @@
 # 開発タスクの使用量記録
 
+- 2026-10-14 ACOUSTIC-HISTORY-001 ET2は[独立最終Post PASS/Closed](../../../tasks/ACOUSTIC-HISTORY-001/early-trial-egress-review.md)。独立252PASS、感度25目的FAIL、完全逆復元後36PASSを確認し、重複/目的FAILをunique製品PASSへ合算しない。A09試験のpanic混同を作者が是正し、実装者の重複V2自己検証は省略、既定3snapshotへ感度をまとめた。[使用量記録](../../../tasks/ACOUSTIC-HISTORY-001/usage-observation-20261014-et2.md)に親/子別の取得値・欠測・手戻りを保存した。共通週枠22→終了側58%は当工程専有量ではなく、親子包含/runner token欠測/長い親文脈/検証密度差のため旧方式比未判定。終了側counterは最終応答/記録push前まで。利用者指定のET2完了境界で停止、ET3/release/製品EXE/nativeは次回である。
+
 - 2026-10-14 15:40 JST、ET1/FX1 Closed後の続行指示でACOUSTIC-HISTORY-001 ET2を開始。HEAD `97d2c72` clean、範囲は起動/資格情報/識別/JSON拒否の接合と独立検証/Postまで、ET3製品提供は後続。[ET2観測記録](../../../tasks/ACOUSTIC-HISTORY-001/usage-observation-20261014-et2.md)へ開始週枠22%・親counter・取得範囲を保存した。親Sol/medium維持、計画指定Astra/highでdesignerを起動し既存承認契約の試験可能な接合だけを具体化する。親子を合算せず旧方式比を未判定とする。
 
 - 2026-10-14 ACOUSTIC-HISTORY-001のET1/FX1は[独立Post PASS/Closed](../../../tasks/ACOUSTIC-HISTORY-001/early-trial-paths-review.md)。残るrecheck1、本体sticky分類、保存先/外部保護/AI cwdを確認し、独立回帰で見つけたfixture構成不整合5件をtest3file/5symbolだけ是正した。影響範囲各83rawを再検証し未変更証拠と接合、通常250/試用281行動PASS・各fixtureSKIP3。親Sol/medium、作者/実装/計画/レビューAstra/high、runnerSol/mediumを工程別dispatchした。[使用量記録](../../../tasks/ACOUSTIC-HISTORY-001/usage-observation-20261013.md)に親/子別の実在開始終了counter・差分・欠測を保存した。再開週枠10%→終了側22%はアカウント共通観測で当工程単独へ帰属せず、親子を合算しない。終了時計02:14:26 UTC、親counter02:16:16.587 UTCまで、最終記録/push/応答は範囲外。通常開発の検証だけで比較専用再実行0、旧方式比未判定。集計wrapper・fixture前提・test参照名の手戻りを保持し、feature追加時の既存fixture棚卸しを改善候補とした。ET2/ET3・製品EXE・native/API受入は未完了である。
