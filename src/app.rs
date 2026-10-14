@@ -227,7 +227,7 @@ pub(crate) mod early_trial_startup_tests {
         isolated("app::early_trial_startup_tests::et04_nonhistory_json_and_settings_survive_trial_reopen", |base| {
             let watch = watch_recording_starts().unwrap(); let (ctx, mut app, trial) = fresh(base);
             let normal = ledger(&base.join("local/WordWeave5"));
-            let candidate: Progress = serde_json::from_str(r#"{"version":2,"audio_history":null,"settings":{"minutes":7,"topic":"manual synthetic import"}}"#).unwrap();
+            let candidate: Progress = serde_json::from_str(r#"{"version":2,"audio_history":null,"settings":{"minutes":7,"topic":"manual synthetic import"},"memories":{},"reviews":[],"suspended":[],"ai_calls":{},"study_seconds":{}}"#).expect("FIXTURE: et04_nonhistory_json_and_settings_survive_trial_reopen requires valid nonhistory v2 JSON before restore");
             app.restore(candidate).unwrap(); assert_eq!(app.progress.settings.topic, "manual synthetic import"); assert_no_history(&app);
             app.begin_settings_edit(); app.settings_editor.draft.minutes = 11; app.save_settings(&ctx).unwrap(); assert_no_history(&app);
             drop(app);
@@ -610,9 +610,40 @@ fn add_chat_text_files(
     Ok(())
 }
 
+#[cfg(feature = "early-trial")]
+#[derive(Debug)]
+pub(crate) enum TrialStartupFailure {
+    StorageOpenRejected { safe_message: String },
+    RecoveryOrInitializationStarted,
+}
+
+#[cfg(feature = "early-trial")]
+impl std::fmt::Display for TrialStartupFailure {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::StorageOpenRejected { safe_message } => f.write_str(safe_message),
+            Self::RecoveryOrInitializationStarted => f.write_str(
+                "試用データの回復または初期化を完了できませんでした。試用内では回復がすでに適用されている場合や、途中で停止している場合があります。",
+            ),
+        }
+    }
+}
+
+#[cfg(feature = "early-trial")]
+impl std::error::Error for TrialStartupFailure {}
+
+#[cfg(feature = "early-trial")]
+fn start_early_trial_diagnostics(path: &std::path::Path) {
+    wordweave5::diagnostics::initialize(path);
+    let operation = DiagnosticOperation::begin(DiagnosticEntry::Application);
+    operation.event(DiagnosticStage::Startup, DiagnosticEvent::Completed);
+}
+
 pub struct WordApp {
     storage: Option<Storage>,
     fatal: Option<String>,
+    #[cfg(feature = "early-trial")]
+    early_trial: bool,
     progress: Progress,
     deck: Vec<Entry>,
     page: Page,
@@ -752,6 +783,56 @@ impl WordApp {
         app
     }
     fn new_with_storage(ctx: &egui::Context, storage: Result<Storage, String>) -> Self {
+        Self::new_with_storage_and_loader(ctx, storage, Storage::load)
+    }
+
+    #[cfg(feature = "early-trial")]
+    pub(crate) fn new_early_trial(
+        cc: &eframe::CreationContext<'_>,
+        storage: Storage,
+    ) -> Result<Self, TrialStartupFailure> {
+        Self::new_early_trial_with(
+            &cc.egui_ctx,
+            storage,
+            Storage::load,
+            start_early_trial_diagnostics,
+        )
+    }
+
+    #[cfg(feature = "early-trial")]
+    fn new_early_trial_with<L, D>(
+        ctx: &egui::Context,
+        storage: Storage,
+        loader: L,
+        start_diagnostics: D,
+    ) -> Result<Self, TrialStartupFailure>
+    where
+        L: FnOnce(&Storage) -> Result<Progress, String>,
+        D: FnOnce(&std::path::Path),
+    {
+        let mut app = Self::new_with_storage_and_loader(ctx, Ok(storage), loader);
+        if app.fatal.is_some() {
+            return Err(TrialStartupFailure::RecoveryOrInitializationStarted);
+        }
+        app.early_trial = true;
+        start_diagnostics(
+            &app.storage
+                .as_ref()
+                .expect("accepted storage")
+                .dir
+                .join("diagnostics"),
+        );
+        Ok(app)
+    }
+
+    fn new_with_storage_and_loader<L>(
+        ctx: &egui::Context,
+        storage: Result<Storage, String>,
+        loader: L,
+    ) -> Self
+    where
+        L: FnOnce(&Storage) -> Result<Progress, String>,
+    {
         let mut font_notice = String::new();
         let mut fonts = egui::FontDefinitions::default();
         let windows = std::env::var_os("WINDIR")
@@ -843,7 +924,7 @@ impl WordApp {
                 None
             }
         };
-        let mut progress = match storage.as_ref().map(Storage::load) {
+        let mut progress = match storage.as_ref().map(loader) {
             Some(Ok(p)) => p,
             Some(Err(e)) => {
                 fatal = Some(e);
@@ -911,6 +992,8 @@ impl WordApp {
         Self {
             storage,
             fatal,
+            #[cfg(feature = "early-trial")]
+            early_trial: false,
             progress,
             deck,
             page: Page::Home,
@@ -2706,6 +2789,12 @@ impl WordApp {
         Ok(())
     }
     fn restore(&mut self, mut progress: Progress) -> Result<(), String> {
+        #[cfg(feature = "early-trial")]
+        if self.early_trial && progress.audio_history.is_some() {
+            return Err(
+                "音声履歴を含むため、早期試用には復元しない。現在の記録は変更していない。".into(),
+            );
+        }
         if self.color_editor.is_some() {
             return Err("配色の保存かキャンセルを終えてから復元してください。".into());
         }

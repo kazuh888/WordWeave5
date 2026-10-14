@@ -13,7 +13,11 @@ use tokio::task::JoinHandle;
 use tokio_util::sync::CancellationToken;
 use zeroize::Zeroizing;
 
+#[cfg(not(feature = "early-trial"))]
 pub const WORDWEAVE_QWEN_CREDENTIAL_TARGET: &str = "WordWeave5.QwenReading.Connection.v1";
+#[cfg(feature = "early-trial")]
+pub const WORDWEAVE_QWEN_CREDENTIAL_TARGET: &str =
+    "WordWeave5.EarlyTrial.QwenReading.Connection.v1";
 
 #[cfg(test)]
 mod early_trial_startup_tests {

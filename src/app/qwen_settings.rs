@@ -205,7 +205,6 @@ use qwen_audio::{
 };
 use std::sync::{mpsc, Arc};
 use tokio_util::sync::CancellationToken;
-#[cfg(not(test))]
 use wordweave5::qwen_reading::WORDWEAVE_QWEN_CREDENTIAL_TARGET;
 use zeroize::Zeroizing;
 
@@ -224,6 +223,13 @@ struct ProbeJob {
     receiver: mpsc::Receiver<Result<ProbeSuccess, ProbeError>>,
 }
 
+fn configured_store_with<F, T>(factory: F) -> T
+where
+    F: FnOnce(&'static str) -> T,
+{
+    factory(WORDWEAVE_QWEN_CREDENTIAL_TARGET)
+}
+
 pub(super) fn default_store() -> Arc<dyn CredentialStore> {
     #[cfg(test)]
     {
@@ -231,10 +237,11 @@ pub(super) fn default_store() -> Arc<dyn CredentialStore> {
     }
     #[cfg(not(test))]
     {
-        Arc::new(
-            WindowsCredentialStore::for_target(WORDWEAVE_QWEN_CREDENTIAL_TARGET)
-                .expect("constant credential namespace"),
-        )
+        configured_store_with(|target| {
+            Arc::new(
+                WindowsCredentialStore::for_target(target).expect("constant credential namespace"),
+            ) as Arc<dyn CredentialStore>
+        })
     }
 }
 

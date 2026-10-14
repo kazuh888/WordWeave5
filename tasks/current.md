@@ -87,3 +87,9 @@ ET2設計は必須の録音開始counter不足で一度STOPしたが、planner `
 設計・計画・Pre結果は `abad297` でpush済み。独立作者 `trial_startup_tests`（Astra/high）が6fileの専用試験を作成中であり、本体変更は未開始。既存Qwen定数のpure-lib exact1件はcompile成功後、通常namespaceと試用literalの不一致という目的assertで1FAIL（行動RED）を取得した。録音入口を呼ぶ試験は未実行。残る試験/署名/hash固定→所有返却→別の実装者→ET2-G0→独立runner/Postへ進む。
 
 作者は[ET2試験報告](ACOUSTIC-HISTORY-001/early-trial-startup-tests.md)で18新case（試用bin17+lib1／通常bin6+lib1）と署名・oracle・6source/module hashを固定し所有返却した。最終一括no-runは不足API28診断のみでexit101、行動REDと混同しない。作者のcount参照誤り2件は修正済み、fmt/diff成功。本体・bin/Recorder実行0。factory前からの録音counterとは別に、send/probe spyはfactory後の操作のみであり起動中通信0の直接観測は未取得である。次は別実装者Astra/highが本体接合し、親ET2-G0まで録音を呼ぶ試験を実行しない。
+
+ET2試験checkpoint `9a7eb5c`をpush済み。別実装者Astra/highが本体をC1へ接合し、通常/試用no-run成功、親G0のsource/4EXE照合後に限定実行した。録音安全3件は両構成PASS、通常新7PASS、試用5PASS/#3FAIL/後続12未実行で停止。main試験のstrict保存形式必須field欠落を作者がC2で是正し、親sourceG0再確認後のcache再no-run中である。旧失敗/EXE/期待値を保存し、元のHistoryPresent拒否oracleは弱めていない。
+
+独立静的reviewは本体の確定欠陥0だが、起動/設定/復元の送信0が実操作へ未接続というET2-P01/P2検証不足をAcceptedとした。[計画P01追補](ACOUSTIC-HISTORY-001/early-trial-plan.md)で新ai.rs/qwen_reading_ui.rsと既存qwen_settings/qwen_settings_testsの4fileにtest専用観測を限定し、親が追加2fileと同file内の合成Store選択を受領した。designer Astra/highが具体型/worker寿命/通信安全Gateを設計中、Pre前の是正source編集は禁止である。詳細判定/解除は[レビュー記録](ACOUSTIC-HISTORY-001/early-trial-startup-review.md)、C1/C2実行は[実装記録](ACOUSTIC-HISTORY-001/early-trial-startup-implementation.md)、作者fixtureは上記試験報告を正とする。ET2最終Post/ET3/製品EXEは未了、実data/key/API/mic/管理者操作0。
+
+C2#11はrestore前の正常JSON必須field不足で停止し、作者が全18fixtureを一括点検してC3へ限定是正した。親G0後のC3試用bin新17件は全PASS、FAIL/skip/timeout/残存0。通常/libはC1/C2の元snapshot範囲に限定し、全件fresh検証済みとはしない。P01の[具体設計](ACOUSTIC-HISTORY-001/early-trial-startup-design.md) SHA `8AC25D82…96F82F3` / plan `BCD69DBC…5E3A785` は[独立Pre PASS](ACOUSTIC-HISTORY-001/early-trial-startup-review.md)、阻止0。次はP01専用の独立作者Astra/high→別実装者Astra/high→親の通信/録音8sourceG0→独立runnerSol/medium→PostAstra/highである。P01はAcceptedのまま、通信正対照を旧録音限定解除で実行しない。使用量08:32時点の週枠22→42は共有枠の中間値であり当該工程専有とは断定しない。

@@ -102,3 +102,67 @@ module hashは最初の追加cfg属性からmodule閉じ括弧までをUTF-8化�
 | src/media.rs | 775F1B67CFA6DF7186ED12866C8080F787CB4FE1D2B046F849DC8050CF45A0B6 | DCD6637D4AB50C170E7B6AD22B49F9CC99E0352A499D9B5F37AD1E30A9352FAA |
 
 usageは対象session token_count取得可。最初の観測07:25:24.180Zはinput38639/cached23040/output223/reasoning10、途中07:39:49.553Zはinput4107026/cached3974272/output22534/reasoning3844である。開始前と最終応答は含まず、親子包含不明、週枠は親測定である。終了付近snapshotは親handoffに返す。runtime model/effortを指定値で埋めず、未取得とする。
+
+## C1後の作者fixture是正（未build・未実行）
+
+2026-10-14。親が限定再割当したmain.rsの追加test moduleと本報告のみを変更した。Astra/highを保持し、debugging-and-error-recoveryとtest-driven-developmentを全文確認した。本体・他5source・P01通信観測scopeは変更していない。旧C1記録/hashは履歴として保持する。
+
+実測証拠は `target/early-trial-build/et2-impl/runtime-c1/trial-case3/` のresult.json/stderr.logである。`early_trial_startup_tests::et_d01_creator_preserves_open_rejection_without_creating_closure` は旧main27のsafe_message一致assertで失敗、exit101、timeout=false、Waited=true、Administrator=false、fixture残存0であった。C1試用bin SHAは `15B231707BB6FE50E3658688E3EC542FF82AA64D47D0B97A154BF41AE6167687`。ログにactual安全文はなく、その理由を動的に確認済みとはしない。
+
+静的原因は旧fixtureが `version` と `audio_history` のみで、strict `ProgressWire` の必須6フィールド `settings/memories/reviews/suspended/ai_calls/study_seconds` を欠くことである（store.rs:1134/1252）。`check_early_trial_contents` はdecode失敗をInvalidProgressOrPendingへ変換し、その後のHistoryPresentへ到達しない（1846–1852）。保存形式の必須フィールドを確認せず短縮fixtureを使った作者側の前提不足である。Progressの寛容なDeserializeだけではこの不足を検出できない。途中説明の「7フィールド」は数え違いであり、欠落はこの6個である。
+
+是正は同じ実名1case内の2対照である。元のmalformed literalを残して実Storage::open→creatorの「記録不正・BeforeWrites」安全文と全tree不変をassertする。その後、6必須フィールドを含む独立v2 literalへ明示置換し、元の「音声履歴を含む」exact本文・StorageOpenRejected.safe_message一致・Display一致・creatorなし・全tree不変・diagnosticsなしを検査する。fixture置換は各保存前後snapshotの外に置き、アプリが行った変更と混同しない。失敗時にはcase名、expected安全文とactual failureの安全なDisplayを出力する。新たなProgress-onlyのserde検査、production codec複製、skip、期待値弱化はない。安全文分類の動的確認と新fixtureの受入は再実行待ちである。
+
+`cargo fmt --check` exit0（`target/early-trial-build/et2-author/fx1-fmt.log`）、`git diff --check` exit0。no-run build・runtimeは今回0である。新case追加はなく、試用18/通常7の予定件数は維持する。親のsource G0再確認→実装者no-run→新EXE固定→親再解除→同exact case再実行を待つ。
+
+| source | 今回固定SHA256 | 作者module SHA256 |
+| --- | --- | --- |
+| src/main.rs | 66BDD7137811C5C954A12C8C1E5461D5AF8933DC832D2282F2F37ACDE45C2025 | 84A5F2A3DF6E645B105A5453FC51B3A6E835D8FEA9F0B5895C6FD4A7B803149C |
+| src/app.rs（C1不変） | 2AA13D474D8B8F2F6ED47B1D6E57FC75BA342C6C2822490927E38793860C3C56 | 3877EFEAEDBBC7A8BB88A1987070313D7B59AFB632D2DDB1EBF97D6B7C5DC4AA |
+| src/qwen_reading.rs（C1不変） | 3910E0042F057691F339A3AF7A59F6A381F7D0DB3D6B47706CAA1986D88CBB64 | FAE2E01F3926D3AAC196DCCEA603BB7D574711C2FBFDB2402617256A09EC76A0 |
+| src/app/qwen_settings.rs（C1不変） | D847555998E71987E8519D8B8B4811D68231054A043A365F3D040BA0339E11C8 | A9881AF09824509E98202B9E673B0E22FC724653FC4AF4255962EB5F970034B6 |
+| src/app/qwen_settings_tests.rs（C1不変） | 45EF01F0F3DB4A2302AE8DAF9FC10834190D427AB648823139B46DC49DE324F1 | C6550481C8B381BD44EF0419F9437D4046F7C06BA4A1C189C2EECAD2A10281C0 |
+| src/media.rs（C1不変） | 14914D6606950E3E9565EA43F9374B8B70A3C9CAB78D7F71419311176F9B3207 | DCD6637D4AB50C170E7B6AD22B49F9CC99E0352A499D9B5F37AD1E30A9352FAA |
+
+mainの旧C1 sourceは `A646CB6B4524188DD8DF88F3067A6ACB30ECF8F803C3B6AD6ADBEC6B30B1489D`、旧moduleは `73F14DD72E8AE1A0A1B6F42E5C508A54C3C911FE65BC28F73F06581F9316EFD4` である。今回だけ親の明示割当で作者fixtureを修正した。次担当は新moduleを固定して扱う。既存C1 PASSを新snapshotの実測として流用しない。
+
+## C2後の18case入力一括診断（reportのみ・source編集禁止）
+
+2026-10-14。上表の6source SHA256が不変であることを確認し、全18caseの作者fixtureを正常入力と意図した不正入力に分けて型・strict wire・関連入力検証へ静的照合した。今回の変更は本節だけである。source編集、no-run、runtimeは0であり、P01の設計審査・通信観測scopeには介入しない。
+
+実測は `target/early-trial-build/et2-impl/runtime-c2/trial-case11/` のstderr.log/result.jsonである。#11 `app::early_trial_startup_tests::et04_nonhistory_json_and_settings_survive_trial_reopen` はapp.rs:230のfixture Deserializeで `missing field memories`（line 1 column 93）となり、restore前に失敗した。exit101/child101、timeout=false、Waited=true、fixture残存0。試用EXE SHA256は `F89BF3B3B00465B288699941A374D4A93CEDAD01547675FEC1C2B2A8C67EAAD6`。これは作者fixtureの構造不備であり、restore本体の行動FAILではない。
+
+前節の「Progressの寛容なDeserializeだけではこの不足を検出できない」は誤りであり、本節で訂正する。`Progress` の手動Deserialize（store.rs:1099）は `ProgressWire::deserialize` と `normalize_progress` を呼ぶため、直接 `serde_json::from_str::<Progress>` も同じ必須field検査を通る。main.rs:23–25の同趣旨コメントも訂正対象である。required wire fieldsは `version/settings/memories/reviews/suspended/ai_calls/study_seconds`、v2ではさらに明示的な `audio_history` が必要である。Settings自体にはserde defaultがあり、部分settingsとProgress全体の欠落を混同してはならない。
+
+| case番号 | 入力と照合結果（静的） |
+| --- | --- |
+| #1–2 | namespace/titleの独立literalのみ。JSON、Store、Draft、audio入力なし。 |
+| #3 | 短縮JSONは意図したInvalidProgressOrPending対照。修正済みhistory JSONは全required fields、64桁hexとbytes=12を含む。両者を明示置換して別snapshotを取る。 |
+| #4–6 | watch登録・worker・意図したpanic/poison。保存形式fixtureなし。隔離子processの失敗を行動成功へ読み替えない。 |
+| #7–9 | OLD/NEXTは完全なv2 JSON、pendingは実Intentのold_deck/old_progress/deck/progress型と一致。15列TSVは全必須値・安全なid・1個の空欄を満たしparse_deck前提assertあり。#9のraw Errは分類専用stub。通常rootの非JSON sentinelは非parseの保存比較用であり、正常Progressへ修正しない。 |
+| #10 | typed Progressからの全field JSONにhistory参照を挿入するため必須fieldを保持。chat/Draftも既存型から構築する。 |
+| #11 | **正常入力不備1箇所**。独立JSON literalにmemories/reviews/suspended/ai_calls/study_secondsの5個が欠落。settingsは既に存在する。 |
+| #12 | 実producerによるbackupとtyped Progress。短縮手書きJSONなし。Conversation/draft、cancel→承認の入力は型契約と整合。 |
+| #13 | 検査済み15列TSVと、parse_wordsが許す1列ASCII単語2行。手書きProgressなし。 |
+| #14 | 既存material_ui_draftのCorrect candidateはbaselineからmeaning/usageのみ変更。証拠quoteは合成exchangeの実部分文字列、index/id対応も一致し、readyの前提assertあり。Sourceの元conversationが現在のProgressにあることは必須契約ではない。 |
+| #15 | 合成txtをFileBlob入口へ渡す。2件の添付はサイズ/件数制限内。通常rootで明示選択するファイルは保存比較snapshot前に追加。audio decoder用入力ではない。 |
+| #16–17 | WindowsCredentialStoreはconstruct/targetだけ。namespace別Storeのtyped Connectionは公式地域hostの許可label/pathと非空ASCII合成key。host変更時key=Noneは意図した拒否対照。合成ReadingTarget/referenceも型条件内。 |
+| #18 | configured_storeのtyped Connection、typed Progress clone restore、実preview_data::audioのPCM16 mono/8000Hz/8frames WAV。RIFF長・align・byteRate・非空frame条件と整合し、最小音声長を勝手に追加しない。実マイク入力なし。 |
+
+最小修正候補は2箇所である。親のsource所有再割当前には実施しない。
+
+1. app.rs:230（#11）：既存literalへ `"memories":{},"reviews":[],"suspended":[],"ai_calls":{},"study_seconds":{}` の5fieldだけを追加し、Deserializeのunwrapをcase/正常v2 fixtureを識別するexpectへ変更する。topic/minutes、restore件数、保存・再open、history=None、通常root不変のoracleは維持する。
+2. main.rs:23–25（#3）：ProgressのDeserializeを寛容とする説明だけを上記手動Deserializeの事実に合わせる。fixture・期待本文・assertは変更しない。
+
+追加の正常fixture構造不備は#11の1箇所だけが確定した。他の正常入力について静的照合で追加欠陥は見つからなかったが、これをruntime PASSとはしない。親からC2安全3件両構成、#3/#7–10 PASSの報告を受領した。#12–18の試用runtimeは未実行であり、UI操作・cleanup・本体連携の成立は未検証である。今回原因は、独立literalを短くする際にProgressのrequired wire fieldsを一括点検しなかった作者側の前提不足である。既に正しいOLD/NEXTや共有harnessを変更する理由はない。
+
+### C2後の限定fixture是正・所有返却
+
+親のP01設計Pre完了後の明示再割当を受け、上記2箇所だけを修正した。appの#11は正常JSONの5field補完とcase名付きexpect、mainはDeserialize説明コメントの1行訂正である。本体・期待値・case数・他module・共有harness・P01監視試験は不変である。修正箇所だけをメモリ上で逆置換した全文SHAはそれぞれ旧C2 main=`66BDD7137811C5C954A12C8C1E5461D5AF8933DC832D2282F2F37ACDE45C2025`、app=`2AA13D474D8B8F2F6ED47B1D6E57FC75BA342C6C2822490927E38793860C3C56` と一致し、他内容不変を確認した（sourceへ逆置換を書き戻していない）。
+
+| source | 是正後SHA256 | 作者module SHA256 |
+| --- | --- | --- |
+| src/main.rs | 0A2D32C729CCA0139D9DC3C3CAB61BFC4C2660D8D46CCCB81EF53A40D6C5AE40 | 39A30E0B8A630248BBFFDFC406B76812C6A6E6F3B0F53F3B48540DB0DAE748A7 |
+| src/app.rs | 4F1183841C9CA298F6F7F34B252CC225BA7AF0E770F3F5CFEA819D4CA9EAF962 | 5A2105D714F9190AEB5F346425F9754478F4BDFDE788EBF06A12764C2FE69F77 |
+
+他4sourceのSHAはC1後固定表のままであり不変である。module hash方式も同表と同じである。`cargo fmt --check` と `git diff --check` はexit0。no-run/runtimeは0で、是正後の構造・行動PASSはまだ主張しない。親へsource所有を返却し、再G0→実装者no-run→EXE固定→親解除→同exact #11再実行、その後未実行caseへ進む手順を維持する。今回用いたTDD/debugging手順はfixtureの失敗段階と製品行動の失敗を分離し、正本期待値を変更せず入力だけを是正するために用いた。

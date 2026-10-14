@@ -299,3 +299,64 @@ Request status=`READY FOR PRE-REVIEW`、Cycle=`ET2-PR1 Pre-2`、branch=`codex/de
 是正にはexecute-review-remediation/protocol全文と、review-project-conventions、review-reliability-data-integrityを文書self-checkへ適用した。独立Gateを代行しない。確認は現HEADのstart先頭/3consumer、source固定前後・実行解除失効・worker寿命・poisonの境界、競合する旧条件の除去、参照/diff検査であり、実行試験0である。今回の是正は配布/復旧手順を変更しないためrelease運用の追加reviewは非該当である。
 
 本追補の確認はplanning-and-task-breakdown全文とDefinition of Done、AGENTS/development-team/KPIに基づく文書・参照・差分検査のみである。planner threadは `01a13931-36fd-7922-a65d-a60492d90e26`、指定Astra/high、runtime model/effort未取得。対象sessionのtoken counterは取得可能で、最初の観測は2026-10-14T06:55:11.381Z、input 38145/cached 23040/output 294/reasoning 0。開始前・最終応答・親子包含は未確認、終了値は親handoffへ返し、usage/currentは親が記録する。
+
+## ET2-P01追補: 操作開始前からの通信観測（2026-10-14、限定所有提案）
+
+**暫定計画・親の追加所有受領/設計具体化/独立Pre待ち**である。対象は [C1独立静的Post準備のET2-P01/P2](early-trial-startup-review.md)。正本ET-06の送信/probe 0を静的非到達へ読み替えず、未接続spyを実操作の通信入口へ接合する。製品契約、C1本体機能、既定G0、ET3全体/native/提供gateは変更しない。plannerは本追補のみ所有する。
+
+| Finding / 原文・位置 | 原因 / 状態 / Packet / 正本 | Oracle / 残余 |
+| --- | --- | --- |
+| ET2-P01 / P2：`src/app/qwen_settings_tests.rs:31`のfactory実行後32行で通信spyを生成している。Wireは47行の独立QwenDialogだけに接続され、64行のwire.count()==0は先行する起動・設定保存・復元の送信を観測しない。Probeもfactory後のeditorだけで起動中は観測外である。契約ET-06、設計の受入表、計画の必須集合5の動的送信/probeゼロ証拠を満たしていない。Wireを前で生成するだけでは未接続なので解消しない。 | spyの生存期間だけでなく接続先も実操作と不一致。Accepted / ET2-P01-V / findingと判定はreview記録、具体接合はdesignerの既存設計への追補が正本となる | 各実入口の安全な正対照と、factory前からの操作別0を独立実行。現物に自動送信は静的には未検出だが動的未実証。Closedは独立Post後のみ |
+
+基準はHEAD `9a7eb5c94041f0937f8bc3cfac35bdee2f8280e1`＋C1本体5file差分である。[C1実装記録](early-trial-startup-implementation.md) SHA `9F007E599B481A5771149D23A1117046E353FD1E5914CFC90B73F14659052256` の固定6source全hash一致を読取確認した。現設計SHA `24B9FEBE6F83528EF1B4D55EF9890B00FC9846E9F50B5BB446F48A2FAE687D7E`、製品契約SHA `0BC3839A6C6B60E5CD4E7267269FE33D4D898CA704B89609E32E0BB0912A1A6D` は不変である。親が凍結C1のG0を個別解除して行う安全/機能試験は継続できるが、ET2-P01解消や最終PASSの根拠にはしない。
+
+### 操作と実境界の照合
+
+| 対象操作 | 現経路 / 動的に覆う境界 | 既存mockの利用と不足 |
+| --- | --- | --- |
+| 共通factory起動 | `new_early_trial_with`→constructor/load、`qwen_settings::default_store`。現constructorに送信呼出なし。後述のCodex/Qwen/probe監視をfactory前から登録する | default_storeのtest構成は既存合成Storeであり実keyを読まない。factory後のWire/Probe代入は起動の観測にならない |
+| 設定表示 | `go_to_qwen_settings`→実frame→`qwen_connection_panel`→editor。接続確認は `start_probe`、Codex確認は `launch_content(0)`→`Config::check` | 既存`qwen_probe_transport`/EditorProbeはeditorごとの送信を観測できるが、未生成editor/起動は覆わない。`start_probe`入口の監視で補う |
+| 設定保存 | `QwenConnectionEditor::save`→合成store.save、`save_settings`→Storage.save/zoom。現物に送信呼出なし | 実app内editorと既存合成Storeを使い、操作前後の全通信counter差分0と保存成功を併記する |
+| JSON復元 | `WordApp::restore`→既存verify/退避/save/UI更新。現物に送信呼出なし | 同じapp/監視下で実restoreを行い、成功/拒否の既定oracleと全通信0を組み合わせる |
+| 既存音読準備 | **実 `open_qwen_reading`**→`ReqwestTransport::new`→`QwenDialog::new`→ReadingController→prepare。送信はhuman_send→worker→GatedTransport→inner Transport.send | 独立DialogのWireで代替せず、実appが持つDialogに監視Transportを接続する。既存音声fixture/Store/操作helperは再利用する |
+
+Codexのアプリ側実通信境界は `src/ai.rs` の `Config::check` と、`chat`/`material_detailed`/private `generate`/`read_ink`/`transcribe` の5箇所の `codex::generate_with_effort` 呼出である。学習/チャット/教材/媒体からの既存呼出はここへ合流する。checkはapp-server起動/認証、generateはjournal作成/app-server/送信へ進むため、観測と合成拒否は各lib呼出より前とする。`Config::from_settings` の生成回数だけを送信回数と扱わない。
+
+現物ではlibの `codex::check`→`Server::start`→`start_with_line_limit`→`spawn`→`Command::spawn`→initializeであるため、aiのcheck呼出直前拒否は認証子process生成より前にある。generateの5出口はchat、material_detailed、private generate（response/structured経由のfeedback・exercise・assess・語彙生成・例文/翻訳を含む）、read_ink、transcribeであり、ai.rs内の全generate_with_effort参照を照合した。この6境界の動的観測と、次段落の対象外手動操作の静的除外は別の証拠である。
+
+別の明示操作である `control_settings.rs::load_effort_catalog`（候補取得ボタン→libのlist_model_efforts）、`run_history.rs::recover_run`（再取得ボタン→libのrecover）、`vocabulary_ui`の語彙downloadは今回の操作集合に入れない。表示/保存/restoreがそれらを呼ばないことを現物照合したため追加編集/動的監視を要求しない。この静的除外を上表5操作の送信0の動的証拠へ代用しない。新たな自動到達が見つかればSTOPして範囲を戻す。
+
+### 最小の追加所有とdesignerへの入力
+
+ET2-P01-VはM（4file）、難易度高/危険高である。追加所有は **`src/ai.rs` と `src/app/qwen_reading_ui.rs` の2fileだけを提案**し、親受領前には編集しない。ET2通算8fileを一括再実装せず、この独立した観測是正4fileへ切る。
+
+| file / 所有 | 限定する変更 | consumer / 不変条件 |
+| --- | --- | --- |
+| 追加 `src/ai.rs`：実装者はtest専用観測本体、作者は専用test | `cfg(test)`の固定種類counter/watchと、上記6lib呼出直前のcfg(test)加算/合成Err。既存通信本体やpromptを抽出/共通化しない | binのConfig呼出と後述Qwen観測が同じprocess-global状態を参照する。非test動作/未監視test/Volta探索を保持 |
+| 追加 `src/app/qwen_reading_ui.rs`：実装者はtest専用接合、作者は専用test | `QwenDialog::new`で登録中のwatchに紐付くtest Transportを既存引数へ接合し、実app所有Dialogのinner sendを加算後合成拒否する | 送信口は既存Transport traitを再利用。非test署名/構築順/音声制御は不変。ReqwestTransport.newはclient構築でありHTTP実行はsend内。実接続前に阻止する |
+| 既存所有 `src/app/qwen_settings.rs`：実装者はtest専用接合、作者は専用test | `start_probe`先頭のcfg(test)監視/合成拒否をresolve_connection/Reqwest生成/worker開始より前に置く。加えて、cfg(test) `default_store` が監視登録時の合成CredentialStoreを同じwatch寿命で選ぶ接合を限定採用する。現行Store::new(None)固定とfactory後代入では設定済み起動を証明できないためである | 未設定/設定済みStoreをfactory前に登録してconstructor中から同じ合成Storeを使用する。未監視testは既存Store::new(None)、非testのstore選択・constructor本体・既存mock transportは不変。実資格情報、公開汎用DI、追加fileは不要。具体型と安全Gateはdesigner/Preで確定する |
+| 既存所有 `src/app/qwen_settings_tests.rs`：独立作者のみ | ET06をfactory前登録、実appの設定/restore/音読Dialog、操作別counterと終了証拠へ修正する | 既存Wire/Probeの独立単体testはその範囲の証拠として保持。実装者は期待値を変更しない |
+
+追加source基準SHAはai=`2AF7BE14882F9496BB1860179CF2B3D3FAC2F68DE39F1941DB056E1927925B6C`、qwen_reading_ui=`0463767500979C625724F065F54D4B1C7F525BC7688F7BD38FC40241CBFCB41D`。元6sourceはC1記録を正とする。main/app/qwen_reading/media本体はこの是正で編集しない。control_settings/run_history/chat_media/shared harness/store/commit/codex.rs/依存crateも所有外である。
+
+designerは上記2追加fileの可否と全consumerを再照合し、既存設計へ一つの限定接合節を作る。確定事項は、(1)固定種類のenum/counter snapshot/watch登録/拒否判定の型、(2)String/MaterialFailure/SafeError/TransportFutureへの合成Err変換、(3)同一global・poison拒否・Arc identityとRAII、(4)async Transportがwatchの同一Arcを保持してworker終了前に実transportへ戻らない設計、(5)発生workerの完了待ちと失敗時cleanup、(6)G0と同じsource/EXE親解除条件を通信へ適用する一意の安全Gate、である。特に既存probeはJoinHandleを保持しないため、監視中はstart_probeをworker生成前に拒否する。Qwen正対照は所有runtimeの終了、Codex別thread正対照はjoinを確認する。未waitをpending=Noneだけで証明せず、追加所有なしで寿命を閉じられなければSTOPする。
+
+監視はfactory前に登録し、登録重複を拒否する。active時は実API/接続/実資格情報アクセスより前に加算して合成拒否、lock異常/poisonはfail-closed、自分のArcだけRAII解除とする。Qwenの資格情報は既存合成Storeのみを使い、実store構築/target検査と実load/saveを混同しない。最終操作/worker終了とcounter確認前に解除しない。これは既承認受入に必要なrepository test境界であり、agent/運用harness設定やLLM routerの変更ではない。
+
+不採用は、spy生成順だけの変更、独立Dialogだけの測定、Config生成数だけの代用、静的非到達だけでET-06を通す案である。`codex.rs`/`qwen_reading.rs` はlibであり、そこへcfg(test)を追加しても通常のbin依存libには入らないため採らない。lib用新test feature、公開汎用DI、別名/重複module、全通信framework、対象外の手動通信を包む拡大も行わない。
+
+### 受入・責任・最小再検証
+
+planner/external-spec authorは `gpt-6-astra/high` 固定。外部仕様はET-06不変につき追加起動非該当。ET2-P01-Vのdesigner/implementer/test author/reviewerはそれぞれ **`gpt-6-astra/high`**、独立runnerは **`gpt-6.1-sol/medium`** とする。両組合せはcallable/effort対応を確認済み。理由は送信前境界・worker寿命・判定不能な0を扱う設計/期待値/実装/独立判断にはAstra、確定した安全手順/EXE/実名の実行にはSolである。親モデル/quality gate不変、非対応モデル/SkillはSTOP、runtime metadataは取得値だけを記録する。
+
+- [ ] P01-0：親が追加2fileの限定所有を受領→designerが具体型/接合/寿命/安全Gateを固定→独立reviewerが設計・本追補・C1＋追加2hashをPre判定する。計画は設計後に精緻化し、Pre PASS前はsource/testを変更しない。
+- [ ] P01-1：独立作者が8入口（Codex6、Qwen send、probe）の正対照、global登録/重複/poison/RAII/別thread捕捉、5操作別0の実名と期待値を固定する。各実入口を呼ぶ安全対照はcounter=1と合成拒否、外側実transport/実libへ到達0を要求する。API不在compile blockerは行動REDに数えない。source遮断未確認の正対照でREDを取らない。
+- [ ] P01-2：逐次所有を返して実装者が4fileのtest専用境界を接合する。source固定→親が入口と同一global、実外部操作前の加算/拒否/poison/guard寿命を読取確認→対応no-run build前後source一致/EXE絶対path・SHA・構成・実名固定→親明示解除、を設計の安全Gateに従って行う。作者/実装者/runnerとも解除前は正対照を実行しない。旧録音G0だけで通信正対照を解除しない。
+- [ ] P01-3：独立runnerが解除後に正対照→factory前登録→各5操作直後の全通信counter=0、録音0、操作成功/拒否の既存oracle、worker終了→最終0を確認する。音読準備は実appのopen_qwen_readingから作られたDialogで行う。Qwen設定済み/未設定、通常構成の同等constructor経路と試用共通factory経路を区別する。実名/件数/exit/timeout/待機/残存を記録し、0件/未実施をPASSにしない。
+- [ ] P01-4：親受領した感度差分では遮断と実加算を保持して観測返値だけを誤らせ、各新oracleの目的assert FAILを確認する。相互に隠蔽しないものは1snapshot/compileへまとめる。変異/逆復元/構成/EXE変更は旧解除を失効させ、再Gate後の候補GREENだけをPostへ渡す。独立PostがET2-P01を判定し、必要なclosure更新は親が保存する。
+
+C1のfactory/失敗段階/JSON拒否/namespace/録音本体はそのまま再利用する。C1で先行取得した証拠は当該hash/構成と対応する範囲だけへ接合し、旧ET06の送信0を新観測のPASSへ流用しない。変更4fileはbin側だけであり、通常/試用のbinを既定別target-dirで再no-runして固定する。新監視/ET06全実名、qwen_settings/qwen_readingの既存回帰、ET2の同bin起動/復元/録音安全集合、aiの既存ET1 config試験、fmt/diffが最小再検証集合である。変更されないlib/他integrationのC1証拠はsource/依存/構成一致なら接合し、理由なく再実行しない。ET3のall-targets/release/関連crate/nativeは既定のまま残す。
+
+停止は新しい自動通信経路、監視迂回、worker寿命未解決、追加file/公開API/依存設定、実key/API/ネットワーク/録音到達、安全Gate不成立、C1の帰属不能な失敗である。rollbackはownerが本Packet差分だけを個別patchで戻しC1を保持する。watchを外した状態ではET2-P01未解消・最終受入不可へ戻す。実データ/EXE削除、reset、管理者/OS/native操作、公開は行わない。
+
+本担当の検証は文書diff/参照、C1＋追加2source hash不変の照合までである。再委譲/実装/runtimeは0。threadは `01a13931-36fd-7922-a65d-a60492d90e26`、指定Astra/high、runtime metadata未取得。本再依頼の着手時counterは未取得で、調査途中の2026-10-14T08:03:07.477Zは同session累積input3015798/cached2857088/output19988/reasoning2284である。前工程を含み本Packet単独量ではない。終了snapshotは親へ返し、current/usageは編集しない。

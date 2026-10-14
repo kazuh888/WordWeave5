@@ -186,6 +186,52 @@ use std::{
 mod speech;
 pub use speech::{PlaybackSnapshot, Speaker};
 
+#[cfg(test)]
+use std::sync::atomic::{AtomicUsize, Ordering};
+
+#[cfg(test)]
+static RECORDING_START_WATCH: Mutex<Option<Arc<AtomicUsize>>> = Mutex::new(None);
+
+#[cfg(test)]
+pub(crate) struct RecordingStartWatch {
+    calls: Arc<AtomicUsize>,
+}
+
+#[cfg(test)]
+pub(crate) fn watch_recording_starts() -> Result<RecordingStartWatch, &'static str> {
+    let mut registered = RECORDING_START_WATCH
+        .lock()
+        .map_err(|_| "ET2: recording watch poisoned")?;
+    if registered.is_some() {
+        return Err("ET2: recording watch already active");
+    }
+    let calls = Arc::new(AtomicUsize::new(0));
+    *registered = Some(Arc::clone(&calls));
+    Ok(RecordingStartWatch { calls })
+}
+
+#[cfg(test)]
+impl RecordingStartWatch {
+    pub(crate) fn calls(&self) -> usize {
+        self.calls.load(Ordering::SeqCst)
+    }
+}
+
+#[cfg(test)]
+impl Drop for RecordingStartWatch {
+    fn drop(&mut self) {
+        let mut registered = RECORDING_START_WATCH
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner());
+        if registered
+            .as_ref()
+            .is_some_and(|calls| Arc::ptr_eq(calls, &self.calls))
+        {
+            *registered = None;
+        }
+    }
+}
+
 pub struct Recorder {
     stream: cpal::Stream,
     samples: Arc<Mutex<CaptureBuffer>>,
@@ -236,6 +282,16 @@ impl CaptureBuffer {
 }
 impl Recorder {
     pub fn start() -> Result<Self, String> {
+        #[cfg(test)]
+        {
+            let registered = RECORDING_START_WATCH
+                .lock()
+                .map_err(|_| "ET2: recording watch poisoned".to_owned())?;
+            if let Some(calls) = registered.as_ref() {
+                calls.fetch_add(1, Ordering::SeqCst);
+                return Err("ET2: recording start intercepted".into());
+            }
+        }
         let device = cpal::default_host()
             .default_input_device()
             .ok_or("マイクがありません。Windowsの既定の入力デバイスを確認してください。")?;

@@ -40,3 +40,28 @@ Pre-2は設計PASS/指摘の設計上Closedとなった。design SHA `24B9FEBE�
 作者 `trial_startup_tests`、thread `01a1394d-02e8-7493-84ae-371e9ade04bc`、指定Astra/high・返却model/effort未取得。[試験報告](early-trial-startup-tests.md)で18caseを固定した。pure-lib定数exact1件は目的FAIL、bin一括no-runは不足API28診断で未compile、Recorder runtime0。作者count参照誤り2件は修正済みであり行動REDには数えない。起動中API送信0の直接観測はないという範囲を明記した。source6fileへの追加のみ900行、fmt/diff成功、所有返却済みである。
 
 取得snapshotは07:25:24.180Z input38639/cached23040/output223/reasoning10→07:45:05.745Z input5530507/cached5386368/output32742/reasoning6268。差分input5491868/cached5363328/output32519/reasoning6258。開始前/最終応答分/親子包含は未確認であり別加算しない。待機中に親は起動/録音経路と作者fixtureを統合確認したが、作者と同じ試験を再実行していない。定数試験の作者再実行1回は後続buildで置換されたEXEと識別を結び直すためである。
+
+## C1–C3とP01設計の中間checkpoint（未完了）
+
+実装者 `trial_startup_impl`、session `01a13962-a5dd-7822-9764-05ea27255dc5`、指定Astra/high。C1本体5file接合・通常/試用no-run成功後、親G0で固定source/EXEへ限定解除した。安全3両構成と通常7PASS、試用#3は作者JSONの必須field不足で停止。作者が是正したC2でも#11正常JSONに不足がありrestore前で停止した。全18fixtureを一括点検してC3へ最小修正した。本体欠陥とfixture欠陥を混同せず、旧FAIL/log/hashを保持し期待値を弱めていない。
+
+独立reviewerは送信spyが起動/設定/復元に未接続というET2-P01/P2を確定した。plannerの4file限定追加→designerの具体型/worker寿命/G0同期→独立Pre PASSまで進んだ。P01本体実装/動的証拠/Postは未了である。設計担当 `trial_egress_design`、session `01a13975-8bd4-7d32-84b7-1ce794b5d6ca`、指定Astra/high。実装/runtimeなし。
+
+08:32:30 UTC時点のアカウント共通週枠usedPercent=42、window=10080、resetsAt=1792496607。開始22から表示上20ポイント増えたが、他作業/共有枠/整数粒度を分離できずET2専有消費とは断定しない。親へ情報を通知し、許可なしのmodel/effort/quality gate変更はしていない。
+
+親の実在snapshot08:31:15.942Zはinput1633692386/cached1595256064/output3696525/reasoning1129498/total1637388911。開始snapshotとの差はinput33578634/cached32934784/output75786/reasoning34483。最終値ではなく、最初のdispatch前後欠測と親子包含不明を維持する。
+
+完了した担当の対象session末尾からtoken_countだけを読取共有で取得した。本文/秘密は記録していない。再開で同sessionを使うため、以下は各Packet単独量でも全タスク最終値でもない。子同士/親との合算は行わない。指定model/effortは全員Astra/high、provider返却値は未取得。
+
+| 担当（session上記） | 観測UTC | input | cached | output | reasoning |
+| --- | --- | ---: | ---: | ---: | ---: |
+| planner | 08:11:32.414 | 5141273 | 4956544 | 30205 | 4963 |
+| reviewer | 08:26:38.264 | 4692702 | 4448768 | 16990 | 4571 |
+| author | 08:29:43.009 | 8954883 | 8721536 | 48145 | 9542 |
+| egress_designer | 08:19:54.668 | 2026232 | 1922816 | 15452 | 3023 |
+
+egress_designer開始snapshot08:09:41.886Zはinput88977/cached61440/output363/reasoning13。観測差分input1937255/cached1861376/output15089/reasoning3010、開始直後までの欠測あり。実装担当はC3実行中で終了snapshot未取得である。初回startup designerの固有session/終了counterは未取得のままであり、全子の総量を取得済みとはしない。
+
+低リスク効率化として、試用cfg(test)のfixtureとコメントだけを直したC3の焦点検査はtrial binのみno-run/実行とし、通常/lib成功は元snapshotに限定した。最終独立runner両構成とET3全体gateは維持する。cache再利用でC2build時間が減った証拠はなく、incremental hard-link失敗→compiler copy warningを記録した。fixture点検を一件ずつでなく全18へまとめ、source凍結build中に独立設計/静的reviewだけを並行した。今後の改善候補は正常fixtureの必須field確認を作者引継ぎ前に行うこと、長い旧ログ/本文転載を避け短いartifact参照で引き継ぐことである。常駐監視・運用harness・モデルrouter変更は行わない。
+
+C3試用bin新17件は現固定source/EXEで全PASS、実名一致/毎起動Admin=FalseとSHA確認/timeoutなし/wait済/残存0。通常/libは再実行なし。P01独立PreはPASSだが実装/動的観測/感度/runner/Postは未了。実装者の最新自己報告counter08:37:16.029Zは同session累積input16047921/cached15808384/output42474/reasoning4645、記録追記と最終応答は未反映である。初回観測07:48:59.445Zとの差はinput16009258/cached15785344/output42304/reasoning4645。開始前/最終応答分/親子包含不明を維持する。C1/C2の停止・是正・再Gateを含み、C3単独消費とは呼ばない。

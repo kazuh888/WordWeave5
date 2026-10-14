@@ -1,5 +1,7 @@
 # ET2 起動接合の限定設計
 
+現行追加Packetは末尾の **ET2-P01-V（通信観測、独立Pre待ち）** である。以下のET2-PR1/Pre-2の状態・6source表は当時の履歴であり、現在のsource凍結や実行解除ではない。ET2-P01-Vの所有追加は末尾に限定し、実行前条件の正本は本書ET2-G0を8source/通信へ同期した一節だけとする。
+
 2026-10-14 / ACOUSTIC-HISTORY-001 / designer指定 `gpt-6-astra/high`。状態は **ET2-PR1設計是正案：Pre-2未判定・計画同期待ち** である。[独立Pre-1](early-trial-startup-review.md) はCHANGES REQUIRED、ET2-PRE-01をAcceptedとした。本書の修正だけでClosedとしない。ET2-Sの限定所有は [計画ET2追補](early-trial-plan.md) SHA256 `38C5486BF336465C85EEC18985EA68CC0890DE02F27A6E215494DEF045E409A9` の採用・親受領済みである。実装着手、seam安全性、動作合格を意味しない。製品契約は [early-trial-contract.md](early-trial-contract.md) SHA256 `0BC3839A6C6B60E5CD4E7267269FE33D4D898CA704B89609E32E0BB0912A1A6D` のままとする。[仕様・設計cycle 2 PASS](early-trial-review.md)、[ET1/FX1最終Post](early-trial-paths-review.md)も入力とする。正本の元の機能所有5fileをET2-F、追加test専用境界1fileをET2-Sとして区別し、モデル・製品仕様・既定検証gateは変更しない。前版の所有不足によるSTOPは解消済みだが、今回の実行前安全Gate不足はPre-2の独立判定を要する。
 
 完了境界は現sourceに即した関数接合、失敗注入、独立oracle、残る証拠不足の返却である。所有は本書のみ。AGENTS、development-team、KPI、api-and-interface-design、wordweave-egui-uiを全文確認した。型付き境界とUI失敗導線に限定適用し、REST層は追加しない。
@@ -114,12 +116,12 @@ impl RecordingStartWatch {
 
 factory/loader/selector/watchの署名と全testを作者が固定した後、API不在のcompile失敗はcompile blockerとして実装者へ渡す。行動REDを作るためのstub、一時公開API、偽成功factoryは設けない。compile成功だけでは実行を許可せず、ET2-G0を経てからET2-S安全対照、ET2-Fの順とする。未取得REDの感度確認もET2-G0と計画の限定手順に従う。実装者だけが一時本体差分を所有し、独立runnerの目的assert FAIL確認と候補hash復元・安全Gate再確認後のfocused GREENを最終Postへ渡す。
 
-### ET2-G0：録音入口を呼ぶ試験の実行前安全Gate（唯一の規範）
+### ET2-G0：録音・通信入口を呼ぶ試験の実行前安全Gate（唯一の規範）
 
-1. 実装者が変更を止め、6sourceのhash・dirty識別・build構成（通常/early-trial）を固定する。親がその実物sourceを読取確認し、watch登録とRecorder::startが同一process-global状態を参照すること、start先頭のactive判定→加算→固定合成Errが全てcpal到達前に完結すること、lock異常/poisonもcpal前で拒否することを記録する。正対照のwatch登録が成功必須で、guardを直接呼出/worker joinの終了まで保持することも確認する。symbolの存在検索やcompile成功だけでは解除しない。
-2. 確認済みsourceから実行せずにtest EXEをbuildする。build前後のsource hash一致、JSONから得たEXE絶対path/SHA256、構成、対象実名を固定する。親はsource読取確認とこのEXEの対応を照合し、その固定組だけについて実行解除を明示記録する。解除前は作者・実装者・runnerの誰もRecorder::start正対照を実行しない。署名不在や接合未確認の段階でRED取得を試みない。
-3. 解除されたEXE/実名で上記動的安全正対照を行い、成功後に録音0の後続caseへ進む。静的Gateは加算・捕捉・寿命を検査する動的counter oracleの代替ではない。動的失敗/timeout/worker未waitは解除を停止し親へ返す。
-4. source・対象EXE・構成のいずれかが変われば解除は失効する。再build、感度実験、元の候補への復元後も手順1–2を再確認して親が解除する。同一hashへの復元だけで旧解除を自動復活させない。録音感度実験は遮断とactive時加算を保持し、callsの観測返値を誤らせて正対照のassert FAILを確認する。cpal前遮断の撤去、watchとstartの別global化、未監視/非testの実録音対照は禁止する。
+1. 実装者が変更を止め、ET2通算8source（main/app/qwen_reading/qwen_settings/qwen_settings_tests/media/ai/qwen_reading_ui）の全bytes hash・dirty識別・構成（通常/early-trial）を固定する。親が実物を読み、録音watch/startの同一global、cpal前のactive判定→加算→固定Errとpoison拒否を確認する。通信を含む実行では、さらに末尾の全8入口が一つのbin側globalを共有し、Codex実lib・journal・認証子process、Qwen inner Transport.send、probeのconnection解決・worker生成の前に加算/拒否することを確認する。登録重複、poison時に未監視へ落ちないこと、default_storeの合成Store選択、guard/保持Transport/workerの寿命と終了手順も読む。symbol存在やcompile成功だけでは解除しない。通信接合が未実装のC1/C2を録音だけの既存限定範囲で扱う場合も、通信試験は解除対象外と明記する。
+2. 確認済みsourceから `cargo test --locked --bin wordweave5 --no-run --message-format=json` を既定の通常/試用別target-dirで行う（試用のみ `--features early-trial`）。必要な既存lib検証を併記しても、binの通信接合確認をlib EXEへ代用しない。build前後8source一致、JSON由来のprofile.test・features・EXE絶対path/SHA256、作者が固定した対象実名/予定件数を一組にする。親が対応を照合し、その組と実行順だけを明示解除する。EXEのlistも解除後に行い実名集合を照合する。解除前は全担当とも録音/通信正対照を実行しない。API不在compileはblockerであり行動REDではない。
+3. 各構成で、解除された同EXEの録音安全対照→通信8入口と登録/寿命の安全対照→5操作のゼロ観測、の順に進む。同じ固定組で既に通った対照は証拠を接合し、理由なく反復しない。旧録音G0だけで通信正対照を許可しない。通常ユーザー、既存Hidden/有限timeout/child wait・残存検査・合成rootの条件を保持する。安全対照の失敗、0件、timeout、未終了workerなら解除を停止する。静的Gateと動的counterは互いを代替しない。
+4. 8source・EXE・構成・対象集合の変更、感度変異・逆復元で解除は失効する。手順1–2を再確認し親が解除する。同じhashへの復元でも旧解除は自動復活しない。感度実験では録音/通信の遮断と実加算を保持し、calls/snapshotの観測返値だけを誤らせる。正対照には誤0、操作0oracleには誤非0を独立に与え、目的assert FAILを確認する。遮断除去、別global化、実資格情報・実API・実録音による対照は禁止する。
 
 このGateは親による現在タスク内の読取確認と記録であり、harness/settingsやproduction APIの変更ではない。実行禁止状態からの解除条件だけを本節に集約し、計画はこの節を参照する。
 
@@ -165,3 +167,118 @@ closure matrixとfinding原文の正本は [独立review記録](early-trial-star
 Pre-2 requestは計画同期後に親が提出する。Target branch=`codex/development-agent-team`、HEAD=`97d2c72a9adec4f1904c6deb2b18e92c50262923`、target artifactは本書と同期後計画、review classは設計/規約/信頼性、requested GateはPre-implementation cycle 2、dependencyはET1/FX1 ClosedとET2-S受領済み、product decisionなし。out-of-scopeは上表のとおりである。本書hashはhandoff、同期後plan hashは親のrequestに固定する。変更前Pre-1 design hash `D9E044C42C85D1C1914B2E24820AE31D6B4082B7B920EC9F4E5C5CB1DDBBB42A` は履歴である。今回の文書検査はgit diff --check、参照/空白検査、6source hash照合であり、source実行試験は0である。
 
 指定model/effortはplannerのAstra/high、runtime返却値は未取得である。子のcanonical task名は`/root/trial_startup_design`、固有thread ID/usage counterはこの担当では未取得。親が開始/終了測定を担当する。設計者はsource/test編集0、再委譲0、実credential/API/録音0、文書検査のみである。
+
+## ET2-P01-V：操作前からの通信観測の限定接合（2026-10-14）
+
+状態は **設計具体化済み・独立Pre未判定**。ET2-P01/P2はAcceptedのままである。入力は [計画のET2-P01追補](early-trial-plan.md) SHA256 `BCD69DBC7B1EA022598374A93D967DE5DA8239427FF5443C3D55F5E2F5E3A785`、上記Pre-2 PASS版設計 `24B9FEBE6F83528EF1B4D55EF9890B00FC9846E9F50B5BB446F48A2FAE687D7E`、[C1静的指摘とG0記録](early-trial-startup-review.md)、[実装/実行記録](early-trial-startup-implementation.md)、[作者記録とmain fixture是正](early-trial-startup-tests.md)である。外部契約は既承認のET-06、契約hash `0BC3839A6C6B60E5CD4E7267269FE33D4D898CA704B89609E32E0BB0912A1A6D` を保持する。初期plan入力 `FDF9D92BC710C99C40A1F5F5E3EC64EE9B03C28C1A78F8ADEB9FCFC62B103AA5` からの差は、設定済み起動に必要な同fileのtest Store選択をplannerが採用し親が受領したことである。
+
+指定designerは `gpt-6-astra/high`。完了境界は本節の型・接合・安全Gate・独立oracleの固定とPreへの返却であり、source実装/実行/最終受入を含まない。AGENTS/development-team/KPI、`agent-skills:api-and-interface-design`を全文確認した。Skillは既存Rustの内部契約とエラー変換に適用した。UI配置・日本語表示・ボタン・縮尺を変更しないtest専用Packetであるため、今回の`wordweave-egui-ui`適用は非該当である。上記の日本語・両軸中央・100/150/200%DPI・狭幅のET3受入はそのまま残る。
+
+### 所有と実入口
+
+親受領した変更対象は4fileである。`src/ai.rs`のcfg(test)固定監視と6出口直前、`src/app/qwen_reading_ui.rs`のcfg(test)Transport接合/試験終了補助、`src/app/qwen_settings.rs`のcfg(test)default_store選択/start_probe先頭、独立作者の`src/app/qwen_settings_tests.rs`だけを扱う。本節は旧ET2-Sの「qwen_reading_ui読取のみ」をこの限定範囲で更新する。main/app/qwen_reading/mediaの本体、lib/codex/依存/feature、shared harness、control_settings/run_history/chat_mediaは編集しない。実装者と作者は同fileを順番に所有し、相手の本文や期待値を変更しない。
+
+現物で `src/main.rs` がai/app/mediaをbin moduleとして構築することを確認した。libのcfg(test)へ監視を置いてもbinの通常依存libには入らないため、監視実体は **ai.rs内の一つのcfg(test) inline module** に置く。crate内の必要consumerにだけ可視とし、production公開API・別名module・新REST層・汎用DIを作らない。
+
+| 固定Entry（8種類） | 現物の入口と遮断位置 | 戻り型と拒否後の外部境界 |
+| --- | --- | --- |
+| `CodexCheck` | `Config::check`の`codex::check`直前（ai.rs:149） | `Result<String,String>`。libのobserved_operation/Server::start/initialize/Command::spawnより前 |
+| `CodexChat` | `Config::chat`のgenerate_with_effort直前（ai.rs:156） | `Result<ChatReply,String>`。journal作成/実送信/parse前 |
+| `CodexMaterial` | `material_detailed`のgenerate_with_effort直前（ai.rs:180） | `Result<Draft,MaterialFailure>`。material wrapperもこの一入口へ合流 |
+| `CodexGenerate` | private `generate`のgenerate_with_effort直前（ai.rs:214） | `Result<String,String>`。response/structured経由のfeedback/exercise/assess/draft_word等を含む |
+| `CodexReadInk` | `read_ink`のgenerate_with_effort直前（ai.rs:240） | `Result<String,String>`。base64処理は既存どおり、実lib前 |
+| `CodexTranscribe` | `transcribe`のgenerate_with_effort直前（ai.rs:250） | `Result<String,String>`。既存サイズ拒否は先行し、正対照は上限内合成WAVを使う |
+| `QwenSend` | 実`open_qwen_reading`→`QwenDialog::new`でtransportを接合し、GatedTransport→そのinnerの`send` | `TransportFuture<'a>`。ReqwestTransport.sendへ渡す前。newのclient構築は送信回数に数えない |
+| `QwenProbe` | `QwenConnectionEditor::start_probe`の第一処理 | `Result<(),SafeError>`。refresh/invalidate/resolve_connection/ReqwestProbe生成/thread spawnより前 |
+
+Codexの5generate参照とcheckを全件照合した。`list_model_efforts`（control_settings:293）、`recover`（run_history:73）、語彙downloadは別の明示操作であり、今回の起動/表示/save/restore/音読準備には含まれない。対象5操作から新たな到達経路が判明したら範囲を戻す。除外経路の静的非到達は対象8入口の動的観測を代替しない。
+
+### 固定型、登録、拒否と所有寿命
+
+以下は実装前のcompile契約であり実装例ではない。`Entry`の順序は上表で固定する。配列はprivateで、snapshotの`calls(entry)`だけを公開する。非testには型も接合も存在しない。
+
+```rust
+// ai.rs 内 #[cfg(test)] pub(crate) mod trial_egress
+enum Entry { CodexCheck, CodexChat, CodexMaterial, CodexGenerate,
+             CodexReadInk, CodexTranscribe, QwenSend, QwenProbe }
+struct Snapshot { calls: [usize; 8] }
+enum WatchError { AlreadyActive, Poisoned, Ended }
+enum Block { Observed(Entry), Poisoned, Ended }
+struct Watch { state: Arc<State> }          // Cloneを実装しない登録owner
+struct Lease { state: Arc<State> }          // test Transportだけが保持する
+// Stateはprivate: [AtomicUsize; 8] と合成 Arc<dyn CredentialStore>。
+fn watch(store: Arc<dyn qwen_audio::CredentialStore>) -> Result<Watch, WatchError>;
+fn capture() -> Result<Option<Lease>, WatchError>;
+fn reject_if_watched(entry: Entry) -> Result<(), Block>;
+fn selected_store() -> Result<Option<Arc<dyn qwen_audio::CredentialStore>>, WatchError>;
+impl Watch { fn snapshot(&self) -> Result<Snapshot, WatchError>; }
+impl Snapshot { fn calls(&self, entry: Entry) -> usize; }
+impl Lease { fn reject(&self, entry: Entry) -> Block; }
+```
+
+module/consumer間で必要な型/メソッドだけを`pub(crate)`とする。`State`、global、任意reset/任意callbackは露出しない。`watch`のStoreは既存の合成`preview_data::Store::new(None/Some(connection))`を作者が作って渡す。production Storeを渡さないことをG0で確認し、秘密/host/request/音声をcounterやログへ保存しない。watch登録だけではstore.load/saveしない。
+
+globalは `Mutex<Option<Arc<State>>>` 一つである。正常lockかつNoneの時だけwatchを登録する。重複はAlreadyActiveで先行watchを保持する。`reject_if_watched`は同じlock下でactiveなら該当counterをSeqCst加算してObservedを返し、**正常Noneだけ**Okとする。lock poisonはPoisonedで拒否する。snapshotもpoisonや自分のArcが登録されていない状態をErrとし、異常を全0へ変換しない。capture/selected_storeは同じglobalからArcをcloneし、lockを解放してから構築/credential読取を行う。global lockをawaitやtrait呼出に跨がせない。
+
+Dropは`Arc::ptr_eq`で自分の登録だけを解除する。poison guardを回収して自分の登録を外してもclear_poisonせず、以後の呼出を拒否する。捕捉panic後の通常解除/再登録と、poison後の継続拒否は別oracleである。poison試験は独立childで行い、後続caseへ汚染を持ち越さない。
+
+`QwenDialog::new`では既存引数transportを、capture=Someの時だけprivate `WatchedTransport { lease, inner }` へ包みReadingControllerに渡す。Noneなら元のArcそのものを渡し既存mockを保持する。capture ErrはSafeErrorへ変換してconstructorを拒否する。WatchedTransport.sendは同期部分で保持Leaseのcounterを加算し、innerを呼ばず合成TransportFailureを返すFutureを作る。Futureも同ArcのLeaseを保持する。guardが先にdropされてもこのwrapperは実transportへ復帰しない。Lease.rejectは登録Arc一致ならObserved、poisonならPoisoned、登録なし/別ArcならEndedとして必ず拒否する。後二者でも保持元counterへの呼出は記録し、新しいwatchのcounterへ混入させない。古いTransportを次caseへ使い回すことはfixture誤用であり、Ended対照以外は禁止する。
+
+設定済み起動はfactory後の`app.qwen_store`代入では成立しない。現default_storeはtest時に毎回Store::new(None)であるため、受領済みの限定接合としてcfg(test)分岐の先頭でselected_storeを読む。Someなら登録された同じ合成Arcを返し、Noneは従来のStore::new(None)、Errは固定メッセージのtest fixture panicとする。返値がArcである既存署名を広げない。poisonで既定Storeへ落として合格を続けない。非testのprivate selector/WindowsCredentialStore::for_targetは一切変更しない。app constructor、editor、ReadingControllerの既存所有移譲とstore.load/save契約を保持する。
+
+### 型変換、状態、非同期の終了
+
+Codex6入口ではreject_if_watchedのErrを固定合成Stringへ変換して即returnする。Observed/Poisoned/Endedは異なる固定literalとし、入力本文・path・認証情報を含めない。material_detailedだけは`MaterialFailure::from(String)`を使う。現material.rs:118にFrom<String>があり、`Other(String)`となる。`material()`のlegacy_messageへの変換も既存どおりである。`String.into()`の型推論に依存してMaterialFailureと取り違えない。
+
+probeとconstructorの拒否は`SafeError::new(ErrorCode::InvalidState, SendDisposition::NotSent)`である。probe_state、revision、probe_inputs、probe_jobは更新せず、workerを生成しない。SafeErrorに任意本文を詰める口はない。TransportFutureは `Pin<Box<dyn Future<Output=Result<TransportResponse,TransportFailure>> + Send + 'a>>`（tools/qwen-audio/src/provider.rs:71）であり、SafeErrorを直接返せない。wrapperは`Box::pin(async move { /* Leaseをここまで保持 */ Err(TransportFailure::Network) })`を返す。
+
+既存`DisplayResult`という型はsrcとtools/qwen-audio/srcに存在しない。表示へはevaluateのSafeError→ReadingView.error→user_error/Displayが使われる。GatedTransportはinnerを呼ぶ前にstarted=trueにするため、監視Qwen正対照の表示状態は **Failed / Network / MayHaveBeenSent** となる。これは既存保守的表示であり、inner未呼出という試験事実と分ける。NotSent表示を要求するためにcontrollerや製品エラー契約を変えない。
+
+Codex正対照は合成Configを直接構築し、exeには実行不能sentinel、cwdには空の専用fixtureを指定する。check/5generateを実メソッドから呼び、固定拒否と該当1/他7個0、cwd/journal未作成、sentinel不変を確認する。外部lib到達0の根拠はG0で読むlib直前の無条件returnとその固有合成Errであり、未設置のlib counterを測定したとは報告しない。Qwenは既存Wire/拒否spyをinnerへ渡した同じconstructor経路の正対照でinner.count=0を測り、実appのopen_qwen_readingで作ったDialogについてもQwenSend=1を確認する。probeは先頭拒否と既存Probe spy=0、jobなしを確認する。この組で実入口を通らないwatch helper単独の試験を排除する。
+
+Codex別thread正対照はJoinHandleを必ずjoinし、その後にsnapshot/guard解除する。probeは先頭遮断によりworker生成0であり、既存probe workerがjoin可能になったとは主張しない。Qwen正対照は合成audio/connectionでprepare→既存human_sendまたはSend action→pollでFailedを観測する。`pending=None`、receiver受信、controller.close、既存runtime.shutdown_backgroundのいずれもworker終了証拠にしない。
+
+qwen_reading_uiのcfg(test)だけに `pub(super) fn finish_egress_test(&mut self)` を置く。runtimeを先にtakeし、controller.close/既存stop_media/状態解放を行い、取り出したRuntimeを同期dropしてworker終了を待つ。closeのshutdown_backgroundへ渡さない。実装上はruntimeをtake→既存close→runtimeのdropという最小接合でよい。正対照作者は同file子testでruntime/workerを所有し、操作case作者はこの限定補助で実app所有Dialogを終了する。通常close/Dropの契約は変更しない。Runtimeの同期dropが返る前にwatchを外さず、完了しなければ既存child timeout/kill+waitで失敗にする。shutdown_timeout後の残存を成功と扱わない。
+
+試験のcleanupはassert panic時にもDialogの同期終了→audio job registry drain→app/Store所有解放→最後のsnapshot→watch解除の順を確保する（作者の専用RAIIまたはcatch_unwindで行い、shared harnessは変更しない）。5操作自体に新workerはなく、これを各実経路の静的照合で確認する。想定外のpending/connection_check/workerを検出した場合は正常終了扱いにせず、終了を確認できるまで監視を維持してchild失敗を親へ返す。終了不能時はwatchを解除せずchild終了に委ねる。未知workerの終了を証明するための追加file/公開APIが必要ならSTOPする。
+
+保存順序は不変である。設定はstore.save成功後にeditor baseline/key、一般設定はStorage.save成功後にprogress/draft/zoom、restoreは既存検査→現在状態退避→save_progress成功後にmemory/epoch/UIを更新する。watchは全期間の観測所有者であり保存transactionの参加者ではない。回復/rollback/retry/cancelに新たな振舞いを加えない。試験終了後の合成fixture cleanupだけを行い、通常/実学習データには触れない。
+
+### ET-06 oracleと引継ぎ
+
+| 受入/単位 | 実操作・所有・判定 |
+| --- | --- |
+| ET-06 / P01-1 | 全8Entryで実入口1回→該当1/他0、型に合った合成拒否、外部到達0の上記証拠。重複登録、別thread捕捉/join、通常Drop/unwind後再登録、poison、保持Transportのguard終了後拒否を独立childで確認 |
+| ET-06 / P01-3起動 | 録音watchと通信watch/合成Storeを**constructor前**に登録し全0を確認。通常構成は実new_with_storage、試用構成は実new_early_trial_with（既存fresh再利用可）。通常newのnative wrapper/diagnosticsまで動的実行したとは記録しない。両構成×Store設定有無を別caseまたは明示subcaseで区別する |
+| ET-06 / 設定表示 | 同じappでgo_to_qwen_settings→実frame/接続panel→既存編集ボタン経由のeditor生成。factory後に別editorへ置換しない。表示/編集を開いた直後に8個全0・録音0、未確認状態、合成Store読取を確認 |
+| ET-06 / 設定保存 | 実app内editor.save/finish_qwen_settingsと一般save_settingsを通す。設定なしcaseもここで合成key/hostを明示入力して保存する。各保存直後に全0、合成Store saves/内容、一般設定のdisk反映を確認 |
+| ET-04/06 / JSON復元 | 同appの実restoreへ非history候補を渡し、成功後のmemory/diskと全0を確認。試用history拒否は既存exact本文/不変ledgerを併用し全0。通常版へ試用拒否期待値を流用しない |
+| ET-06 / 音読準備 | 実open_qwen_readingでapp.qwen_dialogがSomeになったこと、Inputで全0を確認。合成WAV設定→prepareのConfirmingでも全0、Cancel→同期終了後も全0。独立Dialogだけの試験ではこの行を満たさない |
+| ET-06 / 終了 | 全5操作後と所有worker終了後に8個全0・録音0、audio_history=None維持、CODEX_HOME値不変を確認。guardを最後まで保持。API/認証ファイルの全面不変やnative成功を環境変数だけで推定しない |
+
+未設定caseの音読prepareは、設定保存で合成設定を作ってから実行する。未設定のまま開く追加対照ではInputとprepareのInvalidKey/NotSentを確認する。未設定起動を設定済み起動の代用にはしない。各操作直後の累積snapshotは0であり、差分だけを比較して先行する送信を見逃さない。旧Wire/Probeの単体証拠はその範囲で保持し、factory後に生成した独立Dialogの0を新表へ流用しない。
+
+不採用はspy生成順だけの移動、Config生成回数、静的非到達だけによる合格、lib内cfg(test)、globalの毎send再検索でguard終了後に実transportへ戻るwrapperである。最後の案はworker生存中の解除と競合し実送信へ流れるため、同Arcを保持する拒否専用wrapperを選んだ。広い通信framework/公開fault/製品エラー型変更はこの受入に不要である。
+
+次は親が本書hash/同期plan/正本/下表を固定して独立Preへ渡す。designer→Pre（reviewer Astra/high）→独立作者Astra/high→実装者Astra/high→runner Sol/medium→独立Post Astra/highの割当を保持する。API不在はcompile blockerとして返し、G0未解除で行動REDを作らない。作者は実名と構成別件数、8入口/設定有無/5操作/寿命の対応を固定する。実装者は4fileだけを接合し、親は唯一のET2-G0を適用する。runnerは解除後の実名/exit/timeout/worker終了/残存と新snapshotを報告する。感度はG0第4項だけを使う。独立Post前にET2-P01をClosedへしない。
+
+最小再検証は新監視全case/新ET06 matrix、qwen_settings/qwen_reading既存bin回帰、同binのET2起動/復元/録音安全集合、aiのET1 config試験、fmt/diffである。変更なしlibの証拠はsource/依存/構成一致を照合した範囲のみ接合する。ET3のall-targets/release/native gateは不変である。合成Errで観測失敗を隠す、未joinをpendingなしで正当化する、設定済み起動をfactory後代入で置換することは禁止する。
+
+### Pre入力snapshot、未検証と測定
+
+HEADは `9a7eb5c94041f0937f8bc3cfac35bdee2f8280e1`。mainはC1実行失敗後の作者fixture是正済みであり、C1の全source/4EXEへ凍結したままとは扱わない。次表は本節作成時の読取snapshotで、将来の実装source凍結とは別である。
+
+| file | SHA256 |
+| --- | --- |
+| src/main.rs（作者fixture是正後） | `66BDD7137811C5C954A12C8C1E5461D5AF8933DC832D2282F2F37ACDE45C2025` |
+| src/app.rs | `2AA13D474D8B8F2F6ED47B1D6E57FC75BA342C6C2822490927E38793860C3C56` |
+| src/qwen_reading.rs | `3910E0042F057691F339A3AF7A59F6A381F7D0DB3D6B47706CAA1986D88CBB64` |
+| src/app/qwen_settings.rs | `D847555998E71987E8519D8B8B4811D68231054A043A365F3D040BA0339E11C8` |
+| src/app/qwen_settings_tests.rs | `45EF01F0F3DB4A2302AE8DAF9FC10834190D427AB648823139B46DC49DE324F1` |
+| src/media.rs | `14914D6606950E3E9565EA43F9374B8B70A3C9CAB78D7F71419311176F9B3207` |
+| src/ai.rs | `2AF7BE14882F9496BB1860179CF2B3D3FAC2F68DE39F1941DB056E1927925B6C` |
+| src/app/qwen_reading_ui.rs | `0463767500979C625724F065F54D4B1C7F525BC7688F7BD38FC40241CBFCB41D` |
+
+現時点で追加製品判断はない。Store選択の所有不足はplanner/親受領で解消した。残る危険は接合漏れ、poisonをNoneに扱う誤り、保持Transportからの復帰、runtime背景終了、fixture/構成の誤帰属であり、上記Gateと独立oracleへ対応した。これらの実装compile・動的実証・Postは未了である。新しい通信入口/追加所有/終了不能worker/正本矛盾はSTOPして親へ返す。rollbackは各ownerが本Packet差分だけを個別patchで撤回し、ET2-P01を未解消へ戻す。C1本体・作者是正・実データ・既存EXEを巻き戻さない。
+
+担当threadは `01a13975-8bd4-7d32-84b7-1ce794b5d6ca`（`/root/trial_egress_design`）。指定Astra/high、実行model/effort返却metadataは未取得。開始側の取得済みtoken snapshotは2026-10-14T08:09:41.886Z、input88977/cached61440/output363/reasoning13であり、開始直後までの欠測がある。終了値と本書hashはhandoffへ返す。親子包含は未確認、週枠は親測定へ接合し、usage/currentは編集しない。検証は文書diff/参照・実型/consumer照合・入力hashの読取のみ、source/test編集・build/runtime・再委譲・公開は0である。
