@@ -1,6 +1,6 @@
 # 現在のタスク要約
 
-更新：2026-10-13（I2d-M最終Post Closed後、D2集約/ET1開始前提を独立PASS。早期試用保存先分離ET1の独立作者Astra/highを起動した。親Sol/mediumを維持し工程別dispatchとusage記録を継続する。音声履歴UI・試用EXE・製品全体は未完成）。詳細は [参照インデックス](context-index.md) を参照する。
+更新：2026-10-14（早期試用保存先分離ET1とfixture是正FX1は独立Post PASS/Closed。次はET2の起動・資格情報・識別表示。音声履歴UI・試用EXE・製品全体は未完成）。詳細は [参照インデックス](context-index.md) と末尾の最新位置を参照する。
 
 ## 現在の目標
 
@@ -60,10 +60,18 @@ ACOUSTIC-HISTORY-001：原音・音響解析結果・Qwen助言を保存し、�
 
 今回の整理は作業用要約から廃案・重複ログ・無関係な履歴・設計本文の転載を除外したものである。根拠資料と旧記録は削除していない。旧版はインデックスに残すが通常再開時には読み込まない。
 
-## 最新の実行位置（2026-10-13）
+## ET1工程履歴（2026-10-13〜14）
 
 [独立D2集約/ET1依存確認](ACOUSTIC-HISTORY-001/early-trial-dependencies.md)はPASS・阻止0、`9fd2dc6`でpush済み。既存各Postを再実行せずexport迂回残置とsource継続性を照合してD2を閉じた。ET1の[独立試験34宣言](ACOUSTIC-HISTORY-001/early-trial-paths-tests.md)は通常4件成功、試用33件5pass/28fail（公開root/cwd具体RED14・stub由来失敗14・実挙動baseline2pass・stub拒否3pass）を確認した。mixed snapshotのため最終runnerは固定source全件fresh実行する。probeの[限定設計](ACOUSTIC-HISTORY-001/early-trial-probe-design.md)はET-P01是正後に[再Pre PASS](ACOUSTIC-HISTORY-001/early-trial-probe-review.md)。作者はsource所有を返却済み、実装担当Astra/highが本体接合へ進む。次は独立runner Sol/medium→Post Astra/high。ET2資格情報/表示とET3製品提供・全体gateは残る。今回の測定は[usage-observation-20261013.md](ACOUSTIC-HISTORY-001/usage-observation-20261013.md)を正とする。
 
 2026-10-14再開：残るstoreの`et05_final_recheck...`は独立作者のfresh exactで1PASS。本体sticky段階分類と独立回帰2件を`30fc43c`でpush済み。[本体記録](ACOUSTIC-HISTORY-001/early-trial-paths-implementation.md)の1条件mutationはexact1FAILで検出し、逆復元後の全5source/作者3prefix一致を確認した。最終固定sourceの通常4/試用35が全PASS、失敗/ignored/timeout/TEMP残存0。[予備静的Post](ACOUSTIC-HISTORY-001/early-trial-paths-review.md)は確定欠陥0、最終判定未了。独立runner `trial_paths_runner`（Sol/medium）へ既定store/export/backup/media等の回帰と構成別新集合を引き継ぎ、完了後に同reviewer Astra/highへ最終照合する。ET2/ET3と製品EXE更新は未実施である。
 
 独立runner初回は通常250行動PASS/0FAIL/fixtureSKIP3、試用276行動PASS/5FAIL/fixtureSKIP3。試用新35は全PASSだがET1受入は阻止される。独立reviewerは5FAILをET1-P01（P2）の旧試験namespace前提不整合と判定した。s06、chat_mediaのm05 3関数、progress_export_destinationのh03が通常root/通常エラー文を固定し試用契約を検査できていない。本体の登録前generic caller契約は変更しない。planner `trial_paths_s06_plan`（Astra/high）へ追加所有3test-file限定deltaを返した。Pre PASS後に独立作者のfixture是正→影響するsettings/media/destination両構成の独立再検証→Postを行う。失敗をskipや成功へ変更せず旧ログを保持する。
+
+ET1-FX1 Pre-1はplan hash `3E698E4B…6A591312`に対し独立PASS。計画/失敗証拠を`bb01b58`でpush済み。独立作者 `trial_recheck_resume`（Astra/high）が3test-file/5symbolを限定是正し、通常bin/integration compile成功、同sourceの試用compile中である。追加assertの初回E0433は所有内の名前解決を修正したtest compile errorで、行動REDではない。既存assert/本体/88他sourceは保持。次はexact5両構成の作者確認→独立runner各83raw件（settings/media/fatalclose/ai/destination）→最終Post。旧static snapshotは名前解決修正前であり、最終hashへ再照合する。
+
+## 最新の実行位置（2026-10-14）
+
+ET1とET1-FX1は[独立最終Post PASS/Closed](ACOUSTIC-HISTORY-001/early-trial-paths-review.md)。残るrecheck1件・本体sticky段階修正・試用保存先/外部保護/AI cwd接合を確認した。独立回帰で発見した既存fixtureの構成前提不整合5件も是正し、期待値緩和なく解消した。[独立runner](ACOUSTIC-HISTORY-001/early-trial-paths-runner.md)は影響範囲を両構成83raw件で再検証し、未変更範囲のhash一致/実名証拠を接合した。通常250行動PASS/試用281行動PASS・各fixtureSKIP3、失敗0。全件を今回再実行した結果ではない。symlink権限不足2件と別drive alias未用意1件は未実証のまま、TEMP/LOCAL/テストprocess残存0。親Sol/medium、作者/計画/レビューAstra/high、runnerSol/mediumを維持し[usage](ACOUSTIC-HISTORY-001/usage-observation-20261013.md)を記録した。
+
+次回は[計画ET2](ACOUSTIC-HISTORY-001/early-trial-plan.md)の直接起動・失敗表示・Qwen資格情報分離・識別表示を進める。ET3の通常/試用all-targets・release・関連crate・native gate後に試用EXEを提供する。製品EXEは今回未更新、実data/credential/API/管理者/OS変更なし。今回の依頼範囲はET1最終レビューまでで完了した。

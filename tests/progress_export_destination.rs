@@ -575,21 +575,25 @@ fn h03_resolver_is_side_effect_free_and_tracks_environment_only_in_child() {
         || {
             let f = Fixture::new();
             let before = f.snapshot();
+            let namespace = if cfg!(feature = "early-trial") {
+                "WordWeave5-EarlyTrial"
+            } else {
+                "WordWeave5"
+            };
             let first = f.base.join("LocalAppDataMissing");
             std::env::set_var("LOCALAPPDATA", &first);
-            assert_eq!(resolve_storage_root().unwrap(), first.join("WordWeave5"));
+            assert_eq!(resolve_storage_root().unwrap(), first.join(namespace));
             assert_eq!(f.snapshot(), before);
             std::env::set_var("LOCALAPPDATA", &f.outside);
-            assert_eq!(
-                resolve_storage_root().unwrap(),
-                f.outside.join("WordWeave5")
-            );
+            assert_eq!(resolve_storage_root().unwrap(), f.outside.join(namespace));
             assert_eq!(f.snapshot(), before);
             std::env::remove_var("LOCALAPPDATA");
-            assert_eq!(
-                resolve_storage_root(),
-                Err("LOCALAPPDATAが見つかりません。".into())
-            );
+            let missing_error = if cfg!(feature = "early-trial") {
+                "試用専用の保存先を決定できません。\n起動前の検査で停止しました。元データは変更していません。"
+            } else {
+                "LOCALAPPDATAが見つかりません。"
+            };
+            assert_eq!(resolve_storage_root(), Err(missing_error.into()));
             assert_eq!(f.snapshot(), before);
         },
     );

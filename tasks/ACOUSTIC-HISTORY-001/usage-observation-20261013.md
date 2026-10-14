@@ -41,3 +41,31 @@ probe故障seamはdesignerへ限定して具体化し、[独立Pre](early-trial-
 実装担当sessionは `01a137e7-ed3a-7bd0-8a38-cfd71e56a966`（Astra/high）である。source1条件のmutation/逆復元とfocusedを逐次所有し、作者sourceは返却済み。次の独立runnerとread-only reviewを並行する場合、source固定後の実行と静的照合という異なる責任に限定し、最終Postはrunner証拠受領後に判定する。
 
 実装担当の62usageイベントを取得した。最初00:55:16.845 UTCはinput=38196/cached=23040/output=138/reasoning=10/total=38334、最後01:23:30.654 UTCはinput=5871441/cached=5676672/output=16167/reasoning=1525/total=5887608。差分はinput=5833245/cached=5653632/output=16029/reasoning=1515/total=5849274、cache_write=0である。初回request以前・最終counter後の応答反映は保証外、親子包含未確認のため合算しない。最終fixed通常4/試用35PASS、感度確認1FAILとhash復元を記録した。mutationは受入PASSへ加算しない。
+
+### 独立回帰・限定fixture是正
+
+独立runner初回は通常250行動PASS/0FAIL/fixtureSKIP3、試用276行動PASS/5FAIL/fixtureSKIP3。新通常4/試用35は全PASS。本体の保護漏れという親の初報は独立原因確認で訂正した。5件は通常namespace固定の既存fixture不整合であり、登録前generic caller契約を変えず3test-file/5symbolだけを是正する。`bb01b58`で失敗証拠と計画を保存・pushし、ET1-FX1 Pre-1は独立PASSである。失敗ログ/期待値を削除せず、修正影響のbin/destinationだけ両構成各83raw件を再検証する。
+
+runner session `01a13801-2d5c-7f51-86ef-860c79cb964b`（Sol/medium）の74イベント。最初01:22:52.176 UTCはinput=41784/cached=0/output=135/reasoning=0/total=41919、初回終了側01:43:45.004 UTCはinput=7113662/cached=6970240/output=22116/reasoning=4989/total=7135778。差分はinput=7071878/cached=6970240/output=21981/reasoning=4989/total=7093859。再開後のFX1検証は後続snapshotへ接合する。
+
+限定planner session `01a13810-6d05-7140-8f62-bff0aa4ae790`（Astra/high）の16イベント。最初01:39:35.437 UTCはinput=38027/cached=23040/output=309/reasoning=19/total=38336、最後01:45:20.539 UTCはinput=1242282/cached=1166976/output=12985/reasoning=777/total=1255267。差分はinput=1204255/cached=1143936/output=12676/reasoning=758/total=1216931。plannerの自己報告終了snapshotより後の反映を含む。自己報告の週枠17→18%は並行作業込みでありplanner単独へ帰属しない。
+
+上記cache_writeは0。初回request以前/最終counter後は保証外、親子包含未確認で合算しない。返却model/effortは未取得で、指定値と区別する。手戻りはrunner集計wrapperの配列混在と起動前構文調整、既存fixtureの構成不整合5件である。前者は生ログを保持し成功済みの再実行を避けた。後者の修正後検証は品質保持のための再実行であり、性能比較用の反復ではない。
+
+## ET1 / FX1終了snapshot（2026-10-14、最終記録・push・応答前）
+
+FX1独立PostとET1限定工程PostはPASS/Closed、阻止0。両構成の修正影響83raw件は独立全成功、各80行動PASS/fixtureSKIP3、未変更範囲接合後は通常250/試用281行動PASS・失敗0・各skip3。5FAILは解消し、88不変sourceと未変更12EXEの証拠継続を照合した。全件を最後に再実行したものではない。ET2/ET3、製品EXE、native/実API受入は未完である。
+
+終了側時計02:14:26 UTC（11:14:26 JST）、週枠usedPercent=22、windowDurationMins=10080、resetsAt=1792496608。再開側10%との差を当該タスクだけの消費へ帰属しない。並行作業・反映遅延の内訳は不明、resetの取得値に1秒差があることも保持する。通常開発の観測だけであり比較専用の反復0、旧方式比は未判定である。
+
+親の終了counterは02:16:16.587 UTC、input=1598034079/cached=1560493312/output=3613633/reasoning=1093065/total=1601647712、cache_write=0。同日再開snapshotとの差分はinput=26599289/cached=26336384/output=46258/reasoning=13568/total=26645547。長期親の累積値自体を今回消費とは扱わず、以降の文書保存・commit/push・最終応答は取得範囲外である。
+
+| 子session / 指定model-effort | 観測範囲UTC | 終了counter input / cached / output / reasoning / total | 最初の実在snapshotとの差分（同順） |
+| --- | --- | --- | --- |
+| 作者01a137e2… / Astra-high、79イベント | 00:49:14.040–02:00:25.038 | 8388392 / 8222080 / 31214 / 4259 / 8419606 | 8350418 / 8222080 / 30963 / 4259 / 8381381 |
+| runner01a13801… / Sol-medium、103イベント | 01:22:52.176–02:13:04.641 | 11254139 / 11076352 / 34777 / 8534 / 11288916 | 11212355 / 11076352 / 34642 / 8534 / 11246997 |
+| reviewer01a137f8… / Astra-high、54イベント | 01:13:57.112–02:14:09.803 | 8012096 / 7811072 / 17814 / 4158 / 8029910 | 7973803 / 7788032 / 17654 / 4158 / 7991457 |
+
+子完全IDと最初のcounterは上節または各担当報告を正とする。reviewerの最初はinput=38293/cached=23040/output=160/reasoning=0/total=38453である。表は各sessionの前の中間counterを更新するもので、中間差分と重ねて合算しない。全てcache_write=0、初回request以前/最終counter以降は保証外、親子包含未確認で合算しない。モデル/effortは指定とturn_contextの値で、provider返却値は未取得である。実装担当とplannerの終了counterは上節どおりである。
+
+追加手戻りは作者が新assertでbin crateに存在しないcrate::storeを参照したE0433であり、所有内を既存store::へ直してcompileした。行動REDではない。改善候補は、namespace/環境欠落エラーを変えるfeature追加時に既存fixtureの独立literal・lock対象・error全文を先に棚卸しすること、テストassertの参照先を既存module importに合わせることである。恒久harness/設定/モデル/品質水準は変更していない。保存先と任意外部宛先のliteralを一括置換しない点が重要であり、今回の契約確認と5symbol限定diffを根拠とする。効果量・週枠節約率は未測定である。

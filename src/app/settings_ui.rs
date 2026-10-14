@@ -439,7 +439,12 @@ pub(super) mod i2_export_settings {
                 let local = f.root.join("fallback-local");
                 fs::create_dir(&local).unwrap();
                 std::env::set_var("LOCALAPPDATA", &local);
-                let root = local.join("WordWeave5");
+                let root = local.join(if cfg!(feature = "early-trial") {
+                    "WordWeave5-EarlyTrial"
+                } else {
+                    "WordWeave5"
+                });
+                assert_eq!(store::resolve_storage_root().unwrap(), root);
                 let dest = f.root.join("external.dat");
                 f.app
                     .write_settings_export(&dest, b"absent root export")

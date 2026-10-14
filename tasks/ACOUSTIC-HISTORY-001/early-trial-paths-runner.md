@@ -1,5 +1,7 @@
 # ET1 独立runner
 
+最新は末尾ET1-FX1である。影響83件を両構成で独立再実行し、各行動80PASS/0FAIL/fixtureSKIP3。旧FAIL5件は解消し、未変更証拠の接合後は通常250/試用281行動PASSである。独立PostとET2/ET3/nativeは未完了。以下の初回CHANGES_REQUIREDと旧FAILログは履歴として保持する。
+
 2026-10-14。ACOUSTIC-HISTORY-001 / ET1。planner指定は `gpt-6.1-sol/medium`（early-trial-plan.mdと親dispatch）。実行model/effort metadataと開始usage counterは未取得である。thread `01a13801-2d5c-7f51-86ef-860c79cb964b`、session `01a08550-055c-7aa1-9834-905e4a7ce148`。
 
 AGENTS、開発7役、KPI、wordweave-change全文を確認し、skillのrisk-based検証と報告だけを適用した。受入はET-01/04/05/06とET-D01、入力はearly-trial-plan.md ET1、early-trial-paths-tests.md段階1–4、early-trial-paths-implementation.md、既定backup-destination-runner.md/media-export-runner.mdの関連回帰集合である。
@@ -100,3 +102,75 @@ EXE path/SHA256は今回の `default-manifest.json` / `trial-manifest.json` を�
 新35/通常4のfocused受入は同じ最終sourceで独立PASSしたが、既存回帰5FAILによりET1全体の受入完了・Post PASSを主張しない。親へ各FAILを返し、source/hash固定の所有を返却する。保存/回復/書込失敗/再試行/保持は合成データの局所証拠であり、電源断、敵対的TOCTOU、single-call途中のstage競争全体の保証ではない。
 
 未検証はET2の実起動/資格情報namespace/画面非到達、ET3の `cargo test --all-targets --locked` と `cargo build --release --locked --bin wordweave5`、試用全体test/releaseと関連crate gate、native直接起動/IME/マイク/ペン/TTS/実Codex・Qwen認証/API/拒否dialog/DPIである。今回のtest EXEによるOS fixture検査をそれらの実機受入へ読み替えない。実data、実credential、実API、OS設定変更、ユーザーapp停止、製品EXE置換、publishは0である。
+
+## ET1-FX1 独立再検証（最新、2026-10-14）
+
+同じrunner `gpt-6.1-sol/medium`、同thread/sessionで継続した。wordweave-changeは既読の検証・報告規約だけを継続する。実行model/effort metadataと追加工程の開始usage counterは未取得である。入力はplan末尾ET1-FX1、Pre-1 PASS、作者tests.md段階5であり、plan SHA256 `3E698E4B6CC2A0778AC12B4B5C2DC012A47381FCC1365134CFE9A7B46A591312` の一致を確認した。親から作者のsource所有返却・全実行終了を受領してから開始した。
+
+対象はHEAD `bb01b5869c7e9b22af07a4a4593fae708b38ca60`＋未commitの次3test-file差分である。HEADは文書checkpointであり、本体/依存/manifest/lockは旧runner基準から不変。旧91hashのうち88件一致、更新3件は以下に一致した。差分は46追加/13削除、所有5symbolに限り、全文diffを `fixture-fix-source.diff.log` に保存した。
+
+| 変更test file | 固定SHA256 |
+| --- | --- |
+| src/app/settings_ui.rs | 021FB7F28501512AC2083AFA371260E5572031C491CB4FF0E057C0E685BBC32C |
+| src/app/chat_media.rs | 1D50424433A8F37A1962E439A34F34B8851C99F5CDA45EEAA3B74D1BB8A6BF3B |
+| tests/progress_export_destination.rs | B77396A23A1523437E8C7865799AE9740426F12ECA4FAD8017597065CDA7F9CF |
+
+独立のread-only比較で、settings S06、media M05A/B/C、integration H03の関数範囲を現sourceと `git show 30fc43c:<path>` の双方から除外し、残り全文をLF正規化して比較した。3fileとも厳密一致した。shared helper/production/他testを含み、期待rootのfeature別literal、resolver照合、M05B名前付き前提以外の変更はない。新開始snapshotは `fixture-fix-source-before.log`、88/3の確認は `fixture-fix-source-check.log`。従来store/commit/ai prefixとET1新36宣言は不変である。
+
+### 新規影響集合のcompile/runtime
+
+両構成を直列に次でfresh no-runする。試用だけ `--features early-trial` を加える。既知sandbox OS5は再試行せず、確定JSONのtest executableから各2EXEを同定し、新SHAを固定する。
+
+```text
+cargo test --locked --bin wordweave5 --test progress_export_destination --no-run --message-format=json
+```
+
+通常compileはexit0、2m21.943s。新bin `--list` は322件、integrationは29件、各nativeexit0。旧5実名の存在を確認後、settings25、media23、既定fatal-close5filter各1、ai1、destination integration29を実行した。各filterに `--nocapture --test-threads=1`、integrationは空filterを渡した。選択実名/成功実名/summaryの一致を確認し、重複なしraw83PASS/0FAIL/0ignored。symlink2件OS1314とalternate-drive alias不在1件を今回stderrで確認し、行動80PASS/fixtureSKIP3である。short-name aliasも今回確認した。旧logsからskip発生を推測していない。
+
+通常2list/9runtimeはnativeexit0、AdminFalse、timeoutFalse、終了wait済み、kill0。各起動前のWindowsIdentity/WindowsPrincipal取得成功・Administrator=False、固定SHA、Hidden、120秒上限、timeout時Kill(true)/WaitForExitを維持した。合成TEMP/TMP/LOCALAPPDATAだけを使用し、終了時TEMP/LOCAL/テストEXE process残存0、91source hash一致を確認した。
+
+全新証拠はignored `target/early-trial-build/et1-runner/fixture-fix-*`。構成別build.jsonl/build.stderr.log/build-summary.log、manifest.json、2target list、group selected/runtime stdout/stderr、native-summary.log、results.log、completion.logに保存した。旧5FAILログは上書きしない。試用構成の独立確認と最終接合は次の追記で確定する。
+
+### FX1 最終結果・証拠接合
+
+試用fresh compileはexit0、2m28.151s。実コマンドは上記通常コマンドへ `--features early-trial` を追加した次である。
+
+```text
+cargo test --locked --features early-trial --bin wordweave5 --test progress_export_destination --no-run --message-format=json
+```
+
+今回の試用listもbin322/integration29、各exit0。同じ9runtimeのsettings25/media23/fatal-close5/ai1/destination29はすべてPASSで、選択と成功の83実名集合は一致した。raw **83PASS/0FAIL/0ignored**、行動 **80PASS/0FAIL/fixtureSKIP3**である。skip理由は今回もsymlink2件OS1314とalternate-drive alias不在1件。short-name alias成功は今回stderrにある。各構成で同じ83名を実行したものであり、166uniqueとは数えない。
+
+| 変更対象・旧実名（省略prefixは上節） | 旧通常 / 旧試用 | 今回通常 / 今回試用 |
+| --- | --- | --- |
+| S06 storage_none_uses_resolved_root_without_opening_or_creating_it | PASS / FAIL | PASS / PASS |
+| M05A none_resolves_default_without_creating_root_then_protects_it | PASS / FAIL | PASS / PASS |
+| M05B missing_environment_and_unknown_root_identity_refuse | PASS / FAIL | PASS / PASS |
+| M05C failed_default_storage_open_keeps_the_attempted_default_root_protected | PASS / 前提FAIL | PASS / PASS |
+| H03 resolver_is_side_effect_free_and_tracks_environment_only_in_child | PASS / FAIL | PASS / PASS |
+
+旧5名は新bin/integrationの全list内にあり、設定・媒体・integrationのgroup選択と成功実名でも照合した。M05Bのmissing環境resolver Err、file分岐のresolver==独立literal rootとroot.is_fileという名前付き前提assertを含み、両分岐の3媒体拒否・ledger/memory不変まで通過した。これらの個別成功markerを追加出力したわけではなく、無条件の直列assert/loopを保持した同caseの完了PASSが到達根拠である。
+
+M05Cでは各構成literalとresolverの一致後、その同rootを実Storage::atで保持し、Storage::open()の実Err、Storage=None、3媒体拒否/不変までPASSした。mockによるErr差替えはない。旧通常root lockで試用rootをopenしていた前提不成立は解消した。ErrのOScodeを今回ログに追加取得しておらず、特定のWin32 codeまで実測したとは主張しない。S06/M05Aの外部成功・root未作成・内部拒否・保持、H03の2環境literal/全Err文言/snapshot不変も全保持している。
+
+| 今回runner固定EXE（target/debug/deps/） | SHA256 |
+| --- | --- |
+| 通常 wordweave5-72e8adffa8f9ef2c.exe | 2B94BAC1889E553CEC61F839C6B529C2E568477C991D667B2C0D08547ADB3F57 |
+| 通常 progress_export_destination-b4a366b351b447cc.exe | 68B3E5BD3F8E07CD98E251B497ECAAE2B01E2FDC359356E356525B840F29C543 |
+| 試用 wordweave5-e0ab9f88db3adadd.exe | 2DCE5268F78BD57776BE39EB27CFB5ADEBFD8C57C05712996266A4C20A7FF50D |
+| 試用 progress_export_destination-8431c9241084d920.exe | 127232B7E3F82E9AD0843BE586B98D7004EA14CFA4974E030BB1A45BB664DCE9 |
+
+両構成それぞれ2list/9runtimeのnativeexitはすべて0。全起動AdminFalse・timeoutFalse・wait済み、kill0。両構成ともTEMP/LOCAL/テストEXE残存0、91source hash一致。2026-10-14 **11:11:19.250 JST** の最終read-only確認でも91source/4固定EXE SHA一致・同path process残存0（`fixture-fix-final-check.log`）。HEADはbb01b58のまま、source差分は上記未commit3file/5symbolだけである。親/作者のdocs dirtyは保持した。
+
+最新の必要範囲は以下の接合で評価する。単一の新全件実行と表現しない。
+
+| 構成 | 今回の影響集合 | source/依存不変で継承した旧集合 | 接合後raw / 行動 |
+| --- | --- | --- | --- |
+| 通常 | raw83PASS、行動80PASS/skip3 | 170PASS | raw253PASS/0FAIL、行動250PASS/0FAIL/skip3 |
+| 試用 | raw83PASS、行動80PASS/skip3 | 201PASS | raw284PASS/0FAIL、行動281PASS/0FAIL/skip3 |
+
+旧通常253・旧試用284の実名集合から影響83をそれぞれ除いた170/201件を接合した。本体/依存/manifest/lockは不変、変更3fileの5symbol外は独立全文一致、残る88対象も一致する。計画FX1-2の明示境界に従い、未変更lib/他integrationを理由なく反復していない。新通常4/試用35は、今回ai1と旧不変integration3またはlib20/integration14の証拠を接合した結果である。旧trial5FAILを残数へ加算したり、旧PASSを今回fresh全件PASSへ言い換えたりしない。
+
+FX1のrunner範囲は **PASS** であり、独立Postへ返却する。findingのClosed、ET1全体のPost PASSはrunnerが決定しない。旧FAIL・作者E0433・前回収集wrapper不備のログは保持し、今回FX1 runnerではcompile/runtime/収集失敗0、source/期待値編集0、再委譲/commit/push/publish0、実data/鍵/API/release/ユーザーapp停止0である。
+
+build sessionは通常21409/試用39463、runtimeは通常6183/試用74210。thread/sessionは初回と同じ、追加工程の開始/終了usage counter・実行model/effort metadata・親子包含関係は未取得。推定や合算をしない。実行時間は各build summaryと各native-summaryに保持した。ET2、ET3の通常/試用all-targets・release・関連crate gate、native起動/表示/IME/マイク/ペン/TTS/実認証/API受入は依然未実施であり、今回の局所合成検証を代替証拠にしない。

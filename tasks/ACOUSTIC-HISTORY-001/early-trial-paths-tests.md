@@ -266,3 +266,70 @@ cargo test --locked --features early-trial --lib store::early_trial_paths_tests:
 EXE pathは両snapshotとも `target/debug/deps/wordweave5-1e58dd7001d62083.exe`、prefix境界は段階3と同じである。Cargo/integration/commit/aiの全file hashは段階3から不変。新しいsource宣言は合計36、試用構成は35（lib20、integration14、ai1）、通常は4のままである。この構成別予定集合を今回の実行件数に加算しない。
 
 追加2テストと本節の所有を親へ返却する。実装役が最終sourceの試用全件/通常GREEN、次に独立runner/Postを担当する。collaboration task/thread IDは段階3と同じ、compile exec sessionは初回26194・fixture修正版50426である。指定model/effortはAstra/high、実行model/effort metadataと開始/終了usage counterは引き続き未取得である。
+
+## 段階5：ET1-FX1 構成別fixture是正（2026-10-14）
+
+同じ独立作者 `gpt-6-astra/high` が再開した。AGENTS、7役責任、TDD全文の既読内容を継続し、wordweave-change全文を今回読了、テスト/fixture工程だけへ適用した。入力は[計画追補](early-trial-plan.md) SHA256 `3E698E4B6CC2A0778AC12B4B5C2DC012A47381FCC1365134CFE9A7B46A591312` と[独立Pre-1 PASS](early-trial-paths-review.md)（阻止0）である。契約SHA `0BC3839A6C6B60E5CD4E7267269FE33D4D898CA704B89609E32E0BB0912A1A6D` は変更していない。開始HEAD `bb01b5869c7e9b22af07a4a4593fae708b38ca60` は文書checkpointであり、開始時全91source/test/manifest/lock hashはrunner基準 `30fc43c` と一致した。開始dirtyなし。
+
+### 変更した前提と保持したoracle
+
+所有はsettings S06、media M05A/B/C、integration H03の3file/5symbolと本節だけである。root期待値はtest側のfeature別独立literal（通常 `WordWeave5`／試用 `WordWeave5-EarlyTrial`）から生成し、resolver返値と照合する。resolverを期待pathの生成元にしていない。本体、shared helper、他case、登録前caller契約、事前登録/OnceLock reset、環境隔離方式は変更していない。
+
+| Finding / 対象symbol | 変更と維持した受入（ET-01/05/06・既存d-S/d-M/H03） |
+| --- | --- |
+| ET1-FX-S06 / `s06_storage_none_uses_resolved_root_without_opening_or_creating_it` | 構成別root＋resolver一致。外部payload成功、root未作成、既存/new leaf拒否、ledger不変、app.lock未作成を全保持 |
+| ET1-FX-M05A / `m05_none_resolves_default_without_creating_root_then_protects_it` | 構成別root＋resolver一致。3媒体の外部成功、root未作成、保護leaf拒否、既存refuseのledger/memory保持、app.lock未作成を全保持 |
+| ET1-FX-M05B / `m05_missing_environment_and_unknown_root_identity_refuse` | missing環境のresolver Err、file分岐のresolver==独立root・root.is_fileを名前付き前提assertで追加。両分岐の3媒体拒否と既存refuseの保持assertは変更なし |
+| ET1-FX-M05C / `m05_failed_default_storage_open_keeps_the_attempted_default_root_protected` | 構成別rootをStorage::atで実lockする前にresolver一致。Storage::openの実Err必須、Storage=None、3媒体拒否・ledger/memory保持、held dropを全保持 |
+| ET1-FX-H03 / `h03_resolver_is_side_effect_free_and_tracks_environment_only_in_child` | 2環境のroot literal一致と各snapshot不変を維持。missing Errは通常全文 `LOCALAPPDATAが見つかりません。` を保持し、試用全文 `試用専用の保存先を決定できません。\n起動前の検査で停止しました。元データは変更していません。`（改行1文字）と比較。単なるis_errへ緩和していない |
+
+S06 prefixは `app::settings_ui::i2_export_settings::`、M05の3件は `app::chat_media::i2_export_media::`、H03はintegrationの直下名である。全既存行動assert/子成功assertを維持し、skip/ignore/早期returnを追加していない。通常namespaceを任意外部宛先として使う所有外caseのliteralも変更していない。
+
+### 変更前証拠と作者self-check
+
+変更前の同名通常5PASS/試用5FAILは[独立runner記録](early-trial-paths-runner.md)の固定sourceで取得済みの証拠である。製品漏れではなく構成不整合という[独立review判断](early-trial-paths-review.md)を受領した。旧M05Bの最初の失敗分岐は旧ログから断定せず、今回の名前付き前提と最終case成功を新しい動的証拠とする。M05Cの旧実open失敗前提不成立を行動REDへ変換しない。旧FAILを再現目的で反復していない。
+
+最初の通常compileはexit101、新規resolver一致assertの `crate::store` がbin crate直下に存在しないE0433が5箇所で発生した。これは作者の名前解決ミスであり、行動RED・本体不具合ではない。所有symbol内だけを既存importの `store::` へ修正し、元のcompileログを保持した。修正済み3fileをまとめて固定後、以下を両構成で実施した。以降source編集なし。
+
+```text
+cargo fmt --all -- --check
+git diff --check
+cargo test --locked --bin wordweave5 --test progress_export_destination --no-run --message-format=json
+cargo test --locked --features early-trial --bin wordweave5 --test progress_export_destination --no-run --message-format=json
+```
+
+通常compileはexit0／2m18s、試用compileはexit0／2m23s。確定JSONのtest executableから各2EXEを同定し、固定SHA照合後に全listを取得、対象完全名の存在を確認して5件ずつ `NAME --exact --nocapture --test-threads=1` を実行した。
+
+| 構成 | 今回作者実測 | 境界 |
+| --- | --- | --- |
+| 通常 | 5PASS / 0FAIL / 0ignored、全native exit0 | S06・M05A/B/C・H03各exact1 |
+| 試用 | 5PASS / 0FAIL / 0ignored、全native exit0 | 同じ最終sourceの同じ5名 |
+
+両構成の10実行は5つのunique名を構成別に実行したものであり、隔離childや媒体副ケースを追加件数として数えない。M05Bの両分岐とM05Cの実同root lock失敗の前提を含め、全既存oracleへ到達した。各起動前にWindowsIdentity/WindowsPrincipal取得成功・Administrator=Falseを強制し、true/取得不能は拒否、固定SHA照合、Hidden、45秒上限、timeout時Kill(true)/WaitForExitを使用した。4list・10runtimeすべてtimeoutなし・終了wait済み、両構成の合成TEMP/LOCAL直下残存0である。既存の有限childとその終了assertも保持した。実data/鍵/API/管理者実行/UAC/OS設定/製品EXEへの接触なし。
+
+### 固定hash・差分範囲
+
+| 最終変更file | SHA256 |
+| --- | --- |
+| src/app/settings_ui.rs | 021FB7F28501512AC2083AFA371260E5572031C491CB4FF0E057C0E685BBC32C |
+| src/app/chat_media.rs | 1D50424433A8F37A1962E439A34F34B8851C99F5CDA45EEAA3B74D1BB8A6BF3B |
+| tests/progress_export_destination.rs | B77396A23A1523437E8C7865799AE9740426F12ECA4FAD8017597065CDA7F9CF |
+
+全91対象中88件は旧runner基準から不変、3件だけ上表へ更新、最終compile前とruntime後の91hash不一致は0である。3fileから所有5symbolを取り除いた全文をLF正規化して基準commitと比較し、全一致した。これにはproductionとshared helper・他testを含む。除外後のLF正規化SHAはsettings `5B85984B9109BBBD390D3E72F87447E5E1F4D75B377517F5B6540F70E430247B`、media `C629DE5EFB2E654E258344C4D79DDF9330B4174E26C8EDF07F4ED9DD0920364C`、integration `939D8F7983A26F8583513CE769DBFAFDC6E55A9D463E37B0F028D2E122C549E3` である。
+
+既存作者prefixもstore `05DECCA1466F3E77627A7296ECFB782543CC5F91DF0F07F21328949C67CB5660`、commit `C624AC8332C4B37D1DF033A54A9F5C3E15870F54D57B9DECD3A27F2C63696D71`、ai `E609E5392402569B5E08F9170F5CA9C01EE7F5BEF49FAFE48BB3A2013D9977AD` で不変。今回の試用35/通常4の新集合は編集していない。
+
+| 今回固定EXE（target/debug/deps/） | SHA256 |
+| --- | --- |
+| 通常 wordweave5-72e8adffa8f9ef2c.exe | F7046914EF489CB2D1873D4696D396D8DB42FFADF961155EE3F0CC8C855D3DC5 |
+| 通常 progress_export_destination-b4a366b351b447cc.exe | 2533AB21DDC4DD2E9506AA4D94CD50D665F86429AA09D8C32D9E333CE986034D |
+| 試用 wordweave5-e0ab9f88db3adadd.exe | 374F847930466C7F8EDA281827D3E6E4824FA0CDB42215F1655582B107BF0EAB |
+| 試用 progress_export_destination-8431c9241084d920.exe | 884A7D8ECB35ED97F8CC50D9D85C68EDCE91A757AA20D8666D90E4A34A594F93 |
+
+### ログ・返却・残るgate
+
+ログはignored `target/early-trial-build/et1-author/fixture-fix-*` に保持する。初回失敗は `default-build.{jsonl,stderr.log}`、名前解決修正後の成功は `default-build-fixed.{jsonl,stderr.log}` と `trial-build.{jsonl,stderr.log}`。構成別manifest、2targetのlist、exact別stdout/stderr、`runtime-summary.log` に完全名・PID・nativeexit・権限・timeout・終了待機・残存を記録した。`source-fixed.log` は名前解決修正前、**最終の正本は `source-final.log` と `final-check.log`** である。`scope-check.log` は5symbol外一致の照合結果である。
+
+最終hash照合は2026-10-14 10:58:38 JST。通常build sessionは初回11428（失敗）／修正後69151（成功）、試用build44278、両構成runtime68528（完了）である。collaboration task `/root/trial_recheck_resume`、thread `01a137e2-5701-7692-a8e2-78b0a6f5871a`、指定Astra/high、実行model/effort metadata・開始/終了usage counterは未取得。親のusage記録は変更していない。
+
+sourceと本節の所有を親へ返却する。FX1の作者完了境界はfixture修正・両構成exact5のself-check・証拠固定までである。独立runnerによる計画83raw件×両構成、その後の独立Postが残り、5子finding/ET1-P01/ET1全体を作者はClosedへ変更しない。未変更範囲の既存証拠接合とET2/ET3/native受入も親・runner・reviewerへ引き継ぐ。

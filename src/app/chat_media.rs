@@ -1742,7 +1742,12 @@ mod i2_export_media {
                 let local = f.root.join("local");
                 fs::create_dir(&local).unwrap();
                 std::env::set_var("LOCALAPPDATA", &local);
-                let root = local.join("WordWeave5");
+                let root = local.join(if cfg!(feature = "early-trial") {
+                    "WordWeave5-EarlyTrial"
+                } else {
+                    "WordWeave5"
+                });
+                assert_eq!(store::resolve_storage_root().unwrap(), root);
                 for (i, media) in MEDIA.into_iter().enumerate() {
                     seed(&mut f, media);
                     let dest = f.root.join(format!("external-{i}"));
@@ -1767,6 +1772,10 @@ mod i2_export_media {
                 let mut f = Fixture::new();
                 drop(f.app.storage.take());
                 std::env::remove_var("LOCALAPPDATA");
+                assert!(
+                    store::resolve_storage_root().is_err(),
+                    "M05B missing environment: resolver must refuse"
+                );
                 for media in MEDIA {
                     seed(&mut f, media);
                     let dest = f.root.join("new");
@@ -1775,8 +1784,18 @@ mod i2_export_media {
                 let local = f.root.join("local");
                 fs::create_dir(&local).unwrap();
                 std::env::set_var("LOCALAPPDATA", &local);
-                let root = local.join("WordWeave5");
+                let root = local.join(if cfg!(feature = "early-trial") {
+                    "WordWeave5-EarlyTrial"
+                } else {
+                    "WordWeave5"
+                });
                 fs::write(&root, b"not a directory").unwrap();
+                assert_eq!(
+                    store::resolve_storage_root().unwrap(),
+                    root,
+                    "M05B file root: resolver must select the independent expected path"
+                );
+                assert!(root.is_file(), "M05B file root: fixture must be a file");
                 for media in MEDIA {
                     seed(&mut f, media);
                     let dest = f.root.join("new");
@@ -1794,7 +1813,12 @@ mod i2_export_media {
                 let local = f.root.join("local");
                 fs::create_dir(&local).unwrap();
                 std::env::set_var("LOCALAPPDATA", &local);
-                let root = local.join("WordWeave5");
+                let root = local.join(if cfg!(feature = "early-trial") {
+                    "WordWeave5-EarlyTrial"
+                } else {
+                    "WordWeave5"
+                });
+                assert_eq!(store::resolve_storage_root().unwrap(), root);
                 let held = Storage::at(root.clone()).unwrap();
                 fs::write(root.join("sentinel"), b"failed-open root").unwrap();
                 let attempted = Storage::open();

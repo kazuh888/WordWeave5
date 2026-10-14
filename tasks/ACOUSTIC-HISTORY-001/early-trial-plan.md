@@ -1,5 +1,7 @@
 # ACOUSTIC-HISTORY-001 早期試用EXE限定計画
 
+2026-10-14最新：ET1と限定fixture是正ET1-FX1は[独立最終Post PASS/Closed](early-trial-paths-review.md)。通常250/試用281行動PASS、各fixtureSKIP3を保持した。未変更範囲の証拠接合を含み全件再実行ではない。ET2/ET3・製品EXEは未完成である。以下の過去時点の未了/Pre待ち表記は工程履歴である。Pre承認snapshotのhashは最終Postへ記録し、今回の計画変更は完了状態だけであり契約/検証条件を変更しない。
+
 2026-10-13再開時点：ET0仕様/設計PASSとd-S/B/Mの最終Post Closedを[独立依存確認](early-trial-dependencies.md)で照合し、ET1開始条件を満たした。以下の過去の「d-B/M未了」は計画作成時の入力記録であり、本最新状態に置き換わる。ET1独立作者Astra/highを起動済み。本体・ET2/ET3提供はまだ未完成である。工程別自動引継ぎの承認により、親モデル切替待ちだけを理由に停止せず、計画指定値を各dispatchで明示する。
 
 2026-10-12 / ET0仕様・設計反映済みの確定計画。入力は[外部契約・設計](early-trial-contract.md) SHA256 `0BC3839A6C6B60E5CD4E7267269FE33D4D898CA704B89609E32E0BB0912A1A6D`。親からcycle 2の仕様/設計ともPASS・ET-D01 Closedを受領した。[独立review記録](early-trial-review.md)を判定正本とし、本文の初回草案表示と後続判定を区別する。source・動作は未実装であり、d-B/M Closed前にET1へ進まない。既承認d-B/Mの着手条件とEXE提供gateは維持する。
@@ -72,9 +74,9 @@ ET0は同一文書の両節が揃った時点で、独立reviewerを1回起動�
 
 ### ET1: 試用保存先と外部宛先保護（M、5file）
 
-- [ ] `Cargo.toml` の既定offの試用featureと `src/store.rs` のroot/外部出口policyを接合し、試用rootと通常rootの両方を保護する。root不明・不正・alias・書込不能時の通常版fallbackは0回とする
-- [ ] `src/ai.rs` のjournal/codex-work rootを同じ保存先選択へ接合する。`src/commit.rs` は回復前のpending旧新Progressの読取専用history検査だけを追加し、既存回復のpublisher/順序を変えない。LOCALAPPDATA/CODEX_HOME、Codex認証・model・effortは変更しない
-- [ ] 独立作者の `tests/early_trial_paths.rs`（予定）と必要な本体cfg(test)で通常/試用構成、再起動、境界拒否、合成通常root sentinel不変を検証し、runner/Postを通す
+- [x] `Cargo.toml` の既定offの試用featureと `src/store.rs` のroot/外部出口policyを接合し、試用rootと通常rootの両方を保護する。root不明・不正・alias・書込不能時の通常版fallbackは0回とする
+- [x] `src/ai.rs` のjournal/codex-work rootを同じ保存先選択へ接合する。`src/commit.rs` は回復前のpending旧新Progressの読取専用history検査だけを追加し、既存回復のpublisher/順序を変えない。LOCALAPPDATA/CODEX_HOME、Codex認証・model・effortは変更しない
+- [x] 独立作者の `tests/early_trial_paths.rs` と必要な本体cfg(test)で通常/試用構成、再起動、境界拒否、合成通常root sentinel不変を検証し、runner/Postを通す
 
 本体所有は `Cargo.toml`、`src/store.rs`、`src/ai.rs`、`src/commit.rs`。独立test所有は新 `tests/early_trial_paths.rs` と上記の専用cfg(test)であり計5file。依存はET0とd-B/M Closed。storeのprivate `TrialRoots` は検査成功時の固定2rootを一度登録し、外部dest/tempと最終再検査へ同じ観測集合を渡す。登録前generic APIと `Storage::at` の既存契約は維持し、実mainは登録前に外部操作へ進まない。root/tree/pendingのpreflight、非履歴pendingの既存回復、登録/失敗stageの詳細は契約設計を正本とする。検証はET-01/04/05/06のfocused回帰と既定store/export/backup/media regressionであり、環境変更・登録は有限timeoutの子processへ隔離する。新featureに依存追加は不要でありCargo.lockを無目的に更新しない。
 
@@ -164,6 +166,8 @@ KPIはこのplanner子の開始/終了usage counterおよび実行model/effort m
 
 ### Closure matrix
 
+最終状態（2026-10-14）：以下5行の全findingはFX1独立Post PASSを受け**Closed**である。表内のPlanned/Pre/Post未了はPre承認時のsnapshotを残した履歴であり、現在状態ではない。canonical contract/oracleは変更せず、[最終Post](early-trial-paths-review.md)をReviewer recordの正とする。ET1-P01もClosed、ET2/ET3の残余は維持する。
+
 finding全文欄は親から受領した報告文である。追加4件の独立reviewer判定は同系fixture不整合、本体欠陥未検出である。既存Post予備確認の「確定欠陥0」はrunner前の観測であり、今回のFAILを閉じる判定ではない。
 
 | Finding ID / 原文・位置 | Root cause / state | Packet / canonical artifact / evidence | Oracle | Reviewer record / residual |
@@ -190,6 +194,8 @@ finding全文欄は親から受領した報告文である。追加4件の独立
 12. **Traceability**: 上記5finding→ET1-FX1→ET-01/05/06と既存d-S/d-M/H03回帰。本PacketのPost PASSはET1全体・ET2/ET3・音声履歴全体のClosedを意味しない。matrixは独立Post記録後にのみClosedへ更新する。
 
 ### 作業単位・モデル・検証
+
+完了記録：FX1-0/1/2/3はすべて完了。Pre承認snapshotの下記チェックリストは履歴であり、最終Postと本書先頭の完了状態を現在の正とする。
 
 ET1-FX1はS（test 3file、production 0file）、難易度中/危険中である。差分は小さいが、正常なcaller契約を誤変更しないことと独立oracle維持が判断点である。planner/external-spec authorは `gpt-6-astra/high`。外部仕様と内部設計は承認済み正本を再利用し、追加仕様作成・設計変更・本体実装は非該当である。
 

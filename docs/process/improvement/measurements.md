@@ -1,5 +1,7 @@
 # 開発タスクの使用量記録
 
+- 2026-10-14 ACOUSTIC-HISTORY-001のET1/FX1は[独立Post PASS/Closed](../../../tasks/ACOUSTIC-HISTORY-001/early-trial-paths-review.md)。残るrecheck1、本体sticky分類、保存先/外部保護/AI cwdを確認し、独立回帰で見つけたfixture構成不整合5件をtest3file/5symbolだけ是正した。影響範囲各83rawを再検証し未変更証拠と接合、通常250/試用281行動PASS・各fixtureSKIP3。親Sol/medium、作者/実装/計画/レビューAstra/high、runnerSol/mediumを工程別dispatchした。[使用量記録](../../../tasks/ACOUSTIC-HISTORY-001/usage-observation-20261013.md)に親/子別の実在開始終了counter・差分・欠測を保存した。再開週枠10%→終了側22%はアカウント共通観測で当工程単独へ帰属せず、親子を合算しない。終了時計02:14:26 UTC、親counter02:16:16.587 UTCまで、最終記録/push/応答は範囲外。通常開発の検証だけで比較専用再実行0、旧方式比未判定。集計wrapper・fixture前提・test参照名の手戻りを保持し、feature追加時の既存fixture棚卸しを改善候補とした。ET2/ET3・製品EXE・native/API受入は未完了である。
+
 - 2026-10-13 ACOUSTIC-HISTORY-001再開。HEAD `186b464`、tree clean、前提D2集約確認→早期試用保存先分離ET1を今回の限定対象とする。開始11:43:45 UTC（20:43 JST）、週枠0%・reset1792496608は前回と異なる窓であり、前回98%からの単純差分を使わない。[親開始snapshotと担当記録](../../../tasks/ACOUSTIC-HISTORY-001/usage-observation-20261013.md)を保存した。親Sol/mediumを維持し、計画指定の各役へ自動dispatchする。ET2/ET3提供・実API受入は今回の開始時点では未完了である。
 
 - 2026-10-12 I2d-M限定単位は[最終Post PASS/Closed](../../../tasks/ACOUSTIC-HISTORY-001/media-export-final-review.md)。新25件独立PASS、関連込み114行動PASS/0FAIL/fixture skip3、source/oracle固定・通常ユーザー・timeout/子/TEMP残存0である。作者/実装/Post Astra/high、runner Sol/mediumへ自動dispatchした。終了02:58:17 UTC（最終記録/push/応答前）、週枠93→98%はアカウント共通観測、親子usageは[担当別snapshot差分](../../../tasks/ACOUSTIC-HISTORY-001/usage-observation-20261012.md)で別記し合算しない。旧方式比の増減は未判定。hash fixtureとassertionの修正、実装側の不要な再compile/既知sandbox再試行を手戻りとして記録し、runnerではcompile/runtime分離で重複を回避した。製品EXE・全体deliveryは未完了である。

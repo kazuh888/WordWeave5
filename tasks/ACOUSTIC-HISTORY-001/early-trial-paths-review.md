@@ -42,3 +42,21 @@ fixtureはStorage::atからstorageを破棄し、試用OnceLockを登録して�
 3test-file/5symbolの限定所有、独立literal、通常版期待値保持、M05B名前付き前提、M05C実同root失敗、既存拒否/成功/ledger/memory保持、有限child、両構成83raw件再検証、役分離とrollback/停止/Post条件を確認した。契約・3source・基準91hash一致、文書diff/参照確認も成功。本体・登録前caller契約・ET2へ拡張しない。
 
 このPreは是正着手の許可である。5FAILとET1-P01/ET1全体は未Closed、修正後の独立runner/Postが必要である。計画closure matrixの5子findingをET1-P01の内訳として追跡する。
+
+## 最終Post（2026-10-14）：FX1 PASS / ET1限定工程 PASS
+
+同じ独立reviewer（Astra/high、同thread）の最終判定を親が受領・保存した。阻止0、要回答質問0、ET1-P01と5子findingはClosedである。上記未了表記は各段階の歴史記録であり、本判定を最新とする。
+
+対象はHEAD `bb01b58`＋承認3test-file/5symbolの未commit差分。Pre計画hash `3E698E4B6CC2A0778AC12B4B5C2DC012A47381FCC1365134CFE9A7B46A591312`、最終source hashは以下である。
+
+| source | SHA256 |
+| --- | --- |
+| src/app/settings_ui.rs | 021FB7F28501512AC2083AFA371260E5572031C491CB4FF0E057C0E685BBC32C |
+| src/app/chat_media.rs | 1D50424433A8F37A1962E439A34F34B8851C99F5CDA45EEAA3B74D1BB8A6BF3B |
+| tests/progress_export_destination.rs | B77396A23A1523437E8C7865799AE9740426F12ECA4FAD8017597065CDA7F9CF |
+
+参照名修正を含め承認5symbol以外は不変、91対象中88source不変、production/sharedhelper/他test不変、assert弱化なし。独立runnerの両構成83raw成功を生ログ・実名集合・build構成・実物EXE hashで確認した。各80行動PASS＋fixtureSKIP3、旧5FAIL全成功、M05B両分岐の3媒体拒否、M05C同root lock/open拒否/状態保持へ到達した。特定OSエラー番号は未実測である。
+
+未変更範囲の通常170・試用201件の実名・成功記録・12EXE hashを接合し、通常250行動PASS、試用281行動PASS、各fixtureSKIP3とした。全件の新規再実行とは表現しない。保存先分離、history拒否、回復順、probe後始末とmutation検出、sticky stage、複数root保護、AI cwd接合の静的証拠とも整合する。
+
+symlink権限不足2件・別drive alias未用意1件は未実証のまま保持し、旧昇格証拠で今回成功へ置換していない。ET2・ET3の全体test/release/native/実認証/API受入は未完了であり、このPASSは製品EXEの提供判定ではない。レビュー担当の編集・試験実行・再委譲は0。
