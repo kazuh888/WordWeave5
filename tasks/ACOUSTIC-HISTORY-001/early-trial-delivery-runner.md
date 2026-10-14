@@ -260,3 +260,21 @@ PNGは `owned-refusal.png`、SHA256 `79A18A944717CE06AA63EE975DD0EE22CAEE42F3033
 最終source170差0/HEAD6fb6da3と試用E3A0…BBD2/旧通常9B888…387D3/旧standalone57A3…4506E不変を `source-after.json` / `exe-after.json` / `final-audit.json` に保存した。22:53:17 JSTの `native-refusal-process-summary.json` は今回3組のnative/observerと所有子のlive0、全Waitedtrue/timeoutfalse/残存0。ユーザーprocess停止/global input/他app操作/desktop capture/実資格情報/API/mic/提供copy/再委譲/commitは0。
 
 最後の許可補充を終了し、再起動しない。RootUnavailableの新PNG/DPI100/本文/OK/focusと、残る標準keyboard/他native gateを親へ返して所有返却する。終了週枠70%（window10080/reset1792496607、22:53JST・最終応答前）、開始65%との差は共有並行区間の観測であり本工程単独量ではない。子token/log session/provider返却model・effort/親子包含の欠測は継続する。
+
+## ET3-G初回独立合成試験：不合格・所有返却（2026-10-15 00:42 JST）
+
+planner `early-trial-gate-plan.md` のrunner指定は `gpt-6.1-sol/medium`、provider返却model/effortは未取得である。AGENTS/development-team/KPIとwordweave-change全文を読み、検証・報告だけを適用した。親から静的P1二件closure PASSと初回合成試験だけの解除を受領した。実行対象HEADは `2cec3c08686dae9c6e74131b4369f03366c38d1f`、開始dirtyはdelivery-review、gate-design、usage-observation-20261014-et3、currentの文書4件である。製品source/test/期待値/設定を変更していない。
+
+固定入力SHA256はInvoke-CargoGate.ps1 `F39A95D99618EBD35576C64F8144C710110EF0D77FA91BE66AB28B9F91A1A892`、Test-CargoGate.ps1 `763CB0B1D4308C6FFF029CCBE7FBA3E5667E4DE2EB1CEE963222B554534CD0CC`、cargo_gate_entry.rs `3AEB0B19E2D03EE088EB1BEDA4DBACEEC0406E12ED75D59AB95A7E331F42FD41`、cargo-gate-entry.exe `1C04288220C3D98B182F3011FE3D1DE8AE88B050871DF400B21ED8AECCCC5E94`、fake.rs `3482075BF7479E61942978830AE91FDDF5301133E1A2F43EDB9B65DDAA0FA016`。設計SHAは `2DE1F344FEC43468AA1F40716A7A912BDCD943318B5D39FDC5F47CBEEC970937`。前後現物一致、driverもsourceMatched=trueである。
+
+R=`F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate`、suite=`8b960cec-97f2-43fb-9851-50b4044d17be`。git check-ignore成功後、通常ユーザーAdmin=false、pwsh7.6.6を確認した。CIMに必要なsandbox外実行は管理者昇格ではない。実commandは `& 'F:/Program Files/PowerShell/7/pwsh.exe' -NoLogo -NoProfile -NonInteractive -File R/Test-CargoGate.ps1 -GateScript R/Invoke-CargoGate.ps1 -OutputRoot R/verification/8b960cec-97f2-43fb-9851-50b4044d17be` （Rは上記絶対pathへ展開）。一回だけ実行しexit1、firstFail停止、自動再試行0である。新fixture rustc1.98.1 compile成功、stderr0byte、fake.exe SHA `1AF001913CECEA34F4B69B14E5E093A2A8AAF933416D20200F88054B6BAB8965`。入口controller PID2620開始15:40:24.5891281UTC、GATE21 RunOwner PID37284開始15:40:31.8137400UTCである。
+
+controlはPASS2/FAIL0/SKIP0/NotRun0。80caseのraw resultはPassed26/Failed1/NotRun53/Skipped0、gatePass=falseである。ただしPassed26（ENV01–06/GATE01–20）は全variants=[]、対応case directory0であり、静的契約検査や実process動作の成功としても扱えない。driverのL1995付近 `$variants = if (...) { ... } else { @($null) }` → `foreach ($variant in $variants)` により通常case呼出が消失した疑いが強い。実証済みgate behavior PASSは0、raw26件を合格へ接合しない。テスト作者へ返すべき観測不備でありrunnerは修正しない。
+
+最初の実caseはGATE21/run（runId `f8ed9578-d246-40ed-be83-a02aa797c96f`）。失敗は `BEHAVIOR_ASSERTION: Terminal gate evidence missing; unknown is not PASS`、Confirm-CaseResult L1688、driver L2000。run rootにはrun.json/cancel.jsonだけ、terminal result0、controller stdout/stderr各0byte、target started marker0。classificationはUnverifiedBehaviorOrFixtureFailureであり、製品拒否動作のPASSにも製品FAIL確定にも読み替えない。GATE21/approval variant未到達である。
+
+15:41:54.7818683UTCのread-only CIM監査（exit0）は固定controller/RunOwner PIDからの生存子孫とsuite内実image候補0、cargo-gate-entry.exe全体0。初回広いcommand文字列検索は観測用pwsh自身を候補へ拾ったため、固定PID鎖/実image境界へ限定して確認した。ユーザーprocess停止0である。gate自身のkill/wait/cleanup terminal証拠は欠落しているためcleanup PASSは未成立。suiteのtemp/localと合成証拠fileは保持し、現在生存0をfixture残存0へ換算しない。
+
+正本は `R/verification/<suite>/result.json`、`frozen-inputs.json`、`toolchain.json`、`identity-control/`、`GATE21-run/author-failure.json`、同controller stdout/stderr、`R/runs/<runId>/{run,cancel}.json`、追加read-only結果 `independent-runner-audit.json` である。親へ不合格とraw合格件数の不成立を返し、所有を返却する。製品full/real Cargo接合ORDER07/実API/資格情報/native microphone・pen・TTS・IME・authentication/提供copyは本試験では未実施であり、旧ログや合成controlで解除しない。app終了/EXE置換/再委譲/公開0である。
+
+週枠開始91→終了92%（window10080分/reset1792496607、最終応答前）の共有account観測は並行工程を含むため単独消費へ換算しない。子token開始/終了counter、固有session ID、provider返却model/effort、親子包含は未取得である。

@@ -76,6 +76,8 @@ nativeが起動するものは固定実path `F:/Program Files/PowerShell/7/pwsh.
 
 保存順は同directory内の新規tempへ全bytesを書込・Flushして閉じる→既存宛先を上書きしないrenameで公開である。公開済みRun/Manifest/Approvalは変更しない。失敗・拒否時は新しいcancel/terminal証拠を残す。承認の部分書込は待機中の完成品と扱わず拒否する。runnerは読んだ承認bytesとhashを記録する。署名・ACLを追加する設計ではなく、親と担当の所有規律を前提とする。同一ユーザーの悪意ある改竄への防御を主張しない。
 
+nativeのこの非上書き公開はRust `std::fs::rename`ではなく、Kernel32の`MoveFileW` FFI（`extern "system"`、戻りBOOL）に固定する。所有する同directoryのCreateNew tempへ全bytesを書き`sync_all`後に閉じ、検証済み絶対pathを内部NULなしのUTF-16＋末尾NULへ変換して呼ぶ。temp／宛先の解決済み親directory一致を必須とし、事前の不存在確認だけで競合を防いだことにしない。[MoveFileW公式契約](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-movefilew)の「新nameは既存不可」を公開境界に使い、BOOL=0では直ちにGetLastErrorを保存して非zero終了する。失敗時に処理できるのは自分のtempだけであり、既存payload／宛先は変更・削除しない。hard_linkによる複数link状態、置換許可付き別API、copy fallbackは追加しない。標準Windows APIへのFFIだけで外部Cargo crateは0、既定の完成file・非上書き公開を実現するprimitiveの具体化であり新承認はない。
+
 ## 時間順序・状態遷移
 
 1. `Prepared`：親が静的G0、source170/G0 12/marker4、Runのcommand/env/予定集合を照合し、全source writer停止・同target別buildなしを宣言する。独立runnerが固定pwshで同ps1を `-Mode RunOwner -RunPath <run.json>`として一度起動し、その実processが外側監督となる。RunOwnerは通常ユーザー・固定入力・全wrapper hashを確認し、直系SupervisorをHidden起動／登録し開始ACKを出す。SupervisorはACK前Cargo起動0。source170は全期間lockせず、build前後、親承認時、各EXE実行直前と終了時に全bytes hashを照合する。ソース変更を伴わない凍結検証であり、変更検出/所有違反はrun全体を無効化する。
@@ -83,12 +85,14 @@ nativeが起動するものは固定実path `F:/Program Files/PowerShell/7/pwsh.
 3. `AwaitingManifest`：Cargoが呼ぶ最初のRunnerはRequestを出して停止する。build-finishedが未到着ならSupervisor側収集を待つ。JSONがrunner起動より後に届いても非実行を保ち、期限までに全prefixが取れなければ中断する。stdout収集をrunner待機で塞がない。build-finished前のbuild-script実行は通常Cargo buildの既承認範囲であり、ここで保証する「起動0」は対象test EXEについてである。
 4. `AwaitingG0`：Supervisorは全EXEを読取lockし同handleからhashを取り、source再照合後Manifestを公開する。親はraw JSON prefix/source/EXE/profile/features/target・予定集合・first Requestを独立照合し、g0承認を発行する。manifest内に載るだけでは起動許可にならず、full Runnerはここでも待つ。承認前のEXE `--list`も0である。
 5. `SafetyChecks`：Supervisorがg0承認に束縛されたSafetyWorkerを一件ずつ直系子として起動する。worker登録／開始ACK後だけ同Manifestの新binとcodex_processを既存V2Caseでlistして実名集合を照合し、その後新binの録音3→P01既定順20→新integration自身A11を実行する。Supervisorとworkerは各V2Case起動直前にもsource170/G0 12/marker4を再照合し、V2CaseのEXE hash確認と組にする。親はこの固定対象／順序をg0発行時に照合し、別tool treeで起動しない。順序の入力は既存`fx1-default-selected.log`先頭23行（試用も同23）と`fx1-integration-selected.log`全11行をsource実名と照合しRunへ固定する。新binの旧G0/PASSを接合しない。V2CaseのTimeoutSeconds=65、内部helperの既定45秒は変更せず、workerの外側case時計はV2CaseのStart直前から65秒、aggregate残りが短ければ外側が先に止める。exact1/PASS1/必要完了marker/AdminFalse/残存0を必要とする。case結果・回収完了前には次workerを開始しない。親が同run全ログとG0結果digestを独立照合するまでfullを発行しない。
-6. `RunningFull`：親が同run/Manifest＋新G0結果digestを束縛したfull承認を1枚発行する。待機中Runnerと後続Runnerはこれを共用し、各spawn直前に有効期限・cancel不在・live RunOwner/Supervisor/Cargo/entry identity・Run/Manifest/承認hash・source/G0/marker一致・対象EXE hash・許可集合・当該Runner登録ACKを再照合する。EXE読取lockを終了まで保持し、変更できなかったという推測だけでhash照合を省略しない。構成ごと2枚の親承認であり、24件の人間待ちは設けない。
+6. `RunningFull`：親が同run/Manifest＋新G0結果digestを束縛したfull承認を1枚発行する。Supervisorが期限内に検証・受領した証拠を下記full-received.jsonへ公開してから、待機中Runnerと後続Runnerが同full承認を共用する。先行Runnerもreceipt前target0である。各spawn直前にreceiptと承認の対応、有効期限・cancel不在・live RunOwner/Supervisor/Cargo/entry identity・Run/Manifest/承認hash・source/G0/marker一致・対象EXE hash・許可集合・当該Runner登録ACKを再照合する。EXE読取lockを終了まで保持し、変更できなかったという推測だけでhash照合を省略しない。構成ごと2枚の親承認であり、24件の人間待ちは設けない。
 7. `Finished`：Cargo、全Runner、G0監督、既知子孫の終了/Waitを確認し、source/marker/旧製品の保全とfixture残存0を記録してからlockを解放する。成功判定にはCargo exit0だけでなく全gate Result整合、予定実行集合との対応、実test集計を必要とする。24artifact全部が起動されるとは要求しない。未起動のprofile.test=false補助binと対象testを区別し、件数減を自動容認しない。
 
-任意状態の拒否・変更・取消し・期限切れ・親/supervisor喪失は`Aborting→Stopped`だけへ進む。旧runの再開・自動承認・自動再試行はない。Run開始から3600秒上限、build1800秒、各承認待ち600秒、full各EXE600秒、回収wait10秒を上限とし、残り全体時間の方が短ければそちらを使う。時間延長は親の別Run判断であり待機中の期限を書き換えない。G0中のfull待機は親のG0処理を含む600秒であり、足りなければ失敗として返す。
+任意状態の拒否・変更・取消し・期限切れ・親/supervisor喪失は`Aborting→Stopped`だけへ進む。旧runの再開・自動承認・自動再試行はない。Run.deadlineUtcは**回収を含む全体停止上限**であり、Run.startedUtcから最大3600秒のままとする。全mode共通の実行停止境界`executionDeadlineUtc = Run.deadlineUtc - 10秒`を導出して末尾10秒を回収へ予約する（Runへ新しい入力fieldは足さない）。build1800秒、各承認待ち600秒、G0 aggregate600秒、full各EXE600秒、V2Case65秒の各実行／待機期限は、このexecutionDeadlineUtcとの早い方を採る。各phase自体からさらに10秒を差し引く意味ではない。期限到達で新規spawn／承認採用／待機を止め、回収へ移る。時間延長は親の別Run判断であり待機中の期限を書き換えない。
 
-600秒はaggregateの失敗上限であり、34exact×65秒=2210秒（list2件を含めれば最大2340秒）を全件使っても完了する保証ではない。g0承認の親記録publishedUtcからfull承認受領までの600秒を固定する。親はg0公開時点で`g0DeadlineUtc=min(publishedUtc+600秒, Run期限)`も承認へ含め、Supervisorは将来のpublishedUtcを拒否して同期限を固定する。観測が遅れても時計を後ろへずらさない。期限切れでは実行中G0を所有照合して回収しfull起動0を保つ。G0とfull承認待ちの時計を二重にリセットしない。各監督はUTC残り時間から作るStopwatch上限も持ち、時計の逆行による延長を許さない。fakeはこのaggregate期限切れを独立検証する。全case上限を許す時間枠へ変える必要が生じた場合は親/plannerへ返し、自動延長・case短縮・省略はしない。
+ACK、Intent、SafetyInvocation、fixture停止点のdeadlineは実行／待機側の期限、Result.cleanupDeadlineUtcは回収側、Run.deadlineUtcだけが両者を含む全体上限である。全modeはUTC比較と初回に残り時間から設定したStopwatch上限の早い方で停止し、時計逆行や監督交代で予約を失わない。Run検証／child起動前にexecutionDeadlineUtcへ既に達していれば対象起動0で返す。短いfixtureRunも同じ10秒予約を持ち、作者が必要な起動・hook・phase対照時間に回収10秒を加えた絶対期限を明示する。残り10秒以下のRunを通常対照として実行可能に自動延長せず、短いphase期限によるtimeout対照は十分な全体Run内に置く。
+
+600秒はaggregateの失敗上限であり、34exact×65秒=2210秒（list2件を含めれば最大2340秒）を全件使っても完了する保証ではない。g0承認の親記録publishedUtcからfull承認受領までの600秒を固定する。親はg0公開時点で`g0DeadlineUtc=min(publishedUtc+600秒, executionDeadlineUtc)`も承認へ含め、Supervisorは将来のpublishedUtcを拒否して同期限を固定する。観測が遅れても時計を後ろへずらさない。期限切れでは実行中G0を所有照合して回収しfull起動0を保つ。G0とfull承認待ちの時計を二重にリセットしない。各監督はUTC残り時間から作るStopwatch上限も持ち、時計の逆行による延長を許さない。fakeはこのaggregate期限切れを独立検証する。全case上限を許す時間枠へ変える必要が生じた場合は親/plannerへ返し、自動延長・case短縮・省略はしない。
 
 ## process・argv・回収境界
 
@@ -96,7 +100,7 @@ nativeが起動するものは固定実path `F:/Program Files/PowerShell/7/pwsh.
 - LOCALAPPDATA/TEMP/TMP、target、JOBS2、repo cwd、WW5_ET2_CHILD/BASE空、既定CARGO_LOGはfull2の構成別EnvMapを使う。runner値とrun path/idだけをCargo子環境へ追加する。親環境を`$env:`で書き換えない。Cargoが実行時に加えるライブラリPATH等はnative→PS→targetへ保持する。環境照合は固定keyとrunner実pathを対象とし、CargoによるPATH追加を誤って違反扱いしない。
 - Runnerはpayloadの先頭からcanonical EXEを検証し、残り全argvを順番・空文字・UTF-16 code unit・空白・引用符・末尾backslashを含めProcessStartInfo.ArgumentListへ1要素ずつ渡す。shell、Invoke-Expression、Start-Processの任意argv文字列連結は使わない。cwd/envを継承しUseShellExecute=false/CreateNoWindow=true、stdout/stderr/stdinをOS handleとして継承する。PS pipelineを経由せずbyte列を保ち、wrapperログやnativeエラーはsidecarのみへ出す。filter/skip/ignore/test-thread/quietを付加しない。
 - 通常完了時はchild.ExitCodeのInt32をPSの明示`exit`へ渡し、nativeはExitStatus.code()のInt32を`std::process::exit`へ渡す。符号を成功判定へ転用せず、同じ32bit patternを保持する。[pwsh -Fileのexit規則](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_pwsh?view=powershell-7.6)を使い、0/7/101/0x80000001/0xFFFFFFFFを実native→PS→fakeで確認する。通常終了のResultはgateStatus=`Completed`、製品exitはそのままである。gate拒否/timeout/cancel/監督障害は非zero＋`Rejected`/`TimedOut`/`Cancelled`/`OwnerLost`/`CleanupIncomplete`で区別する。製品の同じ数値exitと混同せず、sidecar欠落はunknownであってPASSではない。
-- 各ownerは開始意図を先に保存し、spawn直後のProcess handle／PID／開始時刻を保持し登録する。正常exitでも子孫残存を監査する。OSのPIDだけでなく同じ開始時刻・image・command・親子関係を確認し、未知processを停止しない。有限kill/waitの実体と登録raceは次節で固定する。
+- 各ownerは開始意図を先に保存し、spawn直後のProcess handle／PID／開始時刻を保持し登録する。正常exitでも子孫残存を監査する。OSのPIDだけでなく同じ開始時刻・image・command・親子関係を確認する。自身がdirect Startした子の所有根拠は下記DirectLaunchHandleでも証明できるが、起動入力をOS照会値へ転記せず、未知processを停止しない。有限kill/waitの実体と登録raceは次節で固定する。
 - 継続lockは承認対象EXEへ限定する。SupervisorがManifest作成前から全対象EXEを`FileAccess.Read + FileShare.Read`で開き、同handleでhashし、G0/full/全回収まで保持する。これが閉じるraceは「hash照合後からspawnまでのEXE差替え」である。sourceは実行imageではなく凍結buildの根拠であり、非並行writer所有＋全件再照合が既定G0を満たすため全170fileの全期間lockは不要と判断した。writerが停止を守れない・一時変更/逆復元が判明した場合はhashが戻っても承認失効である。悪意ある非協調writerへの一般的防御は追加しない。EXEのlock取得/正常実行両立に失敗したらSTOPし、lockを外して続けない。
 - 全process終了確認前にTEMPや合成rootを削除しない。fixtureは今回の検証済み絶対pathだけをcleanupし、証拠を保持する。共有full2環境は構成の全作業が終わるまで保持し、内部一時fixture残存0と空の保持directoryを区別する。中断したrunは証拠を保存したまま無効化し、次回は新runId/新承認から始める。
 
@@ -124,11 +128,17 @@ ACK前にowner又は子が終了した場合はCargo／V2Case／target起動0で
 
 子孫探索にはWindows `Win32_Process`のProcessId／ParentProcessId／CreationDate／ExecutablePath／CommandLineを使い、Process handleのStartTime／ExitTimeと突き合わせる。監督loopで観測済みedgeを保存し、既知親が消えても子の同定を捨てない。V2Case直系は専用OutputDirectoryをcommandに持ち、Runnerは固有InvocationPath、nativeはpayloadのentryPidとCargo→entry→Runnerの実親子鎖、CargoはRun固定commandで識別する。EXE名や時間帯だけの一致を所有根拠にしない。初回から観測不能・権限不足・中間親が消えてedgeを証明不能であれば`CleanupIncomplete`とし、全体PASS／次case／fullを禁止する。親喪失を検出しただけで子孫回収済みとは記録しない。
 
+直系子については`DirectLaunchHandle`を独立した所有根拠として認める。条件は同じownerが(1)atomic Intentを保存、(2)承認済み絶対path／image lock／正確なArgumentListを使いUseShellExecute=falseで直接Start、(3)その呼出が返したProcess／SafeHandleをPID照会から作り直さず保持、(4)そのhandleのPID／StartTimeと、終了時のExitTime／ExitCode／有限wait結果を記録する、の全成立である。即exitしてCIM行が消えても、この証拠で当該直系子のOwnedと終了を判定できる。handle時刻／waitが取得不能なら推定せずUnprovableであり、Intentだけでは所有を証明しない。通常のlive childでもOS照会が取得できたfieldは記録し、実測値とIntentが矛盾すれば拒否する。
+
+最小追加fieldはRegistrationとResult.processes行の`ownershipEvidence:{kind,intentSha256,launcherIdentity,exitTimeUtc,osQueryStatus}`である。kindは`OsQuery`又は`DirectLaunchHandle`、osQueryStatusは`Observed,NotFoundAfterExit,Unavailable`。DirectLaunchHandle時のidentity.pid/startTimeUtcは保持handle由来、未観測のidentity.path/parentPid/commandLineUtf16はnullとする。実際にAPIへ渡したpath／argv／親はintentSha256の指すIntentとlauncherIdentityから読み、OS実測値として埋めない。OsQuery時はintentSha256をnull可、exit前のexitTimeUtcもnullとする。保持handleを持つ起動ownerだけがその同一handleへ停止／waitでき、PID再利用やsidecar読取を理由に他processをDirectLaunchHandleへ昇格しない。他監督の引継ぎと未知descendantは既定のOS identity／親子edge照合を必要とする。
+
+この規則は直系子の短寿命を扱うものであり、子孫残存0・ACK・親livenessを代替しない。合成LIFE16/17のnegative観測境界も通し、保持handleを理由にその欠測を成功へ書き換えない。CIMのsandbox access拒否はUnavailableとして別途記録し、未知子孫の監査不能を短寿命扱いでPASSにしない。ordinary環境での照会能力確認は後続runnerが行い、本変更でquery機構を置換しない。一次根拠は[Process.SafeHandle](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.process.safehandle?view=net-10.0)のnative handle、[CreateProcessW](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw)の作成process情報の返却、[GetProcessTimes](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getprocesstimes)のhandleに対応する作成／終了時刻である。別APIで即exit後のcommand lineを必ず復元できるとは仮定せず、TRANSPARENTの実証は保持handleによる終了と独立fakeのargv／stream／exit証拠を組み合わせる。
+
 回収手順のownerは、通常のcaseではSafetyWorker、fullではRunner、全run abortではSupervisor、Supervisor異常時ではRunOwnerである。SafetyWorker／Runner自身もRunOwner又はSupervisor喪失を検出すると自分のtree回収へ入る。entryが強制終了した場合もRunnerは登録済みentry PID＋開始時刻の喪失から回収する。複数ownerが同時にabortを観測してよく、保存先をowner別にして上書きせず、同じOS identityへの停止は既終了を成功として扱う。cancelはrun rootへのCreateNew一度公開、解除はない。
 
-各回収は最初のabort時点から10秒の単一Stopwatch期限とする。まず新規spawnを禁止し、所有identityを再確認して記録済み子孫を葉から順に`Process.Kill()`する。新規子を作り得る既知ownerにも停止要求を送り、250ms以内のWaitForExit(int)で各handleを確認しながら残り時間内だけ再列挙する。Kill要求成功をwait成功に読み替えない。[.NETのKill契約](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.process.kill?view=net-10.0)でもkillは非同期であり、親のWaitは子孫終了を保証しない。したがって引数なしWaitForExit()、processごとの新しい10秒、Kill(true)だけで完了扱いする実装は禁止する。既知processに対する単体Killと全handleの有限Wait／残存再照合を同ps1の共通helperに固定する。OS列挙の各queryも残り時間以内の有限timeoutにする。
+各回収の共有絶対期限は`cleanupDeadlineUtc = min(firstAbortUtc + 10秒, Run.deadlineUtc)`である。firstAbortUtcは最初の既知abort（cancelが先ならcancel.publishedUtc）とし、各owner自身のabort観測からのmonotonic10秒上限も併用する。まず新規spawnを禁止し、所有identityを再確認して記録済み子孫を葉から順に`Process.Kill()`する。新規子を作り得る既知ownerにも停止要求を送り、250ms以内のWaitForExit(int)で各handleを確認しながら残り時間内だけ再列挙する。Kill要求成功をwait成功に読み替えない。[.NETのKill契約](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.process.kill?view=net-10.0)でもkillは非同期であり、親のWaitは子孫終了を保証しない。したがって引数なしWaitForExit()、processごとの新しい10秒、Kill(true)だけで完了扱いする実装は禁止する。既知processに対する単体Killと全handleの有限Wait／残存再照合を同ps1の共通helperに固定する。OS列挙の各queryも残り時間以内の有限timeoutにする。
 
-Supervisorのabort/cancelを受けたRunOwnerは同じcleanupDeadlineを共有し、10秒を積み増ししない。Supervisorが通知前に異常終了したときはRunOwnerが検出時点で10秒を開始する。各workerも上位のcleanupDeadlineがあれば自分の期限との早い方を採る。10秒内に対象全handle終了・所有子孫残存0を証明できなければ非zero `CleanupIncomplete`を保存して待機を終え、fixture削除とfullを禁止し、未回収identityを親へ返す。OS停止要求自体が応答不能の場合を実時間10秒で必ず回収できるとは主張しない。
+Supervisorのabort/cancelを受けたRunOwnerは同じcleanupDeadlineを共有し、10秒を積み増ししない。Supervisorが通知前に異常終了し既知の先行abortがなければRunOwnerの検出時点をfirstAbortUtcとするが、Run.deadlineUtcの上限は維持する。各workerも上位のcleanupDeadlineがあれば自分の期限との早い方を採る。通常のRun timeoutはdeadlineそのものではなくexecutionDeadlineUtcで発火するので回収予約を使える。スケジューラ停止等で検出が遅れ残りが0なら、保持する既知所有handleへの未送信Killを直ちに要求し、待機を追加せず未確認分をCleanupIncompleteとして返す。「0秒だから停止要求も省く」は禁止する。期限内に対象全handle終了・所有子孫残存0を証明できなければ非zero `CleanupIncomplete`を保存して待機を終え、fixture削除とfullを禁止し、未回収identityを親へ返す。OS停止要求自体が応答不能の場合を全体上限までに必ず回収できるとは主張しない。
 
 保証対象は少なくとも一つの監督が生存してOS照合／停止APIが応答する障害である。RunOwner／Supervisor／workerを同時に強制終了する、OS自体が停止する、観測前に中間processが消え所有鎖を証明不能となる場合に、Jobを使わず全子孫停止を無条件保証しない。その場合も承認の自動継続／次runへの流用／不明processのkillはない。必要な合成対照で単独監督喪失やACK境界の回収が成立しない場合はPre/Post不合格として親/plannerへ戻す。新Job／別launcher／品質条件の変更を実装者が選択する余地はない。
 
@@ -173,11 +183,16 @@ Supervisorのabort/cancelを受けたRunOwnerは同じcleanupDeadlineを共有�
 | source/g0/marker digest | sourceInput等はそのrun用に保存するUTF-8 JSON配列のPathHash snapshot。各fileの**保存済み全bytes SHA**を`sourceDigest/g0Digest/markerDigest`とし、再serializeしない。decodeした順序・path/hash集合はRunの対応配列と一致必須。source/g0は全file bytes、markerは一意の`// BEGIN ET2-P01 AUTHOR TESTS`先頭`/`から`// END ET2-P01 AUTHOR TESTS`末尾`S`までの現行UTF-8 bytesをhashする。旧marker snapshotの値を復活させない |
 | expectedArtifacts | `{packageId,manifestPath,targetName,targetKind,profile,features,allowExecution}`。targetKind/featuresは重複なしordinal順配列、profileはCargo JSONの実field名と型を保持し構造比較する。Manifestのartifact行はこれに`executable:{path,sha256}`を加える。allowExecution=trueだけが候補であり親承認は別途必要 |
 | safetyCases | `{caseId,order,artifactKey,list,exactName,requireChildMarker,expectedListNames}`。orderは0開始の連続整数、artifactKeyは`{packageId,manifestPath,targetName,targetKind}`、caseIdはrun内一意のASCII英数／`-`／`_`。list=trueのexactNameは`::`、expectedListNamesは作者固定実名集合。exactはexpectedListNames=[]。製品のlist2＋録音3→P01 20→integration11を変更しない |
-| process identity | `{pid,startTimeUtc,path,parentPid,commandLineUtf16}`。前3fieldは作者候補を採用し、OS親子照合に後2fieldを加える。commandLineUtf16はOSのcommand line全体のcode unit配列であり、target argvとは区別する。identityの等価性はPID＋StartTime、path/command/parentは追加の所有根拠である |
+| process identity | `{pid,startTimeUtc,path,parentPid,commandLineUtf16}`。前3fieldは作者候補を採用し、OS親子照合に後2fieldを加える。commandLineUtf16はOSのcommand line全体のcode unit配列であり、target argvとは区別する。identityの等価性はPID＋StartTime、path/command/parentは追加の所有根拠である。DirectLaunchHandleの未観測fieldだけは上記規則でnullとし、ownershipEvidenceとIntentに起動入力の由来を残す |
 | Approval | 作者候補の`phase,decision,runId,runSha256,manifestSha256,cfg,sourceDigest,g0Digest,markerDigest,publishedUtc,expiryUtc,g0DeadlineUtc,recordReference,safetyEvidenceSha256`を採用。recordReferenceは非空文字列。g0のsafetyEvidenceSha256だけnull、fullでは同runの成功証拠file SHA必須。fullの受領はg0Deadline以前、実行有効期限expiryUtcはRun期限以下であり、G0期限経過後に全full実行を直ちに失効させる意味ではない |
+| FullReceipt／Supervisorのみ | run rootの`full-received.json`へ`{runId,runSha256,manifestSha256,fullApprovalSha256,supervisorIdentity,receivedUtc}`をimmutable公開する。fullApprovalSha256は検証したapproval-full.jsonの全bytes SHA、supervisorIdentityは登録済み実identity。receivedUtcは全G0結果／full承認検証が成功した実受領時刻であり、full.publishedUtcの転記ではない |
 | G0成功証拠 | Supervisorが`safety-evidence.json`へ`{runId,manifestSha256,cfg,cases}`を保存。casesはRun順に`{caseId,order,invocationSha256,workerIdentity,v2Identity,targetIdentities,result,v2Result,stdout,stderr,listNames,passed,gateStatus}`。result/v2Result/stdout/stderrはPathHash、listNamesはlist時だけ実名集合、exact時[]。全行passed=true／gateStatus=Completed、V2のPassed／exact1・marker・wait／残存0と原文証拠が一致して初めて親full承認へ進む。SHAは保存済み全bytesから取り、順序や件数を再構成して省略しない |
 
 sidecarは作者候補を採用し、run rootの`run.json,manifest.json,approval-g0.json,approval-full.json,cancel.json,safety-evidence.json`、`invocations/<invocationId>/{payload,request,intent,registration,ready,ack,result}.json`、`safety/<caseId>/{invocation,intent,registration,ready,ack,result}.json`に固定する。RunOwner／Supervisor／Cargoの起動情報は`processes/<role>/{intent,registration,ready,ack}.json`、V2CaseのStart意図／登録は`safety/<caseId>/v2-{intent,registration}.json`とする。V2Case専用OutputDirectoryは`safety/<caseId>/v2-output`であり、既存V2の`result.json/stdout.log/stderr.log`はここに保持する。root監督のterminalは`result-<role>-<pid>.json`、worker／Runnerのterminalは各固有directoryの`result.json`である。roleは`RunOwner,Supervisor,Cargo,Entry,Runner,SafetyWorker,V2Case,Target`。同名はCreateNew、既存内容の差替え／第二承認は拒否し、同じimmutable fileの再読だけは重複発行としない。
+
+同run共通sidecarに上記`full-received.json`を加える。Supervisorはfull検証終了時にUTCと既定G0 Stopwatchの両方が期限未到達、cancelなし、G0成功証拠完了、承認expiry未到達を確認してreceivedUtcを取り、直ちに既定atomic保存でreceiptを一度公開する。受領時刻がg0DeadlineUtc以上なら発行禁止でTimedOut、過去のpublishedUtcで救済しない。保存失敗／receipt欠落は実行許可にならず、先行Runnerの既定待機期限を延長しない。再起動してreceiptを復元・再発行する経路もない。
+
+全Runnerはreceiptの全bytes／SHA、run・manifest・full承認SHA、登録Supervisorの同一identityを検証し、`full.publishedUtc <= receivedUtc < g0DeadlineUtc`と受領時の承認有効範囲を確認する。その後は現在時刻に対するfull.expiryUtc／executionDeadlineUtc／各EXE600秒と既定のlive identity・cancel等を適用する。**後続Runner自身の読取時刻をg0Deadlineと比較して共有full承認を失効させない**。欠落／破損／別fullへのreceiptはtarget0、同じfull bytesだけのreceiptを共用する。Runner Resultには`fullReceiptSha256`を追加し、full実行前の拒否では未読ならnullとする。この証拠の追加は期限内受領の可視化だけであり、新しいdeadlineや自動延長、第三の親承認を導入しない。
 
 Manifestのtop keyは`runId,runSha256,cfg,cargoIdentity,sourceDigest,g0Digest,markerDigest,jsonPrefixBytes,jsonPrefixSha256,artifacts,createdUtc`、Requestは`runId,invocationId,cfg,cargoIdentity,entryIdentity,runnerIdentity,payloadSha256,executable,argvUtf16`である。Registration／Readyは`runId,role,scopeId,intentSha256,identity,ownerIdentity`、ACKはこれに`readySha256,manifestSha256,caseId,deadlineUtc`を加え、非caseではcaseId=null、Manifest作成前のSupervisor登録ではmanifestSha256=nullとする。開始Intentは`runId,role,scopeId,ownerIdentity,path,argvUtf16,deadlineUtc`を持つ。SafetyInvocationは`runId,runSha256,manifestSha256,g0ApprovalSha256,caseId,order,executable,exactName,list,requireChildMarker,v2Case,outputDirectory,g0DeadlineUtc,deadlineUtc`であり、executable/v2CaseはPathHash。Resultは本書の既定内容を`runId,role,scopeId,identity,manifestSha256,requestSha256,ackSha256,argvUtf16,childExitInt32,childExitU32,gateStatus,startedUtc,endedUtc,timeout,cancelled,cleanupDeadlineUtc,processes,fixtureResiduals,sourceMatched`へ対応させる。未到達のidentity／hash／exitはnull、未取得配列はnullと空配列（取得済み0件）を区別する。processesの行は`{identity,killRequested,waited,hasExited,ownership,error}`、ownershipは`Owned,Unrelated,Unprovable`である。
 
@@ -225,3 +240,39 @@ LIFE17は実owned fake targetの終了観測を`Unavailable`とし、kill自体�
 実装者は固定キー／sidecarと同ps1の限定hook／negative observerだけを実装し、既存V2Case・作者oracle・native captureの責務を変更しない。作者は80caseを維持したままdriverを確定キーへ接合し、対象hook到達→変異／停止→release→外側markerとOS handleで結果を判定する。未実装を行動REDにせず、欠けたcaseをskip/PASSにしない。この新fixture契約は親が局所レビュー対象として識別し、その後の独立実行／Postへ渡す。追加の製品semanticは0、合成試験専用の新semanticは有限停止とnegative観測の二つである。
 
 局所作業の測定は23:19:16 JST近傍の共有週枠73%／10080分／reset1792496607。開始token／provider返却metadataは未取得である。現物hashは上記入力2fileと一致、作者fileの編集・fixture実行・再委譲・公開は0である。
+
+## RunOwner bootstrap拒否context（初回合成実行後の局所是正）
+
+GATE21-runの必須field欠落、GATE22の重複Run JSON、GATE23の型／未知cfgは、実行認可用Runの成立前に拒否する。一方、既定oracleはRejected／非zero／target0に加えてterminalと実測cleanup証拠を必要とする。この監査情報を壊れたRunから補完せず、RunOwnerだけが固定`R/runs/<UUID>/rejection-context.json`をstrict Run解析前に検証する。これは実行許可／g0／fullの代替ではない。childはこのlauncherを自身の親と比較せず、既存の自己scope確定前はunknown／書込なし、確定後だけ既存scopeへterminalを保存する。
+
+sidecarは次の8fieldだけを持ち、別名／欠損／重複key／未知keyを拒否する。
+
+| field | 完全な型・値 |
+| --- | --- |
+| runId | canonical directory名とOrdinal一致する小文字D形式UUID |
+| runSha256 | 刺激による変異を全て完了した後のrun.json全bytes SHA256、uppercase64hex |
+| startedUtc / deadlineUtc | 既定7桁UTC文字列。未来開始不可、正の期間、開始から最大3600秒。実行停止はdeadline-10秒 |
+| launcherIdentity | 既存5fieldの実OS identity。RunOwnerの直接OS親と同世代であり、開始時刻照合前にSafeHandleを固定して終了まで保持 |
+| auditKind | `fixture`,`default`,`early-trial`,`acoustic-analysis`,`qwen-audio`,`qwen-audio-no-default`の閉集合。監査境界だけを選び、Run.cfgの代替にしない |
+| fixtureControl | fixture時だけ既存descriptorのPathHash、製品5値ではnull |
+| tempPaths | 正確に`{TEMP:<absolute string>,TMP:<absolute string>}`。fixtureでは検証済みfixtureRoot内。製品は下表の固定値 |
+
+準備順は、独立親／作者がfixtureとdescriptorを確定→Runの刺激／raw書込を完了→raw SHAを計算→sidecarを既定atomic CreateNew公開→RunOwner開始である。GATE22の重複keyを削除・正規化してSHAを取らない。動作中のsidecar更新／第二発行／旧run流用はない。新public parameter、native変更、fixture bypassは追加しない。
+
+readerは固定mode／parameter set／実pwsh／非Adminの確認後、RunPathが`R/runs/<UUID>/run.json`そのもの、UUID小文字D形式、絶対path、既存directory、全祖先reparse不在であることを確認する。この安全なpath由来runIdと証拠rootだけを先に保持する。境界未確定なら外へ書かず非zero／unknown。sidecar欠落・不正なら、安全rootが確定している時だけCleanupIncomplete／未取得配列nullのterminalを保存する。
+
+fixture contextはdescriptorのSHA／runId／suiteId／root、固定fixture-owner.txtの内容、controllerIdentityとlauncherIdentityの一致、実OS親identity、TEMP／TMPのroot内境界を検証する。descriptorやmarkerのbytesもimmutable照合へ含める。製品contextはfixtureControlを禁止し、固定TEMP／TMPを確認する。Runは別のValidationInputとして通常の全検証を通し、その完了まで実行stateのRunはnullとする。成功時にRunのcfg／runId／時刻／TEMP／TMP／fixtureControlがcontextと一致することを確認して初めてRunへ昇格する。不一致をcontext値で補修しない。
+
+| auditKind | TEMP / TMP | 実行時の関連固定値 |
+| --- | --- | --- |
+| default | 既存full2-fixed-envs.jsonのConfiguration=defaultの値 | 既存値不変 |
+| early-trial | 同Configuration=trialの値 | 既存値不変 |
+| acoustic-analysis / qwen-audio / qwen-audio-no-default | `Repo/target/early-trial-build/et3/full2-env/related/temp`共通 | LOCALAPPDATA=`.../full2-env/related/local`、CARGO_TARGET_DIR=`Repo/target/early-trial-build/et3/related`、JOBS2と他既定envキーを維持。3cfgは逐次実行のみ |
+
+関連3cfgの値は本局所是正で親が指定した新しい合成境界であり、default／trialと共有しない。Assert-ProductionRunもこの固定値以外を拒否する。新しい実Cargo起動権限は与えない。
+
+bootstrap拒否ではsidecar検証後の残時間から得たUTC／Stopwatch上限を引き継ぎ、単一回収期限をmin(最初abort+10秒,context.deadlineUtc,既存cancel共有期限)とする。時計逆行・後続owner・初期化の再実行で予算を増やさない。Runを一度も実行stateへ昇格していないためStartは未到達だが、これだけで子0とせずOSの自身の子を実際に観測する。未知の子があればUnprovableとして記録し停止しない。所有集合0かつ観測子0だけでprocesses=[]、検証済みTEMP／TMPの実列挙0だけでfixtureResiduals=[]とする。列挙不能／残存／期限超過はCleanupIncompleteであり、未取得値はnullのまま、fixtureを削除しない。通常の入力拒否はRejectedを保持し、既に検出したTimedOut／Cancelled等を成功へ置換しない。
+
+terminalは既定`result-RunOwner-<pid>.json`へatomic CreateNewする。path由来runId、実測できた自己identity、拒否理由を記録し、未到達のmanifest／request／ACK／argv／child exitはnull、sourceMatched=falseとする。開始前監査を他branchやrun全体の終了証明へ拡張しない。GATE21-approvalは通常Run成立後の既存拒否・回収経路を維持する。80case刺激／期待値、未知非PASS、terminal必須、negative oracleは変更しない。
+
+未解決の受入阻止：LIFE14の既存刺激はdescriptor.controllerIdentityをsentinelのPIDと誤StartTimeへ変異するが、独立sidecar.launcherIdentityは真driverである。上記contextのcontroller／launcher一致検証は成立せず、監査context完成前のCleanupIncomplete／未取得配列nullとなる。既存oracleのRejected＋既知cleanupとは整合しない。sentinelをlauncherと認定する、descriptor境界を緩和する、空監査結果を捏造する是正は行っていない。本局所実装のparser／analyzer成功をLIFE14や80caseのPASSへ換算せず、追加設計と独立検証を未了として親へ返す。

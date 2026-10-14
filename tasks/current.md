@@ -1,6 +1,6 @@
 # 現在のタスク要約
 
-直近：ET3-Gの再Pre/局所追加/接合追補レビューはPASS。独立作者Astra/highが80case固定/fake自己検証7/7PASS、最終設計SHA91650B87の具体JSON/同期点へdriverを接合中。実装者 `et3_gate_impl` Astra/highが別2fileを同時作成する（固定interface/非重複所有による限定並行）。両者返却前の混在runtimeは禁止、製品full/提供は未解除。書式検査3件PASS、source170差0。native残部の試用時移管は10分以上無応答のため未承認とし、独立wrapper作業だけ継続している。詳細と正本は末尾リンクを参照する。
+直近（2026-10-15）：ET3-G初回通常入口はcontrol2 PASS、GATE21 FAIL停止。先行26Passedは呼出0のため行動PASS撤回、残53NotRun。dispatch是正は旧4RED/1PASS→修正後5PASS。RunOwner拒否sidecar限定接合はInvokePS34216046／TestPSEEAF6957／design0EC0336Fで返却、静的検査と準備対照2PASSまで。LIFE14の誤controller刺激と既知cleanup要求の契約不一致が未解決、接合後独立レビュー／80case再実行／製品full／提供は未了。native/fake/製品source不変、書式3PASSを再利用する。DPI150/200移管は承認済み、他native残部移管は未承認。共有週枠95%を受け継続範囲を照会中。詳細と正本は末尾リンクを参照する。
 
 更新：2026-10-14（ET1/FX1とET2は独立Post PASS/Closed。利用者指定のET2完了境界で停止。ET3・音声履歴UI・試用EXE・製品全体は未完成）。詳細は [参照インデックス](context-index.md) と末尾の最新位置を参照する。
 

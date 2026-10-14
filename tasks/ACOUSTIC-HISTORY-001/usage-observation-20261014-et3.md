@@ -1,5 +1,25 @@
 # ET3 試用EXE提供の使用量観測
 
+## 限定是正返却checkpoint（2026-10-15）
+
+親の最終応答前観測15:53:52.898Z：input1750335382/cached1709918592/output3998406/reasoning1284467/total1754333788/cache_write0。13:21:12.832Z開始側との差はinput48453866/cached47977984/output112827/reasoning57056/total48566693。cached/reasoningは内数、子との包含未確認のため合算しない。ここからcheckpoint/最終応答までは未反映である。共有週枠95%/10080分/reset1792496607/ordinaryUsageAllowed=true、65→95を工程専有量へ換算しない。
+
+限定返却はdispatch5PASSとsidecar準備2PASS、bootstrap runtime0、LIFE14契約不一致未解決、接合Post/合成80/製品full/試用提供未了である。週枠の継続範囲を照会しており、品質gateの省略や低いモデルへの無断変更を節約としない。
+
+## P1 closure後・合成runtime開始（2026-10-15）
+
+dispatch是正の作者終了共有週枠94%（開始92%、並行を含む）。旧4RED/1PASS→修正後5PASSを取得し、80行oracleを維持した。bootstrap局所設計の独立PASS後、Invoke/designとTest準備の非衝突2所有へ限定接合を割当した。製品full/提供は0、次の大きな実行単位の前に継続範囲の回答を確認する。欠測子counterをキャッシュ比や成果物量から推定しない。
+
+初回runtimeはcontrol2 PASS、GATE21 FAIL、raw26Passedはdriver呼出0のため成功から撤回、残53NotRunとなった。既定firstFail停止を維持し、reader切分け→作者の実行数保証とbootstrap拒否証拠の局所設計へ戻した。初期想定を超える一時harnessの複雑化と、静的レビューでは捕捉できなかった偽PASSは追加コスト・品質上の反省点として記録する。wrapper未合格のまま製品fullへ進む節約はしない。新しい週枠上限は設定しておらず、91%を踏まえ利用者へ今回の区切りを照会中である。
+
+独立静的で実行前に捕捉したP1二件を限定是正した。作者のcontrol-path回帰2RED→2PASSと独立再静的closure PASS後、runner gpt-6.1-sol/mediumへ初回通常入口（control2＋合成80case）だけを解除した。製品fullは未解除、成功済みrelease/formatの反復なし。親の再開時共有週枠は91%/10080分/reset1792496608/ordinaryUsageAllowed=true。工程専有量へ換算しない。子token・返却model/effort・親子包含は欠測である。
+
+## 2026-10-15 00:12 JST：4file固定・初回runtime前の区切り
+
+作者/実装は各2fileの所有を返却。現fake自己検証9/9PASS、実装PS parser/PSSA0、nativecompile成功、作者PS parser0/PSSA error0・ShouldProcess warning6は根拠付き保持。wrapper80case/runtime/製品fullは0のまま、短命processのCIM metadata混在リスクと範囲保護をfresh reviewer `et3_gate_static_review` Astra/highへ独立静的確認中である。初期M・小script想定からPS約1700行へ拡大し、具体interface/時計/OS primitive等の往復が発生した。これは開発コスト増として記録し、並行化を使用量削減と断定しない。
+
+共有週枠は00:12:44 JSTの親取得87%/10080/reset1792496608/ordinaryUsageAllowed=true。再開65%との差を当工程専有消費へ換算しない。親同一sessionの15:12:44.760Z観測はinput1738202408/cached1697933056/output3965905/reasoning1270444/total1742168313/cache_write0。13:21:12.832Z開始側からの差はinput36320892/cached35992448/output80326/reasoning43033/total36401218。cachedはinputに、reasoningはoutputに含まれる。開始13:18から開始側snapshotまで・この後・最終応答は未取得、子counter/実行metadata/親子包含は欠測、合算/週枠換算/金額換算をしない。
+
 追加手戻り：Pre-2 PASS後の独立作者が、意味契約はあるが具体JSON key/cfg/digestと決定的race同期点が未固定でdriverへ進めないことを報告した。80case/fake自己検証7/7を固定して返却し、designerへ局所4点を戻した。共有週枠の作者終了受領値は73%。改善候補は、同種の複数担当interfaceでは作者へ渡す前に最小入力例/具体命名/同期点を一緒に固定することである。今回の再handoffを効率改善として隠さず、追加frameworkや検証削減で解消したとは扱わない。
 
 再開区間の中間記録：限定計画/設計/独立PreはAstra/high、native拒否窓runnerはSol/medium。Preで入口parseとG0回収所有の2件が不足し、実装前に計画へ返した。設計是正はfresh `et3_gate_design_fix` Astra/highが担当する。native observerの未確認ControlType/IDOK前提による中断2回と、実値先行取得による最終観測1回を手戻りとして保持する。nativeの終了共有週枠70%はrunner受領値であり、開始65%との差を当工程だけの消費や旧方式比へ換算しない。各子counter/provider返却metadata/親子包含は欠測である。製品source変更0、取得済みrelease3buildを反復せず保持した。

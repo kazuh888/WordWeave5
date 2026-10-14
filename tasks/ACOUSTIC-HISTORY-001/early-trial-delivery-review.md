@@ -1,5 +1,59 @@
 # ET3 試用EXE提供・独立レビュー記録
 
+## 限定是正返却・未完了checkpoint（2026-10-15）
+
+InvokePS SHA `3421604615881BAE6451A988245049CD67E5476551FDCE0700FC825F5BFB9037`、TestPS SHA `EEAF6957CBBCB7B76A14ADEE5CBA52D46D547AE44A67A995DBCA189DAC760DD6`、design SHA `0EC0336FA63EEC9DDB81ADD19A10444511A5EA72EC1B4184344C8312DC9F869D`で各所有返却。Invoke parser/PSSA診断・実行error0。Test parser/analyzer実行error0/新診断0/既存ShouldProcess6保持、sidecar準備の合成2対照PASS（正常/duplicate Run実bytesSHA・8field・非上書き）。80行oracle/87呼出し制御/P1/fake/nativeは不変である。
+
+**LIFE14未解決**：既存刺激はdescriptor.controllerIdentityをsentinel＋誤StartTimeへ変える。真driverを示す独立launcherとの照合が不成立となり、実装はsafe runDirにCleanupIncomplete/配列nullを保存するが、既存oracleはRejected＋既知cleanupを要求する。sentinelをlauncherと認定したり、監査境界を緩めたり、空配列を捏造したりして解消しない。局所契約是正→接合後独立レビュー→新固定snapshot合成80→実Cargo/製品fullの順が残る。今回修正後のgate runtimeは0であり、旧局所設計PASSを実装Postへ読み替えない。
+
+shared週枠95%を受け、親は保存checkpointを作り次工程の範囲回答を求める。DPI移管以外のnative残部移管は未承認のままであり、試用EXEは未提供である。
+
+## 初回合成runtime停止：driver偽PASSとbootstrap証拠欠落
+
+dispatch限定是正の返却：TestPS `C9BA3EF8…`、80行oracle不変。通常1回／variant契約数と順序、呼出ごとの一致する結果1件、ケースと最終集計の予定数・呼出数・結果数を保証した。独立合成再現は旧4RED/1PASS→修正後5PASS（正常87呼出し、空結果、複数結果、途中throw、空結果偽装）。parser0/analyzer実行error0/新診断0、既存ShouldProcess6は保持。gate全体の再実行ではない。次phaseのsidecar準備接合前snapshotであり、最終hashは後続返却を正とする。
+
+bootstrap局所設計は独立PASS：新しい拒否専用contextはRunOwner限定、sidecarは実行cfg/認可に流用しない。固定UUID path・実bytesSHA・保持launcher同一性・fixture/TEMP境界・UTC/Stopwatchと既定上限/回収10秒予約を独立検証する。実測0のみ空配列、不能はCleanupIncomplete/null、context自身不正は書込なしunknown。childは自己scope前unknown、確定後だけ既存出力。関連3cfgのsynthetic TEMP/TMPは親指定の`target/early-trial-build/et3/full2-env/related/temp`、localは隣接local、targetは既存et3/related、逐次実行のみである。default/trial固定環境は変更しない。実装と作者準備の接合・独立確認は未了である。
+
+固定snapshotの通常入口はexit1。control2 PASS後、resultのENV01–GATE20は26Passedだがvariants=[]で対応fixtureなしであった。TestPS1995のif出力`@($null)`が消失してforeach0回となり、failure=nullだけで成功化した。26件を行動PASSから撤回し、未実行として扱う。最初の実動作GATE21（sourceInput欠落）はterminal証拠なしでFAIL、残53はNotRun。ログ正本はignored `target/early-trial-build/et3/cargo-gate/verification/8b960cec-97f2-43fb-9851-50b4044d17be`。
+
+InvokePS613–627で完全field検証が拒否証拠context設定より先にthrowし、finally2036の条件が偽となることをread-only切分けで確認した。作者はTestPSの実行数保証／空実行非成功だけを限定是正する。bootstrapは安全なpath/UUID/reparseと拒否専用contextの局所設計を先に確定する。既存80刺激・期待値・terminal必須・未知非PASS・起動0を緩和しない。製品fullと提供は未解除である。
+
+## P1限定是正・独立再静的closure PASS（2026-10-15）
+
+InvokePS `F39A95D9…`／TestPS `763CB0B1…`を固定し、独立reviewer Astra/highが旧P1二件のclosureをPASSと判定した。CIM世代照合、属性取得前のSafeHandle固定、同handle保持・有限停止・Dispose、未知identity非停止を確認した。作者のdriver共通関数回帰は修正前2RED→修正後2PASS、mockはIt内限定である。通常入口の動的mock除去、実PID再利用race、合成80case、wrapper全体／製品fullはこのPASSに含まない。TestPSのparser/analyzer実行error0、新規診断0、既存ShouldProcess診断6件を保持した。
+
+親は通常入口のcontrol2＋合成80caseだけをrunner Sol/mediumへ解除した。初回失敗停止・NotRun非成功・所有processだけの有限回収を維持し、製品fullは未解除である。native/fake/設計の固定SHAは変更していない。
+
+P1限定修正の実装返却：Invoke PS `F39A95D99618EBD35576C64F8144C710110EF0D77FA91BE66AB28B9F91A1A892`、parser/PSSA診断・実行error0、native不変/runtime0。取得直後SafeHandle固定、CIMとhandleのUTC6桁観測精度照合、不一致/欠測Unprovable、Knownの同handle保持/kill前確認へ限定した。作者はTestPS同種修正と独立2回帰を作成中であり、独立再確認/P1 Closedではない。親の通常権限・sandbox外・自processだけの読取診断はAdministrator=false/CIMDateKind=Local/handle valid/UTC6桁一致true/TargetStarted=falseであった。CIM能力/時区精度の確認だけで、全process世代raceや80caseの成功を代用しない。
+
+## 初回runtime前・独立静的最終：CHANGES_REQUIRED（P1二件）
+
+fresh reviewer Astra/highは固定4source全文・V2・自己oracle結果を確認し、初回80caseの受入阻止2件を確定した。第一は下記CIM行/実handle世代混在（Invoke PS 339/925–935/1898–1902）、Test PS 303/954–965の子孫収集にも横展開が必要である。CIM CreationDateと同保持handleの開始時刻を観測精度を明示して照合し、不一致/取得不能をUnprovableとして非停止にする。
+
+第二は列挙GetProcessByIdのProcessオブジェクトにOS SafeHandle固定がなく、時刻確認後のKillで別世代を開き得る点（Invoke PS 925–935/1894–1902、Test PS 764/766–776）。reviewerは.NET10.0.12の自processだけの読取で、StartTime/Path/HasExited/Refresh後も_haveProcessHandle=false、SafeHandle取得後のみtrueを観測した。列挙対象取得直後・開始時刻等を読む前にhandleを固定し、同handleで同世代確認→停止→有限Waitする。固定不能は未知/非停止。cached StartTimeだけや『handleがPID再利用を防ぐ』未検証仮定では代替しない。
+
+静的根拠は[Win32_Process](https://learn.microsoft.com/en-us/windows/win32/cimwin32prov/win32-process)と[.NET Process実装](https://raw.githubusercontent.com/dotnet/runtime/v10.0.0/src/libraries/System.Diagnostics.Process/src/System/Diagnostics/Process.Windows.cs)。これ以外のfixture範囲/reparse/cleanup/製品cfghook拒否/unknown非停止/有限回収/MoveFileW/API・資格情報・mic非利用の確定blockingは検出0。悪意ある並行writer防御は対象外。reviewerの対象runtime/compile/編集0、全6入力SHAは終了時一致、usage counter等欠測である。親は作者/実装へ各所有PSだけの限定修正を返し、初回runtime未解除を維持する。
+
+独立初回runtime前静的確認の中間指摘：`et3_gate_static_review` Astra/highはP1（Invoke-CargoGate.ps1 925–935／342–351）を確認した。CIM snapshotの子Aが終了し同PIDのBへ再利用された後、GetProcessByIdのB.StartTimeとPID-onlyで対応するAのparent/path/commandを結合してOwnedへ入る。cleanupのStartTime比較だけではこの混成identityを防げない。直系Start保持handleとは別の取得前raceである。親はruntimeを未解除のまま、固定入力の全境界レビュー完了までwriterを停止させた。最終指摘受領後に所有PSだけを限定是正する。中間報告を最終Postや製品不具合へ換算しない。
+
+## 2026-10-15 初回runtime前：4file固定、独立静的確認中
+
+作者/実装の各2file所有返却を親が受領し、5現物SHAを照合した。R=ignored `target/early-trial-build/et3/cargo-gate`。wrapper/実Cargo/runtime80caseは0であり、製品full/提供は未解除。最終設計SHA `2DE1F344FEC43468AA1F40716A7A912BDCD943318B5D39FDC5F47CBEEC970937`の回収予約とMoveFileW非上書き公開も独立局所PASSを受領した。
+
+| 固定現物 | SHA256 |
+| --- | --- |
+| Invoke-CargoGate.ps1 | `E4FE39822CA1C75CA2EC34530BCE18DBC6CCEF4559547C901A730951C52F8BB9` |
+| cargo_gate_entry.rs | `3AEB0B19E2D03EE088EB1BEDA4DBACEEC0406E12ED75D59AB95A7E331F42FD41` |
+| cargo-gate-entry.exe | `1C04288220C3D98B182F3011FE3D1DE8AE88B050871DF400B21ED8AECCCC5E94` |
+| Test-CargoGate.ps1 | `E492FB11C443D08857AE5CBF93AA25165E59F2444ABA02A97F75D61F139612F0` |
+| fake.rs | `3482075BF7479E61942978830AE91FDDF5301133E1A2F43EDB9B65DDAA0FA016` |
+
+作者の現snapshot自己検証は9/9PASS、80行oracle SHA `CEF0406933398F433D2726F7EC4F1C4292A0CDF555B39AEA725ABB40920FF905`不変。通常Run65/短期30/ORDER01 35/real85秒は回収10秒を含め事前固定し、動作中延長なし。作者PSはparser0/PSSA error0・ShouldProcess警告6を根拠付き保持、実装PSはparser/PSSA0、native rustc1.98.1/edition2021 compile exit0。既知残存は保持handle StartTimeとCIM同PID metadata間のCreationDate未照合であり、親は未知を無条件承認せずfresh独立reviewer Astra/highへ初回runtime前の所有/境界/停止/cleanup確認を依頼した。新caseの自動retryはなく、ORDER09だけ固定刺激として取消Run拒否後に別Runを一度実行する。
+
+受領証拠/短命processの局所追補も独立PASS：Supervisorの期限内full受領をimmutable `full-received.json`へ束縛し、後続Runnerは同receipt/full bytes/identityと既存expiryを照合する。G0期限の自動延長/全fullへの再適用はしない。最終設計SHA `BC763229524B5AF64E236BD773341E63AB94A7074E62D564272FEE9D11049068`のDirectLaunchHandleは、同ownerのatomicIntent/directStart/返却保持handleに限り直系子の所有終了を証明する。未観測OS値はnullでIntent値と別、未知子孫/引継ぎ/子孫監査/negativefaultの迂回には使わない。同reviewer Astra/highは両追補に確定矛盾なしと判定した。設計のみで動的成功ではない。
+
+実装者の初回静的確認はPS parser error0/native compile成功、runtime0。PSは複数監督/fixture hookを含む約1700行となり当初の小さなscript像より大きいが、製品source/依存/OS/通常Cargoを変更せず、固定80case/独立実行/Postの基準も維持する。作者/実装が最終設計へ接合・静的確認中、両者返却前の混在runtimeは引き続き禁止する。CIM sandbox拒否は通常ユーザーのsandbox外能力確認と別途扱い、管理者実行やDirectLaunchHandleによる全列挙代替を許可していない。
+
 局所接合追補も独立PASS：最終設計SHA `91650B87DD9BDC8752658DCEA2646A9FED1B02BD8655E4F6A28E3A0C116523F9`の役別scope束縛/参照欠落時有限停止、V2出力の固定例外、payload読取前の正常OSchain hookと目的拒否段階の識別を同reviewerが確認し、確定矛盾なしと判定した。GATE18はRequest非上書き対照でnativeUUID衝突実証とは別である。編集/build/runtime/再委譲0、動的成功の判定ではない。親は作者/実装へ追補の接合を解除した。native残部移管質問は10分以上無応答のため承認とせず、利用者既定どおり依存しないwrapper作業だけを継続する。
 
 並行接合でscopeId事前指定、fixtureのcase出力境界、正常OS親子での不正payload/重複ID対照の局所不足が判明した。designerを既存設計だけの短い具体化へ戻し、この接合点を解除する間だけ作者/実装/設計の3補助とする。親は指定model/effortを変えず、各所有fileは非重複。未知のscope wildcardやfixture例外を実装者が独断導入せず、該当部のみ保留し普通のdriver/実装作成は継続する。混在runtimeは解除しない。
