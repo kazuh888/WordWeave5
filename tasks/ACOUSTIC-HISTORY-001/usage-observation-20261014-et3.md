@@ -2,6 +2,10 @@
 
 ## path欠測是正の設計再開（2026-10-15）
 
+修正版12件の再開区間は独立12PASS/guard2PASS、6.5264904秒・retry0、独立review CXT-D受入PASS/指摘0で終了した。新規テスト基盤・ソース変更・準備再試行0、同じ固定入力を再利用し証拠だけを追加した。runner／reviewerは従前の指定責務を再利用、reviewer共有40→40%／10080/reset1792667952、終了観測04:34:36 JST。親開始側も40%であり、変化0を無消費とはしない。今回親・子token/実返却metadata/包含は欠測、共有窓から工程専有量は算出しない。以後の記録・commit・最終応答は観測外、後続focused/80/fullは未実施である。
+
+修正版12件の再実行承認で再開。完了境界は固定12件の独立実行・結果接合までである。開始側共有週枠40%／10080分／reset1792667952／ordinaryUsageAllowed=true、親token同時点snapshotは未取得。既存独立runner cxt12_runtime_approved（gpt-6.1-sol/medium）を関連する同一責務で再利用し、新規runner/harnessは作成しない。provider返却metadataと親子包含は欠測のまま、指定値から実行値や専有消費を推定しない。
+
 今回区切り前の親観測：共有週枠39%／10080分／reset1792667952。開始側36%と同じアカウント共通窓であり、差を本作業の消費へ換算しない。bounded2MiB末尾の同親session累積は2026-10-15T19:27:58.694Z、input1863821938／cached1821960448／output4195581／reasoning1362386／total1868017519／cachewrite0。再開直前の同時点snapshot欠測、子包含未確認、cached/reasoning内数、以後のreview/記録/最終応答未反映のため、今回総量・親子合計は算出しない。
 
 承認12件は9PASS/C9判定不成立/2NotRun、driverguard2PASSで停止。独立review Astra/highでP1を確定し、同モデル作者がpredicate1行是正＋pure21回帰を返却した。旧6RED/15PASS→新21PASS、30入力不変、実12再試行0。Pester準備2回が構文・内部CIM/registryにより無効となり、基本foreach/boolへ縮小した手戻りを同単位に保持する。registry実変更は不明、追加権限で回避しない。検証frameworkが小さな判定修正に過剰となった整備コストであり、削減実績とはしない。reviewer共有37→37%、作者37→38%／10080/reset1792667952、子token/provider返却metadata/包含は欠測で合算しない。次の実装者は新test/handoffの固定bindingだけを接合し、実runtimeを先行しない。

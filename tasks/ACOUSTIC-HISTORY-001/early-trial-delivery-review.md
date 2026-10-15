@@ -2,7 +2,13 @@
 
 ## ARGV-PATH01（CXT01再構成に依存、動的検証未完了）
 
-### CXT01 context再構成（cycle 2、候補静的確認／追加実行許可待ち）
+### CXT01 context再構成（cycle 2、CXT-D受入PASS／CXT-E未実施）
+
+独立接合reviewはCXT-Dの固定file/context受入PASS／指摘0。C0のcontext/Run/payload、C9実junction拒否、C10 deadline=startedと元期限consumer、C11 Run.TEMPだけの変異と元一致consumer、意味的な12期待の不変、15現物hash/P1引継ぎ一致、禁止22/null/旧結果保全を確認した。親が受領し、CXT-Eへ進む技術的前提成立と判定する。次は現行driver68EF44DD／HANDOFFA32C8F6D・新規R/verification/<UUID>直下suiteで既定focused10件1回、firstFail停止である。今回の承認済み12件は終了しており、後続を実行済みとはしない。実OS所有/terminal/cleanup/native、CXT01/ARGV全体Closed、標準80/full/試用提供は未了。
+
+修正版独立実行の新結果 `argv-path01/cxt-runner-20261016-approved-b` は12PASS／0Unexpected／0NotRun、配置guard2PASS／RED0、child/shell exit0、retry0、6.5264904秒（最大case0.8797314秒）。15入力hash/bytes前後一致、P1引継ぎ別途前後一致、禁止22counter全0。C9合成junction→元reparse拒否、C10期限拒否、C11context/Run TEMP不一致拒否まで到達した。旧approved-a結果を合算・改変しない。親も集計値を確認し、独立reviewへ接合を渡した。実OS親関係・所有監督・terminal/cleanup/native argvはこの12件の対象外であり、focused／80／製品full／試用提供は未実施である。
+
+利用者が「再実行してよい」と回答した。修正版test94E4928C／driver68EF44DDを固定し、新しい合成結果rootで12件をsandbox外・非管理者通常ユーザーとして1回実行する許可を受領した。既存runner gpt-6.1-sol/mediumへ引き渡し、firstunexpected停止／retry0／各15秒・全120秒／禁止22を維持する。旧結果を上書きせず、後続focused／80／製品fullの解除とは区別する。
 
 最終P1是正・束縛接合static reviewはPASS／新規指摘0。test94E4928C／P1引継ぎ43151F84、driver68EF44DD／HANDOFFA32C8F6Dを独立照合した。test1行／driver固定入力2行／HANDOFF追記だけ、期待/consumer/期限/firstFail/禁止22は不変。作者の凍結30件は現在28件一致＋承認済みdriver/HANDOFF更新2件で、旧FED3/822E copyも一致した。保存pure21の旧6FAIL15PASS→新21PASSを確認し、判定式のP1を是正済みとするが、実CXT-D受入は未達である。新12件のsandbox外通常ユーザー実行を非同期照会済み・未回答、旧許可を再試行へ流用せず、focused/80/full/提供は止める。
 
