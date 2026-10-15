@@ -713,3 +713,118 @@ FF-Aの完了は本設計と文書diff/参照確認、独立Preへの提出ま�
 新sidecarは診断証拠であり、terminal成功や未知候補0、cleanup成功を推定する入力ではない。正常ENV01でfailure未発生なら診断公開経路のOS実測はUnobservedのままである。局所T01/T02のfile公開証拠は別に報告する。新診断で初因候補が得られても旧35AEの過去原因を確定したとは扱わず、原因修正・追加再現を始めない。同期I/O停滞、path再検査とI/Oの競合、process終了でinternal outcomeが失われることは既述の限界であり、新worker/新log framework/監督再設計で解決しない。
 
 設計着手時の既存変更はdelivery-review、plan、usage観測、tasks/currentの4文書であり、本節以外は編集しない。開始/終了token、週枠、実model metadata、親子包含はこの子では未取得であり、親の計測へ委ねる。実装・test作成/実行・process起動・再委譲・公開は0。設計のみの変更なので製品cargo test/buildは非該当である。
+
+## MISSING-IDENTITY01：完全登録と連続保持handleによる欠測時の同世代照合（MI-A、Pre提出）
+
+入力は[計画MI節](early-trial-gate-plan.md)412行以降全文、SHA256 `AA92C32F8910FD648C3FE839DCBE1E8D7B19341A75B2B08FFFA5D45A62B89C53`、本書のKH/FF、Invoke `33C21282E728E3F654C727286F6AE462B0BF4A5D48E4A56A009E0D42A22FE38C`、[review冒頭](early-trial-delivery-review.md)と保存REPORTである。planner指定はdesigner `gpt-6-astra/high`。AGENTS、development-team、KPI、api-and-interface-design、source-driven-developmentを読了した。承認済みET契約とG5の同世代所有・未知非停止を再利用する。新しい利用者動作・UI・RESTはなくUI skillは非該当である。本節だけが所有範囲であり、独立Preとplanner精緻化前の実装/runtimeは解除しない。
+
+保存suite `6bb4409b-200d-4fa6-a144-9157a37468d2`／run `62900800-fee6-4d5d-a590-940ea5939319` のRunOwnerでは、PID35916、parent23292、snapshot/known/rowFilter各1、command/pathの存在確認false、source600の拒否、candidate=null、Unprovable1/終了不明を確認した。欠測原因、終了との因果、権限不足、旧runとの同一原因は未確定である。本変更を旧Unprovableの事後昇格・回収許可に使用しない。
+
+### 等価証明と置換する内部条項
+
+完全登録済みのprocessを同一の元SafeHandleで連続保持している場合、そのprocess objectの世代はCommandLineの再読取可能性に依存しない。欠測時に参照するpath/commandは登録時の属性であり、現在のOS値を復元した観測ではない。Windowsは終了後もopen handleがある間process objectを保持し、終了は別のsignalとなる（[Terminating a Process](https://learn.microsoft.com/en-us/windows/win32/procthread/terminating-a-process)）。liveでも同じobjectへの連続handleを根拠とする。command自体の不変性は仮定せず、今回のsnapshotに値があれば登録値との矛盾を必ず拒否する。
+
+固定pwsh7.6.6の `F:/Program Files/PowerShell/7/pwsh.runtimeconfig.json` はnet10.0／10.0.12である。公式同tagの[Process.cs](https://github.com/dotnet/runtime/blob/v10.0.12/src/libraries/System.Diagnostics.Process/src/System/Diagnostics/Process.cs#L180-L193)ではStartTimeはキャッシュされ、Refreshはその値も保持handleも破棄しない。SafeHandleは既存handleがあれば同じ参照を返す。[Process.Windows.cs](https://github.com/dotnet/runtime/blob/v10.0.12/src/libraries/System.Diagnostics.Process/src/System/Diagnostics/Process.Windows.cs#L636-L654)では未cacheのStartTimeCoreは保持handleを使うGetProcessTimesへ進み、throwIfExited=false、借用native handleのwrapperはownsHandle=falseである。したがってStartTime読取りを「毎回新規OS照会」とは呼ばない。登録時のhandle由来UTC7値と継続保持が証明の核である。[GetProcessTimes](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getprocesstimes)のcreation time/失敗契約も対応する。これはsource根拠であり、同梱binaryの実型成立は下記MI-Oで別に検証する。
+
+**置換はKH手順6の一部だけ**である。元行にExecutablePathとCommandLineの両propertyが存在し、どちらかの値がnullの場合に限り、既存Get-Identity再取得を以下の欠測照合へ置換する。この条件でだけKHの「全5field再取得」「path-nullはimage APIへ渡し失敗なら拒否」「command-nullは拒否」を上書きする。両値が非nullなら元Get-Identity→Test-EqualData→key照合を原文で維持する。property自体の欠落、不正型、完全登録/世代/保持条件の不足を許容する変更ではない。Get-Identity、Add-KnownProcess、Read-DirectChildIdentity、cleanup、FFのhelper/二caller/診断schemaは変更しない。
+
+取得不足をcatchして既知扱いする方式は採らない。先に条件を検証して専用の狭い分岐を選ぶため、API例外や矛盾を欠測と混同しない。Rowsの補完copyをGet-Identityへ渡す方式も、古い値を今回のOS観測に見せかけるため採らない。新private helper、Win32 API、PID再open、CIM再取得、retryは不要である。
+
+### MI1–4の境界・型・順序
+
+| 受入 | module/状態・所有 | 契約 |
+| --- | --- | --- |
+| MI1/G5 | Read-OwnedTreeのsameGeneration.Count=1内 | 元Rows一意、台帳keyのOrdinal一致、CIM UTC6候補一意、元Process/元pinnedHandleの連続性、UTC7/key一致を接合する。PIDだけの所有判定はない |
+| MI2 | 同分岐の欠測条件と現存field照合 | 完全登録を借用し、Rows/identity/key/evidence/roleを更新しない。部分登録・新規候補・矛盾は救済しない |
+| MI3/FF1–3 | 元row catch、Invoke-GateFailure、既存cleanup | 未証明→Unprovable→元abort/診断/throwを維持する。欠測は終了観測ではなく、HasExited/ExitTime/kill/wait/正式terminalを代替しない |
+| MI4 | 既存Test-KnownHandleのMI専用phaseと既存FF probe | 合成欠測の局所oracle、実Process consumer、ENV01一回を別の証拠とする。旧KH/FF成功はその固定組のまま保存する |
+
+本体のpublic/private関数signature追加は0である。`Read-OwnedTree()` は従来どおりsuccess streamへ値を返さず、script stateを更新するvoid相当である。入力は当該呼出の `Rows:object[]` と `Known:Dictionary[string,object]`。rowの実体は `Microsoft.Management.Infrastructure.CimInstance`、Knownのvalueは `hashtable`、identityは `Collections.IDictionary`（実producerはOrderedDictionary）である。借用handleは `Diagnostics.Process`、pinnedHandleは `Microsoft.Win32.SafeHandles.SafeProcessHandle`。entryはhandle/pinnedHandle/identity/role/exitUtc/ownershipEvidenceの6keyであり、新keyを増やさない。exitUtcだけは元冒頭の実終了観測がnull→UTC DateTimeへ更新できる。
+
+欠測分岐の具体順序を次に固定する。手順1までの元コードと手順7以降の元コードは変更しない。
+
+1. 現33C2のRows取得1回→既知Refresh/実終了観測→同PID行一意→timezone付きCreationDate→全候補key→UTC6候補一意→identityの既存完全性検査→pinned非null/IsClosed=false/IsInvalid=false→Process型/Id/ReferenceEqualsの順を維持する。借用Processをlocal `$handle` に入れない。候補0は元新規経路へ進む。
+2. 元Get-Identity呼出の位置で、rowの `PSObject.Properties['ExecutablePath']` と `['CommandLine']` を調べる。property欠落ならthrowする。存在して非nullの値はstringだけを許し、bool/数値/配列をstringへcoerceしない。空文字は欠測ではない。両方非nullなら元呼出/全5field/key照合へ進む（空pathは元canonical化で拒否、空commandは元UTF16空配列と照合）。以下はnullが少なくとも一つある場合だけである。
+3. 登録元は内部台帳である。identityの5keyが正確に存在しCount=5、pidはint/longの正数でrow/ProcessのIdと一致、startTimeUtcは元Get-Utcを通るstring、pathは空でない絶対string、parentPidはint/longで0以上かつInt32.MaxValue以下、commandLineUtf16はarrayで全要素int/longの0..65535（空配列可）を必須とする。変換による補完は禁止する。evidenceはIDictionaryでkindがOsQuery又はDirectLaunchHandle、osQueryStatusがOrdinalでObservedだけを許す。元sourceのproducerはAdd-KnownProcessの既定Observedか、Read-DirectChildIdentityの完全観測後のObserved設定であり、古いregistration fileを読んで台帳化する経路はない。Unavailable/NotFoundAfterExit/欠落は完全性証拠としない。role/evidenceの他fieldは読む必要がなく保存する。
+4. 元rowのProcessId/ParentProcessId/CreationDateはproperty必須。ProcessId/ParentProcessIdは実CIMのuint32又はint/longで、PID>0、parent>=0、いずれもInt32.MaxValue以下だけを許す。bool/null/stringは拒否し、その後だけintへ変換する。parentはknownIdentity.parentPidと数値完全一致。親候補検索へ戻って不一致を無関係rowにしない。
+5. `borrowedProcess.Refresh()`→`borrowedProcess.StartTime.ToUniversalTime()`を各1回呼ぶ。開始時刻を元 `$precision` とInvariantCultureのUTC6でcreationUtcへ、UTC7 `yyyy-MM-ddTHH:mm:ss.fffffffZ` でknownIdentity.startTimeUtcへOrdinal完全一致させる。既存Get-IdentityKey(knownIdentity)とentry.Keyの照合も維持する。UTC6切捨て一致だけで100ns差を受理せず、丸め/許容差/doubleは使わない。getter例外は元catchへ渡す。IsAliveを追加条件にしない。
+6. pathが非nullなら `Get-CanonicalPath -Path ([string]$row.ExecutablePath)` のstring1個を既存Test-EqualDataで登録pathと比較する（元と同じcase-sensitive比較）。commandが非nullなら `ConvertTo-CodeUnit -Text ([string]$row.CommandLine)` のint[]1個をTest-EqualDataで登録配列と比較する。両nullなら両helper呼出0。欠測pathにGet-PinnedProcessImagePathは呼ばず、登録pathのfilesystem再探索も追加しない。新identity/knownActualを合成せず、値は比較localだけに保持する。
+7. 元の後段IsClosed/IsInvalid/ReferenceEquals検査を必ず通過してからcontinueする。新分岐途中のcontinueは禁止する。失敗は元row catchへ伝播し、元Unprovable追加→Aborting=falseならInvoke-GateFailure(CleanupIncomplete)の順である。既知照合失敗から新規openへのfallbackは0。後段検査までにhandleが閉じる／変わる場合も拒否する。
+
+手順2のshape拒否は完全値経路の不正型も明示拒否するが、正常な両値present経路の観測/比較/例外は変えない。未登録rowへのGet-Identity、Assert-Identity、登録ACK等の別consumerは従来の欠測拒否を保持する。新分岐でGet-Identityを呼ばないため、そこで失敗したFF osObservationのrowFilter3fieldは元producerどおりnullとなる。snapshot/pathPresent/commandPresentは元rowに従う。rowFilterを1/falseに補完せず、diagnosticだけを理由に関数を追加呼出ししない。
+
+同期のRead内に新async/cancellation境界はない。元callerのAssert-Control、既存monotonic時計、cleanup10秒を維持し、sleep/wait/retry/新deadlineを追加しない。StartTimeやcanonical helperの同期呼出しが返らない場合の強制中断保証は従来と同じくない。欠測時にimage APIを呼ばないことはPTH-MONOの期限延長ではない。新永続状態はなく、登録→同handle保持→元終了観測→abort→FF一回診断→元throw→cleanup→terminalの既存順序を保存する。未知のnull、正式/tmpの区別、保存失敗が元failureを置換しない契約も不変である。
+
+### 独立作者の固定seamと有限ケース
+
+作者所有は既存 `R/verification/argv-path01/Test-KnownHandle.ps1` のMI専用差分のみである。既存Pure/Osの履歴oracleを改稿せず、Phase ValidateSetへ `MissingPure, MissingOs` を追加し、旧phaseを今回dispatchしない。引数は既存 `SourcePath:string, ExpectedSourceSha256:大文字64hex, OutputRoot:新UUID絶対path, Phase:string` の4つだけ。SourcePathは保存旧33C2又は承認済み新Invoke、OutputRootはpacket直下・非reparse・非既存・ignoredとする。新probe/framework/production test hookは0である。
+
+MissingPureは実Read-OwnedTreeと実Get-IdentityのASTを抽出する。既存のRead中GetProcessById2箇所→同引数Get-TestProcess、ReadのProcess型検査1箇所→PSCustomObjectに加え、**抽出Get-IdentityのProcess parameter型1箇所だけ**をDiagnostics.Process→objectに置換する。これは旧/newの両方で同じ1箇所である。bodyは原文のまま使い、旧command-null拒否を作者のthrow代用で作らない。元Get-IdentityKey/Assert-Field/Test-EqualData/Get-Utc/Get-IdentityFailureObservation/Invoke-GateFailure/Get-FaultTarget/ConvertTo-CodeUnitをloadする。抽出個数・位置・引数・逆置換全文一致を記録し、adapter不一致はBehaviorRedではない。
+
+Get-OsProcessは `return ,([object[]]$script:testRows)` の1出力だけ、行はPSCustomObjectの5property（ProcessId:int、ParentProcessId:uint32、CreationDate:UTC DateTime、ExecutablePath:string又はnull、CommandLine:string又はnull）である。基本fixtureは既存61001/61002、UTC6のrowとUTC7末尾5tickの完全登録、path=`C:\KH-synthetic\pwsh.exe`、command=`KH`、int[]@(75,72)。Known/Unprovable/Owners/Mode/clockの型・初期値は元Pureを再利用する。Process doubleは元のId/HasExited/ExitTime/SafeHandle、Refresh/Dispose ScriptMethodに、StartTimeのScriptProperty getterを使いDateTimeを返す（内部 backing DateTimeは別名）。getter/read/refresh/post検査の順を単一List[string]へ記録する。偽物を実Process/SafeHandleの証拠としない。
+
+Get-CanonicalPath代用のsignatureは元と同じ `([object]Path,[string]Boundary='',[switch]AllowMissing)`、許可した合成絶対pathに対しそのstring1個を返し、counter/eventを記録する。実filesystemなし。Get-PinnedProcessImagePathは呼出時にUnexpectedとなるtrapであり、M01旧REDはそこへ達しない。Get-TestProcessは元Pureの `([int]ProcessId)` と所有移譲を再利用する。Add-KnownProcess代用は `([object]Handle,[object]Identity,[string]Role,[object]OwnershipEvidence=$null)`、voidで、渡された実抽出Get-IdentityのOrderedDictionaryとHandleそのものを台帳へ登録する。元Pureのscript:returnedIdentityとのReferenceEquals条件はMI phaseでは使用せず、期待する5fieldとのTest-EqualDataとnew Process参照/Role=Target/evidence=nullを検査する。戻りidentityを作者が注入せず、new用Process/rowを整合させる。新phaseではGet-CanonicalPathを元汎用trap一覧から外す。他のCIM/Start/Stop/Kill/Wait/Write/cleanup trapは維持する。FirstFailureStateは定義せず元FFの互換scopeを使用し、診断helper/file実行0とする。
+
+新MissingPureは次の**20件**を順に各1回、各5秒/全60秒、retry0、firstUnexpected停止とする。欠測関連18件と完全値経路2件の接合であり、旧Pure20の一括再実行ではない。基準は完全登録/live、両null（明記したcaseだけ差替え）。全件でprovider1、read内open/add/dispose/kill/wait/terminal0、Rows/元台帳参照と内容不変を基本とし、M18の元open/失敗時DisposeとM20の元new登録だけを表どおり例外とする。
+
+| ID / trace | 入力差分・oracle |
+| --- | --- |
+| MI-M01 / P09置換 | command=null、path一致。新はgetIdentity0/canonical1/unknown0。旧33C2は実抽出Get-Identityがcommand検査でthrow→unknown1となる唯一の予定BehaviorRed |
+| MI-M02 / P20置換 | path=null、command一致。新はgetIdentity0/codeUnits1/image0/unknown0。旧P20のimage API失敗救済は対象完全Knownだけで置換 |
+| MI-M03 / MI1 | 両null/live。getIdentity/canonical/codeUnits/image各0、unknown0、exitUtc=null |
+| MI-M04 / MI1,3 | 両null/HasExited=true。M03と同じ、exitUtcだけ元冒頭でExitTimeに更新。終了と欠測の推論はしない |
+| MI-M05 / P10接合 | command=null、present pathだけ別の合成絶対path。canonical1、unknown1、登録path不変 |
+| MI-M06 / P12接合 | path=null、present command=`KJ`。codeUnits1、unknown1、登録units不変 |
+| MI-M07 / P11接合 | 両null、parent=61999（親候補0）。StartTime getterへ進まずunknown1、無関係rowとしてskipしない |
+| MI-M08 / P19接合 | 両null、ProcessのStartTimeだけ登録+1tick（UTC6は同じ）。getter1、unknown1、7桁/key不一致を拒否 |
+| MI-M09 / MI2 | 両null、StartTime getterが固定InvalidOperationException。unknown1、以後canonical/codeUnits0、open0 |
+| MI-M10 / MI2 | 両null、StartTime getterの返却直前にdoubleの既存pinned.IsClosedをtrueへ変える。後段検査でunknown1。getter1でもcontinueせず借用Dispose0 |
+| MI-M11 / MI2 | 完全identityだがevidence.osQueryStatus=Unavailable。getter0/unknown1、履歴evidenceをObservedへ変えない |
+| MI-M12 / MI2 | 両null、ParentProcessId=null。getter0/unknown1、null→0変換なし |
+| MI-M13 / MI2 | CommandLine property自体を削除、path一致。unknown1/getIdentity0、値nullのM01と区別 |
+| MI-M14 / MI2 | path=null、present command空文字、登録units=KH。codeUnits1/unknown1、空文字を欠測扱いしない |
+| MI-M15 / MI2 | command=null、present path=false。getter0/unknown1、boolをpath文字列へ変換しない |
+| MI-M16 / MI2 | path=null、present command=7。getter0/unknown1、数値をcommandへ変換しない |
+| MI-M17 / MI2 | 両null、ParentProcessId=false。getter0/unknown1、bool→0変換なし |
+| MI-M18 / P17接合 | 子は未登録、親は完全登録、command=null。元open1→実Get-Identity1→unknown1/newDispose1、add0。新規候補に欠測証明を適用しない |
+| MI-M19 / P01維持 | 完全Known、両field present一致。元Get-Identity1/canonical1/codeUnits1、unknown0。旧完全値経路をそのまま通る |
+| MI-M20 / P18維持 | 通常の新規子、完全row、親寿命内。open1/add1、再走の既知確認込みGet-Identity2。旧key保持＋new登録1、借用/newDispose0 |
+
+M01だけを旧33C2で1回実行し19件はNotApplicable、exit1/BehaviorRed1を期待する。case起動・AST・fixture・上限・trapの失敗はUnexpectedでありREDではない。新では20PASS以外不合格。旧P04/05/06/07/08/13/14/15/16の世代候補一意性・row一意・creation異常・閉鎖/無効/別handle・部分identity拒否は**分岐前の元guard全文不変**と旧固定証拠で接合し重複実行しない。P03の新世代、P17のopen自体の失敗、P19の完全値key矛盾、run-wide unknown探索も原文不変を確認する。この前提がdiffで崩れたら単に省略せずPreへ戻す。M08は欠測分岐で新たに必要なUTC7確認、M10はその後段guard通過を追加検証する。
+
+拒否oracleは共通でUnprovable1/identity=null/ownership=Unprovable/killRequested=false/waited=false/hasExited=null、Status=CleanupIncomplete、元abort tick/UTC非null、元InvalidOperationExceptionとmessage、以後処理なしである。各bool/int/nullは実型を確認しJSONの文字列false/0に置換しない。未知evidenceは元5key/kind=OsQuery/osQueryStatus=Unavailable/他null。拒否後のFF rowFilterはM18のみ元Get-Identity観測、欠測専用分岐拒否ではnullを期待する。成功はStatusの初期Rejected/abort nullを維持し、gate全体成功を書かない。
+
+counterのint集合は元counterにstartRead/canonical/codeUnits/imageを追加するだけ。Get-Identityは `([object]Process,[object[]]Rows)` のcounter wrapperから上記型置換済み原文bodyへ同じ引数を渡し、戻りOrderedDictionary1個をそのまま返す。ConvertTo-CodeUnitは元 `([AllowEmptyString()][string]Text)` のcounter wrapperから原文bodyへ渡し、元int[]をunary commaで1出力として返す。wrapper内で行/identityを加工せず、出力へcounter値を漏らさない。単一event列で `rows → 既存各known refresh → targetの追加refresh → start → optional canonical → optional codeUnits → Read返却` を照合する。拒否は表で指定した検査地点までのprefix＋元failure、M20はopen→identity→add→再走identity（各identity内部はrefresh→start→canonical→codeUnits）の順である。辞書列挙順に依存せず、先頭の既知refresh群はfixtureの実列挙順を期待として固定し、その群より前後の順を崩さない。case自身が追加したcaller-return/failure markerとgetter/helper eventを同じ列に入れ、個別counter一致だけで順序を証明しない。M10のstate注入はgetter eventで記録し、post拒否/後続markerなしを接合する。oracleの誤順対照をmemoryで1回確認し、総case数を増やさない。実productionへのevent追加は0。
+
+case/result出力は元Pureのschemaを再利用する。caseはid:string、status:string(PASS/RED/Unexpected/NotRun/NotApplicable)、expected/counters:IDictionaryのint、differences:string[]、order:string[]、before:string、after:IDictionary、referencesPreserved:IDictionary<string,bool>、unknown:object[]、continued:bool、gateStatus:string、elapsedSeconds:double。欠ける測定値を0で補わない。suiteは元phase/sourceSha256/sourceUnchanged:bool/pureOnly:bool/osEvidence:bool/firstUnexpected:null又はstring/retry:int=0/elapsedSeconds/results:object[]を保持する。NotApplicable/NotRunにはid/status/reason:stringだけを許し、実行したcaseのschemaと混同しない。結果は新UUID内のみ、source/testの前後hash、抽出/逆照合記録と実exitを添える。
+
+### 実型consumer・実測との接合
+
+MissingOsは旧Osのfixture／15秒全体（finally込み）／子自身10秒上限／Hidden・通常ユーザー／stdin EOF回収を再利用する。実 `Diagnostics.Process` と `SafeProcessHandle` を使い型代用0。登録前の実CIM取得は1回、元self/子rowを固定し、元Get-Identity→Add-KnownProcessで完全登録する。raw CIM rowとその5field snapshotを保存する。その後、**別の合成PSCustomObject行**に実PID/parent/CreationDateをcopyしてExecutablePath/CommandLineだけnullとし、同じ合成rows配列を2caseで使う。元CIM行を変更せず、これは実OS欠測の再現ではないと記録する。production Readへ供給するRowsのobject[]契約を満たす。Get-OsProcess wrapperはこの固定合成配列だけを返しCIM再取得0。Get-Identity wrapperの参照検査は登録時raw rowsとread時synthetic rowsを区別する。
+
+| ID | 実行とoracle |
+| --- | --- |
+| MI-O1 | 新合成子live、保持した元Process/SafeHandleと完全台帳のまま合成欠測rowsでReadを1回。read側open0/getIdentity0/add0/unknown0、同UTC7/key、exitUtc=null、raw/synthetic両snapshotと台帳参照不変 |
+| MI-O2 | O1成功後stdinを閉じ、同launch handleで残15秒以内のWaitForExitを1回。元Readに同じsynthetic rowsを1回渡しunknown0/元exitUtc更新、元Get-TerminationObservation=Exitedを確認する。借用handleはfinallyまで保持 |
+
+旧Os2を重ねて起動せず、この2件が新しい欠測分岐の実型証拠である。sourceに対する実際のReadのGetProcessById2箇所のcounter adapterと逆照合は元Osを再利用し、既知経路open0を必須とする。実Processのメソッド装飾はしない。Dispose/Kill/WaitがReadにないことは元AST・local `$handle` 代入先不変・参照保持・open0の接合証拠であり、直接runtime counterと称さない（未測定はnull、証明後の導出0はevidenceKind付き）。fixtureのlaunch/wait/kill/Dispose counterは別に記録する。O1失敗ならO2 NotRun、firstUnexpected/回収不能/超過はFAILで再試行しない。同期APIの強制中断を保証せず、返却後超過もFAILである。
+
+### 実行コマンド・固定入力・handoff
+
+MI-B作者がoracle/adapterを先に固定し旧M01 REDを1回、別実装者のMI-C後に新20GREENを1回採る。MI-D独立runnerは確定組でMissingOs2→成功後MissingPure20を各1回、reviewerは所有diff/型/FF不変/証拠を照合する。独立性のための二者の確認であり、同担当の変更なし再試行はしない。旧FF18/PTH-MONO/旧KH20/旧Os2は未変更consumerのbytes一致で接合し、今回一括再実行しない。
+
+```powershell
+& 'F:/Program Files/PowerShell/7/pwsh.exe' -NoLogo -NoProfile -NonInteractive -File "$r/verification/argv-path01/Test-KnownHandle.ps1" -SourcePath $old33c2 -ExpectedSourceSha256 '33C21282E728E3F654C727286F6AE462B0BF4A5D48E4A56A009E0D42A22FE38C' -OutputRoot $freshOld -Phase MissingPure
+& 'F:/Program Files/PowerShell/7/pwsh.exe' -NoLogo -NoProfile -NonInteractive -File "$r/verification/argv-path01/Test-KnownHandle.ps1" -SourcePath $frozenNew -ExpectedSourceSha256 $approvedNewSha -OutputRoot $freshPure -Phase MissingPure
+& 'F:/Program Files/PowerShell/7/pwsh.exe' -NoLogo -NoProfile -NonInteractive -File "$r/verification/argv-path01/Test-KnownHandle.ps1" -SourcePath $frozenNew -ExpectedSourceSha256 $approvedNewSha -OutputRoot $freshOs -Phase MissingOs
+```
+
+上記変数は親が承認済み凍結bytes/hashと各新UUID絶対pathを渡す。静的検査は変更したInvoke/Test/後続binding対象だけのParser error0、PSSA1.25.0診断0と実行error0を要する。先頭から `$ErrorActionPreference='Stop'`、Import-Moduleの固定version、Invoke-ScriptAnalyzer結果配列の保存と件数判定、対象全件終了後の明示 `PSSA_COMPLETE count=0`、process exit0を同じlogに記録する。空stdoutや古いlogだけで実行error0としない。許可区間を元bytesへ逆適用して非所有一致、Read内GetProcessById2件/Dispose受信者/新CIM・retry・helper・row代入0、FF helper/二caller/元catch全文一致を確認する。
+
+MI-E前のbinding作業は最終plan/design/Invoke→使用test/handoff→既存FF probe→親frozen記録の順である。probeの `FixedInputs` はFFで確定済みの**hashtable**（絶対path string→大文字64hex string、12件、重複なし）をそのまま使用し、新MI objectや未知fieldを加えない。12入力はplan/design/Invoke/Test-CargoGate/fake.rs/native source/native EXE/probe/pwsh/V2/rustc/生成fake。Get-PathHashのpath/sha256 hashtable1個、Ordinal key順の前12照合→元ENV01一回→後12照合、case例外→後照合失敗→戻り不適合の優先順、12key dispatch resultとbool/int/null型を保持する。Test-KnownHandleをこの12項目へ追加しない。binding literalのみの差分と元FF dispatch全文一致が前提であり、変更が必要ならFFの影響caseへ差戻す。
+
+MI-Dの独立接合/Pre・局所Postと再束縛ValidateOnly(dispatch0/runtime0)が成功した時だけ、親が既存FF probeの `-ValidateOnly` なし同commandへ新OutputRootを渡し**正常ENV01を一回**dispatchする。FFの65秒Run/build25秒/実行55秒＋cleanup10秒、fixtureの既存上限、firstFail/credit全0を維持する。失敗なら保存して停止し、auto retry・残9・80/fullを開始しない。ENV01 PASSと独立Post後だけ既定focused10→標準80/variant→製品fullへ段階接合する。native/fake/製品source/EXE、認証・実データ・OS/admin設定、API送信、native受入条件は変更しない。
+
+MI-Aの完了は本節、文書diff/参照確認と独立Preへのhandoffである。実装者はRead-OwnedTreeの既知分岐だけ、作者は既存testのMI phaseだけを所有する。新helperを必要とする場合や上記証明が実型で成立しない場合は具体的不足を親/plannerへ返し、外部G5を弱めて実装しない。残るリスクは信頼済み台帳producerの将来変更、同期OS/API停滞、process属性の欠測原因未確定、実suiteに別失敗が残ることである。保持handle同一性は外部からの強制Close/並行再関連付けへの一般的防御ではなく、既存単一actorの所有/lifecycle不変を前提とする。
+
+設計着手時の既存dirtyはplanとusageであり、作業中の親review更新も保持した。本子のtoken/週枠/実返却model・effort/親子包含は未取得、親のusageへ接合する。設計書以外の編集・試験実行・process fixture起動・再委譲・公開は0。設計のみなので製品cargo test/buildは非該当である。

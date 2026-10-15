@@ -408,3 +408,95 @@ Test-FirstFailureの必須interfaceはSourcePath/ExpectedSourceSha256/ProbePath/
 暫定未決だったwhitelist/出力/source束縛、再入を避けるwriter、元contextのENV01専用入口、18case/上限/commandはdesign56F1と独立Preで解消した。未検証なのは実装と受入証拠であり、方式の未決とは区別する。新安全権限・時間変更・追加OS実測が不可欠なら具体的不足を親へ返す。次handoffは本精緻化の親受領後のww-test-author `gpt-6-astra/high`、所有は新Test-FirstFailure.ps1と新隔離証拠だけである。独立18期待凍結→別実装者Invoke/probe→作者旧T01 RED/17NA・新18GREEN→凍結/static/ValidateOnly→独立runner ENV01一回→限定Postの順を維持する。失敗時は証拠を返し、原因patch/retry/後続caseを追加しない。
 
 開始共有週枠は親受領52%。本plannerの開始/終了token・session/実model metadata・終了週枠・親子包含は未取得、推定しない。今回所有は本新節だけ、文書diff/hash/参照確認のみ、他file編集/実装/試験起動/再委譲/公開0である。
+
+## MISSING-IDENTITY01 PacketBrief（2026-10-16、MI-A設計/Pre受領・限定確定）
+
+利用者の最新指示「了解、設計し、以降の作業も実施してください。」を親から受領した。対象は保存されたFIRST-FAILURE01のENV01失敗に対する、既登録・保持handle付きの同世代候補でOS CommandLineが欠測した場合の限定是正である。旧FF-Dの一回承認は履行済みであり、本指示を後続設計・実装・検証の根拠とする。失敗を反復して成功例を得る許可ではない。
+
+本packetの完了境界は、等価な所有権証明の限定設計/Pre、独立回帰、局所実装、独立実測/Post、正常ENV01一回の成立を確認し、既定KH-D/CXT-E focused10→標準80→既定製品fullの段階再開へ返すことである。各下流gateの成功・試用EXE提供は別の既定受入である。本plannerの今回の完了は本追補・文書検査・親への返却まで。計画/task-listの正本は本節のみとし、未完了の旧plan/todo/checklistと旧失敗は保持する。
+
+受領設計は[既存designのMI節（717行以降）](early-trial-gate-design.md)、SHA256 `9679B02C1F3F31A6DE701656A52C4DB0DA3A39A289FC8D498C8898EFDE4AA1AE`。親からfresh独立 `missing_identity_pre`（指定Astra/high）のPre PASS・確定指摘0を受領した。外部仕様変更なし、Invoke33C2不変を確認して本節を限定確定する。方式/型/fixture/20MissingPure・2MissingOs/commandは受領設計を唯一の正本とする。設計の入力planAA92は仮計画時の履歴として保持し、今回hashへ循環更新しない。MI-Aの完了は実装/実測成功を意味しない。
+
+### 保存証拠・外部契約の扱い
+
+- 開始HEADは `a84ad3ae5efbbaa576db212780987665e32d2e87`、git statusはclean。Rは `target/early-trial-build/et3/cargo-gate`、packetは `R/verification/argv-path01` である。
+- 現Invokeは `33C21282E728E3F654C727286F6AE462B0BF4A5D48E4A56A009E0D42A22FE38C`、FF probeは `62DA68853F6CD11B86206999C1F892F5C578D670F1C0A248453F149AD7C71B9F`、FF author testは `AD492926E4DC4CA84766710D41CFF9024065A88D79BAF310226B96026DAECD46`。旧plan0CC4/design30F4との固定組を保存する。
+- 保存suite `R/verification/6bb4409b-200d-4fa6-a144-9157a37468d2` / run `R/runs/62900800-fee6-4d5d-a590-940ea5939319`、独立報告 `packet/f8918c3a-e070-4e0e-91c7-378426128d40/REPORT.md` と[review冒頭](early-trial-delivery-review.md)が根拠である。RunOwner13520のOwnedTree.IdentityCatchはPID35916/parent23292、snapshot/known/rowFilter各1、command/path存在確認false、source600で拒否した。candidate identityはnull、Owned12終了確認/Unprovable1終了不明、Supervisor/Runner正式terminal欠落、ENV01FAILである。
+- plannerのsource確認でも、Read-OwnedTreeは既知候補の有効保持handleを選んだ後にGet-Identityを呼び、Get-IdentityはCommandLine欠測でthrowする。この分岐到達は確認済みである。欠測理由、終了との因果、権限不足、旧runとの原因同一性、保存候補の安全な回収可能性は未確定である。
+- 既存外部仕様G5の同世代所有/未知非停止、G1–6/AP1–4、terminal/cleanup/80case期待を再利用し、外部仕様担当の新規執筆は非該当と確定した。KH手順6の元Get-Identity全5field再取得は、受領MI設計の完全登録・元SafeHandle連続保持・元Rows一意/UTC6/UTC7/key一致を証明し、path/command両propertyが存在して一方以上の値だけがnullの場合に限り置換する。外部判定の緩和が必要なら固定外部仕様担当へ戻し、仕様レビュー/必要な利用者確認前に実装しない。
+- PTH-MONO、CXT-D12、KH OS2/Pure20、FIRST-FAILURE局所18/独立Postの成功は各旧固定組の証拠として保存する。今回のCommandLine欠測ケースを既存mockの成功で確認済みにしない。
+
+### 要求・除外・確定した証明
+
+| ID | 要求と受入条件 |
+| --- | --- |
+| MI1 | 元snapshotと既存台帳の完全identity・連続保持handleの同世代を、現行と等価以上の証拠で確認できる場合だけ既知所有を維持する。PID一致、known/snapshot件数、古いregistration、別actorのunknown0、欠測そのものを所有根拠にしない |
+| MI2 | 欠測fieldを新しい観測値として捏造せず、登録済みidentity/ownershipEvidence/key/handleを保持する。取得できたfieldの矛盾を無視しない。部分identity、無効/閉鎖/別handle、曖昧行/世代、不正creation、新規候補は従来の拒否または元新規検証経路を維持し、既知照合失敗後のPID reopen救済は不可 |
+| MI3 | 終了は既存の実handle観測、kill/wait、正式terminal、cleanup条件で別に判定する。欠測→Exited、row skip→cleanup成功、Unprovable→Ownedへの無根拠変更は不可。FFの最初の失敗保存、未知null、非停止、元例外/abort/期限を保持する |
+| MI4 | 独立作者が新しい欠測境界の旧REDと新GREEN、危険な類似入力の拒否、実型/保持handleconsumer成立を有限ケースで確認する。最終固定組で独立検証・reviewを通過してから正常ENV01を新suiteで一回だけ実行し、結果/失敗/残NotRunを保存する |
+
+確定方式はRead-OwnedTreeの既知分岐だけで、完全な5field identityとObservedの登録evidence、元Process/元SafeHandle、CIM UTC6桁と保持開始時刻UTC7桁/key、parentの一致を接合することである。存在するpath/commandは元helperで登録値と比較し、矛盾・不正型・property自体の欠落を拒否する。欠測pathのimage API呼出は0であり、登録path/commandを現在のOS観測として補完しない。両値presentなら元Get-Identity/全5field照合を維持する。前後のhandle guardを通過するまでcontinueせず、getter例外・閉鎖・参照変化は元Unprovable/abortへ渡す。新helper/API/signature、Get-Identity等の別consumer変更は0である。
+
+対象外はactor/root/source/data/credential/API/admin/OS設定、時計/上限/予算、未知判定、JSON schema、native/fake/製品source/EXE、argv exact、別監督方式、一般化framework、追加常駐監視である。元Rowsの書換え・CIM取り直し・GetProcessById retry・台帳への欠測埋め・新規候補への既知専用扱い拡張は不可。必要な所有範囲追加は理由と差分境界を親/plannerへ返し、暗黙に拡張しない。
+
+### 有限作業リスト・依存・所有・verification
+
+通常1 helperずつfresh context、再委任なし。作者/実装者/runner/reviewerを独立させ、同じfileは逐次所有する。下表は受領設計/Preに基づく確定所有である。作者着手まではsource33C2と保存source fixtureを保持し、作者もproductionを編集しない。
+
+| 単位 | 依存・規模・所有 | 受入・必須verification |
+| --- | --- | --- |
+| MI-A 等価証明の設計/Pre | S、既存designのMI追補のみ | design9679・fresh独立Pre PASSを受領し、本精緻化で完了。外部unknown/cleanup基準不変、B以降は未実施 |
+| MI-B 独立回帰の固定 | Aと本精緻化の親受領後。S、作者はpacketの `Test-KnownHandle.ps1` のMissingPure/MissingOs専用差分と新隔離fixture/reportのみ | 設計の20/2 oracle・adapter・型・順序・上限を固定し、保存旧33C2でM01一回BehaviorRed/19NotApplicableを採る。旧Pure/Os本文とP09/P20の履歴oracleは改稿しない。adapter/API不足はREDと区別し、source不変で所有返却 |
+| MI-C 局所実装 | B所有返却後。S、別実装者は `R/Invoke-CargoGate.ps1` のRead-OwnedTree既知分岐だけ | 作者期待を編集せず接合し、作者が新MissingPure20GREENを一回取得する。拒否不変・借用Dispose/reopen/追加CIMなし。Parser0、固定PSSA1.25.0診断0/実行error0、非所有逆diff/bytes一致。Get-Identity/新helper/APIへの拡大はAへ差戻す |
+| MI-D 凍結/必要な束縛/独立接合 | B/C最終bytes後。S単位に逐次分割、作者は必要なtest束縛、別実装者は必要なdriver/probe/HANDOFF束縛だけ | 独立runnerがMissingOs2→成功時MissingPure20を固定組で各一回、firstUnexpected停止。旧bytes/非所有guard/FF本文不変・最小依存鎖を独立reviewし、接合Pre/局所Post PASSと再束縛ValidateOnly dispatch0/runtime0を得る。旧KHのPure/Osは今回dispatchしない |
+| MI-E 正常ENV01一回/Post | D成功・親の固定組dispatch後。S、runnerは新隔離証拠/log/reportのみ | 既存FF probeの意味を保ちENV01だけ一回、新suite/run・retry0/他case0/全体credit0。元terminal/cleanup/固定入力一致を独立Post確認。初回予期外/FAILは保存して停止し、自動patch/retry/残9開始をしない |
+| MI-F 既定ET3への接合 | E PASS/Post後。Sの段階dispatch、source/期待編集なし | KH-D/CXT-Eの残るfocused10/AP1の最終固定組・接合reviewを確認して一回firstFailで実行。MI-Dの新局所受入が旧KH-D Pure/Os dispatchを置換するため、Fで旧Pure/Osを再起動しない。focused全PASS/Post後だけ標準80/既定variantへ、全必須gate成功後だけ製品fullへ進む。旧NotRunをPASSへ補わず、別原因は別findingとして停止 |
+
+- [x] MI-0：保存証拠・source分岐・既存契約を読み、仮計画と役割/所有/停止条件を作成した。
+- [x] MI-A：既存外部契約再利用、design9679の具体interface・有限20/2ケース・command・独立Pre PASSを受領し、本節を限定確定した。
+- [ ] MI-B/C：独立oracle/旧RED→別実装→新GREEN、静的検査と非所有一致を完了する。
+- [ ] MI-D：必要な束縛と独立局所/OS検証・接合reviewを完了する。
+- [ ] MI-E：正常ENV01一回と独立Postを完了する。失敗時は証拠を返し停止する。
+- [ ] MI-F：各既定gateの成功を条件にfocused10→80/variant→製品fullへ順に返す。
+
+固定局所集合は設計MI-M01–20とMI-O1–2である。M01が旧P09のcommand-null拒否、M02が旧P20のpath-null image API失敗拒否を、完全登録・連続保持handle成立時だけ置換する。旧P04/05/06/07/08/13/14/15/16等は分岐前guard全文不変と旧固定証拠で接合する。不変前提が崩れたらPreへ戻す。新MissingPureは各5秒/全60秒、MissingOsは実子1個・finally込み15秒/子自身10秒でO1→O2、retry0である。実型/保持handleに合成欠測rowsを供給するOS2であり、実OS欠測原因の再現とは呼ばない。
+
+fixture型・AST置換/逆照合・Get-Identity/ConvertTo-CodeUnitのcounter wrapper・原文body・出力個数・単一event順序・誤順memory対照は設計で確定済みである。実Get-Identityの旧拒否をthrow mockで再現しない。source/hash/OutputRoot/Phaseの4必須引数と具体commandも設計に従う。実OSで未測定のDispose/Kill/Waitをruntime測定0へ補わず、AST/参照/open0による導出根拠とfixture回収を区別する。旧FF18/PTH/旧KH20/旧Os2は不変consumerのbytes証拠で接合し、一括再実行しない。
+
+変更したInvoke/Test/必要なbinding対象の最終PSSAは、先頭からErrorActionPreference=Stop→固定1.25.0 Import→解析結果保存/件数判定→全対象終了後の `PSSA_COMPLETE count=0` →process exit0を同一logで必須とする。空出力/古いlogでは実行error0を認めない。Parser0、非所有逆bytes、Read内の元GetProcessById2箇所とDispose受信者、FF helper/二caller/元catch不変を併せて確認する。
+
+### frozen binding・下流の解除条件
+
+本追補だけで旧probe/driverのplan bindingは失効する。旧FF probeをそのまま再実行しない。確定plan/design/Invoke→使用するtestの固定入力→新test hash/handoff→実行するprobe又はfocused driverの固定入力→親のfrozen記録の順で更新する。自分のhashを自分へ追記する循環更新を避け、設計中の入力plan hashは履歴として保持する。
+
+MI-E前は実際にFF probeが読む依存だけを再束縛し、FF probeの単一ENV01/前後照合/12入力/dispatch結果契約は変えない。FixedInputsは既定hashtable（絶対path string→大文字64hex string）12件のまま、Test-KnownHandleを追加しない。Ordinal順前12照合→case一回→後12照合と元例外優先順・dispatch全文を保持する。MI-F前にTest-ContextPreflight/CONTEXT-TEST-HANDOFF-P1→focused driver/HANDOFFの必要束縛を独立作者/別実装者の所有に分けて更新する。一度に3–5fileを超える束縛作業にしない。旧bytes・承認・suite/run/frozen-inputsは非上書きで保存し、旧結果の意味を書き換えない。新hashの自動採番だけを承認根拠としない。
+
+ENV01成功はprobeのcredit0を維持する。focused10/標準80を代替しない。製品fullへ到達した場合は既定の通常/試用構成・関連crate・native gateと、`cargo test --all-targets --locked`、`cargo build --release --locked --bin wordweave5` を既定wrapper/隔離target/承認条件で実施する。既存成功source/buildの証拠はhashと範囲が一致する限り保存し、本PS是正だけを理由に製品buildを反復しない。製品EXE更新は実際の既定提供gate通過後である。
+
+### 各単位の7役exact割当・リスク
+
+以下はMI-A/B/C/D/E/Fそれぞれへの割当である。非該当工程は起動せず責任だけ保持する。現呼出可能一覧にあるモデルと対応effortを選び、親はdispatch時にも照合する。指定値と実返却metadataを分離し、後者がない場合は未取得とする。
+
+| 役 | exact model / effort | 単位の責務・難易度/リスク・選定理由 |
+| --- | --- | --- |
+| planner | `gpt-6-astra` / `high` | A精緻化、B–F差戻し/境界、本planのみ。高/高、所有権証明とgate解除の分離が必要 |
+| external-spec author | `gpt-6-astra` / `high` | Aで外部契約再利用を確認する責任。B–F新規執筆は非該当。外部変更が必要ならAへ戻して仕様化。高/高、内部是正を安全基準緩和と混同しないため |
+| designer | `gpt-6-astra` / `high` | Aの方式/型/fixture/oracle、B–Dの設計逸脱差戻し、E/F新設計非該当。高/高、欠測と世代/handle寿命の厳密な証明が必要 |
+| implementer | `gpt-6-astra` / `high` | C本体局所、D及びF前のdriver束縛。A/B/E/F実行中は本体編集なし。高/高、停止権限と保持handleを扱い誤同定の損失が大きい |
+| test author | `gpt-6-astra` / `high` | B独立oracle/fixture、D及びF前のtest束縛、Aの試験可能性確認。C/E/F期待編集なし。高/高、旧mockで欠測失敗を隠すことと期待値追随を防ぐ |
+| test runner | `gpt-6.1-sol` / `medium` | D固定局所/OS、E一回ENV01、F段階gate。A–C新runtime dispatchなし。中/高、確定手順の独立採取・firstFail/正式証拠を扱い設計判断は委ねない |
+| reviewer | `gpt-6-astra` / `high` | A Pre、B–D独立差分/証拠/束縛、E/F Post。高/高、同世代証明・台帳保全・未知非停止と過大creditを独立検査 |
+
+担当skillはplanner=planning-and-task-breakdown、designer=api-and-interface-design、作者=test-driven-development、実装/runner=wordweave-changeの担当工程、PS作成=powershell-automation、reviewer=review-software-design又はcode-review-and-quality/powershell-reviewである。新規skill/別frameworkは作らない。未導入skill/未対応modelはblocker、silent fallback禁止、親model/effortと品質gateは不変である。
+
+主要リスクは欠測を信頼へ変換する誤り、PID世代混同、登録後に矛盾したfieldの無視、borrowed handle解放、旧case期待の無断削除、古いbindingで新sourceを実行することである。元snapshot・完全台帳・連続handleの証明、拒否負例、独立review、旧bytes保全と最小再束縛で対処する。rollbackは親が本packet所有差分だけを保存版へ戻す操作であり、旧失敗を成功にせず、runtime再開は再判定する。
+
+### 未決・次handoff・測定境界
+
+仮計画の未決だった等価証明、path欠測、Read-OwnedTree限定所有、P09/P20追跡、有限ケース/command、影響consumerはdesign9679と独立Preで解消した。残る不確実性は未実装/未実行の受入、OS欠測原因、同期API停滞、実suiteの別失敗である。新たな利用者仕様判断はない。証明が実型で成立しない、又は安全基準/権限/期限の変更が必要な場合は具体的不足を親へ返す。
+
+親の一次資料照合を受け、designerが.NET10.0.12/PowerShell7.6.6の既存consumerへ対応付けた。StartTimeはcacheされ得るため毎回新OS照会と呼ばず、元handleの連続保持を証明に含める。実型の成立はMI-Oの未実施受入である。OS欠測原因の証明、新PInvoke/API追加の指示として扱わない。
+
+次handoffは親が本精緻化を受領後の `ww-test-author` / `gpt-6-astra` / `high` である。入力は本返却hash、design9679/独立Pre PASS、Invoke33C2、既存Test-KnownHandleと保存証拠。所有は同testの新MissingPure/MissingOs phaseと新隔離fixture/reportだけである。順序はMI-B作者freeze/旧M01RED・19NA→MI-C別実装/作者新20GREEN→MI-D独立MissingOs2・MissingPure20/必要束縛review→MI-E正常ENV01一回/Post→条件付きMI-F focused10/80/fullである。旧Pure/Osの再dispatchは含めない。全役exact割当は上表のまま。親が承認・dispatchを担い、plannerは他agent起動/実装/試験編集/公開を行わない。
+
+開始共有週枠は親受領63%、アカウント共通値である。子 `/root/missing_identity_plan` の開始/終了token、session ID、実返却model/effort、終了週枠、親子包含は未取得。今回の測定範囲は計画文書作成から最終応答前までであり、task専有消費や削減率を推定しない。親が既存usage記録へ接合する。本plannerの検証は文書diff/hash/参照/所有範囲のみ、runtime/実装/再委任/公開0である。

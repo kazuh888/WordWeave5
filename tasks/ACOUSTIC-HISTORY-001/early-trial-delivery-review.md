@@ -1,5 +1,19 @@
 # ET3 試用EXE提供・独立レビュー記録
 
+## MISSING-IDENTITY01（2026-10-16、設計開始）
+
+MI-Aの計画精緻化を受領し最終plan11332260BC8ADC291BAEF3F4A4DF88A477D2E5256DA584645154A80C9F5F4DB2とdesign9679を固定した。旧KH Pure/Osの再dispatchはせず、新MissingOs2→MissingPure20を現局所受入とする。fresh作者 `missing_identity_tests`（指定Astra/high）へTest-KnownHandleのMI phaseだけを所有して期待固定・静的確認・旧M01一回の合成REDまでを依頼した。新20/実型2/ENV01はまだ解除していない。旧case期待/bytes/証拠を保持する。
+
+MI-A独立Pre PASS／確定指摘0を受領した（planAA92/design9679/source33C2開始終了一致）。元登録producer/Read/失敗catch/終了consumer、公式.NET10.0.12のStartTime cacheと元handle保持、property/null/空/型の区別、親/path/command矛盾拒否、局所20＋実型2のAST/配列/順序/時間/拘束を確認した。旧Pure/Osを再dispatchせずMI-D MissingOs2→MissingPure20を現局所受入とし、MI-Fはfocused10へ接合する対応をplanner精緻化へ返した。実装bytes/局所実測/ENV01/下流gateは未検証、元guardの旧証拠再利用は全文不変が条件である。新実装/runtime0。
+
+MI-A設計は9679B02C1F3F31A6DE701656A52C4DB0DA3A39A289FC8D498C8898EFDE4AA1AE（既存design717〜115行追補）で凍結し、fresh reviewer `missing_identity_pre`（指定Astra/high）へ独立Preを提出した。変更候補はRead-OwnedTreeの既知分岐だけで、new helper/APIなし。propertyの存在＋値nullを欠測条件とし、完全登録/元SafeHandle継続/UTC6/7/現存field照合・前後guardを接合する。局所MissingPure20/実型MissingOs2、旧P09/P20の置換条件、元OS値を復元した観測ではないことを固定。Pre未了のため実装/実測は0である。
+
+利用者がOS情報欠測時の安全な扱いの設計と以降の作業を承認した。現HEAD a84ad3a、source33C2と保存run62900800の証拠を入力に、planner仮計画AA92（既存plan412〜）を受領しdesigner Astra/highへ限定設計を依頼した。現Get-Identityは既知保持handleを選んだ後もCommandLine欠測でsource600に到達する。等価以上の同世代証明なしに欠測を無視せず、完全登録/連続handle/世代/現存field矛盾を接合する方式をPreで確認する。欠測原因は未確定。設計・Pre・計画精緻化前の実装/runtime0。既存FF診断Closed/旧局所PASS/失敗証拠を維持し、主KH/ARGV/80/full/提供は未了である。
+
+| Finding ID | Evidence / root | State | Ownership / acceptance |
+| --- | --- | --- | --- |
+| MI-VOLATILE-01 | run62900800のCommandLine欠測とsource600。既知保持handleでも完全なOS情報再取得を必須とする分岐 | Planned | designerは既存design追補のみ。MI1–4の同世代証明・拒否負例・独立回帰/実測/Postが必要。未知非停止/期限/schemaは不変 |
+
 ## ARGV-PATH01（CXT01再構成に依存、動的検証未完了）
 
 ### CXT-E focused実動作：ENV01停止・保存証拠の診断中

@@ -1,5 +1,11 @@
 # ET3 試用EXE提供の使用量観測
 
+## OS情報欠測の是正設計・実装再開（2026-10-16）
+
+利用者が保存済み診断を基に「設計し、以降の作業も実施」を承認した。開始HEAD a84ad3a/tree clean、共有週枠63%/10080/reset1792667952/ordinaryUsageAllowedtrue。fresh planner `missing_identity_plan`へ指定gpt-6-astra/highで限定計画を依頼し、親モデル/時間上限/未知プロセスの扱い/実data/API/OS設定を維持する。Windows公式のhandle保持とcreation timeの一次資料を親が限定照合したが、欠測原因や今回の安全な所有証明成立を先取りしない。
+
+親開始側snapshotは2026-10-15T23:36:13.42Z、session01a08550-055c-7aa1-9834-905e4a7ce148のinput1919393802/cached1877028096/output4315977/reasoning1409727/total1923709779/cache_write0。着手からsnapshotまで欠測、cached/reasoningは内数、子token/実返却model metadata/親子包含は未取得。共有週枠や親counterをこの作業の専有消費へ換算しない。
+
 ## path欠測是正の設計再開（2026-10-15）
 
 FIRST-FAILURE01終了。作者baseline旧T01RED/17NAと新18GREENを各一回、FF-C独立接合PASS、親ValidateOnly一回PASS後、fresh runner `first_failure_runtime`指定`gpt-6.1-sol/medium`でENV01一回を実行した。20.4470182秒FAILだが正式診断3/tmp0を得て、独立限定Postは診断契約PASS／OBS-FIRST-01 Closed。原因patch/retry/残9/標準80/製品fullは0。runner共有週枠63→63%、親の開始側観測53→終了63%/10080/reset1792667952/ordinaryUsageAllowedtrueはaccount共通であり専有消費ではない。親子モデル設定は計画どおりだが実返却metadata/token/包含は未取得、合算しない。

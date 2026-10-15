@@ -2,6 +2,8 @@
 
 ## 最新状態（2026-10-16）
 
+MISSING-IDENTITY01は最終plan1133/design9679、独立Pre PASS／確定指摘0。fresh作者 `missing_identity_tests`（指定Astra/high）がTest-KnownHandleのMI phase期待固定/静的確認/旧M01一回の合成REDを担当中。欠測値の復元ではなく完全登録/元SafeHandle継続/UTC6・UTC7/現存field矛盾照合による等価証明をRead既知分岐へ限定する。新helper/APIなし、旧guard/未知非停止/期限維持。新20局所＋2実型が現受入で旧Pure/Os再dispatchなし。新実装/新20/実型2/ENV01は未解除。開始共有週枠63%、親モデル不変。段階成功時だけENV01一回→focused10→80/fullへ接合し、失敗の無断retryや未知停止は行わない。
+
 ET3の別配置試用EXE提供を継続中である。PTH-MONO-01は最終Post PASS／Closed（Invoke12E7、独立47/47＋5/5）。標準80は別の内部argvパス表記不一致でENV01 FAIL／79 NotRunであり、製品full／提供は未了である。
 
 ARGV-PATH01のnative381F／EXEFF7CとCXT-D12PASS/独立受入は維持する。KHの独立OS2/Pure20は全PASSだが、旧focused a59b49c6はcontrol2PASS／ENV01FAIL／9NotRun。run4de297d1のSupervisorがCleanupIncomplete cancel後に正式terminal/tmp欠落し、初因は未確定である。他観測者のunknown0や別時点registrationで補完しない。利用者は診断追加＋合成正常系ENV01一回を承認済み。旧結果とAST01/CXT-D/PTHの限定PASSを保全し、主KH/ARGV/80/full/試用提供は未了である。
