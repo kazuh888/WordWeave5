@@ -570,3 +570,129 @@ Pre→planner精緻化→独立作者の20pure/旧RED固定→別実装者のRea
 frozen bindingは計画どおり、最終plan/design/Invoke→Test-ContextPreflightの3入力hash→新testとCONTEXT-TEST-HANDOFF-P1→focused driverの5入力hash→HANDOFF/runner frozenの順でのみ更新する。今は更新しない。旧bytesを保存し、旧結果・承認・Run source/frozen-inputを上書きしない。CXT-D旧12PASS/独立PostとPTH-MONO Closedは維持し、関係consumer本文不変の静的証拠でCXT12の不要な再実行を避ける。LIFE14/16/17/18・標準80/87variant・製品full・提供のgateは残る。
 
 rollbackはRead-OwnedTreeの今回差分だけを12E7保存版へ戻すことであり、旧競合や旧binding不一致を解除しない。新回帰/RED/旧source・tmp・fixtureは保持する。他者編集、native/fake/EXE、製品source、認証/API/OS設定は変更しない。usageは子`/root/known_handle_race_design`の開始/終了counter・provider実metadata・週枠・親子包含を未取得とし推定しない。指定model/effortと返却実値を混同しない。
+
+## FIRST-FAILURE01：actorごとの最初のGateFailure診断（2026-10-16、FF-A）
+
+入力は[計画](early-trial-gate-plan.md)のFIRST-FAILURE01節、SHA256 `6B84ECDEFD7E2BE13FC6C4466A26E31E273762FD849F127A9C26CAB7A855F3FC`である。利用者承認は親受領の「中断前エラー診断の追加と合成正常ENV01を1件1回」であり、FF1–FF4が本追補の承認済み内部観測契約である。元外部仕様・安全判断・期限・unknown・承認形式は変更しない。planner指定はdesigner `gpt-6-astra/high`、実metadataは未取得。所有は本節だけである。AGENTS、development-team、KPIと`agent-skills:api-and-interface-design`全文を確認した。UI/REST変更はないためUI skillは非該当である。
+
+設計前Invoke SHA256は`35AE6C713ABCEAA28361DA750E7BD06F373E09EF2FB155D8456F79D83ADC66B5`、本書追補前は`AF67CB6E40B37813226317B68D0698BBD84586732FAE92D88A7982D978E223A2`である。以下の行番号は35AEの位置であり、実装後のcallsite同定は固定分類とInvoke source hashで行う。失敗suite/runは計画記載の`a59b49c6-ffca-4f78-8436-6b46b57d1d7c`／`4de297d1-d99e-4d5e-9a9a-8f74a034bca1`を保持する。Supervisorのterminal/tmp欠測から1356行のcommon catchと1397行のparent edgeのいずれかを選ぶ根拠はない。
+
+### FF1–FF4の責務・最小変更境界
+
+| 受入 | 所有するmodule/function | 契約と非所有境界 |
+| --- | --- | --- |
+| FF1/FF2 | implementer：`R/Invoke-CargoGate.ps1`のprefix、`Initialize-Run`末尾、`Invoke-GateFailure`、小さいprivate診断helper | actor-localの一回性、既に検証済みcontextの射影、診断保存。Status/abortを先に設定し元throwを必ず継続。元main catch/finally、Initialize-Cleanup、Write-Terminalは変更しない |
+| FF1/FF3 | 同fileの`Read-OwnedTree`二つのInvoke-GateFailure呼出だけ | common catchは追加済みUnprovableの最後の1件を渡す。parent edgeも追加済み最後の1件を渡す。既存row/観測/例外/台帳/所有判定本文は変更しない。新しいOS照会・Get-IdentityFailureObservation再実行・Known全列挙なし |
+| FF3 | 同fileの診断context/projector/writer | 出力は合成Run直下の固定名、最大8192 bytes。診断専用状態でありImmutable/Run/terminal schemaへ混入せず、gate判断の入力にはしない |
+| FF4 | implementer：新規`R/verification/argv-path01/Invoke-FirstFailureEnv01.ps1` | source-boundの元ENV01を一度だけdispatchする入口。既存Test、fake、native、focused driver、context testは本文不変 |
+| FF1–FF4 | independent author：新規同folder `Test-FirstFailure.ps1`＋新UUID隔離fixture | 後述18局所caseと静的接合。期待値/adapterの所有を実装者から分離。新framework、OS障害case、既存KH20/OS2/control2の再実行は追加しない |
+
+`Initialize-Run`の現行終端は、fixture/marker/source/自己identityとRunOwnerのrejection context一致を確認した後に`Run=candidate; ValidationInput=null`へ昇格する。この昇格完了後だけ、診断用contextを既存値から複製する。診断初期化自身も局所try/catch内で行い、失敗時はcontext=nullのままとし、元Run昇格を取り消したり新failureを投げたりしない。追加のOS identity取得・source再hash・時刻採取は行わない。`cfg=fixture`、Fixture非null、SourceMatched=true、RunHash/source hash/自己identityが確定済みの時だけcontextを作る。production、bootstrap途中、未検証candidateは対象外である。
+
+### private interfaceと情報whitelist
+
+新状態はprefixに`FirstFailureState` 1個（通常hashtable）だけを初期化する。fieldは`attempted:bool=false, inProgress:bool=false, outcome:string='Unobserved', context:null|hashtable`である。contextはRun/Fixture/Identityの参照を保持せず、以下のscalarだけの新dictionaryにする。診断stateはactor script scope所有、他actorと共有・更新しない。outcomeは`Unobserved/Skipped/Attempting/Published/Failed`だけで、tmpや試行だけをPublishedにしない。
+
+| 型／field | 有効値・射影元 |
+| --- | --- |
+| context | `runDirectory`は既に検証したR/runs/<runId>の絶対path。`runId`はD形式UUID36文字、`runSha256`と`gateSourceSha256`は既存RunHashとRun.gateScript.sha256の大文字64hex。`role`は元Modeの4値。`actorPid`はSelfIdentity.pidの正整数1..Int32.MaxValueかつPID一致、`actorStartTimeUtc`はSelfIdentity.startTimeUtcの既存UTC7桁28文字。`actorStartTicks`はこのUTC文字列を既存Get-UtcでparseしたUtcTicks整数。新clockではない |
+| Invoke-GateFailure | 元の先頭2引数`[string]Status,[string]Message`を保ち、末尾に任意`[object]Callsite='GateFailure.Other'`, `[object]FailureObservation=$null`を追加する。追加引数にValidateSet/必須型変換を置いて元Status設定前に例外を起こさない。既存2引数callerはそのまま動く |
+| Callsite | `OwnedTree.IdentityCatch`＝元1356、`OwnedTree.RunBoundParentEdge`＝元1397、他の未変更caller＝`GateFailure.Other`。実callsite二箇所に名前付き定数を明示。範囲外の型/値は診断だけSkippedとする。行番号や動的Messageから分類しない |
+| FailureObservation | nullまたは元の該当Unprovable 1個。projectorは通常IDictionaryから固定keyを個別参照するだけ。全文serialize/全Keys走査/任意PSObject property走査は行わない。共通catch側はその`osObservation`、parent edge側は既存candidateIdentityだけが得られ、存在しないosObservationを捏造しない |
+| 保存root envelope | `diagnosticKind='FirstGateFailure'`, `schemaVersion=1:int`, `runId/runSha256/gateSourceSha256`, `role`, `actor={pid,startTimeUtc}`, `callsite`, `status`, `firstAbortUtc`, `firstAbortTickSeconds`。statusは元gateの`Rejected/Cancelled/TimedOut/OwnerLost/CleanupIncomplete/Completed`文字列に限定し、値不正は診断だけSkipped。時計は元AbortUtc/AbortTickの既存値、tickは有限かつ0以上のdoubleである |
+| failure | nullまたは`ownership='Unprovable', killRequested=false, waited=false, hasExited=null, candidate={pid,startTimeUtc}, osObservation={...}`。candidate/osObservationは各nullを許す。元該当fieldがこの型/値を満たすものだけ複製し、異常fieldはnullとする。candidateは元identityのpid/startTimeUtcだけ。path/parent commandを含むidentity全文は保存しない |
+| osObservation | 既存12fieldだけ：`pid,parentPid,creationUtc,pathPresent,commandPresent,snapshotMatchCount,knownMatchCount,exceptionType,exceptionLine,rowFilterMatchCount,rowFilterPathPresent,rowFilterCommandPresent`。pidは整数1..UInt32.MaxValue、parentPidは0..UInt32.MaxValue、countは整数0..Int32.MaxValue、lineは整数1..Int32.MaxValue、4個のPresent fieldはboolまたはnull、creationUtcはUTC7桁28文字またはnull。exceptionTypeはASCII `[A-Za-z0-9_.+\x60]`だけの1..256文字またはnull。任意入力の文字列化/切詰め/数値へのcoercionなし |
+| producerFailure | 元osObservationに存在する時だけ`exceptionType,exceptionLine`の2fieldを同じ制約で射影し、その他は捨てる。元Unprovable.error、Caught.Message/StackTrace/InvocationInfo全文、Data辞書は保存しない |
+
+nullをfalse/0へ補完しない。envelopeの必須context/時計が欠ける時は文書全体を保存しない。観測fieldの不正/過長はそのfieldだけnullとし、不正な観測を根拠に元failureを置換しない。余分なfield、配列、全Known、FullRun、環境変数、credential、raw command、教材、実ユーザーpathは一切serializeしない。depthは最大5、配列0、UTF-8 no BOMかつ全体8192 bytes以下をserialize後・Open前に確認する。projectionは固定個数のscalarだけなので入力側に大配列があっても列挙しない。
+
+helperは`New-FirstFailureRecord([hashtable]Context,[object]Callsite,[object]FailureObservation,[string]Status,[object]AbortUtc,[object]AbortTick)`（純粋な射影、成功はrecord1個、不適合はnull）、`Write-FirstFailureRecord([string]RunDirectory,[hashtable]Record)`（同期、成功時だけvoid正常return、失敗はthrow）の2個を基本とする。context生成はInitialize-Run末尾の短いblockで足りる。外部公開parameterやproduction fault switch、汎用logger/moduleは追加しない。writerへ渡るrecordはprojectorの出力だけであり、reader/validatorを各helperへ重複配置しない。
+
+### 一回性、永続化順序、保存不能時の回復
+
+1. `Invoke-GateFailure`は元どおりStatusを設定し、AbortTickがnullの場合だけ元Clock.ElapsedとUtcNowでAbortTick/AbortUtcを設定する。この処理を診断より前に行う。これら3値をlocalに保持する。
+2. 新stateを`Get-Variable -Name FirstFailureState -Scope Script -ErrorAction SilentlyContinue`で存在確認し、存在しない抽出scopeでは診断helperへ入らず元throwへ進む。context/null/state不適合の参照も診断用tryの内側に限る。helperなしやStrictModeの欠測が元例外を置換しない。
+3. 最初の到達で`attempted=true`を、context参照・serialize・path照合・file I/Oより先に設定する。その後`inProgress=true`、context未確定または現在の既存SourceMatchedがtrueでなければoutcome=Skippedとして戻る。attempted=trueなら再試行・上書き・再射影なし。再入先でも先頭の元Status処理は保つが、外側finallyが保持した元Status/AbortTick/AbortUtcを復元する。diagnostic helperからInvoke-GateFailure/Assert-Controlを直接呼ぶ経路は作らない。
+4. 有効contextの時だけprojectorを呼び、record成立後writerへ渡す。writerは既存`Get-CanonicalPath`でR、runs、runDirectory、正式/tmp pathの祖先reparseを再検査し、canonical runDirectoryが固定R/runs/<record.runId>と同一、正式/tmpの親がそのrunDirectoryそのものであることを確認する。directoryは作らない。path確認はfile metadataだけでありOS process照会ではない。未存在root、境界外、reparse、source/context不確定は書込0で失敗/Skippedとなる。
+5. 正式filenameは`first-failure-<role>-<actorPid>-<actorStartTicks>.json`、一時filenameはそれに`.tmp`を付けた固定1個である。roleは固定列挙、PID/ticksは整数のInvariantCulture十進文字列なのでpath部品へ任意入力が入らない。生成時刻やrandomをfilenameへ加えない。同runでPIDが再利用されてもgenerationを区別する。
+6. Serializeは1回、UTF-8変換1回、最大8192 bytes検査後にtmpをCreateNew/Write/FileShare.Noneで1回open、Write1回、Flush(true)1回、Disposeをfinallyで1回、同directory内Move(tmp,final,false)を1回行う。`Write-Json`のAssert-ControlとImmutable追加は再利用しない。既存final/tmp衝突は診断失敗として捕捉し、読戻し/削除/別名/retryなし。自分が残したtmpも証拠として保存する。Move完了後だけoutcome=Publishedである。
+7. 診断blockのcatchは診断の例外を外へ投げずoutcome=Failedとする。finallyでinProgress=falseおよび手順1のStatus/AbortTick/AbortUtcを復元する。最後は元と同じ`throw [InvalidOperationException]::new($Message)`である。serialize/path/write/flush/dispose/move/再入が失敗しても診断例外を元failureへ昇格しない。診断エラー文字列は別file/既存terminalへ出さない。
+8. 元main catch→finally→Complete-OwnedTree→Initialize-Cleanupのcancel公開→既存cleanup/terminalへ戻る。診断の時間は既存AbortTickからの時間として消費され、cleanup開始を遅らせた分だけ既存remainingが減る。新clock/budget/wait/worker/期限延長はない。before-cancelは「当該actorのfailureから元cleanupがcancelを試みる前」であり、他actorが先にcancelを公開しないという全体順序保証ではない。
+
+同期file I/OにはOS停滞を絶対wall時間内に中断する保証がない。bytes/操作数を限定してもこの制約は残るため、局所試験では返却後のelapsedと元throw/cleanup復帰を検証し、ハング耐性の実証とは称さない。file公開はatomic renameによる可視性であり電源断耐久性を保証しない。既存canonical helperのreparse再検査は検査とI/Oの間の外部同時変更を原子的に封鎖しない。このpacketは既存の信頼された合成root契約内であり、攻撃者とのpath競合対策やhandle-relative file APIを追加しない。
+
+Publishedの記録は正式fileの存在・schema/hash・actor/run/source一致によって独立に判定する。tmpのみはAttemptedUnpublished、正式/tmp両方なしはUnobservedであり、最終fileがないことからattempted=falseとは推測しない。internal outcomeは局所test seamで観測できるが、process消失後のFailed/Skippedの区別は永続証拠なしでは未取得である。全actorの最初の障害、元例外throw全経路、Initialize-Run途中の失敗を採取したとは称さない。
+
+### 既存抽出testとの互換性
+
+`Test-KnownHandle.ps1`は元Invoke-GateFailureをAST抽出するが新helper/prefixをloadしない。FFの追加任意parameter以外は従来の2引数契約を保ち、FirstFailureStateがない時はhelper呼出0/file write0で元Status/abort/InvalidOperationExceptionを維持する。Read-OwnedTree二箇所が追加引数を渡しても新Invokeのparameter bindingで受理する。既存test sourceへのhelper注入や期待変更は不要である。旧KH20/OS2の再実行の代わりに、後述T09でこの欠測scopeを1件確認し、AST抽出した関数・変換対象がそれ以外不変である静的逆diffを残す。既存KH consumerが新引数を受理できない場合はテスト期待を弱めずPreへ差し戻す。
+
+### ENV01専用probeの固定境界
+
+新probeのparameterは`NativeSourceSha256:string(64hex), NativeExeSha256:string(64hex), OutputRoot:absolute string, ValidateOnly:switch`のみとし、nativeの許可値は既存381F5E1D/FF7C9A0Fそのものに固定する。case selector/loop/variant/retry parameterは設けない。ValidateOnlyは実case dispatch0、fixture/build0で、元read-only preflightと抽出/固定hash一致のみを確認する。
+
+参照元は現`Invoke-ArgvPathFocusedSlash.ps1` SHA256 `72244CD533E6CE3DA1062D05C4A6F9EC5195FE63AAE40C2D7CC01AB7E0AEF3E0`である。旧9件入口もfocused10入口も起動しない。新probeは同じTest-CargoGate ASTからprefix、mainのboundary/repository initializer各1個、最初のNew-Itemより前の残18 statementを同じsource file名で抽出する。元caseRows hash=`CEF0406933398F433D2726F7EC4F1C4292A0CDF555B39AEA725ABB40920FF905`、80uniqueを維持し、そこからid=ENV01の1件が一意であることを検査する。Test本体とSet-CaseStimulusは改変しない。slash用adapter/guardはENV01に関係せず持ち込まない。
+
+| 入口の区間 | 再利用・変更禁止契約 |
+| --- | --- |
+| 前提 | 元boundary/repository/PSScriptRoot/GateScript/fakeContract、4config path snapshot、OutputRoot=R/verification直下の新UUID・全祖先非reparse・git ignored、Windows/pwsh7.6.6/AdminFalse/Pester5.7.1/rustc/pwsh/V2/固定native存在・native非稼働をそのまま使用。source-bound原文のstatement照合とfresh path検査を維持 |
+| fixture準備 | 元fake.rsを新suite内fake.exeへ元commandでbuild、toolchain/hashを保存。native再buildなし。Get-PinnedProcess/Get-ProcessIdentityで同じprobe controllerを同定し、同じ6field contextを生成する。旧suiteのfake/controller/Run再利用なし |
+| control2の分離 | 元Invoke-IdentityControlRegressionは独立2caseであり戻り値はENV01のcontextに渡されず、元producer/consumerの必要な型/identityを代替するものではない。新probeでは呼出0、旧control PASSを今回のPASSとして記録しない。元ENV01内のcontroller同定、registration、所有検証は省略しない |
+| dispatch | 新probe内の小private `Invoke-FirstFailureEnv01Case([IDictionary]Case,[hashtable]Context,[hashtable]FixedInputs)` に分離する。Case.idが厳密ENV01、variant fieldなし、原文row一致を確認後、固定入力照合→元Invoke-GateCaseを1回→固定入力照合→結果1個/id=ENV01/status=Passed確認。例外/複数/欠測はFailed。catch後return/throwのみで二回目callなし |
+| 元ENV01 | New-CaseFixture→Set-CaseStimulus/Set-CaseSynchronization→Publish-FixtureRun→RunOwner→元G0/fixture/full→Confirm-CaseResult→元finallyを原文のまま使用。Run65秒/build25秒、実行55秒＋cleanup10秒、元fixture watchdog90秒とfinallyの11秒等の回収上限も変更しない。元oracleのterminal/marker/environment/config/ownership判定をprobeで成功へ置換しない |
+| 結果 | 新suiteに`context-preflight.json,toolchain.json,frozen-inputs.json,first-failure-ENV01.json,result.json`を元Write-NewEvidenceで非上書き保存。`expectedCount=1, dispatchCount:int(0又は1), otherCaseDispatchCount=0, retryCount=0, focused10Credit=0, full80Credit=0, productFullCredit=0, sourceMatched:bool`を固定。入口拒否はdispatch0/ENV01 NotRun、元case例外はdispatch1/Failed、正常はdispatch1/Passed。診断有無は別fieldでUnobserved/AttemptedUnpublished/Publishedを報告する |
+
+ENV01の受入は元Confirm-CaseResultだけで足りるため`Test-ArgvPathEvidence.ps1`を追加起動しない。AP1/full native argv受入は元focused10の未了gateに残す。引数oracleを実行しないことをENV01期待の削除と混同しない。元Testのprefixには他caseの関数定義が含まれるが、その定義をloadしたことをdispatchに数えず、入口からの到達callは一意ENV01だけである。既存function内のORDER09再帰branchはENV01で未到達であることを静的にも確認する。
+
+新probeは使用する固定入力だけを束縛する：最終plan/design/Invoke、Test D8AD0AD4、fake3482075B、native source/EXE、probe自身、pwsh/V2/rustc、生成fake。前提の原文抽出は新Test-FirstFailureの静的oracleで独立に照合するため、旧focused driver/HANDOFF/Test-ContextPreflight/CONTEXT-TEST-HANDOFF-P1をruntime prerequisiteとしてloadしない。それらの旧hash再束縛は今回不要である。probe自身の最終hashは親の既存review/handoff記録で先に固定し、self hashの自動取得だけで承認済みとは扱わない。依存入力はcase前後でも照合する。
+
+### 有限18局所case・作者seam・command
+
+作者は`Test-FirstFailure.ps1`を作り、必須引数を`SourcePath, ExpectedSourceSha256(64hex), ProbePath, ExpectedProbeSha256(64hex), OutputRoot`とする。Phase/任意case指定は不要である。OutputRootはR/verification/argv-path01直下の新UUID、各case用隔離directoryはその内側だけ。testはproduction scriptのmainを起動せずASTで元Invoke、projector/writer、probeの固定dispatch関数を抽出し、抽出件数/source hash/本文逆照合を先に検査する。旧35AEでは新helper欠測をadapter失敗やbehavior REDとしない。別のbaseline modeを公開せず、source hashが35AEの時はT01だけ元2引数Invokeにfixture stateを置いて実行し、「元throwは到達・正式sidecarなし」を意図した唯一のREDとする。他17件はNotApplicableであり旧sourceの18件PASSを要求しない。
+
+新sourceは下表18件を各1回、retry0、case5秒/全体60秒の早いmonotonic上限で行う。test自身の既存方式Stopwatchによる前後監視だけでありproduction時計の追加ではない。想定外adapter/fixture/timeout失敗は残NotRunとして止める。各Tの中で明示した二回呼出/再入以外は各1回。実CIM/process launch/Kill/Wait/registry/network/admin操作は全0、実file公開はT01/T02/T03/T07/T08の隔離fileのみで、fixture準備/結果fileは別counterにする。
+
+| ID | 固定入力とoracle |
+| --- | --- |
+| T01 / FF1–3 | common catch由来の合成Unprovable＋12field観測。新では正しいcallsite/actor/run/sourceを含む正式1個、tmp0、試行1。旧35AEは正式0のbehavior RED。元InvalidOperationException/MessageとStatus保持、abort設定→診断→元throw→testのcleanup markerの順序 |
+| T02 / FF1–3 | parent edge由来candidate identity、osObservationなし。正式1個、candidateはpid/startのみ、osObservation=null。T01と分類が異なる。二つの実callerが最後のUnprovableを渡すASTも照合 |
+| T03 / FF2 | 同scopeで第一/第二の異なるCallsiteを2回Invoke。公開1、attempt1、file bytesは最初のまま。第二Statusの元動作は保持、AbortTick/Utcは最初のまま |
+| T04 / FF2 | writer seamから一度だけ再入Invokeし、内側例外をwriter外へ伝播。outer元Message/Status/abortを保持、attempt1/再帰writer0/cleanup marker1。file0 |
+| T05 / FF2 | ConvertTo-Jsonのtest-scope代用が固定例外をthrow。open0、Failed、元throw/cleanup marker保持。serializer failureを保存成功に数えない |
+| T06 / FF2 | writer seamが固定IOExceptionをthrow。Failed、retry0、元throw/cleanup marker保持。実ACL/ディスク障害は作らない |
+| T07 / FF2 | 正式名に合成sentinel bytesを先置き。Moveの非上書き失敗、sentinel不変、retry0、tmpは未公開として保持、元throw保持 |
+| T08 / FF2 | tmp名に合成sentinelを先置き。CreateNew失敗、sentinel不変、正式0、別名0、元throw保持 |
+| T09 / FF2/互換 | 新state/helperなしのStrictMode抽出scope。元2引数と元clockを使いStatus/abort/例外を確認、helper/file呼出0。新Invoke単体が既存Known testの依存で動く証拠 |
+| T10 / FF3 | context runDirectoryを新隔離root内の別UUID directoryへずらす。runIdとの不一致で書込0、元throw保持。外部pathへの試験writeは禁止 |
+| T11 / FF3 | 実Get-CanonicalPathのreparse拒否相当を同signatureの代用でthrow。writer open0、元throw保持。junction/symlinkを作らず、reparse branchが未変更である静的原文照合と区別して記録 |
+| T12 / FF3 | 合成入力にFullRun/Known/env/credential/rawcmd/error/配列と長大なexceptionType257文字を追加。writerをmemory捕捉にし余分key0/過長type=null、許可bool/null維持、depth/bytes上限確認 |
+| T13 / FF3 | osObservationのpid='7', count=-1, pathPresent='false', exceptionLine=0, creationUtc='bad'、他field=null。memory recordで全てnull、coercion0。異常値が元failureへ昇格しない |
+| T14 / FF1–3 | 未変更callerの2引数、valid context。memory record分類GateFailure.Other、FailureObservation=null、元Messageは記録しない |
+| T15 / FF4 | 抽出したprobe dispatch＋元ENV01 row、Invoke-GateCase代用がPassed1個。ENV01 call1/他0/retry0、credit全0。case/contextを代用がcaptureし元row/fixture contract不変を照合 |
+| T16 / FF4 | 同dispatchで元case代用が固定例外。ENV01 call1/他0/retry0/Failed、次caseへ進まない、credit全0 |
+| T17 / FF4 | 同dispatchの固定入力不一致。Invoke-GateCase0/NotRun、fixture launch0/credit全0。元preflight18 statementとcontext initializer2個・80row原文照合は静的確認 |
+| T18 / FF3 | stateありcontext=null（Initialize-Run未確定相当）。attempted=true/Skipped、projector/writer0、元throw/cleanup marker保持。context生成がcfg=fixture/source確定後だけであることを静的確認 |
+
+実file caseのRunDirectory境界だけはAST adapterでtestの新UUID rootへ置換し、置換箇所・定数・逆置換本文一致を記録する。productionにtest用root override parameterは追加しない。T04/T06はprivate writerだけを同signatureで代用、T05はserializerだけ、T11はcanonical helperだけを代用する。他のfile caseは元writerのCreateNew/Flush/Moveを実際に使う。T12–14はwriterをmemory captureに代用する。代用の成功を実OS/file保存成功と混同しない。Read-OwnedTree/cleanup本文の制御は変更しないため元cleanupそのものを局所caseで起動せず、元throw後にtest catch/finallyのmarkerへ戻る事実と、main/cleanupの逆diff不変を接合する。
+
+T01–18に加える静的確認は1組だけ：3対象ps1のParser0/PSSA1.25.0診断0かつ実行error0、Invoke差分が許可境界だけ、旧Test/fake/native/focused/contextのhash不変、fixed分類2箇所/既存2引数の成立、writerにAssert-Control/Write-Json/OS照会/新clock/retryなし、probeにcontrol2/argv oracle/他case呼出/loopなし、原文context抽出・元ENV01 oracle/期限不変、source-before-after束縛とcredit0である。AST禁止call照合は新追加区間と新probe到達経路を対象にし、source-boundでloadする未到達関数定義を誤って実行扱いしない。
+
+commandは下記で固定する。`$old35ae/$newInvoke/$newSha/$probeSha/$freshOld/$freshNew/$freshSuite`は親が保存旧bytes・承認済み凍結hash・新UUIDの絶対pathを渡す。現物hashをその場で採番して承認の代用にしない。
+
+```powershell
+& 'F:/Program Files/PowerShell/7/pwsh.exe' -NoLogo -NoProfile -NonInteractive -File "$r/verification/argv-path01/Test-FirstFailure.ps1" -SourcePath $old35ae -ExpectedSourceSha256 '35AE6C713ABCEAA28361DA750E7BD06F373E09EF2FB155D8456F79D83ADC66B5' -ProbePath $probe -ExpectedProbeSha256 $probeSha -OutputRoot $freshOld
+& 'F:/Program Files/PowerShell/7/pwsh.exe' -NoLogo -NoProfile -NonInteractive -File "$r/verification/argv-path01/Test-FirstFailure.ps1" -SourcePath $newInvoke -ExpectedSourceSha256 $newSha -ProbePath $probe -ExpectedProbeSha256 $probeSha -OutputRoot $freshNew
+& 'F:/Program Files/PowerShell/7/pwsh.exe' -NoLogo -NoProfile -NonInteractive -File "$r/verification/argv-path01/Invoke-FirstFailureEnv01.ps1" -NativeSourceSha256 '381F5E1DCD70ED8040153FB155C8AABA0881FBFB57A8074B286FB4169D8683DD' -NativeExeSha256 'FF7C9A0F641F66F7C340AEC94C21EA9A0C745EA5A39C35B252C3A9CBDAFCCB88' -OutputRoot $freshSuite -ValidateOnly
+# FF-C PASS後、独立runnerが同じ確定probeを一度だけ実行する。
+& 'F:/Program Files/PowerShell/7/pwsh.exe' -NoLogo -NoProfile -NonInteractive -File "$r/verification/argv-path01/Invoke-FirstFailureEnv01.ps1" -NativeSourceSha256 '381F5E1DCD70ED8040153FB155C8AABA0881FBFB57A8074B286FB4169D8683DD' -NativeExeSha256 'FF7C9A0F641F66F7C340AEC94C21EA9A0C745EA5A39C35B252C3A9CBDAFCCB88' -OutputRoot $freshSuite
+```
+
+旧T01 REDは作者1回、新18GREENは実装後に作者1回、静的接合/ValidateOnlyは確定組で1回とし、runnerは18件やKH20/OS2/control2を重ねず承認ENV01だけ1回実測する。test先行時点で新probe未作成なら作者は独立期待/AST adapterを先に凍結し、probe候補生成後に旧REDと新GREENを順に実行する。mock-only probeで本物の入口検証を代替しない。実装/束縛差戻しがあれば影響caseだけ再検証するが、ENV01の再実行権限は追加されない。
+
+### 凍結・handoff・残るリスク
+
+FF-Aの完了は本設計と文書diff/参照確認、独立Preへの提出までである。Pre→plannerのFF-A精緻化→独立作者の18oracle固定→別実装者のInvoke＋新probe→作者局所RED/GREEN→最終入力束縛/独立FF-C接合→runner ENV01一回→独立Postの順とする。plan/designの履歴SHAは互いに更新し続けず、最終SHAを親の既存review/handoffへ返す。実装者はprefix/Invoke/初期化の診断block/二caller/private helperだけを編集し、作者は独立testだけを編集する。予定外の安全契約・型・時計変更が必要なら親へ返し、実装で仕様を決めない。
+
+新sidecarは診断証拠であり、terminal成功や未知候補0、cleanup成功を推定する入力ではない。正常ENV01でfailure未発生なら診断公開経路のOS実測はUnobservedのままである。局所T01/T02のfile公開証拠は別に報告する。新診断で初因候補が得られても旧35AEの過去原因を確定したとは扱わず、原因修正・追加再現を始めない。同期I/O停滞、path再検査とI/Oの競合、process終了でinternal outcomeが失われることは既述の限界であり、新worker/新log framework/監督再設計で解決しない。
+
+設計着手時の既存変更はdelivery-review、plan、usage観測、tasks/currentの4文書であり、本節以外は編集しない。開始/終了token、週枠、実model metadata、親子包含はこの子では未取得であり、親の計測へ委ねる。実装・test作成/実行・process起動・再委譲・公開は0。設計のみの変更なので製品cargo test/buildは非該当である。

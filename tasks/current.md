@@ -6,7 +6,7 @@ ET3の別配置試用EXE提供を継続中である。PTH-MONO-01は最終Post P
 
 ARGV-PATH01のnative381F／EXEFF7CとCXT-D12PASS/独立受入は維持する。KH-REOPEN-01はInvoke35AE/testKnown0C82/contextF46/P1handoff4A74/driver72244/HANDOFF331Fで独立OS2/Pure20全PASS、focused a59b49c6はcontrol2PASS／ENV01FAIL／9NotRun。run4de297d1のSupervisor37636がCleanupIncomplete cancelを公開したが正式terminal/tmp欠落で詳細初因を特定できず、共通catch1356／親edge1397の候補に留まる。別観測者のunknown0や別時点registrationで補完しない。利用者が新診断記録追加＋合成正常系ENV01 1件1回を明示承認し、FIRST-FAILURE01の限定計画を既存plannerへ依頼中。元schema/安全判定/期限/unknown不変、cancel前firstFailureの一度保存・保存失敗が元failureを置換しない契約と診断専用1件入口を設計Preで固定する。新実装/追試0、主KH/ARGV/80/full/試用提供未了、AST01/CXT-D/PTHの限定PASS・旧結果は保全。
 
-FIRST-FAILURE01の暫定計画6B84を受領し、designer `first_failure_design`（指定Astra/high）へ既存設計への限定追補を依頼した。独立Pre・計画精緻化前の実装/実測は0。正常ENV01は専用入口で1件1回だけとし、失敗時は得られた診断を返して止める。
+FIRST-FAILURE01はdesign56F1の独立Pre PASS／確定指摘0、planner精緻化plan0CC4を受領した。独立作者 `first_failure_tests`（指定Astra/high）が局所18期待を先に固定中。実装はInvokeの診断境界と新probeだけ、旧context/focused再束縛なし。新実装/実測は0。正常ENV01は専用入口で1件1回だけとし、失敗時は得られた診断を返して止める。
 
 正本は[計画](ACOUSTIC-HISTORY-001/early-trial-gate-plan.md)・[設計](ACOUSTIC-HISTORY-001/early-trial-gate-design.md)・[レビュー](ACOUSTIC-HISTORY-001/early-trial-delivery-review.md)・[runner](ACOUSTIC-HISTORY-001/early-trial-delivery-runner.md)・[使用量](ACOUSTIC-HISTORY-001/usage-observation-20261014-et3.md)。checkpoint fb96a18までpush済み、通常release不変。今回再開の共有週枠は40→54%でアカウント共通、task専有量や親子token合計は不明である。
 

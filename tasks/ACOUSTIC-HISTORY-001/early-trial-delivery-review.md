@@ -4,6 +4,8 @@
 
 ### CXT-E focused実動作：ENV01停止・保存証拠の診断中
 
+FIRST-FAILURE01 FF-A設計は56F1DB79EEF0F12B8D669DDCF4A927E97ECFFAD5C098A0A13BA1DDEE6FE9280D（既存design574〜126行追加）。独立`first_failure_pre`（指定Astra/high）はPre PASS／確定指摘0。実物Invoke35AEの初期化/元throw/二caller/cleanupと、元focused/Testの前提・ENV01・oracleを照合し、fixture昇格後context、一回保存、abort先行、whitelist8192bytes、欠測state互換、ENV01だけの入口を支持した。同期I/O停止とpath検査後競合は保証外と明記。設計Preは局所18件/実file保存/実装/ENV01の成功を意味しない。planner精緻化plan0CC4B319BE7F48DC78BBB79EDE857C11C0A7C4321C0450C850AB3DC3348BFB9Fを受領し、独立作者へ18期待の先行固定だけを依頼した。旧context/focusedは今回再束縛しない。新実装/実測はまだ0。
+
 新runの独立診断ではSupervisorのCleanupIncomplete初因を1356 commoncatch／1397 run-bound parent edgeの候補まで絞れたが、保存例外/Unprovable/osObservationがなく区別不能。別時点registrationや他観測者のunknown0から推定しない。既存failureBoundary/terminalでは元初因を保存できず、cancel前firstFailureの専用sidecarが必要と判断した。利用者はこの診断追加と合成正常系1件1回を明示承認した。新Packet FIRST-FAILURE01の計画を既存plannerへ依頼し、元schema/安全判定/期限/unknown・実data/API/OS設定不変、診断保存失敗が元failure/cleanupを置換しない契約をPreで固定する。現focused10をそのまま正常1件承認へ流用せず、診断専用入口に10/80/full creditを与えない。
 
 KH-D独立OS2は2PASS/exit0/0.5952944秒、Pure20は20PASS/exit0/0.4744072秒。その後focused新suite a59b49c6-ffca-4f78-8436-6b46b57d1d7cはcontrol2PASS／ENV01FAIL／9NotRun、child/shell exit1／15.7376213秒／retry0、sourceMatched=true、argvEvidence空。run4de297d1-d99e-4d5e-9a9a-8f74a034bca1ではSupervisor37636がCleanupIncomplete cancelを21:35:48.8079204Zに公開したが、Supervisor正式terminal/tmpがなく詳細errorは未取得。RunOwner12488はCancelled、Owned12全waited/hasExitedtrue・unknown0・fixtureResiduals[]、Runner/Safety正式もCancelled（Safety unknown0）。target23060はG0list用局所結果でありfull/AP1成功とはしない。独立read-only診断へ返し、過去KH再open競合の除去と新cancel初因を推測で同一視しない。

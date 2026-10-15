@@ -324,11 +324,13 @@ designerはapi-and-interface-design、作者はtest-driven-development、実装/
 
 今回の開始共有週枠は親受領40%、途中の親受領review終了値41%でありplanner単独の終了測定ではない。子`/root/known_handle_race_plan`の開始/終了token、固有session ID、provider返却model/effort、親子包含、終了週枠は未取得。使用差分/改善率は推定しない。本plannerは文書追補・diff/hash/相対link/所有検査のみ、実装/試験起動/再委譲/公開0である。
 
-## FIRST-FAILURE01 PacketBrief（2026-10-16、暫定計画・設計前）
+## FIRST-FAILURE01 PacketBrief（2026-10-16、FF-A設計/Pre受領・限定確定）
 
 対応findingは`OBS-FIRST-01`（監督processの初因診断欠測）とする。親受領の利用者承認は「中断前のエラー専用診断を検証用プログラムへ追加し、合成正常系ENV01を1件1回」である。既存安全判定/時間上限、非管理者、OS設定/実data/API不変を維持する。今回の完了境界は限定診断の実装・局所pure/file検証・独立接合reviewと、承認されたENV01一回の結果/診断を親へ返すところまでである。ENV01が再び失敗した場合は保存証拠を返して止め、原因是正や再実行を自動追加しない。
 
 主目的はKH-D/CXT-E/ARGVを通してET3提供へ進むことであり、本packetはそのための観測不足の是正だけである。診断が得られたこと、probeの正常終了、ENV01の1件PASSのいずれもfocused10/標準80/87variant/製品full/提供完了ではない。probeの10/80/full creditは常に0とする。FIRST-FAILURE01の観測機構受入と主KH-D focused受入を分ける。正常時にfailureが発生しなければ実sidecar公開経路のOS実証は未観測と記録し、局所file検証と混同しない。
+
+受領設計は[既存design FIRST-FAILURE01節（574行以降）](early-trial-gate-design.md)、SHA256 `56F1DB79EEF0F12B8D669DDCF4A927E97ECFFAD5C098A0A13BA1DDEE6FE9280D`である。親からfresh独立Pre PASS／blocker0を受領した。HEAD4cb270f、Invoke35AE・元context/ENV01との接合を確認した同Preに基づき、方式・型・固定18case・commandを同設計の唯一の正本として本節を限定確定する。設計内の入力plan6B84は履歴のまま保持し、新plan hashへの循環更新はしない。実装/試験/ENV01は未実施である。
 
 ### 入力証拠・維持する成果
 
@@ -336,50 +338,54 @@ designerはapi-and-interface-design、作者はtest-driven-development、実装/
 
 入力Invokeは`35AE6C713ABCEAA28361DA750E7BD06F373E09EF2FB155D8456F79D83ADC66B5`、probe参照元の現focused driverは`72244CD533E6CE3DA1062D05C4A6F9EC5195FE63AAE40C2D7CC01AB7E0AEF3E0`、context testはF46F3B09、Known testは0C82D1C8である。旧plan80B2/designAF67とこれらの結果を保存する。KHの独立OS2/Pure20PASS・static PASS、CXT-D、PTH-MONO、KH-TEST-AST01-P1/P2 Closedを保持し、35AEの所有判定を推測で再修正しない。旧failureBoundaryはReady/Payload/Request等の既存terminal診断であり、新しい初因観測の保存先として流用しない。
 
-### 要求・除外・設計で確定する契約
+### 要求・除外・確定契約
 
 | ID | 観測可能な受入・不変条件 |
 | --- | --- |
-| FF1 初因保存 | 各actorが最初にInvoke-GateFailureへ到達した際、cancel公開より前に、既に確定している合成run/role/actor identity/sourceへ束縛した専用sidecarの公開を一度だけ試みる。固定callsite分類によりcommoncatchとrun-bound-parent-edgeを区別でき、元の該当Unprovable/既存Get-IdentityFailureObservationの最小fieldを結び付ける。全processの最初の事象や成功terminalとは称さない |
+| FF1 初因保存 | 各actorが最初にInvoke-GateFailureへ到達した際、当該actorの元cleanupがcancel公開を試みる前に、既に確定している合成run/role/actor identity/sourceへ束縛した専用sidecarの公開を一度だけ試みる。固定callsite分類によりcommoncatchとrun-bound-parent-edgeを区別でき、元の該当Unprovable/既存Get-IdentityFailureObservationの最小fieldを結び付ける。他actorの先行cancelを排除する順序保証や、全processの最初の事象・成功terminalとは称さない |
 | FF2 非干渉 | 元Status/AbortTick/AbortUtc、元例外・cancel・cleanup・期限・unknownの判定と経路を維持する。保存失敗/衝突/欠測/再入が元failureを置換・握潰し・遅延再試行せず、元cleanupへ進む。試行済み/公開済み/未観測を区別し、tmpを正式公開へ加算しない |
 | FF3 安全な最小情報 | 出力先は既に検証済みの合成Run証拠rootと固定filename規則だけ。context/role/identity/source未確定、path不正/境界外/reparseでは書かず元failureを維持する。既存値の明示whitelistだけを保存し、FullRun/全Known一覧/環境変数/資格情報/生commandline/教材/実ユーザー情報/例外全文をdumpしない |
 | FF4 実測の限定 | 専用probeは既存正常ENV01のfixture・安全context・case期待を保持し、実case dispatchはENV01だけ1回、成功/失敗とも次case0・retry0。元caseのtimeout/cancel/cleanup/terminal oracleを変えず、probe成功を10/80/full creditへ変換しない |
 
-最小候補はInvoke-GateFailure内の一回限定診断hook、必要最小のcaller情報伝達、同fileの小診断helperである。callerは既に作った該当Unprovable/観測を渡し、追加OS照会・process状態再取得・新しい所有証明は行わない。既存status/messageは静的に定義された呼出情報へ限定して記録し、例外は型/識別子/行番号など必要なwhitelistへ射影する。message/identityの具体field・型・長さ/件数上限・source同定根拠・filename・atomic公開/重複時動作はdesignerが既存designへ確定する。行番号だけで分岐を同定せず、source hashと固定callsite分類を組にする。
+確定方式はprefixのFirstFailureState、Initialize-Run昇格完了後の合成fixture/source確定context射影、Invoke-GateFailureの一回限定hook、Read-OwnedTree二callerの末尾任意引数、New-FirstFailureRecord/Write-FirstFailureRecordの2private helperである。本体所有をこの境界だけに固定し、元main catch/finally/Initialize-Cleanup/Write-Terminal/所有判定を変更しない。元2引数Status/Messageを維持し、追加Callsite/FailureObservationは診断専用とする。callerは作成済みUnprovableの該当1件を渡し、再観測・全Known列挙をしない。
 
-現物Invoke-GateFailure97〜はStatus/最初のabort時計を設定してthrowする。既存Write-Json191〜は公開前にAssert-Controlを呼ぶため、診断から無条件に再利用してfailureへ再入する構成は不可である。designerは最初のabort時計を診断より先に固定し、一回の試行印を外部I/O/再入可能処理より先に確定する。局所保存例外を捕捉して元throwを継続し、元failureと診断失敗の優先順位を保持する。新clock/予算/待機/retry/workerを加えず、既存deadlineを延長しない。同期file I/Oを無条件に壁時計内で中断できるとは主張せず、有限bytes/回数・経過時間/欠測と元cleanupへの復帰を検証する。
+保存は設計のscalar whitelist/型/長さ制約だけであり、Message/error/例外全文は記録しない。分類はOwnedTree.IdentityCatch、OwnedTree.RunBoundParentEdge、GateFailure.Otherの固定3値とsource hashで接合する。depth5/配列0/UTF-8 no BOM最大8192 bytes、正式名first-failure-<role>-<actorPid>-<actorStartTicks>.jsonと固定.tmp、CreateNew/Flush/非上書きMove各1回に限定する。具体schemaとhelper signatureは受領設計のprivate interfaceを参照し、本planへ重複定義しない。
+
+Invoke-GateFailureは元Status/最初のabort時計設定→一回のattempted印→診断→元Status/AbortTick/AbortUtc復元→元throwの順序とする。state/helperなし抽出scopeではhelper/write0、context未確定ではSkippedを保つ。診断writerからWrite-Json/Assert-Controlを呼ばず、例外を診断block内で処理して元failureを継続する。新clock/予算/待機/retry/workerを加えず、診断時間も元abortからの予算を消費する。同期I/Oの強制中断、canonical確認とI/O間の外部path競合封鎖は保証しない。process消失後のFailed/Skippedは永続証拠なしなら未取得であり、tmp/正式fileなしをattempted=falseへ補完しない。
 
 診断は外部挙動の安全契約を変更しない内部観測であり、新外部仕様書は非該当である。元JSON schema/status/cancel/FailureBoundary/承認形式・期待値は不変、新sidecarは診断専用で本体判定の入力にしない。汎用logging framework、監督再設計、Job、kill権限、global/OS設定、依存package、認証/API、製品source/Cargo/native/fake修正は除外する。副作用を避けるため診断を非同期化する別processの追加も行わない。
 
 ### ENV01専用probeと再束縛
 
-現在のfocused driverはENV01成功後に残9caseへ進むため、承認された正常1件を実行する入口には使えない。期待count10を1へ変更したり、実行中に外側から強制停止したり、full/10の合格条件を削る案も採らない。新probe `R/verification/argv-path01/Invoke-FirstFailureEnv01.ps1` 1本を上限とし、既存source-bound context初期化/前提とTest-CargoGateの元ENV01/Invoke-GateCase/ConfirmCaseResultを再利用する最小入口をdesignerが評価する。検証済みcontextの契約を再設計せず、元producer/consumerと原文対応を静的に示す。任意case指定、汎用filter、loop継続、他case集合の実行を公開しない。
+現在のfocused driverはENV01成功後に残9caseへ進むため起動しない。新probe `R/verification/argv-path01/Invoke-FirstFailureEnv01.ps1` 1本に固定する。parameterはNativeSourceSha256/NativeExeSha256/OutputRoot/ValidateOnlyだけ、nativeは既存381F/FF7Cの固定組である。元Testのprefix・boundary/repository各1個・前提18文をsource-boundで再利用し、元80unique/caseRows hashを保ったままENV01一意/variantなしを確認する。小private Invoke-FirstFailureEnv01Caseに元Invoke-GateCase一回を限定し、元ConfirmCaseResult/fixture/期限を変更しない。case selector/loop/retry/別variantは設けない。ValidateOnlyは元read-only前提/抽出/hash確認だけでfixture/build/dispatch0とする。
 
-ENV01自身が必要とする合成G0/RunOwner/fixture起動は元caseの一部として維持する。別caseであるcontrol2、KH OS2/Pure20、focused残9、標準80やOS障害刺激はこの一回の実測へ自動追加しない。通常入口の前提検査とcontrol2 regressionを区別し、安全なENV01実行に不可欠な前提を満たせないならPreで具体的不足を返す。旧control2PASSを新環境の実測へ読み替えたり、安全前提を削って1件へ収めたりしない。正常ENV01一回で再発しなければ診断目的の再現試行を足さない。
+ENV01自身が必要とする合成G0/RunOwner/fixture起動・controller同定・registration/所有検証は元caseの一部として維持する。control2は独立regressionでありENV01 contextへ戻り値を渡さないため、受領設計/Preに従い呼出0とする。旧PASSを新環境へ換算せず、通常の安全前提は省略しない。KH OS2/Pure20、focused残9、標準80、OS障害刺激も追加起動0。ENV01一回で再発しなければ診断目的の再現試行を足さない。
 
-新probe所有は実装者、独立oracle所有は作者で分離する。probeは新規`R/verification/<UUID>`直下suiteと元の`R/runs/<UUID>`を使い、診断資料folderと実行suiteを混同しない。既存fixture/source/marker/sidecar/payload/期限consumerは改変しない。case選択・dispatch数・success/failure後の追加起動0・記録のcredit0をpure/file対照で先に確認する。既存argv oracleがread-onlyでENV01結果確認に必要ならdesignerが呼出範囲を固定し、新しい実caseを追加しない。
+新probe所有は実装者、独立oracle所有は作者で分離する。probeは新規`R/verification/<UUID>`直下suiteと元の`R/runs/<UUID>`を使い、診断資料folderと実行suiteを混同しない。既存fixture/source/marker/sidecar/payload/期限consumerは改変しない。ENV01判定は元ConfirmCaseResultで足りるためargv oracleは追加起動しない。AP1は後続focused10に残す。expectedCount1/dispatchCount0又は1/otherCase0/retry0/credit全0を固定し、case判定と診断Published/AttemptedUnpublished/Unobservedは別記する。
 
 本plan追補と後続design更新で、旧driver722/contextF46の固定plan/design hashは不一致になる。旧frozen-inputs/Run/承認/handoff/結果は旧snapshotの証拠として保存し、hash無視で起動しない。凍結順は確定plan/design→診断Invoke→局所test/新probe入力→probeの固定hashと親の既存review/handoff記録→新suite/Runである。probeが直接消費するものだけを再束縛し、旧focused10入口を使わないためだけの無関係な束縛更新は行わない。
 
-probeがcontext test/handoffを固定前提として消費する必要がある場合だけ、作者がその入力hash/既存handoffの新snapshot説明を先に更新し、別実装者が新probeの束縛を後から更新する。期待/consumer本文は変更不可。focused driver/HANDOFFの再束縛は後続focused10へ戻る時の別gateに残し、今回の1件probeのために10件を解除しない。plan/design内の入力hashは履歴であり相互に更新し続けず、最終hashは親の既存報告へ返す。旧bytesの非上書き保存と最終diff/hash対応を必須とする。
+今回のprobe固定入力は最終plan/design/Invoke、元Test D8AD/fake3482/native source381F/EXE FF7C、probe自身、pwsh/V2/rustcと生成fakeだけである。旧focused driver/HANDOFF/context test/P1handoffはruntime前提としてloadせず、再束縛/編集しない。必要な原文対応は新testの静的oracleで確認する。probe自身の承認hashは親の既存review/handoffで固定し、現物の自動hash採番を承認代用にしない。focused10へ戻る時の再束縛は別gateのまま、plan/designの履歴hashは循環更新せず最終値を親へ返す。
 
 ### 有限作業リスト・所有・verification
 
 | 単位 | 依存・所有・規模 | 受入と検証 |
 | --- | --- | --- |
-| FF-A 限定設計/Pre | 本計画の親受領。S、既存early-trial-gate-design.mdのFIRST-FAILURE01節だけ | FF1–4の型/失敗/保存root/一回性/期限/情報whitelist/ENV01入口/局所oracleの固定件数・commandを確定し独立Pre PASS。plannerが受領して本節を精緻化する。ここまで実装/追試禁止 |
-| FF-B 独立oracle→診断/probe実装 | A/精緻化受領後。M、作者は同packet内Test-FirstFailure.ps1と新規隔離fixture、別実装者はInvoke-GateFailure＋最小caller伝達/helperおよび新probeの2本だけ | 作者が有限pure/file期待と旧欠測証拠を先に固定→実装→同oracleのGREEN。元failure/state/期限/期待不変、source差分/非所有逆diff、Parser/PSSA1.25.0診断・実行error0、静的起動数上限を照合 |
-| FF-C 凍結/独立接合 | B後。S、必要時だけ作者のcontext束縛、別実装者のprobe束縛を逐次所有。親が既存報告へ保存 | 旧証拠保全、source/plan/design/test/probeの同じ組、whitelistとpath境界、元error保持・再入/保存失敗時の非干渉、ENV01だけの固定入口を独立review。旧成功consumer検証を意味的不変の範囲で再利用し、無関係な再実行なし |
+| FF-A 限定設計/Pre | S、既存designのFIRST-FAILURE01節だけ | design56F1・fresh独立Pre PASSを受領し、plannerが本節を限定確定。方式/型/whitelist/固定18case/commandの未決を解消。FF-A完了でありB–D未実施 |
+| FF-B 独立oracle→診断/probe実装 | A/本精緻化の親受領後。M、作者は同packet内Test-FirstFailure.ps1と新規隔離fixture、別実装者はInvokeの確定診断境界＋新probeの2本だけ | 作者18期待/adapter先行凍結→別実装者Invoke/probe→作者旧T01 RED/17NotApplicable→新18GREEN各1回。元failure/state/期限/期待不変、source差分/非所有逆diff、3ps1のParser/PSSA1.25.0診断・実行error0を照合 |
+| FF-C 凍結/独立接合 | B後。S、実装者の新probe入力束縛のみ。親が既存報告へ保存。旧context/focusedの編集なし | 確定組の静的接合/ValidateOnlyを1回、旧証拠保全、whitelist/path境界、元error保持・再入/保存失敗非干渉、ENV01限定入口を独立review。旧成功consumerは静的不変/T09互換へ接合し、無関係な再実行なし |
 | FF-D 合成ENV01一回/返却 | C PASS・親の明示dispatch。S、runnerは新隔離結果/logだけ、reviewer read-only | 新probeでENV01 1件1回・retry0・元期限のまま実行、case結果とsidecar/欠測・sourceMatched・terminal/cleanupを別記。新診断保存の成否とENV01判定を独立Postで区分し親へ返す。失敗の再試行/推測patch/後続case起動は禁止 |
 
-- [ ] FF-A：限定設計・独立Pre後に本暫定計画を精緻化する。
+- [x] FF-A：design56F1・独立Pre PASSを受領し、方式/所有/有限18case/専用入口/束縛を限定確定した。
 - [ ] FF-B：独立oracleを固定し、診断と1件専用probeだけを実装・局所検証する。
 - [ ] FF-C：最小束縛・旧証拠保全・独立接合PASSを受領する。
 - [ ] FF-D：ENV01一回の結果と診断範囲を独立確認して返し、本単位と主gateの残項目を区分する。
 
-局所pure/file oracleは次の最小分類を固定し、多数のOS障害試験へ広げない。(1)既存2callsiteの作成済み観測を与えると異なる分類/正しいactor/sourceとなり、診断試行→元throw→cancel/cleanupの順序を壊さない。(2)二回到達/再入/既存sidecar衝突でも最初の内容を上書きせず、試行回数が上限を超えない。(3)write/serialize失敗・context未確定・不正rootでも元Status/abort時計/例外とcleanup呼出を保持し、境界外write0。(4)余分な危険fieldを合成入力へ置いてもwhitelist以外を保存せず、nullを0等へ補完しない。(5)probeのENV01成功/失敗/入口拒否を代用し、実dispatch上限1・他case0・credit0と元fixture/期待不変を確認する。具体件数と局所時間上限はFF-Aで固定し、case再現に依存する反復をしない。
+局所oracleは設計T01–18の18件、各5秒/全60秒の早いmonotonic上限、各1回/retry0/想定外失敗で残NotRunへ固定する。実CIM/process launch/Kill/Wait/registry/network/admin操作は全0。実fileはT01/02/03/07/08の隔離公開だけで、fixture/結果fileを別counterとする。T04/05/06/11/12–14等のprivate代用、T09のstate/helperなし互換、T15–17の本物probe抽出dispatch、T18の未確定contextを設計どおり分離する。元cleanup自体は起動せず、元throwからtest catch/finally markerへの復帰とmain/cleanup逆diff不変を接合する。markerを実cleanup成功と呼ばない。
 
-現35AEでの専用観測欠測は保存証拠として残し、新機能のREDは局所境界で作る。起動/AST/adapter不適合を目的診断REDへ換算しない。file公開を実隔離pathで検証した証拠と、counter/代用で元failure継続を確認した証拠を区別する。保存不能を安全に扱えたことを診断保存成功とは呼ばない。正常一回で新初因が採れた場合はそれを新しい原因調査入力とし、35AEの過去原因へ遡って適用しない。
+Test-FirstFailureの必須interfaceはSourcePath/ExpectedSourceSha256/ProbePath/ExpectedProbeSha256/OutputRoot、Phase/任意case指定なし。局所OutputRootはpacket直下の新UUID、実probeはverification直下の新UUIDである。実行commandは受領設計の「有限18局所case・作者seam・command」に固定し、親が保存旧35AE/新source・承認hash・probe hash/新UUID絶対pathを渡す。作者は旧sourceにT01のみを実行し、元throw到達・sidecar欠測を唯一のRED、他17件をNotApplicableとする。旧helper欠測/抽出不能をREDへ算入しない。新sourceは18/18GREENを必要とする。
+
+作者はprobe未作成の段階で独立18期待/AST adapterを先に凍結し、実probe候補生成後に旧RED→新GREENを各1回行う。mock-only probeで本物入口を代替しない。確定組の静的接合/ValidateOnly後、runnerは18件/KH20/OS2/control2を繰り返さずENV01だけ一回とする。実装差戻し時の影響case再検証はENV01再実行の許可ではない。保存不能を安全に扱えたことを診断保存成功と呼ばず、正常一回で得た新診断を35AEの過去原因へ遡及適用しない。
 
 ### 7役のexact割当・リスク・次handoff
 
@@ -390,7 +396,7 @@ probeがcontext test/handoffを固定前提として消費する必要がある�
 | planner | `gpt-6-astra` / `high` | A後精緻化/B–D境界・差戻し、本plan新節だけ。高/高、診断受入と主gate/承認回数の分離が必要 |
 | external-spec author | `gpt-6-astra` / `high` | A–D新規執筆非該当。利用者承認済み内部診断で元外部契約不変。安全判定/期限/承認の変更が必要ならこの固定役へ戻し、現packetでは進めない |
 | designer | `gpt-6-astra` / `high` | A設計、B/C逸脱時差戻し、D新設計非該当。高/高、failure再入・保存失敗・actor束縛と専用入口を一意化するため |
-| test author | `gpt-6-astra` / `high` | Bの独立pure/file oracle、C必要最小context束縛、A設計後/D期待変更なし。高/高、診断失敗を本体PASSへ誤換算せず、1回上限と情報非漏洩を独立確認するため |
+| test author | `gpt-6-astra` / `high` | Bの独立18pure/file oracleと旧RED/新GREEN、Cは自己test証拠の凍結のみ、A設計後/D期待変更なし。高/高、診断失敗を本体PASSへ誤換算せず、1回上限と情報非漏洩を独立確認するため |
 | implementer | `gpt-6-astra` / `high` | BのInvoke局所診断/新probe、Cその束縛のみ。A/D実装非該当。高/高、abort時計・throw・cleanupを壊さず入力最小化するため |
 | test runner | `gpt-6.1-sol` / `medium` | Dの確定probe一回と実測記録。A–CのOS実測非該当。中/高、固定手順で未知値/正式とtmp/creditを分離し独立採取するため |
 | reviewer | `gpt-6-astra` / `high` | A設計Pre、B/C差分/有限oracle/束縛/実行数の独立接合、D限定Post。高/高、診断追加によるfailure隠蔽・権限/試験範囲拡大を見抜くため |
@@ -399,6 +405,6 @@ probeがcontext test/handoffを固定前提として消費する必要がある�
 
 主要リスクは診断保存の再入/遅延、保存例外による元failure消失、未確定rootへのwrite、情報過剰保存、最初のactor failureを全体初因と誤認すること、ENV01成功時に他caseへ進むことである。FF1–4、独立負例、単一dispatchと旧証拠不変を必須とする。rollbackは今回の診断/probe差分だけを親が保存旧版へ戻す手順であり、旧観測欠測は復活するため実行や合格を解除しない。他者編集/証拠は保持する。
 
-未決はwhitelist/schema/固定出力名とsource束縛、既存failure再入を避ける最小writer、既存安全contextを保つENV01専用入口、有限pure/fileの件数/上限/commandである。技術事項としてdesigner/独立Preで解消する。新安全権限・時間変更・追加OS実測が不可欠と判明した場合は具体的な不足を親へ返すが、現段階で利用者への追加選択は不要である。次handoffは親受領後のww-designer `gpt-6-astra/high`、所有は既存designへのFIRST-FAILURE01限定追補だけ。設計/Pre/本計画精緻化が完了するまで実装・追試を起動しない。
+暫定未決だったwhitelist/出力/source束縛、再入を避けるwriter、元contextのENV01専用入口、18case/上限/commandはdesign56F1と独立Preで解消した。未検証なのは実装と受入証拠であり、方式の未決とは区別する。新安全権限・時間変更・追加OS実測が不可欠なら具体的不足を親へ返す。次handoffは本精緻化の親受領後のww-test-author `gpt-6-astra/high`、所有は新Test-FirstFailure.ps1と新隔離証拠だけである。独立18期待凍結→別実装者Invoke/probe→作者旧T01 RED/17NA・新18GREEN→凍結/static/ValidateOnly→独立runner ENV01一回→限定Postの順を維持する。失敗時は証拠を返し、原因patch/retry/後続caseを追加しない。
 
 開始共有週枠は親受領52%。本plannerの開始/終了token・session/実model metadata・終了週枠・親子包含は未取得、推定しない。今回所有は本新節だけ、文書diff/hash/参照確認のみ、他file編集/実装/試験起動/再委譲/公開0である。
