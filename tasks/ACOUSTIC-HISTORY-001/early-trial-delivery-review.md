@@ -1,5 +1,15 @@
 # ET3 試用EXE提供・独立レビュー記録
 
+## LIFE14再開・既存要求の限定解釈
+
+実装返却InvokePS SHA `00436AD987A4BD1D2FDF70BDDA683D60DA8983CC9AEDCB4BE9F8BC57304C3402`：3箇所15行追加/2削除、読取前hook閉範囲と実比較分岐診断だけを追加、parser/PSSA診断・実行error0、他入力不変/runtime0。独立reviewerへLIFE14接合と前checkpointの拒否context/dispatch/sidecarの未確認実装境界を限定静的確認として返した。PASS前に再runtimeを解除しない。
+
+作者TestPS SHA `BA73802F7082F6266E419CD0EABC2ACC37961B9AF7C99BBF9A9879D06D2F2605`を返却。旧Confirm-CaseResult実関数の目的未到達/診断なし/他role診断は3RED、新oracle8PASS、合成同期対照はidentity限定変異・Registration保全・release結合を確認した。controller破損刺激を撤去、正常bootstrap不変とRunOwner実actorに拒否診断を束縛した。80行SHA不変、87呼出し/dispatch/P1/native/fake/V2も不変、parser0/analyzer実行error0/新診断0/既存ShouldProcess6保持。これは合成関数対照であり実hook/実cleanup成功ではない。実装担当の限定hook/診断接合を解除した。
+
+designer追補SHA `0B7802CC6347EB177E074E677E7FC028C6283ABCA7C98C6ABB42B9C7B0554A69`（末尾280–307）は独立局所Pre PASS。RunOwner/現在runId/固定Supervisor Ready・初回読取前hook、正常bootstrap保持、Readyidentityだけの変異、同actorの実比較診断を定義した。immutable既読hashを削除しない、偽identityをOwnedへ登録しない、既存期限/回収を維持する。実装・動的実証はこのPASSに含まない。作者のTestPS限定是正へ進めた。
+
+plannerと外部仕様担当（各Astra/high、read-only）は、caseRow110のRegistration/Ready境界と現刺激のcontroller破損の取り違えを確認した。真controller/contextを保持し、検証前Ready identityだけを実sentinel PID＋誤StartTimeへ変異させる。1271のRegistration不一致拒否への実測到達、Rejected/nonzero/zeroAll/既知cleanup/sentinel実identity生存が既存LIFE14受入である。1272 Assert-IdentityのOS世代比較そのものへ到達した証拠ではなく、既存OS再照合の約束を検証済みにしない。designerへ既存有限同期の最小追補だけを割り当てた。80行や未知非停止/非PASSの基準を緩和しない。
+
 ## 限定是正返却・未完了checkpoint（2026-10-15）
 
 InvokePS SHA `3421604615881BAE6451A988245049CD67E5476551FDCE0700FC825F5BFB9037`、TestPS SHA `EEAF6957CBBCB7B76A14ADEE5CBA52D46D547AE44A67A995DBCA189DAC760DD6`、design SHA `0EC0336FA63EEC9DDB81ADD19A10444511A5EA72EC1B4184344C8312DC9F869D`で各所有返却。Invoke parser/PSSA診断・実行error0。Test parser/analyzer実行error0/新診断0/既存ShouldProcess6保持、sidecar準備の合成2対照PASS（正常/duplicate Run実bytesSHA・8field・非上書き）。80行oracle/87呼出し制御/P1/fake/nativeは不変である。

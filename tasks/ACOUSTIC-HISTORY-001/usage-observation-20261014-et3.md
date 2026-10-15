@@ -1,5 +1,11 @@
 # ET3 試用EXE提供の使用量観測
 
+## 利用者「継続で」受領・LIFE14限定再開（2026-10-15）
+
+LIFE14作者は開始97→終了98%共有週枠（10080分/reset1792496608）を取得した。旧oracle3RED→新8PASS、合成同期対照、静的検査を返却した。designer/Pre/仕様の子counterは欠測、共有率をtask専有量へ換算しない。親は既定割当Astra/highで実装者へ最小hook/診断だけを引き継いだ。実gate/full/提供は未了である。
+
+利用者は95%共有週枠の報告後も継続を承認した。親モデル不変、開始側週枠95%/10080分/reset1792496607/ordinaryUsageAllowed=true。親counterの直前観測15:53:52.898Zは上記checkpointの値を参照し、今回着手時の完全一致snapshotではない。子counter/返却model・effort/包含は欠測を保持する。planner gpt-6-astra/highへLIFE14の目的・刺激・期待値の限定照合を依頼し、期待値緩和や試験削除ではない最小是正を選定する。製品source/実data/API/資格情報/OS変更なし。
+
 ## 限定是正返却checkpoint（2026-10-15）
 
 親の最終応答前観測15:53:52.898Z：input1750335382/cached1709918592/output3998406/reasoning1284467/total1754333788/cache_write0。13:21:12.832Z開始側との差はinput48453866/cached47977984/output112827/reasoning57056/total48566693。cached/reasoningは内数、子との包含未確認のため合算しない。ここからcheckpoint/最終応答までは未反映である。共有週枠95%/10080分/reset1792496607/ordinaryUsageAllowed=true、65→95を工程専有量へ換算しない。

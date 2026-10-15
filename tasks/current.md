@@ -1,5 +1,7 @@
 # 現在のタスク要約
 
+再開追記（2026-10-15）：利用者「継続で」を受領。LIFE14は既存Registration/Ready境界への刺激対象誤りとplanner/仕様が確認。限定design0B7802CCは独立Pre PASS、作者TestBA73802Fは旧oracle3RED→新8PASS/合成同期対照/静的検査で返却。実装担当が最小hook/実比較診断を接合中。実gate/cleanup/接合Post/80case/full/提供は未了。OS世代比較そのものの証明とは区別する。共有週枠98%、利用者の継続承認を維持する。
+
 直近（2026-10-15）：ET3-G初回通常入口はcontrol2 PASS、GATE21 FAIL停止。先行26Passedは呼出0のため行動PASS撤回、残53NotRun。dispatch是正は旧4RED/1PASS→修正後5PASS。RunOwner拒否sidecar限定接合はInvokePS34216046／TestPSEEAF6957／design0EC0336Fで返却、静的検査と準備対照2PASSまで。LIFE14の誤controller刺激と既知cleanup要求の契約不一致が未解決、接合後独立レビュー／80case再実行／製品full／提供は未了。native/fake/製品source不変、書式3PASSを再利用する。DPI150/200移管は承認済み、他native残部移管は未承認。共有週枠95%を受け継続範囲を照会中。詳細と正本は末尾リンクを参照する。
 
 更新：2026-10-14（ET1/FX1とET2は独立Post PASS/Closed。利用者指定のET2完了境界で停止。ET3・音声履歴UI・試用EXE・製品全体は未完成）。詳細は [参照インデックス](context-index.md) と末尾の最新位置を参照する。

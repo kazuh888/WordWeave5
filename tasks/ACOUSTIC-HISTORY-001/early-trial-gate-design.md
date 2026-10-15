@@ -276,3 +276,32 @@ bootstrap拒否ではsidecar検証後の残時間から得たUTC／Stopwatch上�
 terminalは既定`result-RunOwner-<pid>.json`へatomic CreateNewする。path由来runId、実測できた自己identity、拒否理由を記録し、未到達のmanifest／request／ACK／argv／child exitはnull、sourceMatched=falseとする。開始前監査を他branchやrun全体の終了証明へ拡張しない。GATE21-approvalは通常Run成立後の既存拒否・回収経路を維持する。80case刺激／期待値、未知非PASS、terminal必須、negative oracleは変更しない。
 
 未解決の受入阻止：LIFE14の既存刺激はdescriptor.controllerIdentityをsentinelのPIDと誤StartTimeへ変異するが、独立sidecar.launcherIdentityは真driverである。上記contextのcontroller／launcher一致検証は成立せず、監査context完成前のCleanupIncomplete／未取得配列nullとなる。既存oracleのRejected＋既知cleanupとは整合しない。sentinelをlauncherと認定する、descriptor境界を緩和する、空監査結果を捏造する是正は行っていない。本局所実装のparser／analyzer成功をLIFE14や80caseのPASSへ換算せず、追加設計と独立検証を未了として親へ返す。
+
+## LIFE14：Supervisor Ready初回読取前の限定同期（2026-10-15）
+
+本追補は直前の未解決事項に対する設計であり、実装・受入完了ではない。[計画](early-trial-gate-plan.md)の指定designerは`gpt-6-astra/high`、[仕様担当の限定解釈](early-trial-delivery-review.md)を入力とする。利用者継続承認は親引継ぎによる。LIFE14 caseRow110はRegistration/Ready不一致拒否への実到達を要求し、後続OS実世代比較への到達証明は要求と混同しない。80行・既存合否・期限・所有基準を変更しない。UI変更なしのためwordweave-egui-uiは非該当である。
+
+現物基準はHEAD `25b744ea26237703acddb2125d04c008241bede8`、R=`target/early-trial-build/et3/cargo-gate`、Invoke-CargoGate.ps1 SHA256 `3421604615881BAE6451A988245049CD67E5476551FDCE0700FC825F5BFB9037`、Test-CargoGate.ps1 SHA256 `EEAF6957CBBCB7B76A14ADEE5CBA52D46D547AE44A67A995DBCA189DAC760DD6`である。Invokeの174/191行のRead-Json/Write-Jsonは初回読取／発行時にimmutable SHAを登録し、1263–1273行のConfirm-ChildReadyはReady存在待ち→初回読取→Registration全体比較→Assert-Identity→既存hookの順である。Testの1589行のcontroller変異はこの比較前のbootstrapで拒否されるため、目的validatorを試験していない。
+
+| LIFE14対応／担当境界 | 確定インターフェース |
+| --- | --- |
+| 実装者／InvokeのAssert-Fixture・Confirm-ChildReady | 閉集合へhook=`supervisor-ready-read-before-validation`を1個追加する。cfg=fixture、role=`RunOwner`、scopeId=現在runIdの直接指定のみ許し、scopeIdReferenceは禁止する。このhook指定で別role／scopeは拒否する。呼出位置は正常に生成済みのChild.registration.role=`Supervisor`、scopeId=runId、directory=`R/runs/<runId>/processes/Supervisor`を持つRunOwnerのConfirm-ChildReadyだけである |
+| 作者／Set-CaseSynchronization | LIFE14だけ`{pointId:"author-point",role:"RunOwner",scopeId:<runId>,hook:"supervisor-ready-read-before-validation",deadlineUtc:<既存run.deadlineUtc-10秒>}`をdescriptor.syncPointsへ設定する。既存author-pointの単一処理を再利用し、新同期framework／callbackは作らない |
+| 同期入力・出力／既存Invoke-SyncPoint | Readyの存在を待ち終えた後、Ready bytesの初回Read-Jsonより前に呼ぶ。arrived/releaseの既存field・SHA結合・一回性を保持し、scopeReferenceSha256=null。arrived.actorIdentityはRunOwnerでありSupervisorではない。待機は既存Assert-Controlと25ms loop、固定point/phase/run上限を使用する |
+| 対象参照／作者だけが刺激 | 対象は`R/runs/<runId>/processes/Supervisor/ready.json`、対照は同directoryのregistration.jsonで一意に導出する。任意path入力・新targetReference・Request／Runner scope参照は追加しない。arrivedは対象bytesを読む許可やprocess停止権限ではなく、ownerが対象をまだ読んでいない位置の観測である |
+| 変異field／作者のInvoke-CaseSynchronization | Readyの`identity`だけを保持中sentinelの実5field identityのコピーに置換し、その`startTimeUtc`だけ実時刻+1 tickの既存UTC形式へ変える。pidは生存sentinelの実PID。他のReady field、正常Registration、controllerIdentity、rejection-context.launcherIdentity、Run/descriptorを保持する |
+| 到達診断／Invokeの実比較分岐 | 初回Read-Json成功後、既存`Test-EqualData ready Child.registration`がfalseとなる分岐だけで既存Result.failureBoundary=`ReadyRegistrationMismatch`を設定して既存拒否へ進む。hook到達／Ready読取／schema拒否／timeout／bootstrap失敗だけでは設定しない。実比較をfixture専用の失敗判定で置換せず、診断は所有・回収を変更しない |
+
+保存・状態の順序は、(1) 作者が真controllerのdescriptor／Run／rejection-contextを既存順に固定してRunOwner開始、(2) RunOwnerがSupervisorを実Startしhandle／Registrationを保持、(3) Supervisorが正常Registrationと同内容のReadyを既存Write-Jsonで一度発行してACK待ち、(4) RunOwnerがReady存在確認後の新hookでarrivedを公開して停止、(5) 作者が正常Ready／Registrationの一致と実Supervisor identityを確認し、元Ready bytes/SHA・Registration SHA・sentinel実identityを作者証拠へ保持、(6) 作者がReady.identityだけを変異して書込を閉じ、変異bytes/SHAを保存し、既存Write-NewEvidenceでreleaseを一度公開、(7) RunOwnerがreleaseとimmutable証拠を検証して初回Read-Json→実不一致拒否→既存abort/cleanup/Result、である。ACKは公開せずCargo/V2Case/対象EXEは0である。
+
+Ready変異は合成入力破損という作者の刺激であり、本体Write-Jsonの非上書き規則を変えない。RunOwnerは新hook前に対象ReadyをRead-Json／Assert-PathHashへ渡さず、対象SHAをImmutableへ先登録しない。登録済みhashを削除／更新する回避も禁止する。そうしないとrelease末尾Assert-Immutableで先に落ち、目的比較へ届かない。RunOwnerの既存Read-OwnedTreeはOS列挙でありReadyを読まない。Supervisorは自分が発行した正常Ready SHAを保持するが、ACK待ちはAssert-Controlだけであり、この刺激のための子側検証緩和は不要である。正常経路・他hook・製品cfgの順序は維持する。
+
+作者は到達時にarrivedのrunId/runSha256/pointId/role/scopeId/hookとactorIdentityを照合し、RunOwnerの保持handle実identityと一致させる。SupervisorのRegistration.identityは独立OS handleで実PID/開始時刻/pathと直接親RunOwnerを照合する。Readyの変異前後の構造差がidentityだけ、変異identityがsentinel実コピー＋誤StartTime、Registrationと正常bootstrapのbytesが不変である証拠を保持する。fixture.observationsの局所名は`readyTargetPath, originalReadySha256, mutatedReadySha256, registrationSha256`、実identityは既存`sentinelIdentity`、同期は既存`arrived, arrivedSha256, hookApplied`を再利用する。これらは作者証拠でありgate所有台帳の入力にしない。
+
+LIFE14の判定は既存Rejected／非zero／zeroAll／terminal必須／既知cleanup／sentinel同実identity生存に、同run・role=RunOwner・scopeId=runId・actorと同じ実identityのResultの`failureBoundary=ReadyRegistrationMismatch`と上記刺激証拠を結び付ける。他roleの同名診断、エラー文の部分一致、hook到達だけでは合格しない。1271相当の不一致分岐で停止するため、1272相当のAssert-IdentityがOS開始時刻を照合して拒否した証明にはならない。OS再照合の既存約束は残し、別の実測なしに検証済みへ変更しない。
+
+cancel／controller喪失／期限／release欠落・不正は既存abortへ進み、目的診断がなければLIFE14不成立である。RunOwnerは手元の実Supervisor handleと既存所有台帳を使って単一cleanup期限内で回収・waitし、偽Ready.identityからsentinelをOwnedへ登録しない。unknownは停止せずCleanupIncomplete／非PASS、未取得配列はnullを保持する。診断があっても回収未証明をRejectedの成功対照へ変換しない。作者はgate終了後もsentinelの保持handleで実PID＋実StartTimeの同一生存を確認し、その後だけ自身のsentinelを既存手順で回収する。刺激に使った誤StartTimeを終了確認や停止指定へ流用しない。
+
+既存`ready-validated-before-ack`流用は比較済みのため却下する。controller変異・context緩和は目的境界を変えるため却下する。Registrationも同じ偽identityに変える案は実OS比較という別の試験目的と所有証拠を変えるため採用しない。固定対象を新targetReferenceや汎用fault APIへ抽象化する必要はない。
+
+引継ぎは独立Pre→作者のLIFE14刺激／同期／診断oracleのみ→実装者の限定hook／診断のみ→新固定snapshotの独立実行／Postである。作者のcaseRows80行と既存期待値、native/fake/V2Case、製品sourceを変更しない。作者のschemaCandidate.failureBoundaryには新診断値を追加して現物契約と一致させる。正常Readyの無刺激対照と有限待機・誤release・目的診断不在時の非PASSを既存試験枠で確認し、残る80件／全体gateを省略しない。今回の完了境界は本節とdiff/link/hash確認までで、source実装・test編集・runtime・再委譲・公開は0。仕様上の新たな未決事項はなく、独立Pre・動的到達／cleanup実証は未了である。子の開始／終了token counterとprovider実行metadataは未取得であり、親のKPI記録へ欠測として引き継ぐ。

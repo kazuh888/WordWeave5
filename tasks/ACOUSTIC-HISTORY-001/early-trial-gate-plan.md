@@ -1,5 +1,13 @@
 # ET3-G：一時Cargo runnerによる実行前照合（Pre-2提出版）
 
+## LIFE14限定是正計画（2026-10-15再開）
+
+利用者は95%共有週枠の報告後も継続を承認した。plannerのread-only照合では、caseRowのRegistration/Ready検証に対し現刺激はcontrollerIdentityを破損し、bootstrapで拒否され目的validatorへ到達しない。監査contextを緩和せず、正常controllerを維持し検証前Readyの対象identityだけを変異する案を採る。外部仕様担当はRegistration/Ready不一致拒否と実OS世代照合の目的を区別して確認し、designerは有限な検証前同期を具体化する。既存Rejected/非zero/zeroAll/既知cleanup/sentinel生存と80行を維持し、未知非停止/非PASSを変えない。
+
+所有はdesignerの既存設計LIFE14追補、作者のTestPS当該刺激/同期/到達観測、実装のInvokePS最小同期/診断、runnerの新隔離証拠、reviewerのread-onlyである。native/fake/製品source/実data/API/資格情報/OSは変更しない。planner/仕様/設計/作者/実装/reviewerはgpt-6-astra/high、当該単位runnerはplanner指定gpt-6-sol/medium（既定ET3全体runnerとは別割当）。各モデルは利用可能一覧にある。指定と実返却metadataを混同しない。
+
+順序は限定仕様→設計/独立Pre→作者/実装→独立focused実行/正常・影響対照→Postである。目的validator未到達での拒否を成功に数えない。局所Post後も接合レビューと新固定snapshot通常入口80、実Cargo/製品full、native、試用提供のgateは残る。
+
 2026-10-14。親から一時process限定runner導入と、rfd DPI 150/200%だけの利用者試用確認への移管承認を受領した。Pre-1のP1阻止2件は設計修正・本計画同期を完了し、独立Pre-2待ちである。Pre-1 CHANGES_REQUIREDの判定は履歴として保持し、修正だけでClosedとしない。Pre-2 PASS→親受領まで作者/実装/runtimeへ進まない。既存未完了計画は変更しない。計画と作業リストの指定出力先は本書一本である。
 
 ## 完了境界・根拠
