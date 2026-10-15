@@ -4,9 +4,9 @@
 
 ET3の別配置試用EXE提供を継続中である。PTH-MONO-01は最終Post PASS／Closed（Invoke12E7、独立47/47＋5/5）。標準80は別の内部argvパス表記不一致でENV01 FAIL／79 NotRunであり、製品full／提供は未了である。
 
-ARGV-PATH01のnative381F／EXEFF7Cは保全済み。再構成planE209／designD1CはfreshPre PASS。固定testB779（HANDOFF451451）は作者C0–8=9PASS、C9junction作成AccessDenied・consumer未到達、C10/11NotRun、oldguardRED2／禁止22attempt0。default sandbox/AdminFalseで拒否直接原因未確定、exceptiontype/HResultnull。12件だけsandbox外・非admin通常ユーザー実行を質問中、回答前runtime不可。許可に依存しないC実装はplanner着手判断後、別fresh担当がdriverFED3C837（208行net49）／HANDOFF822E1E8Dへ限定修正し、独立Post静的PASS・blocking0・13入力不変を確認した。新12/ValidateOnly/focused/build/native実行0。CXT01/ARGV/80/製品full/提供は未了、null観測を残存0へ補わない。承認待ちで区切り、背景実行はない。
+ARGV-PATH01のnative381F／EXEFF7Cは保全済み。利用者承認による12件のsandbox外・非管理者実行は、cxt-runner-20261016-approved-aで9PASS／C9誤判定1／C10,11NotRun、driverguard2PASS、retry0、禁止22counter0、15入力不変となった。junction作成と元consumerの期待拒否へ到達したが、テスト側regexのP1を独立確認した。元consumerは変更せず、test述語1行是正94E4928C／P1引継ぎ43151F84、driver束縛2行68EF44DD／HANDOFFA32C8F6Dまで修正・独立staticPASS。純粋21件は旧6FAIL15PASS→新21PASS、実12の代替ではない。無効Pester準備2回は除外しregistry実変更有無は不明として保持する。修正版12件の再実行許可を質問中・未回答。CXT01/ARGV/80/製品full/提供は未了、背景実行はなくnull観測を残存0へ補わない。
 
-正本は[計画](ACOUSTIC-HISTORY-001/early-trial-gate-plan.md)・[設計](ACOUSTIC-HISTORY-001/early-trial-gate-design.md)・[レビュー](ACOUSTIC-HISTORY-001/early-trial-delivery-review.md)・[runner](ACOUSTIC-HISTORY-001/early-trial-delivery-runner.md)・[使用量](ACOUSTIC-HISTORY-001/usage-observation-20261014-et3.md)。checkpoint b18bd4cまでpush済み、通常release不変。共有週枠は開始12／直近36%でアカウント共通、task専有量や親子token合計は不明である。
+正本は[計画](ACOUSTIC-HISTORY-001/early-trial-gate-plan.md)・[設計](ACOUSTIC-HISTORY-001/early-trial-gate-design.md)・[レビュー](ACOUSTIC-HISTORY-001/early-trial-delivery-review.md)・[runner](ACOUSTIC-HISTORY-001/early-trial-delivery-runner.md)・[使用量](ACOUSTIC-HISTORY-001/usage-observation-20261014-et3.md)。checkpoint54d0c31までpush済み、通常release不変。今回再開の共有週枠は36→39%でアカウント共通、task専有量や親子token合計は不明である。
 
 以下は再開以前の履歴であり、現在の工程は上記を優先する。
 

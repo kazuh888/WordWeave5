@@ -2,6 +2,12 @@
 
 ## path欠測是正の設計再開（2026-10-15）
 
+今回区切り前の親観測：共有週枠39%／10080分／reset1792667952。開始側36%と同じアカウント共通窓であり、差を本作業の消費へ換算しない。bounded2MiB末尾の同親session累積は2026-10-15T19:27:58.694Z、input1863821938／cached1821960448／output4195581／reasoning1362386／total1868017519／cachewrite0。再開直前の同時点snapshot欠測、子包含未確認、cached/reasoning内数、以後のreview/記録/最終応答未反映のため、今回総量・親子合計は算出しない。
+
+承認12件は9PASS/C9判定不成立/2NotRun、driverguard2PASSで停止。独立review Astra/highでP1を確定し、同モデル作者がpredicate1行是正＋pure21回帰を返却した。旧6RED/15PASS→新21PASS、30入力不変、実12再試行0。Pester準備2回が構文・内部CIM/registryにより無効となり、基本foreach/boolへ縮小した手戻りを同単位に保持する。registry実変更は不明、追加権限で回避しない。検証frameworkが小さな判定修正に過剰となった整備コストであり、削減実績とはしない。reviewer共有37→37%、作者37→38%／10080/reset1792667952、子token/provider返却metadata/包含は欠測で合算しない。次の実装者は新test/handoffの固定bindingだけを接合し、実runtimeを先行しない。
+
+2026-10-16、固定12試行の追加実行承認を受領して再開した。完了境界は新候補の独立12件結果と接合判定までであり、未成功ならそこで停止する。開始側共有週枠36%／10080分／reset1792667952／ordinaryUsageAllowed=true。runner cxt12_runtime_approvedを計画指定gpt-6.1-sol/medium・fresh contextでdispatchした。親の再開時token snapshotは未取得、子との包含は未確認である。
+
 区切りの共有週枠は36%／10080分／reset1792667952／ordinaryUsageAllowed=true。開始12→36はアカウント共通観測で、当作業の専有消費ではない。CXT-Cの独立Post静的PASSを受領したが、追加12試行の許可は未回答であり、新候補runtimeは0のまま停止する。子token／provider実返却metadataは欠測、親子包含未確認である。
 
 親累積snapshotの最終取得は2026-10-15T15:52:28.586Z（JST10/16 00:52:28）：input1856184672／cached1814607360／output4181964／reasoning1359927／total1860366636／cachewrite0。同sessionの15:20:36.726Zからの観測区間差はinput12925013／cached12879232／output24920／reasoning13982／total12949933であり、全タスク量ではない。cached／reasoningは内数として再加算せず、子と合算しない。再開時snapshotおよびこの後の記録・commit・最終応答は欠測範囲である。追加委譲の使用量削減効果は未判定のまま保持する。

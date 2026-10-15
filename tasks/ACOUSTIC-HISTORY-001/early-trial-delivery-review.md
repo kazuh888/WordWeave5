@@ -4,6 +4,14 @@
 
 ### CXT01 context再構成（cycle 2、候補静的確認／追加実行許可待ち）
 
+最終P1是正・束縛接合static reviewはPASS／新規指摘0。test94E4928C／P1引継ぎ43151F84、driver68EF44DD／HANDOFFA32C8F6Dを独立照合した。test1行／driver固定入力2行／HANDOFF追記だけ、期待/consumer/期限/firstFail/禁止22は不変。作者の凍結30件は現在28件一致＋承認済みdriver/HANDOFF更新2件で、旧FED3/822E copyも一致した。保存pure21の旧6FAIL15PASS→新21PASSを確認し、判定式のP1を是正済みとするが、実CXT-D受入は未達である。新12件のsandbox外通常ユーザー実行を非同期照会済み・未回答、旧許可を再試行へ流用せず、focused/80/full/提供は止める。
+
+P1作者是正はtest述語1行だけ、新test SHA `94E4928C9454FA5BB08E64EC9A50069FE4A247B84131BA50EA60C378676E5494`／新 `CONTEXT-TEST-HANDOFF-P1.md` SHA `43151F84629CA518FF3003AEB0593B87451FA0F131D6FA603A88BA42015EE1AD`。専用prefixだけを `\A(?:TEST_ADAPTER:|FORBIDDEN:|TEST_BUDGET_EXCEEDED\z)` で区別する。基本演算の純粋21件は旧6FAIL/15PASS→新21PASS、parser/PSSA診断・実行error0、30凍結ファイル不変。無効Pester準備2回（構文/XML内部CIM、XML無し内部registry拒否）は回帰結果に算入しない。registry操作の実変更有無は不明、追加権限やOS変更は行わない。旧test/結果/HANDOFFは保存、新実12は未実施。別実装者へdriverのtest/handoff束縛だけを渡し、独立reviewと新実行承認を待つ。
+
+承認済み独立実行は `argv-path01/cxt-runner-20261016-approved-a` で停止した。C0–8=9PASS／C9 UnexpectedFailure／C10,11NotRun、driver配置guard2PASS／RED0、retry0、14.5262183秒。C9はjunction作成と元Get-CanonicalPathの `Reparse paths are forbidden` 拒否へ到達したが、testの大小無視 `-notmatch 'TEST_ADAPTER|FORBIDDEN|TEST_BUDGET'` が通常文中のforbiddenにも一致し誤判定した。独立reviewでテスト作者責務のP1を確定、元consumer変更不要。15入力hash/bytes前後一致・禁止22counter全0・null保持。shell実測exit1とscript分岐exit2は区別し、独立取得していないchild exitを補わない。C9をPASSへ再集計せずCXT-D未達、後続0を維持する。最小是正と純粋文字列回帰だけを作者へ渡し、修正した12件の再実行には新たな許可が必要である。
+
+2026-10-16、利用者が「実行してよい」と回答した。固定12試行だけのsandbox外・非管理者通常ユーザー実行を承認として受領した。対象testB779／driverFED3を変更せず、独立runner gpt-6.1-sol/mediumへ1回・firstunexpected停止・retry0で引き渡した。管理者実行、OS設定変更、実データ／資格情報／API、focused10／標準80／製品fullの実行許可へ拡張しない。
+
 最終CXT-C独立Post静的PASS／blocking0。fresh reviewerはdriverFED3／HANDOFF822Eと固定13入力を照合し、直下UUID guardが最初のtop-level tokens代入より前にあること、元main書込前18文の限定reuse、ValidateOnlyのfixture/build/control/RunOwner前return、10case／literal17／既存oracle／firstFail／cleanup不変を確認した。git check-ignoreはread-only子プロセスを起動するため「全process起動0」とは表現しない。作者の旧9PASSは新候補のGREENではなく、dynamic Post／Closed／試用提供は未了である。回答前の追加runtimeを行わず、承認待ちで区切る。
 
 固定context-testの独立静的Pre-for-rerun PASS：testB779/HANDOFF451451と15入力/保存証拠hash、4typedmocks/12matrix/禁止22/firstFail/null保持を確認しcodeblocking0、C9の自己作成directory衝突経路なし。ただし9PASS/C9環境阻害/2NotRunは作者結果、sandbox外成功保証・実行解除・Closedではない。
