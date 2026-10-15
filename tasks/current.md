@@ -4,9 +4,9 @@
 
 ET3の別配置試用EXE提供を継続中である。PTH-MONO-01は最終Post PASS／Closed（Invoke12E7、独立47/47＋5/5）。標準80は別の内部argvパス表記不一致でENV01 FAIL／79 NotRunであり、製品full／提供は未了である。
 
-ARGV-PATH01のnative2定数修正（381F5E1D）と独立build新EXE FF7C9A0F641F66F7C340AEC94C21EA9A0C745EA5A39C35B252C3A9CBDAFCCB88は保全済み。context連続阻害からplanE209293E／designD1C38FB3へ再構成、4typed mock/Owners空・監督未実行を一意化したfreshPre PASSとplanner確定を受領した。fresh作者cxt_context_tests Astra/highが起動0の12preflightを作成中（400–500行見込みを固定12/可読型確認の範囲で許可、framework/schema変更なし）。後続は別実装者のdriver/HANDOFF逐次所有→独立runner/レビュー。第二runのnull観測を残存0としない。CXT01/ARGV/80/製品full/提供は未了、保存RED／genericexact／既存80は保持する。
+ARGV-PATH01のnative381F／EXEFF7Cは保全済み。再構成planE209／designD1CはfreshPre PASS。固定testB779（HANDOFF451451）は作者C0–8=9PASS、C9junction作成AccessDenied・consumer未到達、C10/11NotRun、oldguardRED2／禁止22attempt0。default sandbox/AdminFalseで拒否直接原因未確定、exceptiontype/HResultnull。12件だけsandbox外・非admin通常ユーザー実行を質問中、回答前runtime不可。許可に依存しないC実装はplanner着手判断後、別fresh担当がdriverFED3C837（208行net49）／HANDOFF822E1E8Dへ限定修正し、独立Post静的PASS・blocking0・13入力不変を確認した。新12/ValidateOnly/focused/build/native実行0。CXT01/ARGV/80/製品full/提供は未了、null観測を残存0へ補わない。承認待ちで区切り、背景実行はない。
 
-正本は[計画](ACOUSTIC-HISTORY-001/early-trial-gate-plan.md)・[設計](ACOUSTIC-HISTORY-001/early-trial-gate-design.md)・[レビュー](ACOUSTIC-HISTORY-001/early-trial-delivery-review.md)・[runner](ACOUSTIC-HISTORY-001/early-trial-delivery-runner.md)・[使用量](ACOUSTIC-HISTORY-001/usage-observation-20261014-et3.md)。checkpoint ac92e29 push済み、通常release不変。共有週枠は開始12／直近29%でアカウント共通、task専有量や親子token合計は不明である。
+正本は[計画](ACOUSTIC-HISTORY-001/early-trial-gate-plan.md)・[設計](ACOUSTIC-HISTORY-001/early-trial-gate-design.md)・[レビュー](ACOUSTIC-HISTORY-001/early-trial-delivery-review.md)・[runner](ACOUSTIC-HISTORY-001/early-trial-delivery-runner.md)・[使用量](ACOUSTIC-HISTORY-001/usage-observation-20261014-et3.md)。checkpoint b18bd4cまでpush済み、通常release不変。共有週枠は開始12／直近36%でアカウント共通、task専有量や親子token合計は不明である。
 
 以下は再開以前の履歴であり、現在の工程は上記を優先する。
 

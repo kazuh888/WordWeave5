@@ -1,8 +1,18 @@
 # ET3 試用EXE提供・独立レビュー記録
 
-## ARGV-PATH01（cycle 1、Pre PASS／作者待ち）
+## ARGV-PATH01（CXT01再構成に依存、動的検証未完了）
 
-### CXT01 fixture初期化是正（cycle 1、Planned／Pre待ち）
+### CXT01 context再構成（cycle 2、候補静的確認／追加実行許可待ち）
+
+最終CXT-C独立Post静的PASS／blocking0。fresh reviewerはdriverFED3／HANDOFF822Eと固定13入力を照合し、直下UUID guardが最初のtop-level tokens代入より前にあること、元main書込前18文の限定reuse、ValidateOnlyのfixture/build/control/RunOwner前return、10case／literal17／既存oracle／firstFail／cleanup不変を確認した。git check-ignoreはread-only子プロセスを起動するため「全process起動0」とは表現しない。作者の旧9PASSは新候補のGREENではなく、dynamic Post／Closed／試用提供は未了である。回答前の追加runtimeを行わず、承認待ちで区切る。
+
+固定context-testの独立静的Pre-for-rerun PASS：testB779/HANDOFF451451と15入力/保存証拠hash、4typedmocks/12matrix/禁止22/firstFail/null保持を確認しcodeblocking0、C9の自己作成directory衝突経路なし。ただし9PASS/C9環境阻害/2NotRunは作者結果、sandbox外成功保証・実行解除・Closedではない。
+
+ユーザー回答前に進められるCの着手条件をplannerが設計471/473から確認し、作者12期待固定＋旧guardRED成立が条件で全12PASSは必須でないと判断した。D独立12/Efocusedは承認/C9実証/接合reviewまで保留する。別fresh実装者Astra/highがdriver/HANDOFFだけを逐次所有し、driverFED3C837A3B6F4B252AE6D4BE6604ED904817E26BA3872230687D64AB61655EE（208行net49）／HANDOFF822E1E8D257C8FAC2A997F5802F4C1A593AA36BB2DBF7498A7C58D2C3279BDDAをfinalfreezeした。元main書込前18文原文reuse、OutputRoot直下・sourcebinding・起動前前提を接合し、param/10case/17arg/firstFail/cleanupを保持、旧89C6/FB1byte保存、parser/PSSA1.25診断0/実行error0/whitespace0/13入力差分0。ValidateOnly/新12/focused/build/native実行0。独立静的Postへ提出し、動的GREEN/Closedは未判定である。
+
+独立作者fixed Test-ContextPreflight.ps1 SHA B77954FCDE5CBA9FB182C259BF5792D461BE8D556E1E38F9917CD0E23B0250DE／CONTEXT-TEST-HANDOFF.md SHA4514510360DCD2DD94A09217BC1D27ABE102AB68736BF70C557DE2995495E037。最終12試行はC0–8=9PASS、C9NewItem junction AccessDeniedでconsumer未到達、C10/11NotRun、retry0。旧driverguard RED2（正常direct拒否／nested受理）は別集計。parser/PSSA errorwarning0、固定15入力不変、禁止22項目attempt0。初aのC2英語regexに依存したlocale adapter阻害は分離後、同failure種別/consumerをErrorId＋repository名＋到達で確認し、aを最終件数へ足さない。
+
+C9はuse_default managed sandbox内AdminFalseで失敗した。F NTFSFixedReady、suite/target存在ReadOnlyFalse/ReparseFalse、親junctionEntries0、ACL継承保護False/7rule/Deny0はread-only確認、effectivePermission未評価。ErrorId NewItemCreateIOError、exceptiontype/HResultは未保存のためnull、直接原因がsandbox/ACL/FSのいずれか未確定。junctionは新suite内の初作成試行だが直前単体不存在観測はなく、停止後entry0のみ確認。設計stopに従い権限追加/代替/追試しない。ユーザーへ12件だけsandbox外・非admin通常ユーザー実行の許可を質問し、回答前runtimeは解除しない。固定testのfresh独立静的reviewを依頼した。12件受入／CXTClosedは未達。
 
 再構成Pre最終PASS：designD1C38FB3557D067A5E0B414E6DAEA021123C66B64D6FB5C62930B271CC5EFADFの437～で4mocksの型/引数/出力数/副作用を確定し、Owners空・監督未実行を明示した。fresh reviewerは実currentprocessを渡すGetIdentity2箇所／AddOwner／fixtureAssertIdentityへ型維持到達可、元AssertControlのcancel/UTC/monoとfilehashschema維持、freshcase状態/出力stream保全を確認しPre PASS。CXT-PRE-01の設計不足は解消、CXT01本体のClosed/runtime成功ではない。plannerがplanE209を変更不要で確定し、fresh作者Astra/highへ新context回帰だけを割当した。次の別実装者はdriver/HANDOFFだけを逐次所有する。contenthash不変のcheckpointでPreを反復しない。
 

@@ -2,6 +2,14 @@
 
 ## path欠測是正の設計再開（2026-10-15）
 
+区切りの共有週枠は36%／10080分／reset1792667952／ordinaryUsageAllowed=true。開始12→36はアカウント共通観測で、当作業の専有消費ではない。CXT-Cの独立Post静的PASSを受領したが、追加12試行の許可は未回答であり、新候補runtimeは0のまま停止する。子token／provider実返却metadataは欠測、親子包含未確認である。
+
+親累積snapshotの最終取得は2026-10-15T15:52:28.586Z（JST10/16 00:52:28）：input1856184672／cached1814607360／output4181964／reasoning1359927／total1860366636／cachewrite0。同sessionの15:20:36.726Zからの観測区間差はinput12925013／cached12879232／output24920／reasoning13982／total12949933であり、全タスク量ではない。cached／reasoningは内数として再加算せず、子と合算しない。再開時snapshotおよびこの後の記録・commit・最終応答は欠測範囲である。追加委譲の使用量削減効果は未判定のまま保持する。
+
+許可待ち中、plannerがCの着手条件（作者期待固定＋oldguardRED成立、全12PASSはD受入）を確認し、独立fresh実装者cxt_driver_implをAstra/highでdispatchした。drivernet49行＋HANDOFFcontextだけ、静的0診断/13入力不変、runtime0で返却。token/provider実返却metadataは未取得。追加許可待ちを暗黙承認にせず、許可不要な静的修正だけを進めた。fresh独立reviewerへ静的Postを渡し、C9/C10/C11と独立動的結果は欠測のまま保持する。
+
+fresh作者の最終12試行は9PASS/1環境阻害/2NotRun、oldguardRED2別。C0正常consumer先行到達後、初aのlocale英語regexによるadapter停止をErrorId/変数名/consumerへ最小是正した手戻りを同単位に保持し、aを固定件数へ加算しない。C9通常sandboxでjunction作成拒否、追加試行/権限変更無しで停止しユーザー許可を照会した。作者token/週枠/実返却metadataは欠測。現状はテスト構築までであり効率削減・全体成功の証拠ではない。
+
 親のbounded2MiB末尾から取得した最新累積snapshotは2026-10-15T15:20:36.726Z（JST10/16 00:20:36）：input1843259659/cached1801728128/output4157044/reasoning1345945/total1847416703/cachewrite0。session01a08550-055c-7aa1-9834-905e4a7ce148の長期累積であり、今回再開時snapshotは欠測のため現在タスクの差分を作らない。親子包含未確認、子の個別counter欠測、cached/reasoningは内数で合算しない。本文/認証情報は採取していない。
 
 CXT設計修正担当観測00:15:30–00:17:24 JST、token/週枠/provider metadata欠測。fresh Preはtypedmocks/Owners省略明示後PASS、planner確定。fresh作者cxt_context_testsをAstra/highでdispatchし固定12試行の新単体test400–500行見込みを型/欠測/禁止counter可読性の範囲で許可した（想定300超、framework/schema/ケース増加は不可）。この整備コストは削減実績ではない。最初に正常consumer到達を局所診断で確認する場合も最終12試行の受入へ加算せず、最終freeze後の固定結果を正本とする。
