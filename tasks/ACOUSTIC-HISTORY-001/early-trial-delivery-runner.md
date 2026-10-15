@@ -310,3 +310,45 @@ ENV01 `cargo_only_runner` の障害は今回も `BEHAVIOR_ASSERTION: Terminal ga
 初発結果を親へ通知し、追記後所有返却する。自動retry/再委譲/ソース・テスト・期待値編集/基準緩和/ユーザーapp停止/EXE置換/公開0。製品full/実API/資格情報/OS/管理者操作/native microphone・pen・TTS・IME・authenticationは未実施である。
 
 終了共有週枠2%（window10080/reset1792667952、最終応答前）を取得した。前節とreset値が異なるため差分や単独消費へ換算しない。子token/session/provider返却model・effort/親子包含は未取得である。
+
+## ET3-G ENV01専用エラー型診断：一回終了（2026-10-15 21:03 JST）
+
+親の限定Pre/closure PASSと一回解除を受領し、planner runner `gpt-6.1-sol/medium` を維持した。HEAD `9963c52c8c277ea744e9e204e74af96e9b451ce7`、開始dirtyはdelivery-review文書のみ。wordweave-change検証・報告範囲で、source/test/期待値編集・再委譲・再試行なしである。
+
+Rは既定cargo-gate絶対root、D=`R/verification/env01-error-probe-20261015-a`。実commandは `& 'F:/Program Files/PowerShell/7/pwsh.exe' -NoLogo -NoProfile -NonInteractive -File 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/env01-error-probe-20261015-a/Invoke-Env01Diagnostic.ps1' -RunDiagnostic`。通常ユーザー/sandbox外CIM、entryがAdmin禁止を検査してfixtureへ到達、一回exit1、console出力0で終了した。新規ENV01 root/runだけを生成し既存結果を上書きしていない。80case acceptance credit0、診断一件未成立でありPASSへ加算しない。
+
+指定SHA前後一致：entry `0DC17ECCE2DCE63E818D9B450C43B6935384141E8790D443BEFE941BEFDD2A33`、Invoke-ErrorProbe `CB7DCAE09936E434FDB4E38B1400AD034A00B8DCB26D4B2C04158AE6D8CECFDD`、Test-ErrorProbe `E2546A91D5E5E771182F0FF38C779F8175337460E72951BE4522F3225E619AEE`、Invoke `E1F5C520199DA8362A486CB164DDC6389B093E71CB612215769C9C470D6E8062`、Test `0BB2510E928C9C3BFAD34D8190F007C97881047B195194A586A319837FE484DE`、design `0B7802CC6347EB177E074E677E7FC028C6283ABCA7C98C6ABB42B9C7B0554A69`、固定fake EXE `CFACB5A55109B5F7DA3327EC5B28EE37473C9C65C6F3DCF1DBA49FCDBC252435`。最初の読取でhelper名をProbe-Env01/Test-ProbeEnv01と誤指定し存在しない旨が出たが、entry内の実path Invoke-ErrorProbe/Test-ErrorProbeへ訂正し両SHAを実行前に確認した。誤読取時のprocess/fixture起動0、診断実行のretryではない。
+
+run `461eee50-80a7-4408-803a-5da7de828d34`、probe12848開始12:02:22.9672956UTC/controller13932。新 `ENV01/error-types.json` は `System.Management.Automation.ValidationMetadataException` / 元Invoke行750だけを保存した。元行750は `$script:InvocationPath = $InvocationPathValue`。outer `diagnostic-error.json` はRuntimeException/元Test行758である。raw message/env/stackを新probe artifactへ追加していない。既存author-failure契約はそのまま保持した。診断の呼出形式に由来する拒否と元ENV01原因の因果同一性は未確認であり断定しない。
+
+run rootはrun/rejection-context/cancelだけ、terminal0、target marker0、controller stdout/stderr各0byte。12:03:05.0461298UTCのread-only CIM監査exit0は固定controller/probe PID鎖とD内imageのlive候補0、native entry全体0。gate自身cleanup/kill/wait/terminal証拠は欠落しcleanup PASS未成立、temp/localとfixtureを保持した。追加kill・ユーザーapp停止0である。正本はD/ENV01/error-types.json、D/diagnostic-error.json、D/ENV01/author-failure.jsonとstreams、D/independent-runner-audit.json、R/runs/<runId>の3JSONである。
+
+親へ型/元行番号と観測限界を返し所有返却する。実API/資格情報/OS/管理者/製品full/native受入/公開0。終了共有週枠6%（window10080/reset1792667952、最終応答前）、子token/session/provider返却model・effort/親子包含未取得。共有週枠を本診断の消費へ換算しない。
+
+## ET3-G内部payload分離版・元通常入口：CleanupIncomplete（2026-10-15 21:14 JST）
+
+親から内部InvocationPayloadPath分離の局所review PASS/独立10PASSと通常入口一回解除を受領した。planner runner `gpt-6.1-sol/medium`、wordweave-change検証・報告範囲を維持。HEAD前後 `9963c52c8c277ea744e9e204e74af96e9b451ce7`、開始dirtyはdelivery-review/delivery-runner文書2件。指定Invoke SHA `0E28AAA12343AB331FD4D26837324B403ECBFC0C0980092237B4A5AC721035C2`、Test `0BB2510E928C9C3BFAD34D8190F007C97881047B195194A586A319837FE484DE`、design `0B7802CC6347EB177E074E677E7FC028C6283ABCA7C98C6ABB42B9C7B0554A69`、native source `3AEB0B19E2D03EE088EB1BEDA4DBACEEC0406E12ED75D59AB95A7E331F42FD41`、native EXE `1C04288220C3D98B182F3011FE3D1DE8AE88B050871DF400B21ED8AECCCC5E94`、fake.rs `3482075BF7479E61942978830AE91FDDF5301133E1A2F43EDB9B65DDAA0FA016` の前後一致、sourceMatched=trueである。
+
+Rは既定cargo-gate絶対root、新suite `85cf0746-bd8a-4670-b321-d76d860ef0da`。commandは `& 'F:/Program Files/PowerShell/7/pwsh.exe' -NoLogo -NoProfile -NonInteractive -File R/Test-CargoGate.ps1 -GateScript R/Invoke-CargoGate.ps1 -OutputRoot R/verification/85cf0746-bd8a-4670-b321-d76d860ef0da` （Rを既定絶対rootへ展開）。probeなし、通常ユーザー/sandbox外CIM、Admin=false/pwsh7.6.6、1回exit1。control PASS2/FAIL0/SKIP0/NotRun0、80case PASS0/FAIL1/NotRun79/SKIP0、予定87variant中実呼出1。ENV01でfirstFail停止した。旧raw26・診断結果は加算0である。
+
+最初の障害はENV01 `BEHAVIOR_ASSERTION: Unexpected gate failure`（Confirm L1921、Invoke L1769、driver L2214）。今回はrun `99b70df0-dc08-4344-93a7-b1b75522e851` の `result-RunOwner-24188.json` まで到達しgateStatus=`CleanupIncomplete`。RunOwner24188開始12:13:05.4397258UTC/controller14464。terminalは1件、Supervisor terminalは未取得、childExit値null、timeout=false/cancelled=false。terminal欠落だった前回の障害とは区別する。
+
+RunOwner terminal processesはOwned4行（PID27076/40876/29976/24608）すべてwaited=true/hasExited=true、killRequested=trueは27076/29976だけ。Unprovable2行は同じPID24592の `OS process identity is unavailable`、waited=false/hasExited=nullである。Supervisor cancel reasonもCleanupIncomplete、単一cleanupDeadlineは12:13:21.1973705UTCである。fixtureResiduals=[]/sourceMatched=trueでもUnprovableを成功へ換算しない。run rootにcancelの一時fileも保持された。controller stdout/stderr各0byte、Cargo stdout1183byte/stderr0byte。started marker1は `cargo-40876.started.json` のfake Cargoだけ、target marker0。LIFE14/sentinel/後続79caseは未到達である。
+
+12:14:03.1613272UTCのread-only CIM監査exit0は固定controller/RunOwner/terminal所有PID/24592の候補と子孫およびsuite実imageのlive候補0、native entry全体0。現在候補0をUnprovable解消やcleanup PASSへ読み替えない。temp/localと証拠保持、runner追加kill0。fake compile成功、新EXE SHA `6820A7BE91922A3C62151981E4997606643402C9442228D0AE08AC3DBBCBEB1C`。正本は `R/verification/<suite>/{result,frozen-inputs,toolchain,independent-runner-audit}.json`、identity-control、ENV01/author-failure.json/streams、`R/runs/<runId>/result-RunOwner-24188.json` とcancel/registrationsである。
+
+親へ不合格と新terminal証拠を通知して所有返却する。再試行/編集/再委譲/基準緩和/ユーザーapp停止/EXE置換/公開0、実API/資格情報/OS/管理者/製品full/native受入0。終了共有週枠7%（window10080/reset1792667952、最終応答前）、子token/session/provider返却model・effort/親子包含未取得。共有観測値を本工程単独消費へ換算しない。
+
+## ET3-G osObservation追加版・通常入口：未知metadata取得（2026-10-15 21:51 JST）
+
+親の観測限定局所review PASS/独立15PASSと一回解除を受領した。planner runner `gpt-6.1-sol/medium`、wordweave-change検証・報告範囲を維持。HEAD前後 `9963c52c8c277ea744e9e204e74af96e9b451ce7`、開始dirtyはdelivery-review/delivery-runner/gate-design/usage-observation-20261014-et3/currentの文書5件。固定Invoke SHA `333C37FF523542AD52004B76D17CE43369896555CEA2F326AE749A3C55D42245`、Test `D8AD0AD44C2457DC60E64E52A6EDB455974D5F8AD9938B956CEF3E4DDAB0F7F3`、design `51DBDBD7B8AE8E31AAA2BF5BB74D9C6D51EF39A8455C2EEFB2C38A1250A2A8EB` の前後一致。native source `3AEB0B19E2D03EE088EB1BEDA4DBACEEC0406E12ED75D59AB95A7E331F42FD41`、native EXE `1C04288220C3D98B182F3011FE3D1DE8AE88B050871DF400B21ED8AECCCC5E94`、fake.rs `3482075BF7479E61942978830AE91FDDF5301133E1A2F43EDB9B65DDAA0FA016` も不変、sourceMatched=trueである。
+
+Rは既定cargo-gate絶対root、新suite `e48f86cd-4032-4598-a904-a4d0a3679be6`。commandは `& 'F:/Program Files/PowerShell/7/pwsh.exe' -NoLogo -NoProfile -NonInteractive -File R/Test-CargoGate.ps1 -GateScript R/Invoke-CargoGate.ps1 -OutputRoot R/verification/e48f86cd-4032-4598-a904-a4d0a3679be6`（Rを絶対rootへ展開）。元-File/probeなし、通常ユーザー/CIM可能sandbox外、Admin=false/pwsh7.6.6、一回exit1。control PASS2/FAIL0/SKIP0/NotRun0、80case PASS0/FAIL1/NotRun79/SKIP0、予定87variant中実呼出1/ENV01期待variant1/完成variants0。旧結果を加算していない。
+
+最初のENV01は `Unexpected gate failure`（Confirm L1934、Invoke L1782、driver L2227）。run `2e9884b9-0768-41ed-a3a4-261b8ecc8889`、controller16280/RunOwner33040開始12:49:46.2983544UTC。RunOwner terminal1のgateStatus CleanupIncomplete、cleanupDeadline12:50:02.2399592UTC、fixtureResiduals=[]/sourceMatched=true。Owned4行（22360/38376/15216/22496）はkillRequested/waited/hasExitedすべてtrue。Unprovable2行は同一PID15748、waited=false/hasExited=nullである。
+
+新osObservationはpid15748、parentPid22496、creationUtc12:49:51.8412780UTC、pathPresent=false/commandPresent=true、snapshotMatchCount1/rowFilterMatchCount1/knownMatchCount0、rowFilterPathPresent=false/rowFilterCommandPresent=true、RuntimeException/元行360を記録した。同run registrationのCargo PID22496、開始12:49:51.7390508UTC、parentSupervisor15216、固定fixture fake-cargo.exeへParentPIDが一致する。これは関係metadataの一致だけであり、未知processの同世代/Owned/停止可能性を証明しない。旧PID24592へ原因を遡及適用しない。
+
+controller stdout/stderr各0byte、Cargo stdout1183byte/stderr0byte、started marker1はfake Cargoだけ/target marker0。後続79case（LIFE14/sentinel含む）は未到達。12:50:48.1570888UTCのCIM read-only監査exit0は固定controller/RunOwner/terminal候補/未知PIDの子孫とsuite実imageの現在候補0、native entry全体0。未知を成功へ昇格せずcleanup PASS未成立、temp/localとfixture保持、runner追加kill0。fake compile成功、新EXE SHA `D2CAF550DAA8280E9934FDD4EEC537C3EE5945D779C5AC2299F441088A529E16`。
+
+正本は `R/verification/<suite>/{result,frozen-inputs,toolchain,independent-runner-audit}.json`、identity-control、ENV01/author-failure.json/streams、`R/runs/<runId>/result-RunOwner-33040.json` とregistrations。親へ初発と追加metadataを通知し所有返却する。retry/編集/再委譲/基準緩和/ユーザーapp停止/EXE置換/公開0、実API/資格情報/OS/管理者/製品full/native受入0。終了共有週枠12%（window10080/reset1792667952、最終応答前）、子token/session/provider返却model・effort/親子包含未取得、単独消費へ換算しない。

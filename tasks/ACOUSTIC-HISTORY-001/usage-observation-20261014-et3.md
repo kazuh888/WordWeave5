@@ -1,5 +1,17 @@
 # ET3 試用EXE提供の使用量観測
 
+## path欠測是正の設計再開（2026-10-15）
+
+独立Pre reviewerは局所PASS、終了共有週枠13%を取得した。開始値・個別token・provider返却metadataは欠測。親開始12%との差を工程専有消費へ換算せず、アカウント共通の観測値として保持する。
+
+designer子`/root/et3_image_path_design`は指定Astra/highで設計文書だけを返却し、22:00:46–22:04:55 JST観測区間、token／共有週枠／provider返却metadataは未取得とした。既存reviewerへ同じ割当Astra/highの独立Preを引き継ぎ、実装を先行しない。実測値を作業量から推定しない。
+
+利用者の続行指示後、親の開始共有週枠は12%／10080分／reset1792667952／ordinaryUsageAllowed=true。子の包含・返却model/effort・今回親token snapshotは未取得。直近runner終了12%との差0は無消費を意味せず、task専有率へ換算しない。既存plannerの限定判定を再利用し、designer gpt-6-astra/highへ同一保持handleの画像path読取設計だけを委譲した。対象は検証用wrapperであり製品Rust変更なし、80件基準・未知非停止/非PASSを維持する。
+
+## 改善候補（今回の検証水準は変更しない）
+
+初期main経路を実行するまで、JSON日時の暗黙変換とscript入力変数のvalidation再適用が静的検査/局所関数対照で捕捉されなかった。未知プロセスの元行/例外情報も不足し、複数の失敗実行を経て観測を追加する手戻りが生じた。次回の同種harnessでは、観測可能な最小正常end-to-endを早期に固定してから失敗注入を段階拡張する順序を計画時の候補とする。これは今回の80件・独立review・未知非PASSを省略/順序変更する承認ではなく、品質を保つための改善提案である。自動委譲の使用量削減効果は依然未判定である。
+
 ## 上限停止後の利用者続行（2026-10-15）
 
 独立作者はInvoke日時回帰旧2RED/7PASS→9PASSを固定し、TestPS同種の2系統を旧2RED→新2GREENへ接合した。TestPS23箇所とInvoke1箇所のoption追加以外は逆置換SHAで不変を確認。作者の共有週枠は新reset区間で1→1%、後phase2→2%、子counter/metadata欠測、task専有率へ換算しない。実Gate再実行は静的review前で0。二次terminal欠落を未確定のまま保持し、日時修正だけで全因果解明とはしない。

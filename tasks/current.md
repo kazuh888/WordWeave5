@@ -1,6 +1,12 @@
 # 現在のタスク要約
 
-最新：日時型是正InvokeE1F5C520/Test0BB2510Eは独立9+2系統PASS/逆置換一致/局所reviewPASS。新suite4bfe2cb0もcontrol2PASS/ENV01実呼出1FAIL/残79NotRun（terminal0/target0/終了後所有候補0）、LIFE14未到達。日時以外の開始失敗は未確定。原本source無変更の外scope例外型/行番号probeを専用verificationで作成中、実ENV01診断はまだ未解除。commandline同定や基準を緩和しない。新週枠0→2%観測、旧枠と差分換算しない。製品full/提供は未了。
+独立Pre PASS：design CE799395の局所path補完設計にblockingなし。plannerの計画確定→独立作者のRED作成が次であり、実装修正・新通常Gate・製品fullはまだ未実施である。
+
+設計追補返却：同一保持handleのpath補完はdesign CE799395A14F1784C05EDDB0BC2D8EE8B53B900EC306B403DB72E225CF5E5756、PTH1–8受入まで文書化し独立Pre中である。Invoke333C37FF／TestD8AD0AD4は未変更。通常release SHA9B888E9F／別試用E3A0A878も不変。Pre通過後に独立作者RED→限定実装→runner／Postへ進む。
+
+最新（2026-10-15 続行）：観測追加の独立Post静的PASS後、通常suite e48f86cdはcontrol2PASS／ENV01実呼出1FAIL／残79NotRun。unknownPID15748は同じCIM snapshotに1行あり、path=null・commandあり・known0であり、CleanupIncompleteを維持した。親PIDのCargo一致は所有証明ではない。plannerは同一保持SafeHandleからの限定OS画像path読取を品質緩和なしの候補と判定し、designer Astra/highへ設計追補を割当した。実装修正・新runtimeは未解除。LIFE14／80件／製品full／試用提供は未達。共有週枠開始12%（アカウント共通）。
+
+最新：5行状態分離後のsuite85cf0746はterminal到達したがENV01 CleanupIncomplete（unknownPID24592、元行未保存）。未知を既知にする根拠なしのため判定を緩めず観測追加へ。design51DBDBD7 PrePASS、TestD8AD0AD4 optional型13行のみ、Invoke333C37FF 観測58行追加は15回帰PASS/unknown維持15/静的0、限定独立review待ち。実Gate新観測はまだ未解除、Data添付失敗の動的確認なし、旧PID正体未解決。LIFE14/80/full/提供未達。元Invocation属性の開始障害は10回帰＋実terminal到達で是正、日時是正9+2も別証拠として保持。
 
 再開追記（2026-10-15）：LIFE14限定是正はdesign0B7802CC独立Pre、TestBA73802F旧3RED→新8PASS、Invoke00436AD9、接合静的PASSまで。通常入口再runtime suite aa5b5366はcontrol2PASS/ENV01実呼出1FAIL/残79NotRun、LIFE14未到達、target0/終了後所有候補0/terminalとgatecleanup証拠欠落。正常初期化失敗の原因を保存入力/純粋式だけで切分け中、新実行未解除。共有週枠99%、利用者継続承認あり。製品full/提供は未了、既存EXE/source/data不変。記録checkpoint aae5a52 push済。
 

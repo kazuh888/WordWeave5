@@ -194,7 +194,7 @@ sidecarは作者候補を採用し、run rootの`run.json,manifest.json,approval
 
 全Runnerはreceiptの全bytes／SHA、run・manifest・full承認SHA、登録Supervisorの同一identityを検証し、`full.publishedUtc <= receivedUtc < g0DeadlineUtc`と受領時の承認有効範囲を確認する。その後は現在時刻に対するfull.expiryUtc／executionDeadlineUtc／各EXE600秒と既定のlive identity・cancel等を適用する。**後続Runner自身の読取時刻をg0Deadlineと比較して共有full承認を失効させない**。欠落／破損／別fullへのreceiptはtarget0、同じfull bytesだけのreceiptを共用する。Runner Resultには`fullReceiptSha256`を追加し、full実行前の拒否では未読ならnullとする。この証拠の追加は期限内受領の可視化だけであり、新しいdeadlineや自動延長、第三の親承認を導入しない。
 
-Manifestのtop keyは`runId,runSha256,cfg,cargoIdentity,sourceDigest,g0Digest,markerDigest,jsonPrefixBytes,jsonPrefixSha256,artifacts,createdUtc`、Requestは`runId,invocationId,cfg,cargoIdentity,entryIdentity,runnerIdentity,payloadSha256,executable,argvUtf16`である。Registration／Readyは`runId,role,scopeId,intentSha256,identity,ownerIdentity`、ACKはこれに`readySha256,manifestSha256,caseId,deadlineUtc`を加え、非caseではcaseId=null、Manifest作成前のSupervisor登録ではmanifestSha256=nullとする。開始Intentは`runId,role,scopeId,ownerIdentity,path,argvUtf16,deadlineUtc`を持つ。SafetyInvocationは`runId,runSha256,manifestSha256,g0ApprovalSha256,caseId,order,executable,exactName,list,requireChildMarker,v2Case,outputDirectory,g0DeadlineUtc,deadlineUtc`であり、executable/v2CaseはPathHash。Resultは本書の既定内容を`runId,role,scopeId,identity,manifestSha256,requestSha256,ackSha256,argvUtf16,childExitInt32,childExitU32,gateStatus,startedUtc,endedUtc,timeout,cancelled,cleanupDeadlineUtc,processes,fixtureResiduals,sourceMatched`へ対応させる。未到達のidentity／hash／exitはnull、未取得配列はnullと空配列（取得済み0件）を区別する。processesの行は`{identity,killRequested,waited,hasExited,ownership,error}`、ownershipは`Owned,Unrelated,Unprovable`である。
+Manifestのtop keyは`runId,runSha256,cfg,cargoIdentity,sourceDigest,g0Digest,markerDigest,jsonPrefixBytes,jsonPrefixSha256,artifacts,createdUtc`、Requestは`runId,invocationId,cfg,cargoIdentity,entryIdentity,runnerIdentity,payloadSha256,executable,argvUtf16`である。Registration／Readyは`runId,role,scopeId,intentSha256,identity,ownerIdentity`、ACKはこれに`readySha256,manifestSha256,caseId,deadlineUtc`を加え、非caseではcaseId=null、Manifest作成前のSupervisor登録ではmanifestSha256=nullとする。開始Intentは`runId,role,scopeId,ownerIdentity,path,argvUtf16,deadlineUtc`を持つ。SafetyInvocationは`runId,runSha256,manifestSha256,g0ApprovalSha256,caseId,order,executable,exactName,list,requireChildMarker,v2Case,outputDirectory,g0DeadlineUtc,deadlineUtc`であり、executable/v2CaseはPathHash。Resultは本書の既定内容を`runId,role,scopeId,identity,manifestSha256,requestSha256,ackSha256,argvUtf16,childExitInt32,childExitU32,gateStatus,startedUtc,endedUtc,timeout,cancelled,cleanupDeadlineUtc,processes,fixtureResiduals,sourceMatched`へ対応させる。未到達のidentity／hash／exitはnull、未取得配列はnullと空配列（取得済み0件）を区別する。processesの行は`{identity,killRequested,waited,hasExited,ownership,error}`、ownershipは`Owned,Unrelated,Unprovable`である。Unprovable行だけに任意の`osObservation`を追加でき、型・欠測・生成失敗は末尾「所有同定失敗の限定観測」に従う。既存ownershipEvidenceと所有／終了判定を変更しない。
 
 scopeIdはRunOwner／Supervisor／CargoでrunId、SafetyWorker／V2CaseでcaseId、Entry／RunnerでinvocationIdとする。Targetは所有branchを継承し、fullではinvocationId、G0ではcaseIdである（G0に存在しないinvocationIdを新設しない）。processの識別は`runId＋role＋scopeId＋PID/開始時刻`、ACKはさらに既定のintent／Ready SHAへ束縛する。以下のfixture参照は同期対象の後決めだけであり、このlifecycle scopeを変更しない。
 
@@ -305,3 +305,63 @@ cancel／controller喪失／期限／release欠落・不正は既存abortへ進�
 既存`ready-validated-before-ack`流用は比較済みのため却下する。controller変異・context緩和は目的境界を変えるため却下する。Registrationも同じ偽identityに変える案は実OS比較という別の試験目的と所有証拠を変えるため採用しない。固定対象を新targetReferenceや汎用fault APIへ抽象化する必要はない。
 
 引継ぎは独立Pre→作者のLIFE14刺激／同期／診断oracleのみ→実装者の限定hook／診断のみ→新固定snapshotの独立実行／Postである。作者のcaseRows80行と既存期待値、native/fake/V2Case、製品sourceを変更しない。作者のschemaCandidate.failureBoundaryには新診断値を追加して現物契約と一致させる。正常Readyの無刺激対照と有限待機・誤release・目的診断不在時の非PASSを既存試験枠で確認し、残る80件／全体gateを省略しない。今回の完了境界は本節とdiff/link/hash確認までで、source実装・test編集・runtime・再委譲・公開は0。仕様上の新たな未決事項はなく、独立Pre・動的到達／cleanup実証は未了である。子の開始／終了token counterとprovider実行metadataは未取得であり、親のKPI記録へ欠測として引き継ぐ。
+
+## 所有同定失敗の限定観測（2026-10-15）
+
+親からの観測限定割当、designer=`gpt-6-astra/high`。基準Invoke SHA256=`0E28AAA12343AB331FD4D26837324B403ECBFC0C0980092237B4A5AC721035C2`、Test=`0BB2510E928C9C3BFAD34D8190F007C97881047B195194A586A319837FE484DE`、追補前本書=`0B7802CC6347EB177E074E677E7FC028C6283ABCA7C98C6ABB42B9C7B0554A69`。ENV01の未知PID24592は元CIM行未保存で役割／欠測理由不明であり、CleanupIncompleteを修正しない。本追補はG5の所有証拠・LIFE16/17の未知非PASSに対する診断追加だけで、新たな所有根拠ではない。
+観測先は既存terminal.processesの該当Unprovable行の任意object `osObservation`であり、親terminalのrunId/role/scopeId/identityとfile SHAへ結合する。同PIDの複数行を集約／同世代扱いしない。追加sidecar・OS照会・trace・新frameworkは0、既存terminalのatomic公開順とcleanup期限を維持する。
+objectは`pid,parentPid,creationUtc,pathPresent,commandPresent,snapshotMatchCount,knownMatchCount,exceptionType,exceptionLine,rowFilterMatchCount,rowFilterPathPresent,rowFilterCommandPresent`を持ち、生成失敗時だけ`producerFailure:{exceptionType,exceptionLine}`を加える。全fieldは未取得null可。pidは正の整数、parentPidは0以上整数、件数は0以上整数、Presentはbool、exceptionTypeは実例外の型FullName文字列、exceptionLineは正のScriptLineNumber整数である。bool／文字列を整数へ強制変換せず、取得不能を0/falseにしない。
+snapshot側の読取元はRead-OwnedTreeの既存`$row/$rows`とcatch時の既存`$script:Known.Values`だけである。pid/parentPidはCIM ProcessId/ParentProcessIdの範囲内整数、creationUtcはCreationDateがDateTimeかつKindがUnspecified以外の時だけUTC7桁へ変換し、その他null。pathPresent/commandPresentは元行の当該propertyが存在し非nullかどうか（空文字はpresent）である。snapshotMatchCountは同snapshot内の同PID行数、knownMatchCountは台帳の同PID行数であり、いずれも同世代／所有の証明ではない。
+rowFilter側は失敗したGet-Identityで実際に渡されたRowsをProcess.Idで抽出した結果だけを表す。現物345–353行は新OS照会を行わず、Read-OwnedTree1136行では入口1117行のsnapshotを再使用するため、「fresh OS再照会」と記録しない。rowFilterMatchCountはその実抽出件数、rowFilterPathPresent/rowFilterCommandPresentは件数1の時だけ同じ非null判定、件数0/複数なら両bool=nullである。抽出前のhandle取得／Refresh失敗等では3fieldともnull、snapshot側から補完しない。
+実装者はGet-Identity内でこの3値を最小局所変数として保持し、失敗時だけ元例外のDataキー`ET3.IdentityRowFilterObservation`へ同名3fieldを渡して元例外をrethrowする。取得した値だけを格納し、全metadata未取得もnullで表す。Data添付自体の失敗は元例外を置換せず、outer側はData欠落をrowFilter全nullとして扱う。共有script変数への最後の観測保持は別呼出の混入を招くため用いない。
+Read-OwnedTreeの最初のdescendant catch（現物1149行近傍）が元ErrorRecordを先に保持し、既存Unprovable rowへ上記objectだけを添える。exceptionType/exceptionLineはこの元ErrorRecord由来であり、message/stack trace/path/command/environment/資格情報を新objectへ複製しない。観測生成は囲ったtry/catch内で行い、変換等が失敗したfieldはnull、producerFailureは生成側例外の型と行だけとする。producer失敗でも元row・元拒否・identity=null・killRequested=false・waited=false・hasExited=nullを保存する。既存errorの意味を変えず、別のUnprovable生成経路への機械的横展開は今回不要である。
+実装所有はInvokeのGet-Identity局所metadataと上記catchの観測生成のみ（必要なら同fileの小private変換helper1個）である。Get-OsProcess、所有判定、停止、回収、期限、例外の成功化、native/fake/V2/製品sourceは変更しない。TestのschemaCandidateは144/207/2131行の出力用契約一覧で、process行の未知fieldを拒否するvalidatorではない。作者は任意型の許可一覧`processRowOptionalFields.osObservation`へ上記field/typeだけを記述し、必須化や80case oracle変更をしない。
+独立作者の小対照はproperty欠落、snapshot/rowFilter件数0/1/複数、Known同PID候補あり、CreationDate欠落／Unspecified、観測producer例外、rowFilter metadata欠落と実測0の区別を扱う。合成行と局所境界で検証し追加OS照会0、全対照で元拒否／unknown非停止／非PASS不変を確認する。実terminalへ載る証拠は後続の新固定snapshot実行で取得し、旧PID24592の原因へ遡って適用しない。
+本担当の完了境界はschema文1箇所と本追補・diff/link/hash確認である。独立Preと実装／小対照／動的実証は未了、未知processの正体は未解決のまま親へ返す。使用skillは既読api-and-interface-design、UI非該当。runtime/source/test編集・再委譲・公開0、子token counter／provider実行metadataは未取得である。
+
+## CIM path欠測時の同一保持handleによる限定補完（2026-10-15）
+
+入力は[承認済みET契約](early-trial-contract.md)、[G5とモデル割当](early-trial-gate-plan.md)、[plannerの限定解釈・親割当](early-trial-delivery-review.md)である。designerは`gpt-6-astra/high`、本書だけを所有する。api-and-interface-designを読了し、内部型・失敗境界へ適用した。UIは非該当。基準HEAD=`9963c52c8c277ea744e9e204e74af96e9b451ce7`、Invoke SHA256=`333C37FF523542AD52004B76D17CE43369896555CEA2F326AE749A3C55D42245`、Test=`D8AD0AD44C2457DC60E64E52A6EDB455974D5F8AD9938B956CEF3E4DDAB0F7F3`、追補前本書=`51DBDBD7B8AE8E31AAA2BF5BB74D9C6D51EF39A8455C2EEFB2C38A1250A2A8EB`である。既存dirtyを保持して末尾だけ追記する。
+
+[直前実測](early-trial-delivery-runner.md)のsuite `e48f86cd-4032-4598-a904-a4d0a3679be6`ではENV01がCleanupIncomplete、control2PASS／80caseは0PASS・1FAIL・79NotRunである。unknown15748のCIMは1行、path=null、commandあり、CreationDateあり、known0で、parent22496は登録Cargoと一致する。しかしGet-Identityの360行で世代照合前に拒否されており、path欠測以外が成立した証拠でも、このprocessを所有できる証拠でもない。本追補は今後のnull-pathだけを扱い、旧runの判定・所有記録を変更しない。
+
+### 内部境界・順序
+
+実装所有はR/Invoke-CargoGate.ps1のGet-Identityと同fileの小private helper／相互運用宣言だけである。現物にはAdd-Type／DllImportがなく既存interop再利用はできないため、親受領済みの最小Add-Type宣言1個を追加する。追加package・外部DLL配置・新process／runspace・新public parameter・native入口／V2Case／製品source変更はない。型ロードは最初の必要時に一度だけ、失敗を既存拒否へ返す。目安は宣言／1回読取20–35行、有限loop／control確認20–35行、Get-Identity接合5–15行である。これは品質上限ではなく、汎用frameworkへ膨張した場合に親へ返す目安である。
+
+| 境界 | 入出力・所有・不変条件 |
+| --- | --- |
+| Get-Identity(Process, Rows) | 現在のProcess.SafeHandleをRefresh／StartTimeより前に固定する。Rowsは既存snapshotのままで新CIM照会を追加しない。既存5field identityとrowFilter例外metadataの型を維持する |
+| helper呼出前の検証 | 同PID行数が厳密に1、CommandLineが存在かつ非null、CreationDateがDateTimeかつKind≠Unspecifiedであることを先に検証する。保持Process.StartTimeとのUTC6桁・InvariantCultureの世代一致を既存方式で確認し、返す開始時刻は7桁のままとする。いずれか不成立ならpath helperへ到達しない。欠損propertyをnullとして補修しない |
+| pathの二分岐 | ExecutablePath propertyが存在し、値が厳密にnullの時だけhelperへ渡す。非null値は従来どおりGet-CanonicalPathへ渡し、空／相対／不正／不存在／reparse等の拒否を維持する。非nullの矛盾をOS値で上書きしない。helper返却値も同じGet-CanonicalPathで検証し、prefix除去・短縮名展開・検索・alias許可を追加しない |
+| Get-PinnedProcessImagePath(SafeProcessHandle) | 呼出元が既に保持する同じオブジェクトを借用し、canonical化前の非空Win32絶対path文字列を返すか例外を返す。PIDを引数にせず、OpenProcess／GetProcessById／MainModule／自己申告／Intent値で再取得しない。handleを作成・複製・Dispose・Closeしない |
+| 小C#相互運用型のRead(SafeProcessHandle, int capacity) | Kernel32のQueryFullProcessImageNameWを1回だけ呼ぶ。P/Invokeは明示W、CharSet.Unicode、ExactSpelling=true、SetLastError=true、BOOLのbool marshal、引数SafeProcessHandle／uint flags=0／StringBuilder／ref uint sizeである。公開されるのは同script用static methodだけで、gate外部契約ではない |
+
+Readは入口でnull／IsInvalid／IsClosedを拒否する。P/InvokeへSafeProcessHandleを直接渡し、CLRの呼出中参照増減を使う。裸IntPtr、DangerousGetHandle、独自CloseHandle、手動DangerousAddRef/Releaseは不要である。呼出元がProcessと固定handleの強参照を保持し、終了・台帳登録／既存finallyまで所有を変えない。各試行前と成功返却前にも同じ固定handleのclosed/invalidを確認し、再Openによる回復をしない。並行Disposeを許可する新workerは作らない。これはPID再利用を防ぐhandle寿命であり、親edge・command・世代検証の代替ではない。[SafeHandleの公式参照数契約](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.safehandle?view=net-10.0)を根拠とする。
+
+Readのnative失敗直後に、別のP/InvokeやPowerShell処理より先にC#内でMarshal.GetLastWin32Error()を保存し、そのNativeErrorCodeを持つWin32Exceptionを投げる。PSのstatic呼出wrapper越しでもその元例外を保持し、文字列比較で再試行を選ばない。成功ではsizeが1以上capacity未満、StringBuilder長とsizeが一致、内部NULなしを確認し、全文字列を返す。切詰め・失敗buffer・不正sizeを成功として返さない。[QueryFullProcessImageNameW](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-queryfullprocessimagenamew)はflags=0をWin32形式、sizeを文字数、成功sizeを終端NULを含まない長さと定める。必要権限は既存handleのquery権限だけで、権限不足でも再Open／Admin昇格しない。[Marshal.GetLastWin32Error](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.marshal.getlastwin32error?view=net-10.0)のキャッシュされたエラーを保持する。
+
+PS helperの容量は256→512→1024→2048→4096→8192→16384→32768文字、最大8回とする。再試行は元Win32Exception.NativeErrorCode=122（[ERROR_INSUFFICIENT_BUFFER](https://learn.microsoft.com/en-us/windows/win32/debug/system-error-codes--0-499-)）だけで、失敗時sizeを必要容量として信用しない。他エラー、最終容量でも122、型ロード失敗、無効／閉鎖handle、不正返却値はそのまま非成功である。32768はこのhelperの保守的資源上限であり、全Windows pathの対応保証ではない。上限到達でも最後のOSエラーを失わず、追加容量・別API・PID検索へfallbackしない。
+
+型ロードと各API試行の前後で既存Assert-Controlと既存cleanup UTC／monotonic上限を確認する。Aborting時はAssert-Controlが早期returnするためcleanupの2上限を別途必ず確認する。新Stopwatch、phase再初期化、新10秒、sleep／backoffは設けず、残予算0なら呼ばない。cancel／期限がAPI中に生じたら復帰直後に拒否し、遅い成功をidentity／Ownedへ渡さない。API失敗と期限超過が重なる場合も元OS例外は保持し、既存の非成功状態を成功に変えない。同期OS呼出と型ロード自体を強制中断する保証はない。既存の「少なくとも一監督が生存しOS APIが応答する」保証条件を維持し、8回という回数上限を壁時計上限の実証へ換算しない。
+
+状態順序は`Pinned → CIM行/command/date/同世代確認 → 既存path又は同handle読取 → canonical化 → 5field identity → 既存parent生存区間／Intent・Ready照合 → Add-KnownProcess`である。pathを取得しただけではOwnedにならない。親PID一致のみ、複数親候補、親生存区間外、LIFE16の観測不能faultは既存拒否を通す。helper失敗はGet-Identityの元例外／rowFilter metadata経由で既存Read-OwnedTree catchへ戻り、unknownはUnprovable・killRequested=false・waited=false・hasExited=null、CleanupIncomplete／非PASSである。既存DirectLaunchHandleの独立した直接起動証拠は変更せず、helper失敗を新たな直接起動証拠へ変換しない。
+
+新永続field・sidecarは不要である。osObservationのpathPresent／rowFilterPathPresentは元CIM値の観測なので、補完成功でもfalseをtrueへ変えない。identity.pathだけが実OS値となり、ownershipEvidence.kind=OsQueryと既存全identity比較を維持する。Intent→Registration→Ready→ACKとterminalのatomic CreateNew順、回収後のfixture削除条件、未知値nullを保持する。失敗後の新しい同定試行を旧Unprovable行の除去や旧runのPASS化に使わない。現物の非null pathも常に照会して上書きする案は矛盾を隠すため、MainModule／PID再Openは同handle保証を外すため、別監督／Jobは権限・寿命範囲を広げるため採用しない。
+
+### 受入対応・独立引継ぎ
+
+以下のPTH番号は局所回帰名であり、既存80case／87variantの受入ID・刺激・期待値を置換しない。作者は既存のAST抽出による隔離対照を再利用し、必要な置換はテスト内のprivate境界だけへ限定する。製品modeやdescriptorにfault APIを追加しない。
+
+| 局所証拠／受入ID | 作者・runnerの必須対照と期待値 |
+| --- | --- |
+| PTH1／G5、ENV01 | 合成processの同じ保持SafeHandleと実OS StartTime／実CIM1行を使い、行コピーのpathだけnullへ変更する。実QueryFullProcessImageNameWを通ったpathが独立確認した合成EXEと一致し、他4fieldが通常CIM対照と同一。helper前後のReferenceEqualsとhandle開存を確認する。成功値をmockしただけでは本項未検証 |
+| PTH2／G3/G5 | 通常の非null CIM対照でhelper呼出0。空・相対・不正pathを従来どおり拒否しhelper0。非nullの別EXE pathはAssert-Identity又は既存Intent比較で拒否し、実pathへの上書きで成功しない |
+| PTH3／G5 | 同PID0行／複数行、CommandLine欠落／null、CreationDate欠落／非DateTime／Unspecified、UTC6桁世代不一致はすべてhelper0・非成功。property欠落と明示null pathを区別する |
+| PTH4／G5 | 実合成handleのclosed／invalid、OS API失敗、型ロード失敗を区別し、元例外／error code保持・非成功を確認する。未知descendant経路では非停止・非PASSであり、部分identityをKnownへ登録しない |
+| PTH5／G5 | テスト内の1回Read境界で122→成功、122以外、8回連続122、成功size0／capacity以上／長さ不一致／内部NULを独立刺激する。容量列は上記8値、上限後の9回目0、元エラー保持、失敗buffer非採用である。mockと実API証拠を分ける |
+| PTH6／G5 | 既存cancel／run・phase期限、Aborting中cleanup UTC／monotonic期限を各試行前後に刺激し、残0でAPI0、復帰後期限超過でOwned0、時計再開始0を確認する。遅延を与えた境界対照はOS全体の中断保証ではない |
+| PTH7／G5、LIFE14/16/17/18 | 既存Registration/Ready拒否・unknown非停止／非PASS・終了未証明非PASS・独立sentinel同PID/実StartTime生存を維持する。正常path補完をmissing-edge／termination faultの回避に使わない。sentinel停止は作者の既存所有手順だけである |
+| PTH8／G1–G6、ET-07 | 新固定Invoke/Test/design SHAで独立Pre→作者のRED→実装→局所GREEN／静的検査→独立Post／通常入口80caseを引き継ぐ。ENV01成功や局所PASSだけを80件・実Cargo接合・製品fullの成功へ換算しない |
+
+設計上の未決仕様はないが、null-path時の実API成功、同handle保持、同期呼出時間、負例回収は未実測である。独立Preで同等のG5証明と判断できなければ実装前に親へ返す。APIが失敗する実環境でもunknown非PASSを維持し、OS権限・gate・80case oracle変更が必要なら本追補の範囲を終了する。実装／test作成はAstra/high、独立runnerはSol/medium、reviewerはAstra/highの既定割当である。本担当は文書diff／相対link／hash確認だけで、runtime・source/test編集・再委譲・公開0。最初の時刻観測は2026-10-15T22:00:46.9921021+09:00（着手そのものの時刻ではない）、子`/root/et3_image_path_design`の開始／終了token counter・provider返却model/effort・週枠は未取得。親のusage記録へ欠測として引き継ぎ、指定値や作業量から推計しない。
