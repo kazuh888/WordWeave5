@@ -2,6 +2,18 @@
 
 ## path欠測是正の設計再開（2026-10-15）
 
+KH-C作者はcontext3literal＋handoff追記だけを更新し、新F46/4A74をfreezeした。静的inversebyte/凍結32/12意味不変を確認、既成功12のruntime反復0。作者共有窓50→51%／10080/reset1792667952（account共通、当担当専有消費ではない）、token/provider返却metadata/包含欠測。別実装者へdriver5hashだけを逐次引継ぎ、OS/20pure/focusedの独立実行は接合review後のためまだ0である。
+
+KH-TEST-AST01のtest0C82はOS内2箇所のみ、AST4/report3PASSと独立Postを経て作者OS2を1回実行し2PASS（finally0.6519982秒）。Pure本文同体を逆diffで証明し、D12での20PASSを不変範囲へ再利用してPure20反復0。作者20+2の独立証拠接合PASS後、context bindingのみの別作者へhandoffした。主KH独立runner/focusedは未実施、検証削減効果や専有usageは未判定のままである。
+
+作者newPure20は20PASS、OSはzeroarg ASTのnull Countによる起動前adapter失敗で停止した。実OS子/CIM起動0、O1FAIL/O2NotRunをOS本体失敗/成功へ転換しない。staticで捕捉できなかったtest adapterの手戻りKH-TEST-AST01として同ET3に記録し、最小AST対照の独立確認へ戻す。source35AE/期待20の変更やPure成功反復、harness一般化を節約策として行わない。
+
+KH-B実装者はsource Read-OwnedTree57add3del、候補35AEをstatic freezeした。Pure/OS実行0、逆置換BOM補正の検査計算1回は手戻りとして記録。本体再修正やpassed analyzer反復はない。実装者共有46→46%／10080/reset1792667952、固有token/provider/包含欠測。親はsource独立staticレビューと作者OSコード準備の非衝突2担当だけを維持し、新source実行を先行しない。
+
+KH-AはdesignAF67の独立PrePASS→plan80B2確定をb3aedffへ保存した。KH-B作者の約460行Pure20は旧19RED1PASS／Unexpected0、P02を決定的再現しtest840で凍結した。OS2は未実装guardであり22件完成とはしない。Invokeのみを所有する別実装者と、Test-KnownHandleのOS部分だけを所有する作者を最大2helperで並列化した。共有fileなし・runtime0、双方freezeと接合後に実行する限定割当であり、使用量削減効果は未測定である。Pester/新frameworkを追加せず、旧成功12/設計Pre/旧Pureの無用な反復を避ける。
+
+KH-A局所設計97行追補・Pre提出時の共有週枠は43%／10080/reset1792667952、開始40%との差を当工程専有量とはしない。実行済みsourceの同定とは別に、計画/設計の全文hashも下流test→driverへ固定されており、文書追補だけでも再束縛の作業鎖が発生した。今後の効率改善候補は、規範契約と作業履歴の同定単位を見直すことである。今回は承認済みharness/検証水準を変更せず、既存凍結鎖を維持する。設計/回帰整備のコストを使用量削減実績へ換算しない。
+
 CXT-E初回focusedはcontrol2PASS／ENV01FAIL／残9NotRun、26.6723846秒で停止した。CXT-Dのfile/context試験では対象外だった既知子の終了競合が実OS段階で表面化した。実装/期待基準を緩めず保存証拠の独立read-only診断とfresh planner Astra/highの局所是正計画へ戻した。成功12件の再実行・native再build・失敗focused追試0。同じET3の手戻りであり、新タスクへ分離してコストを隠さない。子token/provider返却metadata/包含は欠測、共有窓から専有量を推定しない。
 
 利用者「続けてください」でCXT-E focused10件へ再開。開始側共有週枠40%／10080分／reset1792667952。CXT-Dの12件/独立Postを再実行せず受領し、既存runner Sol6.1/mediumへ固定driver68EF44DD・新規直下suite・firstFail/retry0で引き渡した。新native再build、既成功static反復、新テスト基盤作成は不要とし、結果後の独立Postから標準80へ段階復帰する。親token開始snapshot・provider返却metadata・親子包含は欠測であり推定しない。

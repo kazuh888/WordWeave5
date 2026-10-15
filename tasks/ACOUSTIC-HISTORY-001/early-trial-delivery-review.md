@@ -4,9 +4,33 @@
 
 ### CXT-E focused実動作：ENV01停止・保存証拠の診断中
 
+KH-C作者のcontext束縛更新はfinal testF46F3B09DEADB8F4A2D1E1F52D09E62F0C746967F824381ED97C6CEBE5C6B4EC／P1handoff4A74FACE49B6314A8DE837E044462DE0B94A587BB7EDC6786C25D0D4672146FF。Invoke/plan/designの3literalだけの逆byte一致、旧handoff全文保存、凍結32件不変、Parser/PSSA0、元context consumerのRead以外全文不変／Read trapにより旧approved-b12PASSを静的対応付けした。証拠はpacket/kh-c-context-bindings-20261016、今回runtime0。別実装者へdriverの5inputhash/HANDOFFだけを逐次所有で引き渡した。
+
+作者OS2はpacket/8e9595fc-e238-4ff6-bf45-00d8f565af54で2PASS、child/shell exit0、finally込み0.6519982秒。source35AE/test0C82一致、実CIMself/子各1行を同一snapshotのままO1live→O2Exitedへ渡し、各ReadのIdentity1/Add0/PID-open0、作者wait1/kill0、cleanupFailureなし。独立証拠接合PASS／指摘0、D12Pure20PASSの同体再利用と旧結果保全も確認した。これは作者局所20+2の受領であり、独立runner/focused/主KHClosedではない。KH-Cのcontext3binding＋P1handoff追記だけを別作者へ渡した（runtime0）。
+
+KH-TEST-AST01-P1/P2の最小是正は新test0C82D1C838F1EC59D85CE24667FADDB4C5EAD1A0E96C077B764E6BA0DCF5A092。AST4対照旧2RED2PASS→新4PASS／report3PASS、独立逆diffで旧D12全文一致（OS2箇所だけ）、Pure/accepted/時間/回収不変、parser/PSSA0を独立Postで確認し閉鎖可。report意味はHANDOFF記載でありJSONへの新meaning field追加ではない。Pure20はD12での結果を同体範囲へ対応付けるが、新testで実行済みとはしない。親は新OS2だけを新root・通常非adminで1回dispatchし、動的結果待ちである。主KH-REOPENとgate全体は未了。
+
+KH-TEST-AST01の独立reviewはCHANGES_REQUIRED（初回）。P1はzeroarg ASTのArguments=null未考慮、P2はphase選択をosEvidence=trueと記録する分類であり、accepted=falseを成功へ読み替えない。規範契約/plan/design/sourceは変更不要と判断した。作者へOS条件のnull-safe化とPASS case≥1だけosEvidence=trueという2箇所の最小是正、実adapter抽出のAST4対照（旧2RED2PASS→新4PASS）と合成report3対照を依頼。15/10秒・回収・Pure本文/期待・新source35AEは不変、OS/Pure20の追試はまだ行わない。修正後独立差分確認・新SHA freeze・別実行dispatchを必要とし、同根因再差戻し時はtwo-strikeで局所追記を止める。
+
+作者newPure20は20/20PASS、child/shell exit0（packet/3863c4bf-6104-45a2-be2c-95ea7fc17785）。OS1回は起動前AST adapterでO1FAIL/O2NotRun、exit1・0.1678467秒（packet/b7544ab3-3bf5-4055-99d9-f319fc4f0211）。TestD12:232の引数なしDispose ASTはArguments=nullであり、StrictModeの `.Count` 読取が失敗した。launch/CIM/registration/wait/kill0、cleanupFailure=null、source/test不変。実handleの元consumer成立は未検証、OS reportのosEvidence=trueはphase由来であり実測成功へ流用しない。新finding KH-TEST-AST01として独立read-only原因照合/最小是正Preへ返し、再試行・harness拡大は行わない。
+
+OS追加testの最終SHA D12A5DB59689BEA912BFB6E93EE3739DA01B46D21483519CAD8790FF8834AB43、静的handoffはpacket/e7f4fdb2-efa1-4028-9cf7-59c16f69ebf5/HANDOFF-OS-STATIC.md。追加OS/旧Pure不変/Source35AE接合の独立staticはPASS／指摘0。実型consumer/単CIMself子snapshot/EOF終了/15秒同予算/finally同launchhandle回収、lifecycle0の間接証明と未達nullを確認した。親が受領し、作者newPure20→成功時のみOS2各1回を明示dispatchした。動的結果はまだ未取得、source/test変更・再試行・focused/80は未解除。
+
+KH-B sourceの独立static reviewはPASS／確定指摘0（plan80B2/designAF67/新35AE/旧12E7/Pure840の現物一致）。Read前後の本文不変、既知完全照合・借用非Dispose・新規所有移譲、元Unprovable/fault/cancel/期限を確認した。新Pure20/作者OS2/OS freeze接合/独立runner/Postはまだ未取得であり、source実装のVerified/Closedを宣言しない。
+
+KH-B実装候補はInvoke SHA35AE6C713ABCEAA28361DA750E7BD06F373E09EF2FB155D8456F79D83ADC66B5、Read-OwnedTree内57追加3削除だけで凍結した。parser/PSSA1.25診断・実行error0、旧Read本文への逆置換でBOM込み旧12E7全bytes一致、他consumer/fixed期待不変。証拠はpacket/6a6ee790-fa4a-496c-b8a4-205acca75e2f。新Pure/OS/runtimeは未実行、sourceのみの独立static reviewへ渡した。作者は別fileのOSphaseを準備中で未freeze、その新testはこのsource reviewの対象外である。
+
+KH-Aはplan80B2FE76095C74711D7AA0E5DB1D469096F25C84B3CC5DE2B798FEC9C8444035へ限定確定し、designAF67のPreを維持した。独立作者の旧Pure20は保存旧copy（packet/360dac41-af21-4400-91fc-aacfff8f6d2c/Invoke-CargoGate.old.ps1）に対し1PASS／19RED／Unexpected0、exit1。P02はopen1→not-running／getIdentity0／Unprovable1／CleanupIncompleteで決定的RED、保持Knownは保存された。結果rootはpacket/4edbfada-b1f0-45d8-b48e-93d59e776a18、全caseのosQuery/kill/wait/terminal/borrowedDispose/runWideOpen/trap0。これは新source GREENではない。作者はPure期待/旧REDの凍結中、OS2はguardのみ未実装・未実行であり、全22件の完成ではない。
+
+KH-A fresh独立設計PreはPASS／確定指摘0。requestはHEAD ed1ce4a・plan956C0CDA・designAF67CB6E・Invoke12E7、class設計/規約/reliability、Gate Pre。元Rows一意→UTC6桁候補一意→有効保持handle参照→未変更Get-Identityの全5field/UTC7key一致、借用非Dispose、既知失敗fallback禁止、新規旧経路、失敗後stateを支持した。Pure20とOS2、旧型AST0/新1、OS snapshotのself/合成子だけのfield不変抽出を分離して成立性確認済み。実コード・回帰・OS・focusedは未検証でありKH-REOPEN-01 Closedではない。plannerへKH-Aの限定精緻化を返した。
+
+KH-A設計は既存design477〜、SHA AF67CB6E40B37813226317B68D0698BBD84586732FAE92D88A7982D978E223A2で凍結し、fresh独立Preへ提出した。唯一方式はRead-OwnedTree内で元Rows/台帳/保持Processを未変更Get-Identityへ渡す完全照合、newだけ元PID open。保存2PIDは完全identity、部分identityの補完・昇格はしない。Pure20＋実handle2の固定受入を分離し、実装・OS対照はまだ未実施。Pre後のplanner精緻化・束縛再結合前に旧driverを起動しない。
+
 | Finding ID | 原文・位置 | Root cause | State | Packet | Canonical artifact | Evidence | Oracle | Reviewer record | Residual / out-of-scope |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| KH-REOPEN-01 | 既知候補の確認より先にPIDを再openする（Invoke Read-OwnedTree:1270→1274） | snapshot後の終了で、既存保持handleを確認する前にGetProcessByIdが失敗する | Accepted（設計前） | KNOWN-HANDLE01 | 既存gate-designの局所追補→Invoke Read-OwnedTree | 現Invoke12E7、保存run94e5f1c6・Owned/Unprovable/cancel/tmp。所有は設計/作者/実装を計画指定で分離 | 旧分岐RED→同世代保持handleGREEN、PID再利用/無効handle/未登録消失の非PASS、実handle終了対照。具体化はKH-A Pre前 | 独立P1確認、KH-A Preは未実施 | CXT-D/PTH-MONOの限定PASS維持、CXT-E/ARGV/80/full/提供は未了 |
+| KH-TEST-AST01-P1 | zeroarg Dispose ASTのArguments.Count（TestD12:232） | 引数なしをnullで表すAST契約の未考慮 | Closed | KH-TEST-AST01 | Test-KnownHandle OS adapterのみ | 新0C82／旧D12・OS b7544ab3保全 | AST4旧2RED2PASS→新4PASS、作者OS2PASSも後続確認 | 独立PostPASS・指摘0、親受領済み | source35AE/Pure20不変、主KH/全体は別判定 |
+| KH-TEST-AST01-P2 | 起動前失敗でもosEvidence=true（TestD12:456） | phase選択とPASS済みOS case証拠を混同 | Closed | KH-TEST-AST01 | 同report分類のみ | 新0C82・accepted=falseとcounter未観測を保持する旧失敗結果 | 合成0/1/2PASSのevidence/accepted3PASS | 独立PostPASS・指摘0、親受領済み | accepted/時間/回収条件不変、旧結果書換え不可 |
+| KH-REOPEN-01 | 既知候補の確認より先にPIDを再openする（旧Invoke Read-OwnedTree:1270→1274） | snapshot後の終了で、既存保持handleを確認する前にGetProcessByIdが失敗する | Verified（作者局所20+2、独立runner前） | KNOWN-HANDLE01 | 既存gate-design477〜→Invoke Read-OwnedTree | 新35AE／旧12E7、保存run94e5f1c6・Owned/Unprovable/cancel/tmp。所有を計画指定で分離 | Pure20旧19RED1PASS→新20PASS、作者OS2PASS、独立runner/focused10とPost待ち | KH-A Pre・source static・作者証拠接合PASS | CXT-D/PTH-MONOの限定PASS維持、KH-C–D/CXT-E/ARGV/80/full/提供は未了 |
 
 独立診断を受領して既存plan244〜へKNOWN-HANDLE01の暫定4単位を追補した（SHA956C0CDA）。新planner/局所designerはAstra/high、既定作者/実装/reviewerもAstra/high、runner Sol6.1/medium。外部仕様の新規変更は非該当。設計・Pre・planner確定前に実装/runtimeを行わない。plan変更により旧test94/driver68の固定plan hashは不一致となり、再束縛までは実行不可。旧受入証拠は旧snapshotのまま保持する。
 

@@ -4,7 +4,7 @@
 
 ET3の別配置試用EXE提供を継続中である。PTH-MONO-01は最終Post PASS／Closed（Invoke12E7、独立47/47＋5/5）。標準80は別の内部argvパス表記不一致でENV01 FAIL／79 NotRunであり、製品full／提供は未了である。
 
-ARGV-PATH01のnative381F／EXEFF7Cは保全済み。CXT-D修正版12PASS／guard2PASS・独立受入PASSは維持する。続行したCXT-E suite68cfe879-a4ea-4665-83f0-8bff89cd2b2bはcontrol2PASS／ENV01FAIL／残9NotRun、sourceMatchedtrue／16入力不変、retry0で停止した。RunOwnerはOwned終了12＋Unprovable1、CleanupIncomplete。既知PID23100の保持handle照合前のGetProcessByIdが終了競合で失敗する分岐を独立診断中、SafetyWorkertmpにも同branch別PIDあり。最初の公開cancelはSupervisor、全processでの時間的初因は断定しない。G0列挙fakeの完了だけでfull実行/AP1/cleanup成功としない。plannerへ既存planの限定是正追補を依頼、追加runtime/源修正0。標準80/製品full/試用提供は未了、原データ/通常EXEは保持する。
+ARGV-PATH01のnative381F／EXEFF7CとCXT-D12PASS/独立受入は維持する。CXT-E suite68cfe879の既知PID再open競合に対し、KH-A plan80B2/designAF67 PrePASS→KH-B Invoke35AE（Read-OwnedTreeのみ）staticPASS、作者Pure20PASS/実handleOS2PASS・独立証拠接合PASSまで進んだ。旧Pure19RED1PASSと旧failed runは保全。OS起動前adapterのKH-TEST-AST01-P1/P2はtest0C82で最小是正・AST4/report3/独立PostPASS（旧D12Pure本文同体、再実行不要）。主KH-REOPEN-01は独立runner/focused前で未Closed。現在KH-C：context test3hash/P1handoffだけ更新中→別実装者driver5hash/HANDOFF→独立接合→runner OS2/Pure20/focused10各1回、firstFail停止。標準80/full/試用提供は未了、通常EXE/実データ/unknown非停止非PASS/期限は不変。
 
 正本は[計画](ACOUSTIC-HISTORY-001/early-trial-gate-plan.md)・[設計](ACOUSTIC-HISTORY-001/early-trial-gate-design.md)・[レビュー](ACOUSTIC-HISTORY-001/early-trial-delivery-review.md)・[runner](ACOUSTIC-HISTORY-001/early-trial-delivery-runner.md)・[使用量](ACOUSTIC-HISTORY-001/usage-observation-20261014-et3.md)。checkpoint a13352bまでpush済み、通常release不変。今回再開の共有週枠は40→40%でアカウント共通、task専有量や親子token合計は不明である。
 
