@@ -4,7 +4,7 @@
 
 ET3の別配置試用EXE提供を継続中である。PTH-MONO-01は最終Post PASS／Closed（Invoke12E7、独立47/47＋5/5）。標準80は別の内部argvパス表記不一致でENV01 FAIL／79 NotRunであり、製品full／提供は未了である。
 
-ARGV-PATH01のnative381F／EXEFF7Cは保全済み。test94E4928C／P1引継ぎ43151F84・driver68EF44DD／HANDOFFA32C8F6Dの修正版12件を承認どおりsandbox外・非管理者で1回実行し、approved-bは12PASS／guard2PASS／exit0／retry0／6.5264904秒、15入力不変・禁止22counter0となった。独立接合reviewはCXT-D受入PASS／指摘0で親受領済み。旧approved-aの誤判定結果は保全、無効Pester準備とregistry実変更有無の欠測は別記録に保持する。次はCXT-E：固定候補・新規R/verification/<UUID>直下suiteでfocused10件1回／firstFail停止、実OS親・所有・terminal/cleanup・argvを確認しPost後に標準80へ戻す。今回後続実行0、CXT01/ARGV全体Closed/製品full/提供は未了、背景実行なし。
+ARGV-PATH01のnative381F／EXEFF7Cは保全済み。CXT-D修正版12PASS／guard2PASS・独立受入PASSは維持する。続行したCXT-E suite68cfe879-a4ea-4665-83f0-8bff89cd2b2bはcontrol2PASS／ENV01FAIL／残9NotRun、sourceMatchedtrue／16入力不変、retry0で停止した。RunOwnerはOwned終了12＋Unprovable1、CleanupIncomplete。既知PID23100の保持handle照合前のGetProcessByIdが終了競合で失敗する分岐を独立診断中、SafetyWorkertmpにも同branch別PIDあり。最初の公開cancelはSupervisor、全processでの時間的初因は断定しない。G0列挙fakeの完了だけでfull実行/AP1/cleanup成功としない。plannerへ既存planの限定是正追補を依頼、追加runtime/源修正0。標準80/製品full/試用提供は未了、原データ/通常EXEは保持する。
 
 正本は[計画](ACOUSTIC-HISTORY-001/early-trial-gate-plan.md)・[設計](ACOUSTIC-HISTORY-001/early-trial-gate-design.md)・[レビュー](ACOUSTIC-HISTORY-001/early-trial-delivery-review.md)・[runner](ACOUSTIC-HISTORY-001/early-trial-delivery-runner.md)・[使用量](ACOUSTIC-HISTORY-001/usage-observation-20261014-et3.md)。checkpoint a13352bまでpush済み、通常release不変。今回再開の共有週枠は40→40%でアカウント共通、task専有量や親子token合計は不明である。
 

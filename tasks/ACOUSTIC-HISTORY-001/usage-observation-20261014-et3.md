@@ -2,6 +2,10 @@
 
 ## path欠測是正の設計再開（2026-10-15）
 
+CXT-E初回focusedはcontrol2PASS／ENV01FAIL／残9NotRun、26.6723846秒で停止した。CXT-Dのfile/context試験では対象外だった既知子の終了競合が実OS段階で表面化した。実装/期待基準を緩めず保存証拠の独立read-only診断とfresh planner Astra/highの局所是正計画へ戻した。成功12件の再実行・native再build・失敗focused追試0。同じET3の手戻りであり、新タスクへ分離してコストを隠さない。子token/provider返却metadata/包含は欠測、共有窓から専有量を推定しない。
+
+利用者「続けてください」でCXT-E focused10件へ再開。開始側共有週枠40%／10080分／reset1792667952。CXT-Dの12件/独立Postを再実行せず受領し、既存runner Sol6.1/mediumへ固定driver68EF44DD・新規直下suite・firstFail/retry0で引き渡した。新native再build、既成功static反復、新テスト基盤作成は不要とし、結果後の独立Postから標準80へ段階復帰する。親token開始snapshot・provider返却metadata・親子包含は欠測であり推定しない。
+
 修正版12件の再開区間は独立12PASS/guard2PASS、6.5264904秒・retry0、独立review CXT-D受入PASS/指摘0で終了した。新規テスト基盤・ソース変更・準備再試行0、同じ固定入力を再利用し証拠だけを追加した。runner／reviewerは従前の指定責務を再利用、reviewer共有40→40%／10080/reset1792667952、終了観測04:34:36 JST。親開始側も40%であり、変化0を無消費とはしない。今回親・子token/実返却metadata/包含は欠測、共有窓から工程専有量は算出しない。以後の記録・commit・最終応答は観測外、後続focused/80/fullは未実施である。
 
 修正版12件の再実行承認で再開。完了境界は固定12件の独立実行・結果接合までである。開始側共有週枠40%／10080分／reset1792667952／ordinaryUsageAllowed=true、親token同時点snapshotは未取得。既存独立runner cxt12_runtime_approved（gpt-6.1-sol/medium）を関連する同一責務で再利用し、新規runner/harnessは作成しない。provider返却metadataと親子包含は欠測のまま、指定値から実行値や専有消費を推定しない。

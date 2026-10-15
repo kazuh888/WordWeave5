@@ -240,3 +240,84 @@ designerは既存designのARGV-PATH01節にfocused context契約を追補し、�
 撤回/限定するclaimは、(1) source-bound File一致で全context同定済み、(2) boundary/repository2代入とconfig4path確認でruntime前提が網羅済み、(3) ValidateOnly/静的Pre/Postからfocused実行可能、(4) CXT01 Closed、(5) marker0からprocess/TEMP残存0、である。これらの静的検査自体・control2 PASS・保存旧argv REDを消さず、成立した狭い範囲へ限定する。native2定数を原因に戻したり、実行未到達の新nativeをGREEN/FAILと判定しない。
 
 上記再構成/設計/Preが済むまで新patch/再試行は禁止する。80case/87variant/10focused/追加slashの期待値、generic argv exact、OS/権限/依存/Job/API/データ、製品source、既存承認/期限を変えない。必要な新権限または既存consumer境界緩和が判明した場合だけ具体的根拠を親へ返し、利用者判断を求める。現段階は技術契約の再構成で進められ、利用者の追加選択は不要である。
+
+## KNOWN-HANDLE01 PacketBrief（2026-10-16、暫定計画・設計前）
+
+対応findingは親の既存review matrixの`KH-REOPEN-01`（Accepted、独立P1確認）である。KNOWN-HANDLE01は本局所計画名、KH-A–Dは作業単位であり、findingの複製やClosed判定を作らない。
+
+対象はCXT-Eで観測した、既登録processを再列挙した際に保持handleへ到達する前のPID再openが失敗する局所競合である。完了境界は最小是正の独立回帰・固定snapshotのfocused10件・独立Postを経て標準80件への再開handoffを可能にすること。標準80/87variant、製品full、ET3提供の完了は含めない。本plannerの今回の完了は本追補と文書検査・親返却だけであり、設計/Pre受領後に本節を限定精緻化する。
+
+### 証拠と未検証の境界
+
+- 親受領の独立診断P1は、Invoke `12E7FC95F24883AC89E8464108AC7404D4953006EBFA56DC9B7F8D0613281621` のRead-OwnedTreeで1270のGetProcessById→1272のGet-Identity→1274のKnown.ContainsKeyの順であることを確定した。plannerも当該分岐とAdd-KnownProcessのpinnedHandle保持をread-only確認した。追加OS測定は設計着手条件ではない。
+- 保存REDはsuite `R/verification/68cfe879-a4ea-4665-83f0-8bff89cd2b2b`、run `94e5f1c6-43bb-4ca6-98c7-80eb443f76fa`。control2PASS、ENV01FAIL/残9NotRun、sourceMatched=true。RunOwner21556のUnprovable PID23100は再open時not running、rowFilter未到達。同terminalに保持済Owned PID23100（parent14632、start `2026-10-15T20:38:03.9529175Z`、exit `20:38:04.9864708Z`）があり、元CIM creationは`20:38:03.9529170Z`。knownMatch1/snapshotMatch1/path・command存在は補助観測であり、これだけから同世代/所有を断定しない。
+- 最初の公開cancelはSupervisor `20:38:05.0399582Z`。RunOwner cancel.tmp `20:38:05.0425184Z` は未公開である。SafetyWorker result.tmpにもPID6472/knownMatch1の同分岐失敗があるが、正式terminal成功へ加算しない。PID23100が全process時系列で最初の原因だったというclaimは置かない。
+- CXT-D test94E4928C/driver68EF44DDの12PASS・独立Post PASSとPTH-MONO01 Closedは保持する。今回はPTHのpath-null fallback/UTC精度/mono検証より前の別branchであり、そのclosureを撤回しない。旧Unprovableを後からOwnedへ変更せず、保存RED、tmp、cancel、旧入力/結果/承認は上書きしない。現行CXT-E/ARGV受入は未達のままである。
+
+### 要求・候補・不成立条件
+
+| 要求 | 暫定の受入境界 |
+| --- | --- |
+| KH1 同世代の既知process | 元snapshotの対象行と台帳identity・有効保持handleが同じ世代であることを再open前に証明できる場合のみ、その既存台帳を利用する。PIDだけのskip、GetProcessById例外の無条件成功化、最新snapshotへの取り直しによる救済は不可 |
+| KH2 所有/終了の証拠 | 既存Knownの所有根拠とhandle寿命を保持し、新しい所有権・終了事実を合成しない。既知・同世代でsnapshot後に終了しても、保持handleで既存終了観測へ進める。未知・証明不能は従来のUnprovable/非停止/非PASS、既存fault・kill/wait/terminal条件を維持する |
+| KH3 境界の不変 | 新規候補は従来のidentity/parent lifetime検証と登録へ進む。PID再利用、複数/不正CIM行、部分identity、閉鎖/無効handleを安全な既知一致と誤認しない。generic argv exact、承認、UTC/mono期限、未知値nullとfixture保持は不変 |
+
+優先候補はRead-OwnedTree内で既知候補を先に限定照合し、既知同世代の保持handleを借用して既存identity検証へ接続し、新規候補だけをPIDでopenする構成である。ただし単にKnown検索を前へ移すだけでは不十分である。designerは一意な元行、PID、CreationDateの既存UTC6桁比較、保持handleの7桁開始時刻と台帳key、parent/path/commandの照合、pinnedHandleの生存と借用所有、終了後Refresh/StartTime読取の成立性を具体化する。6桁一致を新しい時刻許容差へ変更しない。同PIDに複数世代の台帳候補がある場合の選択/拒否を明示する。
+
+Add-KnownProcessはDirectLaunchHandle由来のpath/parent/commandがnullの暫定identityも保持する。完全identity同士の照合とこの部分identityを混同しない。今回は部分identityの補完・新所有の昇格を追加せず、既存direct-launch証拠処理へ委ねるか既知skip対象外とする。どちらが現行状態遷移を保つかは設計/Preで確定する。既知照合の失敗を別processの再open成功で隠さず、PID再利用の場合は新規世代を既存通常経路で検証するか拒否する既存安全境界を保つ。
+
+代替候補は、既存Get-Identityへ保持Processと元Rowsを渡して完全identityを照合する方式と、既存登録証拠に限定した小private照合をRead-OwnedTreeへ置く方式である。前者で終了済handleの既存consumerが成立するなら優先し、成立しなければ失敗APIと不足証拠を特定して後者をPreで評価する。一般化した新identity framework、全監督の再設計、GetProcessById retry、CIM追加照会、Job/Admin/OS設定による回避は採らない。不成立でも未知を成功にする方向へ縮退しない。
+
+### 作業単位・所有・依存・検証
+
+作業リストの正本は本節である。既存未完了plan/todoは移動・完了扱いにしない。通常1 helperずつ、作者/実装/runner/reviewerは別担当、共有fileは逐次所有とする。
+
+| 単位 | 依存・規模・所有 | 受入と必要検証 |
+| --- | --- | --- |
+| KH-A 設計/Pre | 本計画の親受領と独立P1。S、designerは既存early-trial-gate-design.mdの局所追補だけ | KH1–3を状態/入出力/失敗/handle所有へ具体化し、独立Pre PASS。designerは部分identity・終了済handle・候補一意性と局所試験の固定件数/時間/commandを確定。plannerが外部契約再利用可否と実装境界を限定確定する。ここまで実装/runtime不可 |
+| KH-B 独立回帰→局所実装 | Aとplanner精緻化後。S、作者はR/verification/argv-path01内の局所回帰だけ、別実装者はR/Invoke-CargoGate.ps1のRead-OwnedTreeと必要最小private照合だけ | 保存旧Invokeで競合RED、新Invokeで同一oracle GREEN。実装者は作者期待値を編集しない。Parser::ParseFile/PSSA1.25.0、diff/hash/非所有不変を確認。KH1–3の固定対照がPASSしなければ下流解除不可 |
+| KH-C 束縛更新・接合Pre | A/B確定hash後。S、作者は既存Test-ContextPreflight.ps1の入力束縛と同既存handoffの新snapshot説明だけ、その後別実装者はInvoke-ArgvPathFocusedSlash.ps1の固定入力とHANDOFF.mdだけ | 下記依存鎖の旧/new SHA対応、旧bytes保持、12期待/禁止22/10case/17args/firstFail/期限の意味的不変を独立review。入力hash不一致を無視する実行は不可。元context consumerに意味的変更がないことを確認し、単なるplan/hash変更を理由に旧12件を全再実行しない |
+| KH-D 独立実測/Post | B/Cの静的接合PASSと親dispatch。S、runnerは新規隔離証拠/log、reviewer read-only、親が既存runner/review/current/usageへ記録 | 最小正常scenarioを早期確認する下記固定順で局所OS証拠→既定focused10件1回、firstFail/残NotRun/retry0。新snapshotの正常ENV01、実terminal/cleanup、AP1–4を独立確認しPost PASS後だけ標準80へ返す。別失敗は別findingとして停止し、本局所是正を理由にfullを解除しない |
+
+- [ ] KH-A：同世代Known再利用の限定設計・Preを受領し、本暫定計画を精緻化する。
+- [ ] KH-B：独立作者が期待/REDを固定し、別実装者の局所修正とGREENを照合する。
+- [ ] KH-C：新hash組への最小再束縛・旧snapshot保全・独立接合reviewを完了する。
+- [ ] KH-D：独立OS対照/既定focused/Postを完了し、未完了標準80へ返す。
+
+局所回帰は既存AST抽出/合成fixtureを利用し、新public fault APIや新frameworkを作らない。必要最小の分類は、(1)正常live Known同世代、(2)元CIM採取後に同じ保持handleのprocessが終了、(3)同PIDだが別世代、(4)閉鎖/無効保持handle、(5)未登録processの再open前消失、(6)行/候補が一意でない・必要identity欠測、(7)通常の新規子登録、である。作者は3–6をpure/局所代替で固定し、実PID再利用を待つ試験を作らない。保存REDは消さず、再現率に依存する再実行をREDの条件にしない。旧実装がどの境界で失敗するかを同じoracleへ結び付ける。
+
+OS-bound最小確認は隔離した自分の合成子の実保持handle・実CIMを使い、liveでの既知照合→snapshot後の終了→同じ保持handleでの終了観測を有限順序で行う。pureのHasExited代用だけで(2)を実証済みにしない。正常liveの最小確認を初めに置き、ここが失敗したら後続を起動しない。未知sentinelを本体に停止させず、必要な合成子回収は作者/runner自身の既存所有手順だけである。固定件数/上限と具体commandはKH-A/作者freezeで決めるが、既存gateの10秒cleanupや期限を延長する権限ではない。
+
+新Invokeが変更するのは所有列挙の既知分岐であり、CXTの禁止22中Read-OwnedTreeは実行対象外である。12件は旧固定snapshotでの受入証拠として再利用できる。新hashでの静的抽出・4typedmocks/consumer本文不変・束縛の接合を確認し、影響するconsumerに変更が波及した場合だけその受入を追加実行する。必要な既存LIFE14/16/17/18等の安全検証は後続標準80のgateに残し、局所対照で免除しない。製品source/native/fake/EXE不変ならbuild反復は不要である。
+
+### frozen bindingの再束縛範囲
+
+追補前planは`E209293EC26AA95F0C88C0CFE795B397BEF0B9BF3EB5B94F3FED63F7289E84C4`、designは`D1C38FB3557D067A5E0B414E6DAEA021123C66B64D6FB5C62930B271CC5EFADF`、Invokeは上記12E7である。本追補だけで旧driver68/test94のplan固定値は一致しなくなる。現時点の旧driver実行は許可されず、旧成功記録は旧hash組に対して保存される。
+
+依存鎖は「確定plan/design/Invoke → Test-ContextPreflightの該当3入力hash → 新test hashと既存CONTEXT-TEST-HANDOFF-P1.mdの新snapshot説明 → focused driverのplan/design/Invoke/test/handoff hash → HANDOFF.mdとrunner frozen入力」である。Test-CargoGate.ps1、argv oracle7D74、旧CONTEXT-TEST-HANDOFF.md、native source381F/EXE FF7C、fakeのbytes/期待は不変とする。Test-ContextPreflightの変更は作者所有、focused driver/HANDOFFの変更は別実装者所有であり、今回plannerは変更しない。各段で旧bytesを非上書き保存し、旧testの既定DriverSha256や旧REDの意味を無条件で新候補へ書き換えない。新候補の明示driver引数は最終freeze後にrunnerへ渡す。
+
+設計・planの確定前にhashを追いかけて更新しない。planへ最終hashを追記して自身のhashを再変更する循環を避け、最終hashは親の既存review/handoffへ保存する。Run source snapshot、新suite、新承認は最終固定入力に対して新規作成し、旧Run/承認/frozen-inputsを編集しない。束縛更新はKH-Cの独立reviewを経る限定作業であり、harness判断・期待値の変更許可ではない。
+
+### 各単位の7役割当・リスク・次handoff
+
+下表はKH-A/B/C/Dそれぞれに適用するexact割当である。非該当工程も責務を識別し、起動しない。現在の呼出可能一覧で両モデルとhigh/mediumは対応しており、親はdispatch時にも照合する。指定とprovider返却値は別記し、実metadata不明を推測しない。
+
+| 役 | exact model / effort | 各単位の担当・難易度/リスク・理由 |
+| --- | --- | --- |
+| planner | `gpt-6-astra` / `high` | A後の精緻化、B–Dの境界/差戻し判断。本plan該当節のみ。高/高、競合証拠と再束縛範囲の分離が必要 |
+| external-spec author | `gpt-6-astra` / `high` | A–D新規執筆は非該当。既存G5の同世代所有/未知非停止、G1–6/AP1–4/80期待を再利用する内部是正であるため。外部判定/承認/期限の変更が必要ならAへ戻し、この固定役で仕様化する |
+| designer | `gpt-6-astra` / `high` | Aの局所設計、B/Cで設計から逸脱時の差戻し担当、Dは新設計非該当。高/高、終了後handleと部分identity・PID世代の誤同定リスク |
+| implementer | `gpt-6-astra` / `high` | A実装非該当、BのInvoke局所修正、Cのdriver/HANDOFF束縛のみ、D編集非該当。高/高、停止権限と証拠同一性を維持するため |
+| test author | `gpt-6-astra` / `high` | Aで独立oracle条件確認、B回帰/RED、Cのcontext test束縛だけ、D期待変更不可。高/高、同PID誤PASS・競合再現の不安定さ・mockと実handle証拠の混同を防ぐため |
+| test runner | `gpt-6.1-sol` / `medium` | A/B/Cのruntimeは確定指示前非該当、Dの固定局所/OS/focused実行。中/高、手順確定後の独立採取とfirstFail管理であり未解決の設計判断を委ねない |
+| reviewer | `gpt-6-astra` / `high` | A設計Pre、B/C差分・RED/GREEN・束縛の独立接合、D結果Post。高/高、未知への停止/昇格・別原因GREEN・古い証拠接合を独立検査 |
+
+designerはapi-and-interface-design、作者はtest-driven-development、実装/runnerはwordweave-changeの役割内工程、PS作成担当はpowershell-automation、reviewerは設計時review-software-design、実装時code-review-and-quality/powershell-reviewの該当範囲を用いる。未導入skill/未対応modelはblocker、silent fallbackなし。親model・effort・品質gate・再委譲/公開禁止は維持する。
+
+高リスクは既知と同PIDの混同、借用handleのDispose、部分identityの昇格、世代精度の変更、旧REDの消去、再束縛に混ぜた期待値変更である。元snapshot/台帳/保持handleの三者照合、borrowed/ownedの明示、独立負例とdiffで抑止する。rollbackは親が当該局所差分だけを保存旧版へ戻す操作であり、旧競合/旧束縛失敗を再び許可するものではない。他者編集や旧証拠は戻さない。
+
+未決は(1)終了済保持Processで既存Get-Identityをそのまま使用できる条件、(2)部分identity/複数Known候補の限定分岐、(3)最小回帰の具体件数・時間・commandである。いずれもdesigner/作者と独立Preで解消する技術事項であり、利用者へ選択を丸投げしない。追加権限、既存比較/期限の緩和、別file所有拡大が必要になった場合だけ根拠付きで親へ停止返却する。最小正常確認が別境界で失敗した場合、無限にharness整備へ広げず保存証拠と新findingを返す。
+
+次handoffは親受領後のww-designer `gpt-6-astra/high`、所有は既存designのKNOWN-HANDLE01追補だけである。入力は本節、新独立P1記録、現Invoke12E7と保存RED。外部仕様新規変更は現時点不要、追加OS診断も不要である。設計→独立Pre→planner精緻化まで新実装/試験起動は禁止する。
+
+今回の開始共有週枠は親受領40%、途中の親受領review終了値41%でありplanner単独の終了測定ではない。子`/root/known_handle_race_plan`の開始/終了token、固有session ID、provider返却model/effort、親子包含、終了週枠は未取得。使用差分/改善率は推定しない。本plannerは文書追補・diff/hash/相対link/所有検査のみ、実装/試験起動/再委譲/公開0である。

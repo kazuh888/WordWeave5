@@ -2,7 +2,19 @@
 
 ## ARGV-PATH01（CXT01再構成に依存、動的検証未完了）
 
-### CXT01 context再構成（cycle 2、CXT-D受入PASS／CXT-E未実施）
+### CXT-E focused実動作：ENV01停止・保存証拠の診断中
+
+| Finding ID | 原文・位置 | Root cause | State | Packet | Canonical artifact | Evidence | Oracle | Reviewer record | Residual / out-of-scope |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| KH-REOPEN-01 | 既知候補の確認より先にPIDを再openする（Invoke Read-OwnedTree:1270→1274） | snapshot後の終了で、既存保持handleを確認する前にGetProcessByIdが失敗する | Accepted（設計前） | KNOWN-HANDLE01 | 既存gate-designの局所追補→Invoke Read-OwnedTree | 現Invoke12E7、保存run94e5f1c6・Owned/Unprovable/cancel/tmp。所有は設計/作者/実装を計画指定で分離 | 旧分岐RED→同世代保持handleGREEN、PID再利用/無効handle/未登録消失の非PASS、実handle終了対照。具体化はKH-A Pre前 | 独立P1確認、KH-A Preは未実施 | CXT-D/PTH-MONOの限定PASS維持、CXT-E/ARGV/80/full/提供は未了 |
+
+独立診断を受領して既存plan244〜へKNOWN-HANDLE01の暫定4単位を追補した（SHA956C0CDA）。新planner/局所designerはAstra/high、既定作者/実装/reviewerもAstra/high、runner Sol6.1/medium。外部仕様の新規変更は非該当。設計・Pre・planner確定前に実装/runtimeを行わない。plan変更により旧test94/driver68の固定plan hashは不一致となり、再束縛までは実行不可。旧受入証拠は旧snapshotのまま保持する。
+
+利用者「続けてください」とCXT-D独立受入を受領後、固定driver68EF44DD／HANDOFFA32C8F6Dでfocused10件を1回実行した。新suite `R/verification/68cfe879-a4ea-4665-83f0-8bff89cd2b2b`、run `94e5f1c6-43bb-4ca6-98c7-80eb443f76fa`。control2PASS、ENV01 FAIL「Unexpected gate failure」／残9NotRun、child/shell exit1、26.6723846秒、retry0、frozen16/16前後一致、sourceMatched=true。AP1 oracleのcasePASS後分岐は未到達、argvEvidence空を保持する。
+
+RunOwner21556はCleanupIncomplete「Descendant generation or retained handle could not be proved」。processes13行はOwned12（全hasExited=true）＋Unprovable1、fixtureResiduals=[]、cleanupDeadlineUtc=2026-10-15T20:38:15.0399582Z。unknown PID23100はGetProcessById時not running、identity=null／killRequested=false／waited=false／hasExited=null、osObservationのsnapshotMatch1／knownMatch1／pathPresent/commandPresenttrue／rowFilter3値null。未知の終了・同世代・回収成功を推定しない。Supervisor cancel.reason=CleanupIncomplete→Runner Cancelledであり、Supervisor正式terminalとSafety list正式terminalは欠落（tmpのみ）である。target23492の完了はargv['::','--list']のG0列挙用fake、V2 List=true/Passed=true/ExitCode0であり、通常full test完了ではない。独立read-only診断へ渡し、後続・追試・修正は未実施。
+
+### CXT01 context再構成（cycle 2、CXT-D受入PASS／後続は上記別項）
 
 独立接合reviewはCXT-Dの固定file/context受入PASS／指摘0。C0のcontext/Run/payload、C9実junction拒否、C10 deadline=startedと元期限consumer、C11 Run.TEMPだけの変異と元一致consumer、意味的な12期待の不変、15現物hash/P1引継ぎ一致、禁止22/null/旧結果保全を確認した。親が受領し、CXT-Eへ進む技術的前提成立と判定する。次は現行driver68EF44DD／HANDOFFA32C8F6D・新規R/verification/<UUID>直下suiteで既定focused10件1回、firstFail停止である。今回の承認済み12件は終了しており、後続を実行済みとはしない。実OS所有/terminal/cleanup/native、CXT01/ARGV全体Closed、標準80/full/試用提供は未了。
 
