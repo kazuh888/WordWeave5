@@ -2,6 +2,16 @@
 
 ## path欠測是正の設計再開（2026-10-15）
 
+親のbounded2MiB末尾から取得した最新累積snapshotは2026-10-15T15:20:36.726Z（JST10/16 00:20:36）：input1843259659/cached1801728128/output4157044/reasoning1345945/total1847416703/cachewrite0。session01a08550-055c-7aa1-9834-905e4a7ce148の長期累積であり、今回再開時snapshotは欠測のため現在タスクの差分を作らない。親子包含未確認、子の個別counter欠測、cached/reasoningは内数で合算しない。本文/認証情報は採取していない。
+
+CXT設計修正担当観測00:15:30–00:17:24 JST、token/週枠/provider metadata欠測。fresh Preはtypedmocks/Owners省略明示後PASS、planner確定。fresh作者cxt_context_testsをAstra/highでdispatchし固定12試行の新単体test400–500行見込みを型/欠測/禁止counter可読性の範囲で許可した（想定300超、framework/schema/ケース増加は不可）。この整備コストは削減実績ではない。最初に正常consumer到達を局所診断で確認する場合も最終12試行の受入へ加算せず、最終freeze後の固定結果を正本とする。
+
+2026-10-16のcontext再構成境界で親の共有週枠29%/10080/reset1792667952/ordinaryUsageAllowed=trueを取得した。開始12との差を専有消費へ換算しない。plannerの既存plan改訂、designerの既存design追補（00:02:05–00:09:05 JST、token/週枠/providermetadata欠測）後、次Preはfresh-context reviewer Astra/highへ切替えた。モデル/品質gateは不変で、履歴前提の持越しを減らす運用であり使用量削減は未実証。freshPreは型/Owners副作用未確定1件を検出して差戻し、runtimeを先行しない。current冒頭の本turn内重複時系列を最新状態＋正本indexへ集約し、詳細証拠はreview/runnerに保持した。
+
+ARGV-PATH01では既存TRANS01に明示slashがないcoverage不足を作者/独立reviewで検出し、既存80を変えず専用variant1件（net20行）を追加した。親が作者の途中通知SHA4B253で最終freeze前にreviewをdispatchしたため、使用例comment1行訂正後E5FEとの不一致でcycle2失効となった。これは親の引継ぎ手戻りであり、作者freeze・最終SHA/HANDOFF/検査結合後のcycle3へ再提出した。今後同種引継ぎは途中進捗と最終提出を区別し、freeze前のruntime解除reviewを開始しない。品質gate低下や自動委譲削減実績へ換算しない。
+
+次ARGV-PATH01はplanner既存plan56行／designer既存design40行の限定追補で、native修正予定は2定数・helper0。designer観測23:09:44–23:13:21 JST、token/週枠/provider返却metadata未取得。独立Pre共有週枠22→22%でPASS、変化0は無消費ではない。保存REDをrun/hash/OScommand結合がある範囲で再利用して同失敗の実行を反復しない。作者Astra/highへ専用回帰を引継ぎ、親モデル/基準は維持。
+
 独立runner終了共有週枠20%、最終reviewer21%を観測。新47/47＋5/5成功後、標準80はENV01の別argv拒否で0PASS1FAIL79NotRun、unknown0所有10終了wait。PTH-MONO最終Post PASS/Closedと別argv原因を分離し、後者を未完了として保持する。共有開始12→21をtask専有消費とせず、token/provider返却metadata/親子包含欠測を維持する。
 
 PTH-MONO-01は新5の3PASS2FAIL→directwindow接合11追加後5PASS、旧47PASS、独立Pre/Post静的PASSまで。座標写像の丸め不確実性を指摘し未実装で棄却、directrefへ絞った。reviewer共有週枠はPre終了18%、Post終了19%、個別token/provider返却metadata欠測。既定runner Sol6.1/mediumへ独立47＋5→成功時80段階実行を渡した。技術是正の静的支持と最終Closedを分離する。

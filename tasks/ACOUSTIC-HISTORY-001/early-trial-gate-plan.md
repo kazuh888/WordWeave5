@@ -136,3 +136,107 @@ Pre-1の入口/回収P1二件は[review正本](early-trial-delivery-review.md)�
 ## 計画作業の測定境界
 
 開始共有週枠は親受領値65% / window10080分 / reset1792496607、観測13:18:04 UTC。子 `/root/et3_gate_plan` のtoken開始/終了counter、固有session ID、provider返却model/effort、親子包含は未取得。指定Astra/highと実行確認を混同しない。終了値は未取得であり差分を推定しない。計画の検証は対象文書のlink/所有/差分検査までであり、実装品質の成功や消費改善を主張しない。
+
+## ARGV-PATH01 PacketBrief（2026-10-15、focused context再構成中）
+
+現在はfocused harnessのcontext前提不整合が2回続いたため、3回目の局所patch/retryを禁止し、末尾「CXT01再構成」を現行の再開条件とする。native2定数修正は保全済み、CXT01は未Closed、AP1–4 GREEN・局所Post・標準80件は未了である。以下の初期snapshotと工程表は履歴として保持し、現在の所有とdispatch制限は末尾を優先する。全argv exact、承認、所有、期限、未知非停止/非PASS、80case oracleは既存基準を維持する。完了は独立focused実測・Postと標準80件への再開handoffまでであり、製品full/試用EXE完了ではない。
+
+### Request snapshot・根拠・修正側の選択
+
+親依頼時HEADは `ac92e29587da3fbffc739e95f17656a7649b6e91`。既存dirtyはreview/runner/usage/current文書でありplannerは触れない。次の現物hashをread-onlyで照合した。
+
+| 入力 | SHA256 |
+| --- | --- |
+| R/Invoke-CargoGate.ps1 | `12E7FC95F24883AC89E8464108AC7404D4953006EBFA56DC9B7F8D0613281621` |
+| R/Test-CargoGate.ps1 | `D8AD0AD44C2457DC60E64E52A6EDB455974D5F8AD9938B956CEF3E4DDAB0F7F3` |
+| R/cargo_gate_entry.rs | `3AEB0B19E2D03EE088EB1BEDA4DBACEEC0406E12ED75D59AB95A7E331F42FD41` |
+| R/cargo-gate-entry.exe | `1C04288220C3D98B182F3011FE3D1DE8AE88B050871DF400B21ED8AECCCC5E94` |
+| R/fake.rs | `3482075BF7479E61942978830AE91FDDF5301133E1A2F43EDB9B65DDAA0FA016` |
+| early-trial-gate-design.md | `CE799395A14F1784C05EDDB0BC2D8EE8B53B900EC306B403DB72E225CF5E5756` |
+
+Rは本書既定cargo-gate rootである。[review正本](early-trial-delivery-review.md)冒頭の親受領観測では、Runner内部11引数のindex4/File、8/RunPath、10/InvocationPathだけIntent U+005CとOS U+002Fが異なり、他8引数は一致する。長さ90/120/173、相違8/7/7は当該runの観測値であり、新UUIDを含む後続runの固定期待値ではない。旧source3版の関連4関数同一性とPTH-MONO01のclosureは独立reviewを再利用し、plannerは再実行しない。
+
+現物native14–17のROOT/SCRIPTはforward slash、115/130/167でRun/Invocation pathへ派生し、176–189で内部引数として起動する。Invoke1655–1657は別途内部Intentを生成し、643–647はOS argvとの全code-unit exact比較である。最小候補はnative側ROOT/SCRIPTとそこから派生する内部path表現を既存Intentに揃えることである。Supervisor側にnativeの表現規則を複製する案や比較時のgeneric normalizeは採らない。designerがWindowsのPathBuf派生・実OS引数と既存Intentの同一性を限定確認して方式を確定する。plannerはコード詳細を実装しない。
+
+### 状態・所有者と消費側・型・エラー契約
+
+- nativeは固定内部pathのproducer、SupervisorはIntentのproducer、Runnerの既存validatorはconsumerである。内部3pathは既存絶対pathから構成したOsStr/PathBuf等のOS文字列として渡す。新schema、公開API、source seam、native child modeを足さない。
+- Cargo由来の利用者argvは既存args_os→UTF-16整数配列→payload→Runner→targetの別データであり、空文字/Unicode/孤立surrogate/quotes/backslash/順序/個数を含め変換しない。内部path限定修正をpayloadのslash置換へ広げない。PWSH起動実体、他8内部引数、stdout/stderr/exitの扱いは不変である。
+- 状態はPrepared→内部path構成→payload非上書き公開→native起動→Request/Intent/Readyの既存検証→既存承認後target開始を維持する。内部path exact不一致は従来どおり拒否し、認可や所有を自動補正しない。native起動/公開失敗は非zero、terminal欠落はunknown、回収証拠欠測は非PASSのままである。
+- 本体所有はR/cargo_gate_entry.rsだけを予定する。Invoke/Test/fakeは不変を基本とし、追加所有が必要なら理由付きでplannerへ返す。native source変更後は新EXEをbuildしてsource/EXE SHAを固定し、その組でRun snapshotを新規作成する。旧Run/承認/hashを上書きして再利用しない。
+
+### 7役・依存順・検証チェックリスト
+
+| 役 | exact model / effort | 所有と選定理由 |
+| --- | --- | --- |
+| planner | `gpt-6-astra` / `high` | 本書の当該PacketBrief/作業リストだけ。固定役。設計受領後に限定確定する |
+| 外部仕様 | `gpt-6-astra` / `high` | 新規作成は非該当。既存G4/G5、設計argv契約、80caseを再利用する。外部挙動・品質基準の変更が必要ならこの役へ戻す |
+| designer | `gpt-6-astra` / `high` | 既存early-trial-gate-design.mdの当該限定追補だけ。内部pathとuser payload境界、Windows表現の難度/リスク高 |
+| test author | `gpt-6-astra` / `high` | R/verification/下のARGV-PATH01専用回帰だけ。既存framework/helperを利用し本体編集なし。誤境界PASS・期待値追随のリスク高 |
+| implementer | `gpt-6-astra` / `high` | R/cargo_gate_entry.rs限定。本体と作者oracleを分離し、argv/起動前所有照合に関わるリスク高 |
+| test runner | `gpt-6.1-sol` / `medium` | 新規隔離build/log/報告のみ。固定sourceからnativeをbuildし新hash実測、独立実行。手順は限定的だがOS実観測が必要 |
+| reviewer | `gpt-6-astra` / `high` | read-only Pre/Post。親が報告を保存する。全argv exactと独立性の維持を検査するためリスク高 |
+
+上記は現在の呼出可能一覧で対応する指定値である。実行metadata未取得時は未取得と記録し、黙ってモデル/effortを変更しない。通常1 helperずつ親がdispatchし再委譲しない。親モデル・品質gateは変更しない。
+
+- [ ] A 設計/独立Pre：内部3pathだけを揃える限定設計と所有を確定する。plannerが受領して本計画を確定する。既存外部仕様を再利用できなくなれば停止する。
+- [ ] B 独立RED（A依存）：旧固定source/EXEの実native→pwsh経路で内部11引数のOS観測を得て、3path不一致を検出する。既存失敗証拠の再利用可否は作者/reviewerが対象とoracleを明記する。compile失敗/入口未到達を行動REDへ数えない。
+- [ ] C 本体是正（B依存）：native内部producerだけを修正し、source diffと静的Rust検査を保存する。source/EXEを新固定し、本文比較だけでGREENにしない。
+- [ ] D 独立GREEN（C依存）：同じ独立oracleで3pathを含む11引数すべてをOS実観測とIntentのUTF-16 exactで比較する。user payloadの空文字/日本語/非BMP/孤立surrogate/quotes/末尾backslash等の既存TRANS対照とraw stream/32bit exitを新nativeに結び付ける。意図的な内部argv不一致が既存validatorで拒否される負対照も保持する。ENV01の対象境界通過と新たな別原因を区別し、後者を成功にしない。
+- [ ] E 局所Post（D依存）：固定hash、RED→GREEN、Invoke/Test/fake/80case不変、内部3引数以外不変を独立照合する。局所Post PASS後に既定標準80件runnerへ返す。fresh80完了・製品full・提供Postは後続gateのままである。
+
+必要検証はnativeの既存build方式とRust format、作者回帰、既存TRANS/ENVの実観測、差分/hash/所有検査である。具体コマンドはdesigner/作者が現行入口に合わせ固定する。公開テストfilterや品質基準を追加変更せず、新framework、Job、権限、依存、global/OS設定、実API/実データは対象外である。製品releaseの成功済みbuildを本単位の比較目的で反復しない。
+
+### リスク・rollback・停止・次handoff
+
+主リスクは内部path修正の利用者argvへの波及、Windows文字列表現の残差、新sourceと旧EXE/Runの混在、別validator拒否をGREENとする誤判定である。独立code-unit観測とsnapshot固定で検査する。rollbackは当該native差分のみを戻し、保存した旧source/EXE hash組を照合する手順を親が担当する。旧snapshotは原因が残る停止状態へ戻るだけであり実行解除しない。旧ログ/Run/承認・既存編集を削除しない。
+
+追加source所有、既存比較/外部契約の緩和、新権限、モデル/skill利用不能、native build失敗、実OS観測不能、回収未証明、別原因で受入不成立なら停止して親へ返す。現段階の次handoffはdesigner `gpt-6-astra/high` の限定設計である。本書を採用したのは既存計画/作業リストの正本が本書一本であり、設計詳細の先取り・重複Packet文書を避けるためである。未完了の既存plan/todoと過去記録は保持した。親はcurrent/review/usageを所有し、当該子のusage/実metadata未取得分を推定しない。
+
+### CXT01再構成：context契約を確定するまで作者・実装・runtime dispatch禁止
+
+第一停止はfocused `113c564c-05eb-487c-a200-d090169238e5` のrepository未初期化であり、RunOwner/native起動前のfixture errorである。第二停止は `5babecf8-0678-4bd2-8bab-ae73c540c952` / run `ab0c29bc-b969-4bea-82ca-1eddf01ab54a`。identity control2 PASS後、RunOwner terminalはfixtureRoot境界違反によるCleanupIncomplete、sourceMatched=false、processes/fixtureResiduals/cleanupDeadlineUtc=null、AP1 evidenceなしである。二つをargv行動RED/GREENへ数えない。第二停止のnative/target marker0は親受領観測であり、null配列から残存0を導かない。runner最終監査は別途受領する。
+
+今回のread-only確認snapshotはnative source `381F5E1DCD70ED8040153FB155C8AABA0881FBFB57A8074B286FB4169D8683DD`、新EXE `FF7C9A0F641F66F7C340AEC94C21EA9A0C745EA5A39C35B252C3A9CBDAFCCB88`、Invoke `12E7FC95F24883AC89E8464108AC7404D4953006EBFA56DC9B7F8D0613281621`、Test `D8AD0AD44C2457DC60E64E52A6EDB455974D5F8AD9938B956CEF3E4DDAB0F7F3`、focused slash driver `89C6E49B7D2930FE225DA0AB7C4E36B94B55CFBC522CEE35454F0BE17A2350FB`、HANDOFF `FB1F80EB66BD82858821E449605FBB44B76641BCF9D2367158E55DDFEC153695`。受領design `2123BB9E88E616BF8455E7C6A63931D59DFC8CB1C3FBCAB4F134E09FCE9CCAB7`、旧plan `2A463D32…8058CD44`は改訂前を示す。保存RED・native2定数修正・PTH-MONO01 Closedは撤回しない。
+
+#### 原典producer/consumerの再構成と唯一の契約
+
+| 項目 | 初期化・producer → consumer、必要条件 |
+| --- | --- |
+| source-bound scope | driver54–63/152–156はTestのtop-level try前prefixとmain中boundary/repository代入を抽出する。Test2097/2125はRとrepoを確定し、New-CaseFixture709/738のPSScriptRootは実TestのR、GateScript737/1730は固定Invokeを要求する。関数のFile一致は初期化・precondition充足の証明ではない |
+| main前提 | Test2096–2134/2153–2199の絶対固定R、GateScript兄弟実体、OutputRootの絶対/不存在/reparse無し/ignore、Admin=False、pwsh7.6.6、80件uniqueとcaseRows digest、固定native/V2存在・hash・native非稼働、Pester/rustc、controller実identityを列挙する。driverがmainを省く場合も、実行するconsumerに必要な前提を欠落させない。main全体を無差別実行する解法は採らない |
+| 暗黙入力 | repositoryはGet-ConfigSnapshot796–800のuser/repo各config/config.toml計4path、USERPROFILEは既存読取、GateScriptはfixtureと起動、fakeContractはConfirm-CaseResult1997–1998のstream oracle、cases/caseRowsは選択集合/80件digest、PSScriptRootはRun/native source位置に使う。caseResults/passed等の標準dispatch専用状態は実行経路外として区別する。config欠測hash=nullを内容無しと推測しない |
+| suite/fixture階層 | New-CaseFixture655–657/744はsuiteId=basename(SuiteRoot)、fixtureRoot=SuiteRoot/<case[-variant]>を生成。Invoke789/1011はfixtureRootがR/verification/<suiteId>の厳密な子孫であることを要求する。標準main2103は単にverification配下を許すだけで、後段を含む十分条件ではない。focused driver47のpacketRoot直下要求はこの合成契約と不整合である |
+| 正常なfocused配置 | 実行suiteだけを新規R/verification/<suite-UUID>直下に置き、descriptor.suiteIdをそのbasenameに一致させる既存正常形を採る。fixtureはその下の各case/variant。suite名のUUIDは本focused実行の選択であり、既存gateのsuiteId正規表現をUUID限定へ変更しない。R/verification/argv-path01はdriver/oracle/HANDOFF/解析証拠の保存場所であってfixture suiteの親にしない。解析専用oracle OutputRootと実行SuiteRootのconsumerを混同しない |
+| Runと拒否sidecar | Test709/1722–1728はR/runs/<run-UUID>/run.jsonと8field rejection-contextを新規公開する。Invoke740–796は正規D形式runId/厳密なRun位置、Run bytes SHA、時刻/期限、実OS launcher親同世代、controller一致、descriptor SHA/root、TEMP/TMP二つを検証し、815で初めてRejectionContext確定。Runのcfg/id/時刻/envMap/fixtureControlとの一致後だけ996でRunへ昇格する |
+| marker/fixtureデータ | fixtureRoot直下fixture-owner.txtはUTF-8 no BOMで厳密な既定文言+LF。descriptor/marker immutable、repoはfixtureRoot又は子孫、LOCALAPPDATA/TEMP/TMP/target、source/g0/marker snapshot現物、fake cargo/artifacts/control参照は既定fixture境界内。TEMP/TMPは同じtempでも2fieldを持つ。固定gate/native/pwsh/V2およびRun証拠rootの既存例外を勝手に拡大しない |
+| payload/子scope | nativeはR/runs/<run-UUID>だけからinvocations/<新UUID>/payload.jsonを非上書き公開する。Invoke1937–1945はpayload名/UUID/正確なnestingを再検証する。V2は既定R/runs/<runId>/safety/<caseId>/v2-outputでありfixture側へ移さない。suiteの移動でRun/payloadをpacket配下へ移動しない |
+| cleanup/観測 | Invoke821–823はcontext未確定ならCleanupIncompleteを維持する。確定後も850–868の実子列挙/実TEMP列挙だけがprocesses=[]/fixtureResiduals=[]の根拠となる。native未到達、control2 PASS、wrapper終了だけでcleanupを既知0にしない。unknown非停止、既定deadline/mono、fixture保持を維持する |
+
+第二失敗のdescriptorはsuiteId=5babecf8-0678-4bd2-8bab-ae73c540c952だがfixtureRootにargv-path01階層が挟まる。Invoke789の期待prefixと一致せず、815のcontext確定に到達しないことを保存descriptor/sidecar/terminalと現物で確認した。suiteIdをargv-path01へ偽装する、boundary比較を緩める、descriptorを消費後に補修する是正は採らない。
+
+designerは既存designのARGV-PATH01節にfocused context契約を追補し、そこを唯一の手順正本とする。特に現在designの「回帰所有folder」と「実行suite配置」を明確化し、HANDOFFのnested実行commandを失効させる。planは依存/所有/受入だけを管理し、別context仕様書・新frameworkを作らない。技術前提の欠落はこの設計工程で解消し、品質基準変更を必要としない限り利用者へ選択を丸投げしない。
+
+#### 新cycleの所有・有限証拠・停止条件
+
+| 役・割当 | 今回の所有と境界 |
+| --- | --- |
+| planner `gpt-6-astra/high` | 本PacketBriefだけ。現再構成→design受領→限定確定。過去作業リストは未完了のまま保持 |
+| 外部仕様 `gpt-6-astra/high` | 新規作成は非該当。G1–G6/AP1–4/既存80を維持し、外部要求の変更が判明した場合だけ戻す |
+| designer `gpt-6-astra/high` | early-trial-gate-design.mdのfocused context追補だけ。初期化から全consumer/出力/cleanupまでの前提漏れが高リスクのため限定Pre必須 |
+| test author `gpt-6-astra/high` | R/verification/argv-path01/内の新context回帰とその期待値だけ。既存独立argv oracle/10case/17引数slash期待値を保持し、driver本体を同時編集しない |
+| implementer `gpt-6-astra/high` | 設計/Pre/作者RED後にfocused slash driverとHANDOFFの実行context部分だけを逐次引継ぎ。今回はharness本体所有であり、native2定数/Invoke/Test/fakeの編集は非該当・凍結。作者の新oracleは変更しない |
+| reviewer `gpt-6-astra/high` | read-onlyでcontext Pre、固定harness差分/有限preflight証拠、focused実行後Post。初期化漏れ・誤PASSの独立確認を担う |
+| runner `gpt-6.1-sol/medium` | 新規合成証拠/logのみ。許可されたpreflightと既定focusedを段階実行しソース/期待値を変更しない。native source/EXE不変なら再buildを反復しない |
+
+上記は全て利用可能なexact model/対応effortであり、作者・harness実装・reviewerはcontextと所有境界の高リスク判断、runnerは固定手順の独立証拠採取を担当する。親はcurrent/review/runner/usageを所有し、返却metadata未取得分を推定しない。
+
+- [ ] CXT-A：runner最終監査を受領し、上記全consumer mapをdesignerが唯一の契約へ具体化する。独立Preで完全性を確認してplannerへ返す。ここまで作者/実装/runtime dispatch不可。
+- [ ] CXT-B（A後）：作者が有限synthetic preflightの固定matrixを作る。旧nested配置とrepository欠落の二失敗をそれぞれ正しい境界で検出し、正常な直下suiteを同じ元fixture/path/schema/marker consumerで受理する。外側guardだけの複製やcallback到達だけを合格条件にしない。固定少数case・一度の実行・上限時間・書込root・呼出禁止境界をdesignerがPre前に明記する。
+- [ ] CXT-C（B後）：harness実装者がcontext契約全体に従って是正する。第三の一行patchを先に実行する順序は禁止。旧RED/driver/HANDOFF/失敗rootを保持し、正常/異常のpath、hash、marker、sidecar field/時刻/launcher、Runとfixture整合を対象とする。
+- [ ] CXT-D（C後）：独立preflightはnative/target起動前で止める。可能な実path/file consumerを使い、OS親identity等を代用した試験はmock/context検査と明記して実RunOwner/所有回収成功へ換算しない。無効入力はRunOwner/native起動を呼ぶ前に拒否することを別counterで確認する。正常入力もpreflightだけではruntime許可/terminal実測成功にしない。invalid/欠損marker・descriptor/run不一致・nested/別suite/別run/別payload・reparse・期限不正等の代表的consumer分類を固定し、無制限の追加試験やretryをしない。
+- [ ] CXT-E（D後）：固定harnessの独立接合reviewと親受領後だけ、新しい合法suiteRootで既定focused10件を一回実行する。正常contextの実OS親照合、実terminal/cleanup、AP1–4はこの段階で判定する。最初の失敗で残りNotRun、sourceMatchedとcleanup観測を別記し、前提不整合なら再び停止して根拠を返す。focused Post後だけ標準80件へ戻る。
+
+撤回/限定するclaimは、(1) source-bound File一致で全context同定済み、(2) boundary/repository2代入とconfig4path確認でruntime前提が網羅済み、(3) ValidateOnly/静的Pre/Postからfocused実行可能、(4) CXT01 Closed、(5) marker0からprocess/TEMP残存0、である。これらの静的検査自体・control2 PASS・保存旧argv REDを消さず、成立した狭い範囲へ限定する。native2定数を原因に戻したり、実行未到達の新nativeをGREEN/FAILと判定しない。
+
+上記再構成/設計/Preが済むまで新patch/再試行は禁止する。80case/87variant/10focused/追加slashの期待値、generic argv exact、OS/権限/依存/Job/API/データ、製品source、既存承認/期限を変えない。必要な新権限または既存consumer境界緩和が判明した場合だけ具体的根拠を親へ返し、利用者判断を求める。現段階は技術契約の再構成で進められ、利用者の追加選択は不要である。

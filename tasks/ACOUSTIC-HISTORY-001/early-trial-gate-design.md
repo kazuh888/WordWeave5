@@ -365,3 +365,111 @@ PS helperの容量は256→512→1024→2048→4096→8192→16384→32768文字
 | PTH8／G1–G6、ET-07 | 新固定Invoke/Test/design SHAで独立Pre→作者のRED→実装→局所GREEN／静的検査→独立Post／通常入口80caseを引き継ぐ。ENV01成功や局所PASSだけを80件・実Cargo接合・製品fullの成功へ換算しない |
 
 設計上の未決仕様はないが、null-path時の実API成功、同handle保持、同期呼出時間、負例回収は未実測である。独立Preで同等のG5証明と判断できなければ実装前に親へ返す。APIが失敗する実環境でもunknown非PASSを維持し、OS権限・gate・80case oracle変更が必要なら本追補の範囲を終了する。実装／test作成はAstra/high、独立runnerはSol/medium、reviewerはAstra/highの既定割当である。本担当は文書diff／相対link／hash確認だけで、runtime・source/test編集・再委譲・公開0。最初の時刻観測は2026-10-15T22:00:46.9921021+09:00（着手そのものの時刻ではない）、子`/root/et3_image_path_design`の開始／終了token counter・provider返却model/effort・週枠は未取得。親のusage記録へ欠測として引き継ぎ、指定値や作業量から推計しない。
+
+## ARGV-PATH01：native内部3pathの生成表現（2026-10-15）
+
+[PacketBrief](early-trial-gate-plan.md)140行以降を全文確認した。指定designerは`gpt-6-astra/high`、所有は本追補のみ、api-and-interface-designを内部producer/consumer契約に適用し、UIは非該当である。入力HEAD=`ac92e29587da3fbffc739e95f17656a7649b6e91`、計画SHA256=`2A463D3260EC322D53B0D4815EB8EB1C0E103FCB75B29AA074455A7F8058CD44`、追補前本書=`CE799395A14F1784C05EDDB0BC2D8EE8B53B900EC306B403DB72E225CF5E5756`。Invoke/Test/native source/旧native EXE/fakeの正確な固定hashは同PacketBriefの表を参照する。native source=`3AEB0B19…331F42FD41`、Invoke=`12E7FC95…3281621`は現物一致を確認した。前packetのClosedは[review正本](early-trial-delivery-review.md)の独立証拠を再利用し、本節で再判定しない。
+
+既承認G1–G6、特にG4の全argv exactとG5の所有・有限回収を再利用する。利用者のargvを変えず、既存consumerが要求する内部argvをproducerが正しく生成する是正であり、新しい外部仕様は不要である。旧節の固定path表示は同じファイル位置を指す説明として維持し、native内部引数の文字列表現に限って本節を優先する。旧PTH節の「native変更なし」はそのpacketの範囲であり、本packetのnative2定数変更を禁止する規範ではない。
+
+原因証拠は標準suite `7f2c941c-d1b3-4b4e-a3cc-a71c627a6e2a`、run `7da565fe-32ab-42fb-b4c5-4eaf2d59a356`の保存OS commandとIntentの照合である。11引数中index4/8/10だけがOS側U+002F、Intent側U+005C、残8引数は一致し、target0のまま既存Assert-ObservedCommandが拒否した。数値indexは実行ファイル自身を除く0起算である。この1runの長さや差分数を後続UUIDの固定期待値にしない。
+
+### 最小変更と型・境界
+
+実装者はR/cargo_gate_entry.rsの`ROOT`を`r"F:\Kazuhiro\GitHub\WordWeave5\target\early-trial-build\et3\cargo-gate"`、`SCRIPT`を`r"F:\Kazuhiro\GitHub\WordWeave5\target\early-trial-build\et3\cargo-gate\Invoke-CargoGate.ps1"`という同じ絶対場所のraw stringへ変更する。定数2個だけの差分とし、helper追加0、PWSH定数・capture本体・Command構築・既存FFIは変更しない。動的なslash置換、UTF-8化、lossy変換、大小文字変換、prefix除去、quote付加は行わない。既存`#![cfg(windows)]`の固定Windows nativeであり、非Windows動作やportable path抽象化は対象外である。
+
+| G4/G5のproducer→consumer | 生成値・所有・照合 |
+| --- | --- |
+| native SCRIPT → 内部index4 `-File` | `&'static str`の上記固定値を既存Command.argsへ渡す。SupervisorのRun.gateScript.pathとUTF-16 exact一致する。Run側の既存Assert-PathHash／Assert-SamePathで固定script実体を照合する |
+| native ROOT → expected → 内部index8 `-RunPath` | `Path::new(ROOT).join("runs").join(run_id).join("run.json")`の既存PathBufを渡す。run_idは既存UUID検証済みでseparatorを含まない。環境WW5_CARGO_GATE_RUN_PATHは比較入力suppliedとしてのみ使い、起動文字列へ転記しない。Supervisorの既存RunPath文字列とexact一致する |
+| expected.parent → invocations → directory → payload → 内部index10 `-InvocationPath` | 既存joinのASCII単一componentと生成invocation UUIDだけでPathBufを派生する。生成・atomic公開した同じpayload PathBufをCommand.argへ渡す。SupervisorのscopeDirectory/payload.jsonとexact一致する |
+| Cargo argv → payload.argvUtf16 → Runner → target | native所有の`Vec<Vec<u16>>`を既存args_os/encode_wideから生成し、JSONのfield/header/bodyとコード単位を保持する。利用者のEXE pathを含む全入力は変換対象外。利用者argvのslash、空文字、日本語、非BMP、孤立surrogate、quote、末尾backslash、個数、順序を維持する |
+
+[Rust PathBuf/push・join](https://doc.rust-lang.org/std/path/struct.PathBuf.html#method.push)と[WindowsのMAIN_SEPARATOR](https://doc.rust-lang.org/std/path/constant.MAIN_SEPARATOR.html)に基づき、backslashの固定rootへseparatorのないcomponentをjoinする今回の構成からbackslash表現が得られると判断する。任意入力をjoinすれば正規化できるという一般化はしない。[encode_wide](https://doc.rust-lang.org/std/os/windows/ffi/trait.OsStrExt.html#tymethod.encode_wide)は不正対を含み得るUTF-16をlosslessに扱う既存根拠であり、本変更でもその処理を触れない。実装toolchainでの実OS11引数一致は後続の独立動的証拠を必要とする。
+
+pathの同じ実体であることと、内部引数のexact一致を分ける。nativeの既存`reject_reparse`、supplied/expectedの`fs::canonicalize`比較、公開元／先のcanonical親一致を維持する。PS側もInitialize-Runの固定Run/script検証、Initialize-RunnerChainのinvocations境界・payload名・UUID・nesting、Supervisorのpayload SHA/Request比較を維持する。この3pathのcanonical一致が不成立・不明なら既存の該当段階で拒否し、文字列を書き換えて通過させない。canonical一致しても11引数exactが異なれば従来どおり拒否する。nativeがPSの検証を複製したりRun JSON parserを追加したりする必要はない。[fs::canonicalize](https://doc.rust-lang.org/std/fs/fn.canonicalize.html)はWindowsでextended-length形式を返し得るため、その返却PathBufをCommandへ渡す案は採らない。canonical値は従来の実体照合だけに使用する。
+
+保存・起動順は、run ID/absolute/reparse/canonical一致確認→args_os捕捉→invocation directory確保→payload.tmp CreateNew/write/sync_all/close→MoveFileWで非上書き公開→固定pwshのRunner開始→既存Request/Intent/Registration/Ready/ACK→親承認・spawn直前照合→target開始、で不変である。nativeは同期status待ちを維持し、新async／cancel境界を作らない。RunOwner/Supervisorの既存期限と所有回収がnative/Runnerを監督する。nativeで入力／公開／spawnが失敗すれば既存Err→exit1、Runner以前ならtarget0。Runnerのpath/argv拒否もtarget0で既存回収へ進む。terminal欠落・回収未証明はunknown／非PASS、payload/fixtureを保持し、未知processを停止しない。既存CommandのHidden、stream継承、32bit exit伝達を変更しない。
+
+### 独立証拠とhandoff
+
+新機構は不要であり、独立作者はR/verification/argv-path01/配下の専用回帰だけを所有する。保存REDの実OS command/Intent/payloadとそのrun・PID/開始時刻・source/EXE SHAを結び、既存parser/validatorのAST抽出を用いる。旧証拠に必要fieldがなければ行動RED未成立として親へ返し、compile失敗やmock不一致で代替しない。新nativeのGREENは実native→実pwsh7.6.6→既存gate経路から観測する。Command組立だけの単体試験、payload JSONだけ、別scriptへの代替起動は実OS到達証拠にならない。
+
+| 証拠／受入 | 必須判定とtest seam |
+| --- | --- |
+| AP1／G4、ENV01 | REDのindex4/8/10不一致と残8一致を保存入力から再現する。GREENは同じ既存parserと独立oracleで実OS11引数すべてをIntent.argvUtf16へcode-unit exact照合する。path3個をnormalizeして比較しない。実行file自身は既存Assert-SamePathで別に照合する |
+| AP2／G2/G3/G5 | 3pathの正しい固定実体／run／invocationへのcanonical一致とSHAを検証する。別Run、別payload、別script又は意図的な内部引数1code-unit不一致は既存validatorで拒否しtarget0。AST単体の負例と実gate拒否・terminal・cleanup証拠は区別して記録する |
+| AP3／G4、既存TRANS | 新nativeに束縛した既存argv境界対照で、空文字、日本語、非BMP、孤立surrogate、quotes、末尾backslash、slashを含む利用者引数のexact、raw stdout/stderr、exit0/7/101/0x80000001/0xFFFFFFFFを独立fake観測と照合する。旧nativeのPASSを新nativeの証拠へ流用しない |
+| AP4／G1–G6、ET-07 | native差分が2定数だけ、Invoke/Test/fake/80case・87variant oracleが不変、新source/EXE/runのhash結合、許可前target0、所有cleanup、unknown非停止/非PASSを確認する。ENV01のargv境界通過後に別失敗が出れば局所到達と全体失敗を併記し、80件PASSにしない |
+
+build/formatは既存方式を使い、RをPacketBriefの絶対rootへ展開して`rustfmt --edition 2021 --check <R/cargo_gate_entry.rs>`と`rustc --edition=2021 <R/cargo_gate_entry.rs> -o <R/cargo-gate-entry.exe>`を実行する。build担当は開始前に旧source/EXEの証拠を保持し、同EXEを使う生存runなし、使用するrustc/rustfmt実path・versionを確認する。新source/EXE SHA固定後に新UUIDのRunを作りnativeSource/nativeExeへ束縛する。旧Run／承認／hashの上書き更新はしない。作者は回帰command・固定入力・出力rootを実装前に記録し、同じoracleでRED→GREENを実行する。局所Post後の標準入口は既存`& 'F:/Program Files/PowerShell/7/pwsh.exe' -NoLogo -NoProfile -NonInteractive -File <R/Test-CargoGate.ps1> -GateScript <R/Invoke-CargoGate.ps1> -OutputRoot <R/verification/new-UUID>`の80caseを維持する。製品release再buildは本packetの検証ではない。
+
+引継ぎは計画者の設計受領→本書SHAとPacketBrief snapshotによる独立Pre→作者RED→native2定数実装→独立GREEN/Post→標準80件である。役・model/effortはPacketBriefのまま。本設計に未決技術選択はなく、実OS exact・TRANS・負例回収が未実測である。2定数を越える修正、実OS観測不能、canonical不一致や新たな拒否原因、権限／依存／品質gate変更が必要なら親へ返す。着手観測2026-10-15T23:09:44.4237729+09:00、token開始/終了counter・週枠・provider実行metadataは未取得。本担当の検証は文書diff/link/hashだけ、code/test/runtime/再委譲/公開0である。
+
+## CXT01：focused実行contextの唯一の現行契約（2026-10-16）
+
+本節は[PacketBriefのCXT01再構成](early-trial-gate-plan.md)を受けた限定追補である。計画SHA256=`E209293EC26AA95F0C88C0CFE795B397BEF0B9BF3EB5B94F3FED63F7289E84C4`、追補前設計=`2123BB9E88E616BF8455E7C6A63931D59DFC8CB1C3FBCAB4F134E09FCE9CCAB7`、入力driver=`89C6E49B7D2930FE225DA0AB7C4E36B94B55CFBC522CEE35454F0BE17A2350FB`、HANDOFF=`FB1F80EB66BD82858821E449605FBB44B76641BCF9D2367158E55DDFEC153695`を実照合した。native381F5E1D/EXEFF7C9A0F/Invoke12E7FC95/TestD8AD0AD4/fake3482075Bの全hashは同計画表へ束縛する。designer指定Astra/high、api-and-interface-design既読、UI非該当。本書だけを編集し他者のdirtyを保持する。
+
+前節のnative2定数・G1–G6/AP1–4は保全する。ただし前節の「回帰はargv-path01配下」と旧HANDOFFの実行OutputRoot例は以下の用途分離で置き換え、旧nested実行commandとValidateOnlyからruntime可能とする解釈を失効させる。`R/verification/argv-path01`はdriver/oracle/HANDOFFと解析結果の場所、**実行OutputRootは新規`R/verification/<suite-UUID>`直下**、fixtureRootはその`<case[-variant]>`子である。Runは従来の`R/runs/<run-UUID>`、payloadは`invocations/<invocation-UUID>/payload.json`、V2は`safety/<caseId>/v2-output`のままとする。suiteIdは実行OutputRootのbasenameでありargv-path01へ偽装しない。UUID命名はfocused producerの選択で、既存consumerのsuiteId正規表現は変更しない。解析oracleだけのOutputRootは従来のpacket配下でよい。
+
+初回repository未定義と二回目nested root拒否はcontext構築の失敗であり、argvのRED/GREENではない。二回目のcontext確定前terminalにあるprocesses/fixtureResiduals/cleanupDeadlineUtc=null、sourceMatched=falseを0/PASSへ変換しない。以下のPre以前の第三patch／再実行は不可であり、CXT01は未Closedである。
+
+### 初期化・消費・保存順
+
+driverは実TestのAST prefixと、同main内の一意なboundary→repository代入を元Fileにsource-bindして実行する既存方式を保つ。main丸ごと実行・同内容のconsumer再実装はしない。callbackのFile一致だけでは初期化済みと判定しない。driverの`ValidateOnly`は次表の起動前検査まで、file書込／build／identity-control／RunOwner起動0とし、出力へ`runtime=false`と未検証のfile/schema/OS境界を残す。通常実行でも同じ起動前検査を通ってから、既存fake build→identity-control2件→controller取得→既存10focusedへ進む。
+
+| 境界／実consumer | 起動前の入力・所有・必要な実確認 |
+| --- | --- |
+| source-bound scope／Test New-CaseFixture・Invoke-GateCase | boundary=固定R、repository=Rの4階層上のrepo、PSScriptRoot=実TestのR、GateScript=固定兄弟Invoke。fakeContractのstream keys、caseRows SHA=`CEF0406933398F433D2726F7EC4F1C4292A0CDF555B39AEA725ABB40920FF905`、80件unique、選択9件＋既承認slash variantの10件と16→17引数guardを保持する。standard dispatch専用caseResults/passedは使用しない |
+| 暗黙config入力／実Get-ConfigSnapshot | USERPROFILEとrepositoryを設定済みの同scopeで呼び、user `.cargo/config`、user `.cargo/config.toml`、repoの同2pathという順序・4件を確認する。pathと取得hashだけを記録する。hash=nullはsnapshotの欠測/不存在表現であり内容無しや無変更成功と推測しない。環境・configへ書かない |
+| 実行path／driverとTest main前提 | 絶対OutputRootの親が解決済みR/verificationそのもの、basenameが新UUID、未存在、全祖先reparseなし、git check-ignore成功を確認する。GateScript実体、Windows/pwsh7.6.6/AdminFalse、Pester5.7.1の利用可否、rustc実path、V2/native/source存在、native非稼働を確認する。未取得なら起動せず停止する。部分的なStartsWithだけで階層を許可しない |
+| frozen inputs／driver・Run Assert-Source | 計画表のInvoke/Test/native source/EXE/fake、独立argv oracle7D74D443、今回driver/HANDOFF/新context-testと設計を実hashで固定する。V2/pwsh/fake EXEの実path/hashとtoolchain証拠も保存する。各case前後の既存固定入力照合を維持し、別snapshotを混ぜない。nativeはsource/EXE不変なので再buildしない |
+| fixture／元New-CaseFixture→Publish-FixtureRun→Initialize-Fixture | fixtureRoot以下のrepo、local/temp/target/control、fake cargo/artifacts、source/g0/markerと各snapshot、descriptorと参照fileを既存producerで生成する。`fixture-owner.txt`はUTF-8 no BOMの`ET3-G independent synthetic fixture`＋LF。descriptorのrunId/suiteId/root/controller/cargoKind/cargoFixture/syncPoints/observationFaultsと各境界を元consumerへ通す。固定gate/native/pwsh/V2、Run/safetyの既存例外を増やさない |
+| sidecar／Invoke Initialize-RejectionContext→Initialize-Run | 刺激完了→descriptor/Run bytes確定→raw Run SHA取得→8field `runId,runSha256,startedUtc,deadlineUtc,launcherIdentity,auditKind,fixtureControl,tempPaths`の非上書き公開→RunOwner開始、の既存順。tempPathsはTEMP/TMP両fieldが必須で同temp可。真の起動driver identity=descriptor.controllerIdentity=sidecar.launcherIdentityであり、実RunOwnerのOS直接親・同世代照合を必要とする。時刻は既存UTC7桁とRunの65秒/build25秒、実行55秒＋回収10秒。context確定前にRunへ昇格せず、Run/cfg/時刻/fixtureControl/TEMP/TMP一致後だけ昇格する |
+| 子scope／Initialize-RunnerChain、所有・cleanup | 正確なpayload名/UUID/nesting確認の後に既存registration/OS親鎖を照合する。新suite配置でRun/payload位置を移さない。失敗は既存有限cleanupへ返し、unknown非停止／非PASSを維持する。実子列挙・実TEMP列挙以外を空配列の根拠にせず、未確定ならnullとfixtureを保持する |
+
+このmapの前半をdriverの起動前検査へ、後半を次の独立consumer preflightへ結合する。後半をdriver内へ複製した汎用validatorは追加しない。通常focusedでは後半を未変更のInvoke自身が実OS条件で再検証する。HANDOFFは現行実行commandを1個へ更新し、`$out = Join-Path "$r/verification" ([guid]::NewGuid().ToString('D'))`と固定slash driver／native source381F5E1D…/EXEFF7C9A0F…を指定する。旧nested例は「履歴・実行禁止」と明示するか現行commandへの参照に置換し、旧失敗rootとRED証拠は保存する。
+
+### 有限preflightと証拠の区分
+
+独立作者はpacket配下の新context-testだけを所有する。元TestのNew-CaseFixture/Publish-FixtureRun/Get-ConfigSnapshot、Invokeのpath/hash/schema/fixture/初期化関数をASTでそのまま取り出す既存手段を使い、source bytes/SHAと抽出元を記録する。新framework／gate mode／production test seamは追加しない。正常fixtureはENV01の無刺激形を元producerで生成し、sidecarはInvoke-GateCase内の既存8field発行statementを抽出して使用する。各caseに新しいscope・Immutable・Run/ValidationInput/RejectionContext状態を与え、変異は読取前に1箇所だけ行い、整合を検証するcaseでは関連hashを変異後bytesへ正しく結合する。旧runを補修しない。
+
+このpreflightで**実RunOwner起動は0回**とする。元Invokeの初期化prefixと関数を別の隔離scopeへ読み、既存param契約どおりMode=RunOwner、ParameterSet=Control、RunPath=当該新Runの絶対path、InvocationPath未指定を与えて元Initialize-Runを呼ぶ。Test側の初期化scopeや前caseのscript状態を流用せず、main/dispatchは呼ばない。CXT-PRE-01への修正として、入力設計SHA `82A4774AA899628BCBC4E821386E1F8FD7DB1950473C495390B3B673019A3D36`の「4関数を合成5field identityへ置換」という一括記述を次の型付き契約へ置き換える。選択は**Ownersを空に保ち、ownerのOS同定・登録・liveness監督を省くfile/context試験**である。mock handleは作らない。元Assert-Control、Get-Identity本体、file/hash/schema consumerを編集しない。
+
+test入力の自己Sは`pid:int`を現在preflight pwshの実PID、`startTimeUtc:string`を保持した実現在processの開始UTC7桁、`path:string`を実MainModule.FileNameの既存canonical値、`parentPid:int`を後述C.pid、`commandLineUtf16:int[]`を固定の合成非NUL文字列から元ConvertTo-CodeUnitで作る5field ordered dictionaryとする。controller Cもこの**同じ実現在process**のPID/開始/pathを用い、parentPid=0、commandLineUtf16は別の固定合成文字列とする。descriptorとsidecarのcontroller/launcherはCの同内容コピーである。S.parentPid=C.pidという自己参照は2processのOS関係を表さない明示的なtest代用であり、実親・command・所有証拠へ保存しない。存在しないPIDを開く前提はない。合成OS行R0はSに対応する`ProcessId:int,ParentProcessId:int,CreationDate:DateTime(Utc),ExecutablePath:string,CommandLine:string`を持つPSCustomObject1個とし、CIM実測とは記録しない。
+
+| 隔離scopeの置換関数 | 正確な引数・成功出力・状態更新 |
+| --- | --- |
+| Get-OsProcess | 引数なし。成功streamに`return ,([object[]]@($R0))`相当の**OS行配列1個**だけを出す。identity dictionaryを返さない。呼出をtest専用logへ記録し、gate状態更新・CIM照会なし |
+| Get-Identity | 元どおり`([Diagnostics.Process] Process, [object[]] Rows)`。Processは元consumerが渡す実GetCurrentProcess結果であり、IdがS.pid、保持SafeHandle有効、開始時刻がSと一致、Rowsが上記R0配列と同じ型/全field値であることを確認してSの5field ordered dictionary1個だけを返す。ProcessをDisposeしない。別Process/Rowsを受理せずthrowする |
+| Assert-Identity | 元どおり`([object] Identity, [object[]] Rows)`。元Get-IdentityKeyのschemaを確認し、IdentityがC全5fieldと一致、RowsがR0配列と一致する時だけ成功する。戻り値・success stream出力なし、gate状態更新なし。GetProcessByIdを呼ばず、実OS再同定を行ったとしない |
+| Add-Owner | 元どおり`([object] Identity)`。置換Assert-Identityを`Identity, (Get-OsProcess)`で呼び、Cとの一致を確認する。戻り値・success stream出力なし。test logへ引数と`registrationOmitted=true`を記録し、**Ownersへ追加しない**。GetProcessById／handle確保／Kill／Waitを呼ばない |
+
+元prefixが作るOwners（List）、Known、Unprovableは各case開始から終了までCount=0を必須とする。logやassertion結果をsuccess streamへ漏らさず、元関数の消費側へ追加objectを混ぜない。C0ではGet-Identityの2回、Add-Ownerの1回とInitialize-FixtureからのAssert-Identity到達を確認し、各出力型/個数・引数・Owners空を既存試行内で検査する。負例では到達した呼出だけを検査し、拒否後の未到達を成功扱いしない。元Assert-Controlのcancel/UTC/monotonic検査は動くが、Ownersのforeachは0回であり、Refresh/HasExited/StartTimeによるowner監督は**未実行・未検証**と記録する。OS親世代・所有登録・監督喪失・terminal/cleanupのPASSを一切付与しない。
+
+残る実OSアクセスは現在process自身だけである。Initialize-RejectionContextのGetCurrentProcess/SafeHandle/finally Dispose、Initialize-RunのWindowsIdentity/Admin照合、実GetCurrentProcess.MainModule.FileNameと固定pwshの比較、終端Get-Identityへ渡す実GetCurrentProcessは変更しない。したがってtestは固定pwsh7.6.6の通常ユーザーprocessで実行し、取得不能ならcontext試験失敗とする。fixtureはcargoKind=fake、syncPoints/observationFaults空の無刺激形を維持する。payload切出しは最初のcargoRegistration読取前で止めるため後段のGetProcessById/owner登録へ到達しない。Start/cleanup/Complete-BootstrapAudit等も呼ばない。この到達範囲をASTで確認し、型を保つために合成PIDのProcessを生成する回避をしない。
+
+payload検査だけは元Initialize-RunnerChainの入口から最初のcargoRegistration読取直前までの同じstatementを抽出して実行し、payload名/UUID/nestingの受理／拒否を確認する。後続登録・親鎖への到達を主張しない。Start-FixtureProcess、Invoke-GateCase全体、Invoke-IdentityControlRegression、native/target/監督開始・停止・wait経路はpreflightの呼出対象から外し、隔離test内に呼出禁止trapと個別attempt counterを置く。正常・負例ともRunOwner/native/target実起動0、attempt0を必要とし、trap到達を期待拒否のPASSにしない。invalid入力の本番gate拒否や実回収は後続focusedの証拠と分ける。
+
+書込は新しい`R/verification/<preflight-UUID>`とそのcase子、元producerが新規生成する`R/runs/<run-UUID>`、packet配下の新しい結果rootだけに限定する。旧nested負例だけは新しい`R/verification/argv-path01/<negative-UUID>`を使い、存在済み失敗rootへ書かない。fakeのcopy元は保存suite `argv-path01/5babecf8-0678-4bd2-8bab-ae73c540c952/fake.exe`、SHA=`286E1EFB55A9EAD69D097F6EAEF76C85795145AEE3CC4829CA9D429D41FF5461`と同toolchain.jsonのsource3482075Bを照合して使う。copyするだけで実行・再buildしない。不一致なら停止する。junction負例は新合成root内のdirectoryだけを指す通常権限のjunction1個までとし、作成不能時に権限を追加せず未検証として停止する。
+
+下表は固定12試行で、正常1＋負例11を各1回、予期しない結果で残りNotRun、retry0である。各試行15秒・全体120秒の早いmonotonic上限を入口／consumer前後で確認し、超過は失敗として残りを実行しない。同期file/OS呼出を強制中断できる保証はなく、その応答条件を明記する。この上限はtestの起動抑止予算であり、Runの65/25/55/10秒やcleanupを延長・置換しない。正常consumer確認に実RunOwnerを追加する必要はなく、実OS親／cleanupは既定focused10件の段階へ留める。
+
+| CXT試行／G5・AP4 | 元consumerで必要な結果 |
+| --- | --- |
+| C0 正常direct suite | 元Get-ConfigSnapshot4path、Initialize-Runのcontext確定とRun昇格、元payload入口の正確なnesting受理。模擬identityを除くfile/hash/source/fixtureの通過を記録し、runtime/cleanup PASSとしない |
+| C1 旧nested suite | fixtureRoot=`R/verification/argv-path01/<UUID>/ENV01`、suiteId=`<UUID>`の元fixtureをInitialize-RejectionContextの厳密prefixで拒否する。修正driverの起動前guard拒否も別記する。suiteIdを改変しない |
+| C2 repository未初期化 | 隔離scopeからrepositoryだけを欠かし、元Get-ConfigSnapshotが実際に失敗する。通常scopeの4path成功と組にする。driverのcallback到達だけを検出証拠にしない |
+| C3/C4 marker欠落／文言違い | 別fixture各1回で元path/file/marker検査が拒否する。既存fixtureを壊さない |
+| C5/C6 descriptorの別runId／別suiteId | 各1回、descriptorとそのhashを整合させた上でrun同一性／root境界の実validatorが拒否する。単なるSHA不一致で代替しない |
+| C7 別Run位置 | 有効D形式でもrunIdとcanonical Run位置が異なる入力を元Initialize-RejectionContextが拒否する |
+| C8 別payload nesting | 新Run内の別階層に合成payloadを用意し、元Initialize-RunnerChain入口のname/UUID/nestingが拒否する。nativeを起動しない |
+| C9 reparse | 合成junction配下のfixture pathを元Get-CanonicalPathで拒否する。文字列guardだけを試さない |
+| C10 期限不正 | sidecar deadlineUtc≤startedUtcの1変異を元context時刻validatorで拒否する。OS時計変更なし |
+| C11 TEMP不一致 | sidecarには有効なfixture内TEMP/TMP、Run.envMap.TEMPだけ別の有効fixture内directoryを指し、元Initialize-Runのcontext/Run一致比較で拒否する |
+
+初期化schemaやmarkerをconsumer通過済みと扱うには上記の実path/file結果が必要である。source-bound origin、ValidateOnly、mock identity、native未到達だけからCXT01 ClosedやAP1 GREENを宣言しない。新独立testの期待値を先に固定して旧driver89C6に対するnested契約のREDを示し、別実装者がdriver/HANDOFFのcontext部分だけを是正する。新context-testと既存argv oracle7D74/10case/slash17引数は実装者が変更しない。
+
+Preは本書の返却SHA、計画E209…、driver89C6…/HANDOFF FB1…と固定native/Invoke/Test/fakeを対象とする。順序は設計受領・Pre→独立作者12試行固定→harness実装→独立preflight→接合review/親受領→合法な新suiteでfocused10件1回→Post→標準80件である。最初のfocused失敗で残りNotRun、実OS同世代・実terminal・実cleanup・argv証拠を別記する。新前提不整合、元consumer緩和、権限追加、想定外のscope変更が必要なら停止して親へ返す。rollbackは保存driver89C6/HANDOFF FB1への当該差分だけで、復帰後も実行不可の既知不整合状態である。native2定数／旧証拠／他者編集を戻さない。
+
+完了境界は本追補と文書diff/link/hash確認のみである。役・model/effortは計画のCXT表を維持し、次は独立Preへ返す。開始時計観測2026-10-16T00:02:05.1877712+09:00、token開始/終了・週枠・provider返却model/effortは未取得。code/tests/runtime/新文書/再委譲/公開0、CXT01受入は未完了である。
