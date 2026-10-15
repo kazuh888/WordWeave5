@@ -1,6 +1,8 @@
 # 現在のタスク要約
 
-再開追記（2026-10-15）：利用者「継続で」を受領。LIFE14は既存Registration/Ready境界への刺激対象誤りとplanner/仕様が確認。限定design0B7802CCは独立Pre PASS、作者TestBA73802Fは旧oracle3RED→新8PASS/合成同期対照/静的検査で返却。実装担当が最小hook/実比較診断を接合中。実gate/cleanup/接合Post/80case/full/提供は未了。OS世代比較そのものの証明とは区別する。共有週枠98%、利用者の継続承認を維持する。
+最新：日時型是正InvokeE1F5C520/Test0BB2510Eは独立9+2系統PASS/逆置換一致/局所reviewPASS。新suite4bfe2cb0もcontrol2PASS/ENV01実呼出1FAIL/残79NotRun（terminal0/target0/終了後所有候補0）、LIFE14未到達。日時以外の開始失敗は未確定。原本source無変更の外scope例外型/行番号probeを専用verificationで作成中、実ENV01診断はまだ未解除。commandline同定や基準を緩和しない。新週枠0→2%観測、旧枠と差分換算しない。製品full/提供は未了。
+
+再開追記（2026-10-15）：LIFE14限定是正はdesign0B7802CC独立Pre、TestBA73802F旧3RED→新8PASS、Invoke00436AD9、接合静的PASSまで。通常入口再runtime suite aa5b5366はcontrol2PASS/ENV01実呼出1FAIL/残79NotRun、LIFE14未到達、target0/終了後所有候補0/terminalとgatecleanup証拠欠落。正常初期化失敗の原因を保存入力/純粋式だけで切分け中、新実行未解除。共有週枠99%、利用者継続承認あり。製品full/提供は未了、既存EXE/source/data不変。記録checkpoint aae5a52 push済。
 
 直近（2026-10-15）：ET3-G初回通常入口はcontrol2 PASS、GATE21 FAIL停止。先行26Passedは呼出0のため行動PASS撤回、残53NotRun。dispatch是正は旧4RED/1PASS→修正後5PASS。RunOwner拒否sidecar限定接合はInvokePS34216046／TestPSEEAF6957／design0EC0336Fで返却、静的検査と準備対照2PASSまで。LIFE14の誤controller刺激と既知cleanup要求の契約不一致が未解決、接合後独立レビュー／80case再実行／製品full／提供は未了。native/fake/製品source不変、書式3PASSを再利用する。DPI150/200移管は承認済み、他native残部移管は未承認。共有週枠95%を受け継続範囲を照会中。詳細と正本は末尾リンクを参照する。
 

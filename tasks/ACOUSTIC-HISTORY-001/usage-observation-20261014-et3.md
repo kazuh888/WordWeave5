@@ -1,6 +1,14 @@
 # ET3 試用EXE提供の使用量観測
 
+## 上限停止後の利用者続行（2026-10-15）
+
+独立作者はInvoke日時回帰旧2RED/7PASS→9PASSを固定し、TestPS同種の2系統を旧2RED→新2GREENへ接合した。TestPS23箇所とInvoke1箇所のoption追加以外は逆置換SHAで不変を確認。作者の共有週枠は新reset区間で1→1%、後phase2→2%、子counter/metadata欠測、task専有率へ換算しない。実Gate再実行は静的review前で0。二次terminal欠落を未確定のまま保持し、日時修正だけで全因果解明とはしない。
+
+ENV01の限定read-only調査担当はusage limitで停止し、原因確定前であった。利用者『続けてください』を受領後、親の新観測は共有週枠0%/10080分/reset1792667952/ordinaryUsageAllowed=trueである。旧99%/旧reset区間と跨いだ単純差分を作らず、復帰理由を推定しない。同じAstra/high担当へ保存済み証拠/純粋式だけの調査再開を指示した。製品/実Gateの再実行はまだ解除していない。
+
 ## 利用者「継続で」受領・LIFE14限定再開（2026-10-15）
+
+既定全体runner gpt-6.1-sol/mediumの新通常入口はcontrol2PASS/ENV01FAIL/残79NotRun、実呼出1、LIFE14未到達となった。終了共有週枠99%、task専有率/子counterは未取得。実行前静的PASSでは動的開始成功を証明できないことを保持し、新実行を止めて保存入力/純粋式診断へ戻す。試験と合否基準は削減しない。
 
 LIFE14作者は開始97→終了98%共有週枠（10080分/reset1792496608）を取得した。旧oracle3RED→新8PASS、合成同期対照、静的検査を返却した。designer/Pre/仕様の子counterは欠測、共有率をtask専有量へ換算しない。親は既定割当Astra/highで実装者へ最小hook/診断だけを引き継いだ。実gate/full/提供は未了である。
 

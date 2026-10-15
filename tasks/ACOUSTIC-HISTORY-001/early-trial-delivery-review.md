@@ -1,6 +1,36 @@
 # ET3 試用EXE提供・独立レビュー記録
 
+## 日時是正後の独立再runtimeもENV01停止
+
+限定診断案はsource無変更の外script scope呼出を採る。Invokeは$Errorを消去しておらず、外側から`&`で固定Invoke/RunOwnerを呼んだ後、新規例外の型/ScriptLineNumberだけを固定R配下の既検証新診断dirへCreateNew保存できる。dot-sourceせず、LASTEXITCODE/streamsを保持する。まず合成例外で捕捉/exit/非上書きの小対照を作り、独立確認後に新正常ENV01一件だけを診断する。呼出形態が変わる診断なので80case合格には換算しない。作者所有は専用verification helperだけで、原本Invoke/Test/native/fakeの編集を解除しない。
+
+日時差分限定review PASS後の新suite `4bfe2cb0-11d8-4cc5-a9ce-bd267926c77e`／run `b3237e4b-6338-48ca-bdb6-1f08ad66ebd6`はcontrol2PASS、ENV01実呼出1FAIL/残79NotRun、LIFE14未到達となった。terminal/target marker/streamsは0、Admin=false/固定6SHA一致/終了後CIM所有候補0、gatecleanup証拠は欠落、temp/local保持、自動retry0。日時是正の9+2系統PASSと、正常開始/terminalの別の未解決を区別する。
+
+親は全suiteの再反復を解除せず、実装担当へ最初の例外とterminal例外の型/行番号を安全に取得する最小診断案をread-onlyで依頼した。source無変更のcaller-scope診断が可能なら優先し、source追補なら固定既検証R境界/専用CreateNew証拠だけ、raw内容/env/資格情報を記録せず、targetstream/認可/所有/期限を変えない案とする。
+
+## ENV01・保存入力と純粋式による原因一件確定
+
+TestPSの23 option追加はSHA `0BB2510E928C9C3BFAD34D8190F007C97881047B195194A586A319837FE484DE`で返却。逆置換SHAは旧BA73802F一致、独立2系統旧2RED→新2GREEN（approval7桁保持/明示日時計算、identity同時刻一致/1tick差拒否/残存3件正検出）。専用回帰SHA `C781FFB9C51D3178B1E6B218A5E72ED004896D409EC1EE381C62B8269AE9F7B5`、証拠はR/verification/testps-datetime-20261015。parser/analyzer実行error/新診断0、既存ShouldProcess6保持。実process/Gate/Cargo0、独立reviewerへ日時option差分だけを確認依頼した。
+
+InvokePSは188への-DateKind String一箇所追加だけでSHA `E1F5C520199DA8362A486CB164DDC6389B093E71CB612215769C9C470D6E8062`を返却。同option逆置換bytesは旧00436AD9と一致、固定9回帰は9PASS/0FAIL、parser/PSSA診断・実行error0、実Gate/process/Cargo0。TestPSは日時を含む証拠読取23箇所（approval/identity/Ready/receipt等）のoption追加だけを別所有へ解除した。非日時14箇所と既指定5箇所は保持、明示datetime計算/80oracle/87呼出/期待値は変えない。独立小対照2系統を先に固定し旧RED→新GREENと逆置換一致を確認する。
+
+独立作者の実Read-Json/Get-Utc回帰9件を固定した（R/verification/json-datetime-contract-20261015/Test-JsonDateContract.ps1 SHA `BA60AF8BCBB2A5DBFF9FA64B7F11773A20A8DDDC8DF237443057E6F1D66A6891`）。旧sourceは正常日時保持/65秒期間の2RED、異常日時・root/nested重複key・trailing comma・UTF8不正・immutable変化の7PASS、parser/PSSA/error0。実装者へInvoke読取一行と同一9件のfocused再検証を解除した。
+
+作者はTestPSにも、読取identity日時とOS文字列の比較、approval再発行時の末尾ゼロ消失（7桁→6桁）の同種リスクを確認した。別所有でraw日時契約に該当する読取箇所と最小対照の限定案だけを先行確認する。実processを起動した結果ではなく、terminal欠落の全因果は引き続き未確定である。
+
+Invoke188のConvertFrom-Json既定日時変換により、contextのstartedUtc/deadlineUtcがSystem.DateTimeとなり、632→Get-Utc109のstring必須検査で拒否される。固定pwshの純粋対照では-DateKind Stringにより7桁Z文字列を保持し既存検査が成功、期間65秒/offset・3桁negative拒否を確認した。UUID/path/8key/RunSHA/launcher-descriptor一致/Control parameter-setは成功。最小修正は日時検査の型許容緩和ではなく、読取時の表現保持一箇所である。
+
+RejectionRootIdは当該throw前に確定するため、これだけでterminal欠落の全因果を断定しない。terminal22field組立/直列化/pathの純粋検査は成功、当時のwriter二次失敗は例外無記録により未確定である。実source/実Gate/process変更0。作者へ実Read-Json/Get-Utcの独立小回帰（正常文字列保持/異常拒否/duplicate厳格性）を先行依頼した。旧launcher終了後の現在不一致は原因へ読み替えない。
+
+## 新固定snapshot・通常入口再runtime：ENV01停止
+
+suite `aa5b5366-33bd-477c-af8e-cc4aad2ded11`、run `a495d5a7-0438-4ace-88f7-a5af12a8c572`。control2 PASS、実呼出1のENV01がterminal欠落でFAIL、80case PASS0/FAIL1/NotRun79/SKIP0。LIFE14未到達。Admin=false、固定6入力SHA一致、target marker0、streams0byte、終了後CIM所有候補0。gate自身のcleanup証拠は欠落、temp/local保持、自動retry/ソース編集/実API0。raw26偽PASS問題は再発せず呼出数判定が機能したが、正常初期化の失敗原因は未確定である。
+
+実装担当へsource/保存入力の限定read-only切分けと、型/path/parameter-set等の純粋式診断だけを解除した。終了済み旧launcherとの現在の不一致を実行時原因と誤認しない。既存例外がFailureへ保存されるだけでterminal自体が書けないため、実行時の最初のthrowの復元には不足がある。新RunOwnerや製品fullは未解除である。
+
 ## LIFE14再開・既存要求の限定解釈
+
+Invoke00436AD9/TestBA73802F/design0B7802CCを固定し、独立reviewerはLIFE14接合・拒否context・dispatchの再runtime前限定静的PASSとした。動的OS/cleanup/Postを代用しない。親は既定ET3-G全体runner gpt-6.1-sol/mediumへ新UUIDの通常入口80/87呼出しを1回だけ解除した。LIFE14だけのfocused割当gpt-6-sol/mediumとは工程を区別し、今回はfull80で正常/影響対照も含めて接合確認する。旧raw26偽PASSは再利用しない。
 
 実装返却InvokePS SHA `00436AD987A4BD1D2FDF70BDDA683D60DA8983CC9AEDCB4BE9F8BC57304C3402`：3箇所15行追加/2削除、読取前hook閉範囲と実比較分岐診断だけを追加、parser/PSSA診断・実行error0、他入力不変/runtime0。独立reviewerへLIFE14接合と前checkpointの拒否context/dispatch/sidecarの未確認実装境界を限定静的確認として返した。PASS前に再runtimeを解除しない。
 
