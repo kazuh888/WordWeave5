@@ -601,8 +601,8 @@ rollbackはRead-OwnedTreeの今回差分だけを12E7保存版へ戻すことで
 | FailureObservation | nullまたは元の該当Unprovable 1個。projectorは通常IDictionaryから固定keyを個別参照するだけ。全文serialize/全Keys走査/任意PSObject property走査は行わない。共通catch側はその`osObservation`、parent edge側は既存candidateIdentityだけが得られ、存在しないosObservationを捏造しない |
 | 保存root envelope | `diagnosticKind='FirstGateFailure'`, `schemaVersion=1:int`, `runId/runSha256/gateSourceSha256`, `role`, `actor={pid,startTimeUtc}`, `callsite`, `status`, `firstAbortUtc`, `firstAbortTickSeconds`。statusは元gateの`Rejected/Cancelled/TimedOut/OwnerLost/CleanupIncomplete/Completed`文字列に限定し、値不正は診断だけSkipped。時計は元AbortUtc/AbortTickの既存値、tickは有限かつ0以上のdoubleである |
 | failure | nullまたは`ownership='Unprovable', killRequested=false, waited=false, hasExited=null, candidate={pid,startTimeUtc}, osObservation={...}`。candidate/osObservationは各nullを許す。元該当fieldがこの型/値を満たすものだけ複製し、異常fieldはnullとする。candidateは元identityのpid/startTimeUtcだけ。path/parent commandを含むidentity全文は保存しない |
-| osObservation | 既存12fieldだけ：`pid,parentPid,creationUtc,pathPresent,commandPresent,snapshotMatchCount,knownMatchCount,exceptionType,exceptionLine,rowFilterMatchCount,rowFilterPathPresent,rowFilterCommandPresent`。pidは整数1..UInt32.MaxValue、parentPidは0..UInt32.MaxValue、countは整数0..Int32.MaxValue、lineは整数1..Int32.MaxValue、4個のPresent fieldはboolまたはnull、creationUtcはUTC7桁28文字またはnull。exceptionTypeはASCII `[A-Za-z0-9_.+\x60]`だけの1..256文字またはnull。任意入力の文字列化/切詰め/数値へのcoercionなし |
-| producerFailure | 元osObservationに存在する時だけ`exceptionType,exceptionLine`の2fieldを同じ制約で射影し、その他は捨てる。元Unprovable.error、Caught.Message/StackTrace/InvocationInfo全文、Data辞書は保存しない |
+| osObservation | 基本は既存12field：`pid,parentPid,creationUtc,pathPresent,commandPresent,snapshotMatchCount,knownMatchCount,exceptionType,exceptionLine,rowFilterMatchCount,rowFilterPathPresent,rowFilterCommandPresent`。pidは整数1..UInt32.MaxValue、parentPidは0..UInt32.MaxValue、countは整数0..Int32.MaxValue、lineは整数1..Int32.MaxValue、4個のPresent fieldはboolまたはnull、creationUtcはUTC7桁28文字またはnull。exceptionTypeはASCII `[A-Za-z0-9_.+\x60]`だけの1..256文字またはnull。任意入力の文字列化/切詰め/数値へのcoercionなし。唯一の任意追加keyは下記producerFailureである |
+| producerFailure | 保存先は`failure.osObservation.producerFailure`だけである。元osObservationにこのkeyがあり値がIDictionaryの時だけ、`exceptionType,exceptionLine`の2fieldを同じ制約で射影したdictionaryを追加する。不適合な各値はnull、key欠測又は値が非dictionaryならkey自体を省略する。通常のosObservationは12key、producer失敗時だけ13keyである。root直下やfailure直下には複製しない。これは観測producer自身の失敗であり通常12fieldの元identity失敗とは異なるため保持する。元Unprovable.error、Caught.Message/StackTrace/InvocationInfo全文、Data辞書は保存しない |
 
 nullをfalse/0へ補完しない。envelopeの必須context/時計が欠ける時は文書全体を保存しない。観測fieldの不正/過長はそのfieldだけnullとし、不正な観測を根拠に元failureを置換しない。余分なfield、配列、全Known、FullRun、環境変数、credential、raw command、教材、実ユーザーpathは一切serializeしない。depthは最大5、配列0、UTF-8 no BOMかつ全体8192 bytes以下をserialize後・Open前に確認する。projectionは固定個数のscalarだけなので入力側に大配列があっても列挙しない。
 
@@ -638,13 +638,30 @@ Publishedの記録は正式fileの存在・schema/hash・actor/run/source一致�
 | 前提 | 元boundary/repository/PSScriptRoot/GateScript/fakeContract、4config path snapshot、OutputRoot=R/verification直下の新UUID・全祖先非reparse・git ignored、Windows/pwsh7.6.6/AdminFalse/Pester5.7.1/rustc/pwsh/V2/固定native存在・native非稼働をそのまま使用。source-bound原文のstatement照合とfresh path検査を維持 |
 | fixture準備 | 元fake.rsを新suite内fake.exeへ元commandでbuild、toolchain/hashを保存。native再buildなし。Get-PinnedProcess/Get-ProcessIdentityで同じprobe controllerを同定し、同じ6field contextを生成する。旧suiteのfake/controller/Run再利用なし |
 | control2の分離 | 元Invoke-IdentityControlRegressionは独立2caseであり戻り値はENV01のcontextに渡されず、元producer/consumerの必要な型/identityを代替するものではない。新probeでは呼出0、旧control PASSを今回のPASSとして記録しない。元ENV01内のcontroller同定、registration、所有検証は省略しない |
-| dispatch | 新probe内の小private `Invoke-FirstFailureEnv01Case([IDictionary]Case,[hashtable]Context,[hashtable]FixedInputs)` に分離する。Case.idが厳密ENV01、variant fieldなし、原文row一致を確認後、固定入力照合→元Invoke-GateCaseを1回→固定入力照合→結果1個/id=ENV01/status=Passed確認。例外/複数/欠測はFailed。catch後return/throwのみで二回目callなし |
+| dispatch | 新probe内の小private `Invoke-FirstFailureEnv01Case([IDictionary]Case,[hashtable]Context,[hashtable]FixedInputs)` に分離する。Case.idが厳密ENV01、variant fieldなし、原文row一致を確認後、固定入力照合→元Invoke-GateCaseを1回→固定入力照合→結果1個/id=ENV01/status=Passed確認。開始後の例外/複数/欠測はFailed、開始前の拒否はNotRun。下記の戻り値1個だけを返し、二回目callなし |
 | 元ENV01 | New-CaseFixture→Set-CaseStimulus/Set-CaseSynchronization→Publish-FixtureRun→RunOwner→元G0/fixture/full→Confirm-CaseResult→元finallyを原文のまま使用。Run65秒/build25秒、実行55秒＋cleanup10秒、元fixture watchdog90秒とfinallyの11秒等の回収上限も変更しない。元oracleのterminal/marker/environment/config/ownership判定をprobeで成功へ置換しない |
 | 結果 | 新suiteに`context-preflight.json,toolchain.json,frozen-inputs.json,first-failure-ENV01.json,result.json`を元Write-NewEvidenceで非上書き保存。`expectedCount=1, dispatchCount:int(0又は1), otherCaseDispatchCount=0, retryCount=0, focused10Credit=0, full80Credit=0, productFullCredit=0, sourceMatched:bool`を固定。入口拒否はdispatch0/ENV01 NotRun、元case例外はdispatch1/Failed、正常はdispatch1/Passed。診断有無は別fieldでUnobserved/AttemptedUnpublished/Publishedを報告する |
 
 ENV01の受入は元Confirm-CaseResultだけで足りるため`Test-ArgvPathEvidence.ps1`を追加起動しない。AP1/full native argv受入は元focused10の未了gateに残す。引数oracleを実行しないことをENV01期待の削除と混同しない。元Testのprefixには他caseの関数定義が含まれるが、その定義をloadしたことをdispatchに数えず、入口からの到達callは一意ENV01だけである。既存function内のORDER09再帰branchはENV01で未到達であることを静的にも確認する。
 
 新probeは使用する固定入力だけを束縛する：最終plan/design/Invoke、Test D8AD0AD4、fake3482075B、native source/EXE、probe自身、pwsh/V2/rustc、生成fake。前提の原文抽出は新Test-FirstFailureの静的oracleで独立に照合するため、旧focused driver/HANDOFF/Test-ContextPreflight/CONTEXT-TEST-HANDOFF-P1をruntime prerequisiteとしてloadしない。それらの旧hash再束縛は今回不要である。probe自身の最終hashは親の既存review/handoff記録で先に固定し、self hashの自動取得だけで承認済みとは扱わない。依存入力はcase前後でも照合する。
+
+FF-BのT15–17接合のため、dispatchの未確定だった3契約だけを以下で固定する。受入件数、実行権限、期限は変更しない。
+
+1. **FixedInputsのschema**：非nullの`hashtable`で、keyは絶対full pathのstring、valueは大文字64hexのstringである。nested object/array/nullは不可。項目は上記の12個、すなわちrepoのplan/design、RのInvoke/Test/fake.rs/native source/native EXE、packetの新probe、固定pwsh、固定V2、解決済みrustc、`Context.suiteRoot/fake.exe`である。入口が各実pathと承認済みhash（toolchainと生成fakeは既定の取得点で得たhash）を組にして作り、同一pathの大文字小文字違いを含む重複は拒否する。dispatchは12件・型・絶対path・hash形式を検査し、引数dictionaryを変更しない。path集合がこの12入力と一致することはprobe入口の責務であり、作者は入口の静的照合で確認する。
+2. **固定入力照合seam**：新helperは増やさず、元Testの`Get-PathHash([string]$Path)`をそのまま呼ぶ。戻りは`hashtable { path:string=GetFullPath(Path), sha256:string=大文字64hex }`1個である。dispatchはkeyをStringComparer.Ordinal順のstring配列にして、各pathへ`Get-PathHash -Path $path`を1回ずつ呼び、戻り個数1・型・pathのOrdinalIgnoreCase一致・sha256のOrdinal一致を検査する。例外/不正戻り/不一致はその照合passの失敗であり、以後のkey照会を打ち切る。OS照会はこの関数の既存file hash読取りだけである。T15–17は同名・同signatureのmemory代用でpath→hashを返せる。dispatch本体でGet-FileHash/ReadAllBytesを直接呼ばない。
+3. **戻り値と例外順序**：dispatchは下表の通常hashtable1個だけをsuccess streamへ返し、Case/Context/FixedInputsを変更しない。まず全counter=0、status=NotRun、sourceMatched=falseで開始する。Case/入力型検査→前照合が成功した場合だけdispatchCount=1を元`Invoke-GateCase -Case $Case -Context $Context`の直前に設定する。戻りは配列で捕捉し、例外は局所catchで保持する。その後、元caseの正常/例外にかかわらず後照合を1回試み、その例外も局所捕捉する。前後照合がともに成功した場合だけsourceMatched=trueとなる。判定の優先順はcase例外→後照合失敗→case戻り不適合→Passedであり、後照合例外で先のcase失敗を置換しない。元case自身のcatch/finallyは変更せず、dispatchからretry/cleanup/追加caseを呼ばない。前照合以前の拒否では後照合と元caseを呼ばない。parameter binding自体の不適合はprobe入口で拒否するため、本文到達後の運用例外を以下のresultに変換する契約である。
+
+| dispatch result key | 正確な型・値 |
+| --- | --- |
+| id / status | `id:string='ENV01'`。`status:string`は開始前拒否=`NotRun`、開始後失敗=`Failed`、全判定成功=`Passed` |
+| expectedCount / dispatchCount | 各int。expectedCount=1、dispatchCount=0又は1 |
+| otherCaseDispatchCount / retryCount / focused10Credit / full80Credit / productFullCredit | 全てint=0 |
+| sourceMatched | bool。前後2pass完了かつ全hash一致のみtrue。caseがthrowしても両pass成功ならtrueであり、case合格を意味しない |
+| existingResult | Passedの時だけ元Invoke-GateCaseが返した唯一のIDictionaryそのもの。それ以外はnull。元結果を加工してPassedにしない |
+| errorCode | nullまたは固定string。入力不適合=`InvalidInput`、前照合失敗=`FrozenInputsBefore`、case例外=`CaseInvocationFailed`、後照合失敗=`FrozenInputsAfter`、個数/id/status不適合=`UnexpectedCaseResult`、Passed=null。例外全文/stack/commandは戻り値に追加しない |
+
+この12key以外はdispatch resultへ追加しない。suiteの診断有無・file出力・合計結果は呼出側がこのresultを消費して作る。T15は12入力をmemoryで一致させGet-PathHash計24回、case1回、Passed/sourceMatched=trueを確認する。T16はcaseだけthrowし、同じ24回、Failed/CaseInvocationFailed/sourceMatched=trueを確認する。T17はOrdinal先頭keyのhashを一文字相違させ、Get-PathHash1回、case0回、NotRun/FrozenInputsBefore/sourceMatched=falseを確認する。3件ともASTで抽出した実dispatchを使い、Get-PathHashと既存signatureのInvoke-GateCaseだけを代用し、実file/process操作を行わない。原文ENV01 rowと6field Contextはmemory fixtureとして渡し、元caseが受け取った参照/内容を照合する。
 
 ### 有限18局所case・作者seam・command
 

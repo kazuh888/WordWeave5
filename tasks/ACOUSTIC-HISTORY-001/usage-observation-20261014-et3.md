@@ -2,6 +2,20 @@
 
 ## path欠測是正の設計再開（2026-10-15）
 
+FIRST-FAILURE01終了。作者baseline旧T01RED/17NAと新18GREENを各一回、FF-C独立接合PASS、親ValidateOnly一回PASS後、fresh runner `first_failure_runtime`指定`gpt-6.1-sol/medium`でENV01一回を実行した。20.4470182秒FAILだが正式診断3/tmp0を得て、独立限定Postは診断契約PASS／OBS-FIRST-01 Closed。原因patch/retry/残9/標準80/製品fullは0。runner共有週枠63→63%、親の開始側観測53→終了63%/10080/reset1792667952/ordinaryUsageAllowedtrueはaccount共通であり専有消費ではない。親子モデル設定は計画どおりだが実返却metadata/token/包含は未取得、合算しない。
+
+親終了側snapshotは2026-10-15T22:35:37.551Z、同sessionのinput1917263068/cached1874932352/output4307909/reasoning1407241/total1921570977/cache_write0。途中22:07:01.635Zからの取得済み部分差はinput11695710/cached11616384/output19715/reasoning4869/total11715425/cache_write0。内数を加算しない。この差は途中以後だけで着手前半・ここから文書保存/commit/push/最終応答まで欠測、子包含未確認でtask総量/旧方式比較/週枠換算に使わない。既存PSSA Stop条件のprovenance接合だけで検査再実行を避けたが、効率改善の定量効果は未測定である。
+
+FF-Cの残項目は既存PSSA実行時のExecution errors=0の証拠接合である。親が完了済み子へsend_messageだけで回答を求めたため、idleの新turnが起動されず待機が発生した。followup_taskへ是正し、作者/実装者へ各自の既存command条件だけを照会した。再検査/基準変更ではない。今後、完了子に返答を要する依頼はturnを起動する呼出を使う。不要待機を効率化の成果へ換算しない。
+
+作者test0975973Dを凍結し、実装者Astra/highへInvoke限定診断＋新probeを引き継いだ。作者は初回PSSA11件の命名等を修正し、T05/T18局所mock理由付き抑制2箇所を残した。別read-only reviewer Astra/highが固定済みtestだけを先に確認し、別fileの実装とこの間だけ並行する。adapter誤判定の早期発見という独立確認利益があり、最終接合PASSやruntime解除は実装凍結後に残す。期待の無断変更・OS実測・子再委譲0。
+
+作者の初回PSSA診断0報告は、10秒yield時点のstdoutを完了扱いした確認不足として本人が撤回した。Parser0は確認済み、PSSAは完了marker/exit待ちへ戻し、親の中間説明も訂正した。18case実行0を保持し、欠測をPASSへ転用しない。期待bytes固定後の別所有実装作成と、検査完了を要する実行解除は区別する。
+
+親の途中snapshotは2026-10-15T22:07:01.635Z、同session01a08550-055c-7aa1-9834-905e4a7ce148のinput1905567358/cached1863315968/output4288194/reasoning1402372/total1909855552/cache_write0。bounded末尾2MiBからtokenイベントだけ取得し会話本文は複製していない。FIRST-FAILURE01着手の同時snapshotではなく、その前の区間は欠測。cached/reasoningは内数、子包含未確認のため合計や当工程専有量へ換算しない。
+
+FF-A Pre PASS後の独立作者が、probeのFixedInputs key/type、照合helper signature、dispatch戻り値schemaの3点未定義を検出した。実装前にdesignerへこのinterfaceだけを差し戻し、作者は独立T01–14/18と基盤を継続する。別file/独立責務のためこの間だけ2 helper並行であり、再委譲や新ケース追加はしない。過去にも具体入力契約の不足が起きており、設計Preの改善候補を今回の手戻りとして記録する。成功扱い/検証削減で相殺しない。
+
 FIRST-FAILURE01暫定plan6B84受領後、限定designer `first_failure_design`へ指定`gpt-6-astra/high`・fresh contextでdispatchした。親の再確認週枠54%/10080/reset1792667952/ordinaryUsageAllowed=true。診断情報をwhitelistへ限定する安全性確認を加え、親モデル/権限/期限/検証基準は不変。実装と新実測0、子の実行metadata/token・親子包含は未取得である。
 
 利用者が新scope「cancel前の診断記録追加＋合成正常系1件1回」を承認した。開始側共有週枠53%／10080/reset1792667952。既存planner Astra/highへFIRST-FAILURE01だけを依頼し、新OS照会・既存判定/期限/追加実測の拡張を禁じた。既存Write-JsonがAssert-Controlを呼ぶため、単純再利用によるfailure再入を避ける必要があるとplannerが源で確認した。過去の局所PASS/旧結果は維持し、診断1件を10/80/full creditへ換算しない。親子token/provider/包含は欠測で合算しない。
