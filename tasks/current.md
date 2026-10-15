@@ -1,5 +1,25 @@
 # 現在のタスク要約
 
+PTH-MONO-01最終Post PASS／Closed：Invoke12E7、独立47/47＋5/5、期限後success/retry拒否・再進入非延長・同handle回収まで確認しmatrix更新済み。path補完は47件の限定Post支持。標準80は別argv拒否でENV01FAIL／79NotRun、実Cargo／製品full／提供は未了。次は内部path引数構築不一致の限定packet計画であり、全argv比較緩和はしない。
+
+ENV01別原因確定：内部Runnerの11argv中index4/8/10のpath区切りだけIntent backslash／observed forwardslashで不一致、他8一致。native固定pathとPS GetFullPath構築差でexact比較が拒否する。関連4関数は333C/54AE/12E7不変でpath/mono是正と別原因。全argv比較緩和せず内部構築を揃える別packet候補、まず現PTH-MONO最終独立closure待ち。新修正runtime未解除。
+
+独立runner：固定47/47＋5/5各exit0。標準suite7f2c941c-d1b3-4b4e-a3cc-a71c627a6e2aはcontrol2PASS、ENV01実呼出1FAIL／残79NotRun。run7da565fe-32ab-42fb-b4c5-4eaf2d59a356はunknown0・Owned10全wait/exited・fixtureResiduals[]、Runner Rejected『Observed command argv contradicts intent』→取消、target0。9SHA不変、現在候補0。path欠測はこのrunで再発しないが80成功へ換算しない。実装担当へ保存argv/intentの限定read-only原因照合を依頼、再実行／新修正未解除。
+
+独立Post静的PASS：Invoke12E7の通常cleanup同一clock/budget接合にblocking無し、parser/PSSA0。runner Sol6.1/mediumへ固定47＋5を各新rootで独立再実行し、両成功時だけ標準80firstFailを1回行う段階解除を渡した。PTH-MONO-01は最終Closed前、実80／製品full／提供未了。
+
+PTH-MONO-01実装返却準備：direct window（既存localclock＋確定budget）案の独立Pre許可後、Invoke12E7FC95F24883AC89E8464108AC7404D4953006EBFA56DC9B7F8D0613281621へ11行追加。自己検証は新5PASS／旧47PASSを別記、期限後success/retryのOwned0 unknown1 API1、再進入API追加0。parser0・対象外逆復元一致、PSSA最終待ち、独立Post中。runner／80はまだ解除しない。座標変換案は丸め非延長未証明のため不採用。
+
+PTH-MONO-01追加RED固定：Test-NormalCleanupClock9E9B0444（141行）で実Complete prefix/first try→Read-OwnedTree→Get-Identity→helperを通し5件3PASS2FAIL。UTC余裕・単調期限後successのOwned登録と122後8回retryを再現。通常正対照／再進入残0API0はPASS、専用child同保持handle回収済み、parser/PSSA0。独立Pre中、既存47／Invoke54AE未変更。全cleanupの後段Kill/Wait実行証明ではない。
+
+独立局所Post CHANGES_REQUIRED：Invoke54AEの通常Complete-OwnedTreeはlocal単調clock/budgetを使うが、新helperが参照するCleanupMonotonicLimitはInfinityのままである。Aborting時Assert-Control早期returnにより遅延APIの期限接合が不足。47件は変数直接設定で未接続を検出しない。runner／80解除を止め、plannerへ同一既存budgetの接合＋実初期化経路RED追加の最小是正を依頼した。品質基準は維持、製品source／通常EXE不変。
+
+限定実装返却：Invoke54AE0BD10E437AC4AAFD46F72DB74659A2FFFF5AB284F0C82C0B68337B3BBD28、79追加2削除・対象外逆diff一致・parser/PSSA0。作者adapterのassembly参照fixture1件を最小是正し、旧15PASS2FAIL30NotRun維持／新47PASS0FAIL0NotRunを取得した。独立Post静的中、通過後にrunner Sol6.1/mediumの固定47→標準80firstFailへ進む。全体製品／提供は未了。
+
+作者RED返却→限定実装中：独立新回帰2本498行、固定47件=15PASS／2FAIL／30NotRunMissingBoundary。PTH1は実CIM pathだけnullで早期拒否再現、PTH4はunknown保持成功だが注入helpererror未到達。parser/PSSA0、追加process起動停止0、既存80/87・Test本体不変。実装者`/root/et3_image_path_impl` Astra/highへInvokeだけの修正を割当、30未実行を成功/REDへ換算しない。正本R/verification/image-path-contract-20261015-a/HANDOFF.md。
+
+現在の工程：design CE799395局所Pre PASS後、plannerが作者／実装／reviewer Astra/high・runner Sol6.1/mediumを確定した。作者`/root/et3_image_path_tests`はR/verification/image-path-contract-20261015-aの限定回帰を作成中で、Test-CargoGate.ps1／Invoke本体は未変更。PTH7/8は既存80件へ引き継ぐ。調査・設計checkpoint b360e9fを既存開発ブランチへpush済み。
+
 独立Pre PASS：design CE799395の局所path補完設計にblockingなし。plannerの計画確定→独立作者のRED作成が次であり、実装修正・新通常Gate・製品fullはまだ未実施である。
 
 設計追補返却：同一保持handleのpath補完はdesign CE799395A14F1784C05EDDB0BC2D8EE8B53B900EC306B403DB72E225CF5E5756、PTH1–8受入まで文書化し独立Pre中である。Invoke333C37FF／TestD8AD0AD4は未変更。通常release SHA9B888E9F／別試用E3A0A878も不変。Pre通過後に独立作者RED→限定実装→runner／Postへ進む。

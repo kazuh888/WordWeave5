@@ -2,6 +2,16 @@
 
 ## path欠測是正の設計再開（2026-10-15）
 
+独立runner終了共有週枠20%、最終reviewer21%を観測。新47/47＋5/5成功後、標準80はENV01の別argv拒否で0PASS1FAIL79NotRun、unknown0所有10終了wait。PTH-MONO最終Post PASS/Closedと別argv原因を分離し、後者を未完了として保持する。共有開始12→21をtask専有消費とせず、token/provider返却metadata/親子包含欠測を維持する。
+
+PTH-MONO-01は新5の3PASS2FAIL→directwindow接合11追加後5PASS、旧47PASS、独立Pre/Post静的PASSまで。座標写像の丸め不確実性を指摘し未実装で棄却、directrefへ絞った。reviewer共有週枠はPre終了18%、Post終了19%、個別token/provider返却metadata欠測。既定runner Sol6.1/mediumへ独立47＋5→成功時80段階実行を渡した。技術是正の静的支持と最終Closedを分離する。
+
+独立局所Post reviewerは共有週枠16→17%（他工程含む）を取得し、P1通常cleanup期限未接合でCHANGES_REQUIREDを返却。固定47件の変数直接設定では実初期化の欠陥を捕捉せず、追加回帰／修正へ戻る手戻りを同単位に保持する。個別token／provider返却metadataは欠測、週枠をtask専有率へ換算しない。
+
+実装子`/root/et3_image_path_impl`指定Astra/highは79追加2削除の限定本体を返却、token/provider返却値は欠測。新helperのadapterが最初の実適合時CS0400で停止したため、作者へassembly参照だけを返した（本体静的検査と独立fixture修正の非衝突並列）。作者follow-up観測22:29:48–22:31:54 JST、3追加1削除で47期待不変、旧RED維持／新47PASS。このfixture手戻りは削減実績へ隠さず同じ単位に含める。共有率・個別tokenは未取得。独立Post→runnerを残す。
+
+作者子`/root/et3_image_path_tests`の観測22:11:22–22:23:34 JST（開始そのもの／handoff末尾は欠測）。固定2script498行、47件15PASS2FAIL30NotRun、parser/PSSA0。主な整備コストは単回Read/native AST固定adapterと期限対照で、既存80件を重複実装していない。初回sandboxCIM阻害と中間PSSA parameter誤使用の無効結果は成功へ加えず、修正後の証拠だけを採用した。親子token／共有週枠／provider実返却metadataは未取得、指定Astra/highから実返却を推定しない。実装担当も確定Astra/highで起動した。
+
 独立Pre reviewerは局所PASS、終了共有週枠13%を取得した。開始値・個別token・provider返却metadataは欠測。親開始12%との差を工程専有消費へ換算せず、アカウント共通の観測値として保持する。
 
 designer子`/root/et3_image_path_design`は指定Astra/highで設計文書だけを返却し、22:00:46–22:04:55 JST観測区間、token／共有週枠／provider返却metadataは未取得とした。既存reviewerへ同じ割当Astra/highの独立Preを引き継ぎ、実装を先行しない。実測値を作業量から推定しない。

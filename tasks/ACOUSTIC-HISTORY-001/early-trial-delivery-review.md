@@ -2,6 +2,36 @@
 
 ## 観測Post・通常入口再実行と限定path読取設計（2026-10-15）
 
+### PTH-MONO-01 是正packet（cycle 1、最終Post PASS／Closed）
+
+最終独立Post PASSを受領し、PTH-MONO-01をClosedへ更新した。Invoke12E7への独立47/47＋5/5、専用child同handle回収、遅延成功／retry拒否／再進入非延長を確認済み。path補完も実OS同一handle取得を含む47件の範囲で限定Post支持である。argv拒否と関係4関数の333C/54AE/12E7本文一致は独立照合し期限接合と分離した。index4/8/10区切り詳細は親受領診断として区別する。標準80はENV01FAIL／79NotRun、実Cargo／製品full／OS同期中断保証は残る。下記Pre時点・自己検証時点の記録は履歴であり現状は本段落を正とする。
+
+標準ENV01の別原因は保存dataの実parser ASTによるread-only照合で確定した。Runnerの11引数中index4(-File)/8(-RunPath)/10(-InvocationPath)だけIntent U+005C対OS U+002F（長さ90/120/173、差8/7/7）で、他8一致・引数数11一致。native176の固定forwardslashパスとPathBuf派生、Supervisor1655のGetFullPath backslashが食い違い、AssertObserved646のexact比較が拒否する。比較／Intent／Runner登録／Ready前検証は333C/54AE/12E7で本文同一、今回path/mono是正とは別の既存不整合である。全argv比較の緩和は不要であり、内部path構築表現を揃える別packet候補とする。現在packetの最終独立closureを依頼し、その後だけ新packet計画へ進む。
+
+独立runnerの新root4161f2ea-445b-4f1c-8265-5bf48f322fdaは47/47、4fd51a22-4385-473b-b781-bc9a781c8254は5/5各exit0、専用child17160同handle回収。段階条件成立後の標準suite7f2c941c-d1b3-4b4e-a3cc-a71c627a6e2aはcontrol2PASS／ENV01実呼出1FAIL／残79NotRunで停止した。run7da565fe-32ab-42fb-b4c5-4eaf2d59a356のunknown0／Owned10全wait/exited／fixtureResiduals[]、Runner Rejected error『Observed command argv contradicts intent』、manifestConfirmed=true/g0Published、Runner取消後RunOwner/SafetyWorker取消、target0/Cargo1、LIFE14未到達。9SHA不変／現在CIM候補0を全体PASSに読み替えない。実装担当へ保存情報のみのargv/intent差分原因照合を返し、再実行を止めた。PTH-MONOの最終Closedは独立最終判定を残す。
+
+cycle1 Pre-gate PASS：packet SHA414F3610739FBD8B19D2FF7EDDC46B49EDD98C4305C0F64E16DDC0C80D6EBFB9を固定した後、座標変換案はdouble丸め非延長が未証明で不採用。既存localclock/確定budgetのfunctionlocal window直接参照案は独立Pre範囲内許可を得た（非Private/noshadow、未存在だけ許容、他error伝播）。Invoke新SHA12E7FC95F24883AC89E8464108AC7404D4953006EBFA56DC9B7F8D0613281621の11追加だけで接合した。
+
+自己検証の新5PASSと旧47PASSを別rootで取得、late/retry各Owned0/unknown1/API1、再進入API追加0、専用child13760同handle回収済み。parser/PSSA1.25診断0・実行エラー0、対象外逆復元一致。独立Post静的PASSは同一clock/budget/local/noshadow/missing-only/再進入非延長・80期待不変を確認し、固定47＋5→双方成功時のみ標準80firstFailを解除した。findingはVerified（自己検証＋独立静的支持）であり、最終Closedは独立runner／追跡更新後に留保する。runner Sol6.1/mediumへ新UUIDの段階実行を引き継いだ。製品full／同期API中断保証／提供は非解除。
+
+Pre提出固定追加test：`9E9B0444E5E5FB4449D2B89417E2F09E8F7AFBE3AC7847FDF86AA7B0B7837404`、141行、証拠R/verification/image-path-contract-20261015-a/2189dce6-4de1-4171-81f6-06235b2af3ce。実Complete初期化prefix＋最初tryを抽出しactual Read-OwnedTree／Get-Identity／helper経路到達、同localclock/budget10を観測。5件3PASS2FAIL、UTC余裕・単調超過後successでOwned1/unknown0/API2、122後API8（期待Owned0/unknown>=1/API1）。normalと再進入残0API0×2はPASS。専用child40380同launchhandle保持・有限finally回収/exitedtrue、parser/PSSA0、旧47／Invoke／TestCargo不変。後段Kill/Waitは未実行。author HANDOFFにowner/consumer/state/rollbackを保持し、独立Preへ提出した。
+
+| Finding／原文位置 | Root cause／State | Packet／正本／owner・consumer | Oracle／review／残余 |
+| --- | --- | --- | --- |
+| P1 PTH-MONO-01：通常回収の単調時計期限が新helperへ未接合（Invoke54AE 349、2225–2228） | 通常cleanupのlocal clock/budgetとhelperのscript上限が別系統。Closed | PTH-MONO-01、設計CE799395の346/PTH6を唯一の基準に維持。InvokeのComplete-OwnedTree→Read-OwnedTree→Get-Identity→Get-PinnedProcessImagePath。作者は新回帰だけ、実装はInvokeだけ | 実初期化5件3PASS2FAIL→新5PASS／独立5PASS、旧局所47独立PASS、最終Post PASS（Invoke12E7）。標準80の別argv拒否は分離、OS同期中断保証／80／製品fullは対象外 |
+
+目的・範囲：同一の既存通常cleanup clock/budgetをhelperへ延長なしで接合する1Change Setである。新時計・新予算・署名変更・oracle変更・未知停止・製品data/資格情報/OS変更は除外する。入力は保持handleと既存期限、成功出力は期限内だけの完全path、失敗は元例外と既存Unprovable/CleanupIncomplete/非停止/非PASSであり、遅いpathはOwnedにしない。新永続状態はなく、途中失敗・再進入でも上限を再付与しない。
+
+依存・停止：plannerは現物確認後、既存設計への不適合是正でdesigner追補不要と確定した。作者RED／独立Preの対象hash固定後だけ実装へ進む。scope拡張・同根因2回連続差戻しは局所追記を止め再構成する。rollbackは今回の局所差分を保存snapshotへ個別復元し、旧不合格snapshotをruntime解除しないこと。既存証拠・fixtureを保持し自動削除しない。
+
+request：branch codex/development-agent-team、HEAD b360e9f、対象Invoke54AE／designCE799395、class reliability＋規約・運用、requested Pre、製品判断pendingなし。新回帰hash／self-checkは作者返却後に固定する。モデルは作者／実装／reviewer Astra/high、runner Sol6.1/medium。製品full・EXE提供・main mergeはこのpacketで完了しない。
+
+独立局所PostはCHANGES_REQUIRED（P1阻止1）。Invoke54AE行349のCleanupMonotonicLimitは通常Complete-OwnedTree2225–2228のlocal clock/budgetに接続されず、初期Infinityが残る。有限値設定816はbootstrapだけ、Aborting時Assert-Controlもreturnするため、UTC後退等で単調上限後のRead再試行／遅い成功を拒否できない。設計346／PTH6違反であり、47件の期限変数直接設定では未接続を検出しなかった。他の同一handle／世代／null限定／8回／元例外／unknown保持／adapter不変にはblockingなし。現snapshotのrunner／80解除は不可。plannerへ既存通常budgetを延長なしでhelperに渡す最小是正と実初期化経路の独立REDを返した。
+
+実装者はInvoke `54AE0BD10E437AC4AAFD46F72DB74659A2FFFF5AB284F0C82C0B68337B3BBD28`（79追加2削除、345–417/433–434/451–452/456行のみ）を返却、parser/PSSA1.25診断0・実行エラー0、対象外本文逆diff一致。初GREENはテストnative stubの別Add-Type assembly参照CS0400でresult未生成、動作REDに数えない。作者がstubと元Readを同一Add-Typeでcompileする3追加1削除だけを修正し、47期待値／元Read bodyの逆diff不変を確認した。新companion SHA13F27CEB2AF10F26A0B71F26D073F0DDCB22F6D75960B0114465E349431D0113。新UUIDで旧333C sourceは15PASS2FAIL30NotRun維持、新54AEは47PASS0FAIL0NotRun。実OS同一handleとmock retry/期限/bufferを区別する。独立局所Post静的を依頼し、runner再実測／標準80／LIFE14等／実Cargo／製品fullはまだ未実施。
+
+独立作者はR/verification/image-path-contract-20261015-aの2script計498行を固定し、47件15PASS／2FAIL／30NotRunMissingBoundary（red-fixed/result SHA BF080B0C58270F1C31A68DAD34523E2FEAE604880FC3030BF8B4BFC90609D5C2）を返却した。Test-PinnedImagePath SHA A8B646E941C84F139B04BA338A62532A8D42A62974352081BEA6876C93D0B226、Test-ReadBoundaries SHA CE8742B4B75C1BFD902453283F10D8EC3B72B66FB057704288D74080B239BDCA。PTH1実CIM自身の同一handle＋null化は早期拒否を再現し、PTH4はunknown保全自体は成功だがhelpererror未到達でFAIL。helper未実装30件はREDに数えない。初回sandboxCIM拒否はfixture阻害、通常ユーザーsandbox外で最終RED取得、管理者ではない。parser/PSSA0、C#fixture compile成功。既存Invoke/Test/design不変、子process起動停止0。planner確定後の実装担当Astra/highへInvokeのみの限定修正を渡した。将来helper adapterの動的適合もGREEN前に必要であり、期待値を適合のために緩和しない。
+
 独立Preはdesign CE799395の322–367行と現物Invoke333C37FF／TestD8AD0AD4を照合しPASS、blockingなしと判定した。公式QueryFullProcessImageNameW／SafeHandle契約、nullと欠落の区別、先行世代照合、非null非上書き、最大8回、Aborting時期限、元OS例外、unknown非停止を確認した。PTH1–8の動的確認／同期API中断／80case成功は未承認・未証明のままである。plannerへ局所計画の確定を依頼した。
 
 designer返却SHA `CE799395A14F1784C05EDDB0BC2D8EE8B53B900EC306B403DB72E225CF5E5756`、追補PTH1–8は同一保持SafeHandleの限定補完と先行世代照合、非null値の非上書き、有限buffer、既存期限、失敗時非PASSを規定した。文書diff-check／相対4link実在／Invoke・Test不変を確認し、独立Preへ引き継いだ。実API成功・OS同期応答時間・負例回収は未実測。既存通常releaseと別試用のEXE SHAも保護値と一致した。
