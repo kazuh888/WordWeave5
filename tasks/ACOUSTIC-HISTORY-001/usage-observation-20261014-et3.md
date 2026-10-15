@@ -2,6 +2,14 @@
 
 ## path欠測是正の設計再開（2026-10-15）
 
+FIRST-FAILURE01暫定plan6B84受領後、限定designer `first_failure_design`へ指定`gpt-6-astra/high`・fresh contextでdispatchした。親の再確認週枠54%/10080/reset1792667952/ordinaryUsageAllowed=true。診断情報をwhitelistへ限定する安全性確認を加え、親モデル/権限/期限/検証基準は不変。実装と新実測0、子の実行metadata/token・親子包含は未取得である。
+
+利用者が新scope「cancel前の診断記録追加＋合成正常系1件1回」を承認した。開始側共有週枠53%／10080/reset1792667952。既存planner Astra/highへFIRST-FAILURE01だけを依頼し、新OS照会・既存判定/期限/追加実測の拡張を禁じた。既存Write-JsonがAssert-Controlを呼ぶため、単純再利用によるfailure再入を避ける必要があるとplannerが源で確認した。過去の局所PASS/旧結果は維持し、診断1件を10/80/full creditへ換算しない。親子token/provider/包含は欠測で合算しない。
+
+KH-Dの独立OS2/Pure20は全PASS、focusedはENV01FAIL/残9NotRunで停止した。同じET3で新たな監督取消し初因/terminal欠落の保存証拠診断へ戻る。source再修正・focused再試行・標準80実行0。前KHの作者/独立20+2を無効化せず、欠けたSupervisor初因をKnown再openと推定しない。独立runnerの入力16前後不変とREPORTを保存し、子usage欠測を補完しない。
+
+KH-Cの独立static接合PASS後、KH-Dの独立runner（従前gpt-6.1-sol/medium）へOS2→Pure20→focused10を段階dispatchした。親開始側共有52%／10080/reset1792667952。source35AE/test0C82/driver72244/contextF46の固定組を再利用し、新harness/native再build/context12再実行0、最初unexpectedで後段未実行を維持する。固有token/provider/包含欠測で専有消費・方式比較は算出しない。
+
 KH-C作者はcontext3literal＋handoff追記だけを更新し、新F46/4A74をfreezeした。静的inversebyte/凍結32/12意味不変を確認、既成功12のruntime反復0。作者共有窓50→51%／10080/reset1792667952（account共通、当担当専有消費ではない）、token/provider返却metadata/包含欠測。別実装者へdriver5hashだけを逐次引継ぎ、OS/20pure/focusedの独立実行は接合review後のためまだ0である。
 
 KH-TEST-AST01のtest0C82はOS内2箇所のみ、AST4/report3PASSと独立Postを経て作者OS2を1回実行し2PASS（finally0.6519982秒）。Pure本文同体を逆diffで証明し、D12での20PASSを不変範囲へ再利用してPure20反復0。作者20+2の独立証拠接合PASS後、context bindingのみの別作者へhandoffした。主KH独立runner/focusedは未実施、検証削減効果や専有usageは未判定のままである。

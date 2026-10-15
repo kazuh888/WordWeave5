@@ -4,6 +4,16 @@
 
 ### CXT-E focused実動作：ENV01停止・保存証拠の診断中
 
+新runの独立診断ではSupervisorのCleanupIncomplete初因を1356 commoncatch／1397 run-bound parent edgeの候補まで絞れたが、保存例外/Unprovable/osObservationがなく区別不能。別時点registrationや他観測者のunknown0から推定しない。既存failureBoundary/terminalでは元初因を保存できず、cancel前firstFailureの専用sidecarが必要と判断した。利用者はこの診断追加と合成正常系1件1回を明示承認した。新Packet FIRST-FAILURE01の計画を既存plannerへ依頼し、元schema/安全判定/期限/unknown・実data/API/OS設定不変、診断保存失敗が元failure/cleanupを置換しない契約をPreで固定する。現focused10をそのまま正常1件承認へ流用せず、診断専用入口に10/80/full creditを与えない。
+
+KH-D独立OS2は2PASS/exit0/0.5952944秒、Pure20は20PASS/exit0/0.4744072秒。その後focused新suite a59b49c6-ffca-4f78-8436-6b46b57d1d7cはcontrol2PASS／ENV01FAIL／9NotRun、child/shell exit1／15.7376213秒／retry0、sourceMatched=true、argvEvidence空。run4de297d1-d99e-4d5e-9a9a-8f74a034bca1ではSupervisor37636がCleanupIncomplete cancelを21:35:48.8079204Zに公開したが、Supervisor正式terminal/tmpがなく詳細errorは未取得。RunOwner12488はCancelled、Owned12全waited/hasExitedtrue・unknown0・fixtureResiduals[]、Runner/Safety正式もCancelled（Safety unknown0）。target23060はG0list用局所結果でありfull/AP1成功とはしない。独立read-only診断へ返し、過去KH再open競合の除去と新cancel初因を推測で同一視しない。
+
+遅着の「修正版12件を許可する」回答は既に承認・実行済みapproved-bに対応する。重複12実行や、新しいOS/focused追試の許可へ転用しない。
+
+KH-C最終独立static接合PASS／指摘0を親受領。F46/4A74/72244/331Fと旧保存4ファイル、3/5literal逆BOMbyte一致、非所有13不一致0、12期待/4mocks/22trap/10case/17argv/期限/cleanup不変を確認した。Read-OwnedTreeはcontext禁止trapで実行対象外、旧12PASSを対象consumer本文不変へ対応付けた。最新HANDOFFの唯一順序を確認し、KH-D独立runner Sol6.1/mediumへ新OS2→成功時Pure20→成功時focused10/AP1を各1回・firstUnexpected停止でdispatchした。標準80/fullは未解除、旧結果合算なし。
+
+KH-C driver最終freezeは72244CD533E6CE3DA1062D05C4A6F9EC5195FE63AAE40C2D7CC01AB7E0AEF3E0／HANDOFF331F2EFD6F9A3222B0B08DBCBF0A0DD38C7EE33B1B99679271A0F5374643C75A（packet/kh-c-driver-bindings-20261016）。旧68EF/A32を非上書き保存、5literalだけの逆byte一致、非所有13不一致0、Parser/PSSA/whitespace0、runtime0。旧gate文は履歴へ区分し、現gateはKH-C接合PASS・親受領後の独立OS2→Pure20→focused10である。context F46/4A74と合わせて独立staticへ提出し、結果待ちである。
+
 KH-C作者のcontext束縛更新はfinal testF46F3B09DEADB8F4A2D1E1F52D09E62F0C746967F824381ED97C6CEBE5C6B4EC／P1handoff4A74FACE49B6314A8DE837E044462DE0B94A587BB7EDC6786C25D0D4672146FF。Invoke/plan/designの3literalだけの逆byte一致、旧handoff全文保存、凍結32件不変、Parser/PSSA0、元context consumerのRead以外全文不変／Read trapにより旧approved-b12PASSを静的対応付けした。証拠はpacket/kh-c-context-bindings-20261016、今回runtime0。別実装者へdriverの5inputhash/HANDOFFだけを逐次所有で引き渡した。
 
 作者OS2はpacket/8e9595fc-e238-4ff6-bf45-00d8f565af54で2PASS、child/shell exit0、finally込み0.6519982秒。source35AE/test0C82一致、実CIMself/子各1行を同一snapshotのままO1live→O2Exitedへ渡し、各ReadのIdentity1/Add0/PID-open0、作者wait1/kill0、cleanupFailureなし。独立証拠接合PASS／指摘0、D12Pure20PASSの同体再利用と旧結果保全も確認した。これは作者局所20+2の受領であり、独立runner/focused/主KHClosedではない。KH-Cのcontext3binding＋P1handoff追記だけを別作者へ渡した（runtime0）。
@@ -28,9 +38,10 @@ KH-A設計は既存design477〜、SHA AF67CB6E40B37813226317B68D0698BBD84586732F
 
 | Finding ID | 原文・位置 | Root cause | State | Packet | Canonical artifact | Evidence | Oracle | Reviewer record | Residual / out-of-scope |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| OBS-FIRST-01 | run4de297d1のSupervisorがCleanupIncomplete cancel後に正式terminal/tmp欠落 | 初回failureの観測がmemory/terminal依存で中断前に永続化されない。元failure自体の原因は未確定 | Planned（設計中） | FIRST-FAILURE01 | gate-plan FIRST-FAILURE01→gate-design限定追補 | 旧Invoke35AE・suitea59b49c6・run4de297d1を保全、利用者が診断追加/ENV01一回を承認 | actor/source束縛・一回性・元error保持・whitelist・ENV01 dispatch上限1を設計で固定 | 独立Pre前、実装/実測0 | 10/80/full credit0、診断取得は主gate合格ではない |
 | KH-TEST-AST01-P1 | zeroarg Dispose ASTのArguments.Count（TestD12:232） | 引数なしをnullで表すAST契約の未考慮 | Closed | KH-TEST-AST01 | Test-KnownHandle OS adapterのみ | 新0C82／旧D12・OS b7544ab3保全 | AST4旧2RED2PASS→新4PASS、作者OS2PASSも後続確認 | 独立PostPASS・指摘0、親受領済み | source35AE/Pure20不変、主KH/全体は別判定 |
 | KH-TEST-AST01-P2 | 起動前失敗でもosEvidence=true（TestD12:456） | phase選択とPASS済みOS case証拠を混同 | Closed | KH-TEST-AST01 | 同report分類のみ | 新0C82・accepted=falseとcounter未観測を保持する旧失敗結果 | 合成0/1/2PASSのevidence/accepted3PASS | 独立PostPASS・指摘0、親受領済み | accepted/時間/回収条件不変、旧結果書換え不可 |
-| KH-REOPEN-01 | 既知候補の確認より先にPIDを再openする（旧Invoke Read-OwnedTree:1270→1274） | snapshot後の終了で、既存保持handleを確認する前にGetProcessByIdが失敗する | Verified（作者局所20+2、独立runner前） | KNOWN-HANDLE01 | 既存gate-design477〜→Invoke Read-OwnedTree | 新35AE／旧12E7、保存run94e5f1c6・Owned/Unprovable/cancel/tmp。所有を計画指定で分離 | Pure20旧19RED1PASS→新20PASS、作者OS2PASS、独立runner/focused10とPost待ち | KH-A Pre・source static・作者証拠接合PASS | CXT-D/PTH-MONOの限定PASS維持、KH-C–D/CXT-E/ARGV/80/full/提供は未了 |
+| KH-REOPEN-01 | 既知候補の確認より先にPIDを再openする（旧Invoke Read-OwnedTree:1270→1274） | snapshot後の終了で、既存保持handleを確認する前にGetProcessByIdが失敗する | Verified（局所作者/独立20+2、主gate未完了） | KNOWN-HANDLE01 | 既存gate-design477〜→Invoke Read-OwnedTree | 新35AE／旧12E7、保存run94e5f1c6・Owned/Unprovable/cancel/tmp。所有を計画指定で分離 | Pure20旧19RED1PASS→新20PASS、作者/独立OS2PASS、focusedは別の初因欠測でENV01停止 | KH-A Pre・source static・作者証拠接合・KH-C独立接合PASS | CXT-D/PTH-MONOの限定PASS維持、主KH/CXT-E/ARGV/80/full/提供は未了 |
 
 独立診断を受領して既存plan244〜へKNOWN-HANDLE01の暫定4単位を追補した（SHA956C0CDA）。新planner/局所designerはAstra/high、既定作者/実装/reviewerもAstra/high、runner Sol6.1/medium。外部仕様の新規変更は非該当。設計・Pre・planner確定前に実装/runtimeを行わない。plan変更により旧test94/driver68の固定plan hashは不一致となり、再束縛までは実行不可。旧受入証拠は旧snapshotのまま保持する。
 

@@ -4,9 +4,11 @@
 
 ET3の別配置試用EXE提供を継続中である。PTH-MONO-01は最終Post PASS／Closed（Invoke12E7、独立47/47＋5/5）。標準80は別の内部argvパス表記不一致でENV01 FAIL／79 NotRunであり、製品full／提供は未了である。
 
-ARGV-PATH01のnative381F／EXEFF7CとCXT-D12PASS/独立受入は維持する。CXT-E suite68cfe879の既知PID再open競合に対し、KH-A plan80B2/designAF67 PrePASS→KH-B Invoke35AE（Read-OwnedTreeのみ）staticPASS、作者Pure20PASS/実handleOS2PASS・独立証拠接合PASSまで進んだ。旧Pure19RED1PASSと旧failed runは保全。OS起動前adapterのKH-TEST-AST01-P1/P2はtest0C82で最小是正・AST4/report3/独立PostPASS（旧D12Pure本文同体、再実行不要）。主KH-REOPEN-01は独立runner/focused前で未Closed。現在KH-C：context test3hash/P1handoffだけ更新中→別実装者driver5hash/HANDOFF→独立接合→runner OS2/Pure20/focused10各1回、firstFail停止。標準80/full/試用提供は未了、通常EXE/実データ/unknown非停止非PASS/期限は不変。
+ARGV-PATH01のnative381F／EXEFF7CとCXT-D12PASS/独立受入は維持する。KH-REOPEN-01はInvoke35AE/testKnown0C82/contextF46/P1handoff4A74/driver72244/HANDOFF331Fで独立OS2/Pure20全PASS、focused a59b49c6はcontrol2PASS／ENV01FAIL／9NotRun。run4de297d1のSupervisor37636がCleanupIncomplete cancelを公開したが正式terminal/tmp欠落で詳細初因を特定できず、共通catch1356／親edge1397の候補に留まる。別観測者のunknown0や別時点registrationで補完しない。利用者が新診断記録追加＋合成正常系ENV01 1件1回を明示承認し、FIRST-FAILURE01の限定計画を既存plannerへ依頼中。元schema/安全判定/期限/unknown不変、cancel前firstFailureの一度保存・保存失敗が元failureを置換しない契約と診断専用1件入口を設計Preで固定する。新実装/追試0、主KH/ARGV/80/full/試用提供未了、AST01/CXT-D/PTHの限定PASS・旧結果は保全。
 
-正本は[計画](ACOUSTIC-HISTORY-001/early-trial-gate-plan.md)・[設計](ACOUSTIC-HISTORY-001/early-trial-gate-design.md)・[レビュー](ACOUSTIC-HISTORY-001/early-trial-delivery-review.md)・[runner](ACOUSTIC-HISTORY-001/early-trial-delivery-runner.md)・[使用量](ACOUSTIC-HISTORY-001/usage-observation-20261014-et3.md)。checkpoint a13352bまでpush済み、通常release不変。今回再開の共有週枠は40→40%でアカウント共通、task専有量や親子token合計は不明である。
+FIRST-FAILURE01の暫定計画6B84を受領し、designer `first_failure_design`（指定Astra/high）へ既存設計への限定追補を依頼した。独立Pre・計画精緻化前の実装/実測は0。正常ENV01は専用入口で1件1回だけとし、失敗時は得られた診断を返して止める。
+
+正本は[計画](ACOUSTIC-HISTORY-001/early-trial-gate-plan.md)・[設計](ACOUSTIC-HISTORY-001/early-trial-gate-design.md)・[レビュー](ACOUSTIC-HISTORY-001/early-trial-delivery-review.md)・[runner](ACOUSTIC-HISTORY-001/early-trial-delivery-runner.md)・[使用量](ACOUSTIC-HISTORY-001/usage-observation-20261014-et3.md)。checkpoint fb96a18までpush済み、通常release不変。今回再開の共有週枠は40→54%でアカウント共通、task専有量や親子token合計は不明である。
 
 以下は再開以前の履歴であり、現在の工程は上記を優先する。
 
