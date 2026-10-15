@@ -473,3 +473,100 @@ payload検査だけは元Initialize-RunnerChainの入口から最初のcargoRegi
 Preは本書の返却SHA、計画E209…、driver89C6…/HANDOFF FB1…と固定native/Invoke/Test/fakeを対象とする。順序は設計受領・Pre→独立作者12試行固定→harness実装→独立preflight→接合review/親受領→合法な新suiteでfocused10件1回→Post→標準80件である。最初のfocused失敗で残りNotRun、実OS同世代・実terminal・実cleanup・argv証拠を別記する。新前提不整合、元consumer緩和、権限追加、想定外のscope変更が必要なら停止して親へ返す。rollbackは保存driver89C6/HANDOFF FB1への当該差分だけで、復帰後も実行不可の既知不整合状態である。native2定数／旧証拠／他者編集を戻さない。
 
 完了境界は本追補と文書diff/link/hash確認のみである。役・model/effortは計画のCXT表を維持し、次は独立Preへ返す。開始時計観測2026-10-16T00:02:05.1877712+09:00、token開始/終了・週枠・provider返却model/effortは未取得。code/tests/runtime/新文書/再委譲/公開0、CXT01受入は未完了である。
+
+## KNOWN-HANDLE01：既登録の同世代handleを元snapshotで再照合する（KH-A、設計Pre提出）
+
+入力は[計画244行以降](early-trial-gate-plan.md) SHA256 `956C0CDA0802654176C95378A5E4FA92A9FACE18EB75670E9F731D9A13977AA1` 全節、[review冒頭KH-REOPEN-01](early-trial-delivery-review.md)、Invoke `12E7FC95F24883AC89E8464108AC7404D4953006EBFA56DC9B7F8D0613281621`、追補前本書 `D1C38FB3557D067A5E0B414E6DAEA021123C66B64D6FB5C62930B271CC5EFADF` である。承認済みET契約と既存G5（同世代所有・未知非停止）の内部是正であり、新外部仕様・UI・RESTは非該当。計画のdesigner指定 `gpt-6-astra/high` を維持する。AGENTS/development-team/KPI、api-and-interface-design、powershell-review、同automationのps7/例外/型・所有規約を読了した。汎用module/config/log追加は本packetに適用しない。
+
+保存suite `68cfe879-a4ea-4665-83f0-8bff89cd2b2b`／run `94e5f1c6-43bb-4ca6-98c7-80eb443f76fa` の `result-RunOwner-21556.json` ではPID23100はOsQuery/Observed、start=`2026-10-15T20:38:03.9529175Z`、parent14632、path=pwsh、command590 code unitsの完全identityである。`safety/list/result.json.b7e3c0ac-7b89-4cfb-9e64-49e5b98863fd.tmp` のPID6472もOsQuery/Observed、start=`2026-10-15T20:38:03.9605517Z`、parent23100、path=conhost、command39 code unitsの完全identityである。同tmpのPID23100はDirectLaunchHandle/Observedだが5fieldが揃っており部分identityではない。両failureの1270行、snapshotMatch=knownMatch=1、path/command存在と別Owned行の保存を確認した。この情報は修正対象の分類根拠であり、旧UnprovableをOwnedへ読み替える証拠ではない。最初の公開cancelはSupervisor、正式Supervisor/Safety terminal欠落で全時系列の初因は断定しない。
+
+### 唯一の方式と既存consumerの成立性
+
+方式は **Read-OwnedTreeが元Rows・台帳keyで候補を一意化し、その既存Processを借用して未変更Get-Identityを呼び、全5fieldをTest-EqualDataで照合する** ものに固定する。新private照合helperは不要である。変更所有はRead-OwnedTree内だけであり、Get-Identity/Add-KnownProcess/Read-DirectChildIdentity/Get-TerminationObservation/Complete-OwnedTreeとその別consumerを変更しない。
+
+Invoke429–475のGet-Identityは、SafeHandleを確保→Refresh→元Rows一意性→CreationDateのUTC6桁とStartTime比較→5field生成の順である。MainModuleを読まず、pathが非nullならimage APIも呼ばない。終了だけを理由に拒否する分岐はない。固定pwshのruntimeconfigはnet10.0/10.0.12であり、公式同tagの[Process.cs](https://github.com/dotnet/runtime/blob/v10.0.12/src/libraries/System.Diagnostics.Process/src/System/Diagnostics/Process.cs) のSafeHandle/GetOrOpenProcessHandle/Refreshと[Process.Windows.cs](https://github.com/dotnet/runtime/blob/v10.0.12/src/libraries/System.Diagnostics.Process/src/System/Diagnostics/Process.Windows.cs) のStartTimeCore/GetProcessTimes/GetProcessHandleを参照した。Refreshは保持handleを解除せず、既存handle時のSafeHandleは再openしない。StartTimeはthrowIfExited=falseの保持handleからGetProcessTimesへ進む。したがって有効な同一保持handleと完全な元行があれば既存Get-Identityを再利用できる。これはsource上の成立性であり、同梱binaryの実終了対照はKH-O2で別に検証する。追加OS診断は実施していない。
+
+新しいprivate identity生成・新Win32 APIは採らない。既存のUTC6/7桁比較、path canonical化、UTF16変換を二重実装すると負例とpath-null/PTH-MONOの接続が分岐するためである。PID一致skipや例外握潰しは世代の証明にならず採らない。snapshotのExecutablePath=nullは既存Get-Identityの同一handle path取得へそのまま渡す。そのAPIが失敗すれば元catchへ戻し、台帳pathで補完しない。command/null CreationDate等も既存拒否を維持する。
+
+### KH1–3の契約・状態・handle所有
+
+| ID／既存G | モジュール・入力型 | 成功／失敗・所有 |
+| --- | --- | --- |
+| KH1/G5 | Read-OwnedTree、`Rows:object[]` は当該呼出のGet-OsProcess結果1個。各rowはCIMのProcessId/ParentProcessId/CreationDate/ExecutablePath/CommandLine。`Known:Dictionary<string,object>` のkeyは既存PID/UTC7桁 | snapshotを取り直さず、同PIDの元行1件・同UTC6桁候補1件・handle/全identity一致だけで既知継続。候補/行の曖昧さはthrow |
+| KH2/G5 | `known.handle:Diagnostics.Process`、`known.pinnedHandle:SafeProcessHandle`、identityの既存5field、role/ownershipEvidence/exitUtc | 既存台帳の借用であり、Add/Dispose/Kill/Waitは0。identity/role/evidence/keyを更新しない。終了は冒頭の実Refresh/HasExited/ExitTimeと既存cleanup consumerだけで観測 |
+| KH3/G5 | 新規世代は元GetProcessById→Get-Identity→親寿命→Add-KnownProcess | new handleはlocal所有、登録成功時だけ台帳へ移譲しlocalをnull。失敗時だけlocalをDispose。既知照合失敗は新規openへfallbackせず既存Unprovable/cancel/cleanupへ返す |
+
+Read-OwnedTreeの同期処理を次の順序へ局所変更する。非同期worker、追加CIM、retry、新時計は追加しない。
+
+1. 元のmanifest確認、1回のGet-OsProcess、既存KnownのRefresh/終了時刻更新は維持する。ここで実disposed Process等がthrowした場合は元callerへ伝播し、cleanupは既存のincompleteとなる。これをrow内Unprovableへ合成しない。
+2. `foreach row` のself PID除外後、local `$handle=$null` と既存try/catch/finallyの内側で、**親PIDによる新規候補除外より前**に同PID Knownのkey/valueを列挙する。known rowの親fieldが改変されて親候補0になっても既知検証をすり抜けさせない。同PID Knownが0かつ親候補0の無関係rowは従来どおり無視する。
+3. 同PID Knownがある時は、元Rows内の当該PID行が厳密に1件、CreationDateがtimezone付きDateTimeであることを確認する。全候補のdictionary keyとGet-IdentityKey(identity)のOrdinal一致を確認する。UTC6桁はGet-Identityと同じinvariant書式 `yyyy-MM-ddTHH:mm:ss.ffffffZ` で比較し、差分許容・丸め・double変換を加えない。別6桁世代のKnownは残したまま候補外とする。
+4. 同6桁候補が2件以上なら曖昧として拒否する（7桁だけ異なる候補も同じ扱い）。1件なら完全identityだけを対象にする。path非null文字列、parentPid非null整数、commandLineUtf16非null配列であることを確認する。部分DirectLaunchIdentityはこのbranchでthrowし、元direct-launch証拠と台帳を保持する。ここで補完・再登録・別handleへの置換を行わない。同6桁候補0なら新規世代の既存経路へ進む。
+5. 候補のpinnedHandleが非null、IsClosed/IsInvalidがともにfalseであることを **known.handle.SafeHandleの取得前** に確認する。handle型はDiagnostics.Process、Idはrow PID、取得したSafeHandleはpinnedHandleとReferenceEqualsでなければ拒否する。借用Processをlocal `$handle` に代入しない。保持対象をClose/Dispose/Start等で再関連付けするconsumerは追加しない。
+6. `Get-Identity known.handle rows` の戻り5fieldと台帳identityを元Test-EqualDataで完全照合する。戻りkeyもdictionary keyとOrdinal一致を必須とする。これによりrowのparent/path/command、CIM6桁、保持handleのUTC7桁が接合する。照合後もpinnedHandleの有効性/参照同一性を確認し、成功時だけcontinueする。途中例外や不一致は元catchへ渡す。既存FaultTargetsは末尾Get-FaultTargetおよびcleanupのGet-OwnershipObservation/Get-TerminationObservationで引き続き適用される。
+7. 候補0のnew経路は従来の親候補抽出、PID open、identity、親寿命一意性、登録を維持する。新経路のkeyが予想に反してKnownに存在したら、未照合のままcontinueせずthrowする。既知照合失敗やpartialをopen成功で覆わない。新登録によるwhile再走時は新台帳も手順2–6で照合する。
+
+失敗時のrow catchは元Get-IdentityFailureObservationとUnprovable追加を維持する。`identity=null, ownership=Unprovable, killRequested=false, waited=false, hasExited=null`、既存Knownのkey/identity/evidence/handleは保持する。Aborting=falseなら元Invoke-GateFailure(CleanupIncomplete)で停止し、trueなら既存cleanup観測としてUnprovableを保持する。観測値を0/trueへ補わない。Read自身の成功はterminal成功ではなく、Ownedに対するkill/wait/終了確認、fault拒否、fixture残留、10秒cleanupの判定を省略しない。
+
+新永続状態・新approvalはない。元台帳登録→同handle保持→終了観測→cancel公開→cleanup→terminalという既存順序と、非上書きJSON公開・tmp未公開の区分を維持する。既知照合中のcancel/期限は元callerとGet-Identityのpath fallback consumerが担い、待機や予算を追加しない。PTH-MONO local clock/budget、UTC精度、元fault・unknown非停止条件は不変である。
+
+### 固定22回帰と独立作者のseam（実行はKH-A Pre・planner確定後）
+
+作者は `R/verification/argv-path01/Test-KnownHandle.ps1` 1本を新規所有する。既存Test-PinnedImagePath/Test-ReadBoundariesのsource SHA検査・AST抽出・局所置換・case結果の方式だけを再利用し、新frameworkやproduction fault APIを作らない。`SourcePath:string, ExpectedSourceSha256:64hex, OutputRoot:string, Phase:{Pure,Os}` を必須引数とする。新OutputRootは `R/verification/argv-path01/<UUID>` 直下、旧証拠への上書きなし。caseは下表の20pure＋2OS、retry0、同一oracleを旧Invoke12E7と新Invokeへ適用する。
+
+pureは実Read-OwnedTree ASTを抽出し、同関数内のGetProcessById static呼出2箇所だけを、同じ引数を受ける `Get-TestProcess([int] ProcessId)` へ置換する（1箇所はrun-wide末尾、SafetyWorker modeなので未到達）。個数/位置/引数/逆置換本文一致を検査し、適合失敗はbehavior REDに数えない。各caseをfresh scopeでMode=SafetyWorker、Fixture=null、Manifest=null、Owners空、Known/Unprovable新規にする。
+
+pureのprocessは `PSCustomObject` の `Id:int, StartTime:DateTime, HasExited:bool, ExitTime:DateTime, SafeHandle:PSCustomObject` を持ち、SafeHandleには `IsClosed:bool, IsInvalid:bool` を持たせる。Refresh/Disposeは引数なし・出力なしのScriptMethod、呼出回数だけをtest台帳へ記録する。実SafeProcessHandle/Diagnostics.Processと偽装せず、型検査を含む実機契約はOS phaseで検証する。**Read内のDiagnostics.Process型検査だけ**はpure AST上でPSCustomObject型へ置換し、OS phaseでは原文を使う。この型検査ASTは旧12E7に0件、新sourceに1件を固定し、他の型やstatementを置換しない。public/本体param型は変更しない。
+
+Get-OsProcess代用は`return ,([object[]] rows)`の1出力で、CIM0。Get-TestProcessは登録済みtest process1個だけを返すか固定例外をthrowする。Get-Identity代用は`([object] Process,[object[]] Rows)`を受け、参照同一性を検査してcase所定の5field ordered dictionary1個を返すか固定例外をthrowする。これはselection/error伝播の試験であり、元Get-IdentityのOS同定を試験したとは記録しない。Add-KnownProcess代用は`([object] Handle,[object] Identity,[string] Role,[object] OwnershipEvidence=$null)`、void、元形式の台帳1件を追加し、new移譲を検査する。Get-IdentityKey/Test-EqualData/Get-Utc/Get-IdentityFailureObservation/Invoke-GateFailure/Get-FaultTargetは元定義を使う。script Clock、AbortTick/Utc、Status等は元prefixと同型で初期化する。
+
+counterは `osQuery, pidOpen, getIdentity, addKnown, borrowedDispose, newDispose, kill, wait, terminalWrite:int` と順序log、Knownの前後key/identity/evidenceおよびUnprovable全fieldを保存する。PureのosQuery/kill/wait/terminalWriteは全0、Get-OsProcess代用呼出は各Read1回。borrowedDisposeは全0を必須とし、型代用や未到達を実OS安全性のPASSにしない。実行経路外のStart/Complete/terminal/承認/file書込はtrapし、trap到達は期待拒否ではなく失敗である。
+
+| pure ID | 入力・固定oracle（各1回） |
+| --- | --- |
+| KH-P01 | live完全Known。pidOpen0/getIdentity1/addKnown0、Known同一、unknown0 |
+| KH-P02 | snapshot後終了を代用した完全Known。P01と同じ、exitUtcだけ元冒頭で取得。旧12E7はopen1でnot-running固定例外→unknown1のRED、新はopen0のGREEN |
+| KH-P03 | 同PID別UTC6桁、親寿命内の新規世代。open1/add1、旧key保持＋new key追加。while再走の既知確認を含めgetIdentity2 |
+| KH-P04 | 同PID同UTC6桁でUTC7桁だけ異なるKnown2件。open0/getIdentity0、曖昧拒否 |
+| KH-P05 | 同PID別UTC6桁のKnown2件中1件だけrowに一致。open0/getIdentity1、選択した参照だけ使用、両key保持 |
+| KH-P06 | 元Rowsに同PID2行。open0/getIdentity0で拒否、追加CIM0 |
+| KH-P07/P08 | CreationDate=null／Kind=Unspecified。各open0/getIdentity0で拒否 |
+| KH-P09 | command欠測でGet-Identity代用が元失敗相当をthrow。open0/getIdentity1、unknown保持 |
+| KH-P10/P11/P12 | 戻りidentityのpath／parent（親候補0）／UTF16 code unit1個が台帳と相違。各open0/getIdentity1で拒否 |
+| KH-P13/P14/P15 | pinned IsClosed／IsInvalid／別SafeHandle参照。各open0/getIdentity0で拒否。ここではRefreshは成功する代用でrow拒否を検証。実disposedによる冒頭例外は別の未検証経路として明記 |
+| KH-P16 | path/parent/command=nullの部分DirectLaunchHandle identity。open0/getIdentity0で拒否、partial bytes/evidence不変 |
+| KH-P17 | 未登録候補がopen前消失。open1/getIdentity0/add0、unknown1/newDispose0。例外は成功化しない |
+| KH-P18 | 通常の新規子、親寿命内。open1/add1、Known+1、unknown0、getIdentity2（while再走を含む）、newDispose0 |
+| KH-P19 | 同UTC6桁候補だが戻りUTC7桁/keyが異なる。open0/getIdentity1で拒否 |
+| KH-P20 | 元row path=null、Get-Identity代用でpath取得失敗。open0/getIdentity1で拒否。台帳pathへのfallback禁止。path API自体の既存47＋5受入とは区別 |
+
+P04/06–17/19/20の拒否はAborting=falseを使い、Unprovable1、Status=CleanupIncomplete、元Known不変、kill/wait/terminal0、以後case依存処理未実行を必須とする。新経路でopenに成功後失敗した時だけnewDispose1となるが本表P17はopen自体がthrowなので0である。各pure case5秒、Pure全体60秒の早いmonotonic上限を入口/consumer前後で確認する。既知のRED（P02等）は期待差分として保存して他の固定caseへ進み、adapter/fixture/期限など想定外の失敗はfirstUnexpectedで残NotRunとする。新sourceは20/20 PASS以外を受理しない。
+
+OS phaseは元Get-Identity/Add-KnownProcess/Get-TerminationObservationと実Read-OwnedTreeを使用する。Get-OsProcessだけを採取済み実CIM rowsを返す1出力関数へ限定置換し、ReadのGetProcessById2箇所はcounter経由で元APIへそのまま渡す（既知経路で0を証明する）。型代用は0である。新隔離pwsh合成子1個を通常ユーザー・hidden、stdin読取で待機させ、親はStartが返したProcessとSafeHandleを保持する。引数は固定文字列、子はstdin EOFで正常終了し、独自10秒上限でも終了する。開始からの同じ15秒monotonic上限内でO1→O2を行い、O1失敗時はO2を起動しない。作者自身のfinally回収もこの上限内、保持launch handleのみに限定する。取得/回収不能は非PASSとして証拠を残し、PID停止・retry・権限追加はしない。
+
+| OS ID | 同一合成子による固定oracle |
+| --- | --- |
+| KH-O1 | live中に実CIMを1回採取し、selfと合成子の実row各1件だけを抽出したobject[]を固定する（field改変なし）。完全path/commandを要求。元Get-Identity→元Add-KnownProcessで子を登録する（親edge用Knownは実selfの保持Process/実row identity、self除外は元処理）。登録用counterとRead用counterを分離し、Readに同snapshotを渡してopen0・unknown0・登録後identity/evidence/handle不変、実getIdentity1を確認する。typed consumer成立の最小正常確認 |
+| KH-O2 | O1成功後stdinを閉じ、同launch handleの有限WaitForExitで終了を確認する。**CIM再取得せず**O1のrowsのまま元Readを呼び、open0・unknown0・同UTC7桁の完全identityを確認し、元Get-TerminationObservationでExitedを観測する。Readによる借用Dispose/Kill/Waitは0。runner自身のwaitと終了確認を別counterへ記録し、gate cleanup/terminal成功には数えない |
+
+OS phaseは2件・全15秒、うち各caseも15秒以下、finallyを含む。同期CIM/OS APIの強制中断を保証せず、返却後の超過は失敗として後続抑止する。子自身の10秒上限はfixture側の上限でありgateの10秒cleanupを変更しない。旧sourceのOS phaseはO1がpidOpen>0でoracle不一致ならO2はNotRun、旧競合REDは決定的なP02で担保する。新sourceのOS 2PASSは作者と独立runnerがそれぞれ固定1回取得する。pure20は制御論理、OS2は実handle/元identity/終了観測、focused10は実監督全体と証拠を分ける。
+
+command契約は下記とする。`$frozenOld` は作者が12E7をbyte保存した絶対path、`$frozenNew/$newSha` はKH-B確定入力であり、存在/hash一致がない限り起動しない。Pure/Osそれぞれ新UUID outputを使う。expected hashを現物から無条件に採番して承認済みと扱わない。
+
+```powershell
+& 'F:/Program Files/PowerShell/7/pwsh.exe' -NoLogo -NoProfile -NonInteractive -File "$r/verification/argv-path01/Test-KnownHandle.ps1" -SourcePath $frozenOld -ExpectedSourceSha256 '12E7FC95F24883AC89E8464108AC7404D4953006EBFA56DC9B7F8D0613281621' -OutputRoot $freshOldPure -Phase Pure
+& 'F:/Program Files/PowerShell/7/pwsh.exe' -NoLogo -NoProfile -NonInteractive -File "$r/verification/argv-path01/Test-KnownHandle.ps1" -SourcePath $frozenNew -ExpectedSourceSha256 $newSha -OutputRoot $freshNewPure -Phase Pure
+& 'F:/Program Files/PowerShell/7/pwsh.exe' -NoLogo -NoProfile -NonInteractive -File "$r/verification/argv-path01/Test-KnownHandle.ps1" -SourcePath $frozenNew -ExpectedSourceSha256 $newSha -OutputRoot $freshNewOs -Phase Os
+```
+
+runnerは新sourceのOS2を最初に1回、成功時だけPure20を1回、KH-C静的接合PASS後の既定focused10を1回実行する。focused commandは既存slash driverのNativeSourceSha256=`381F5E1DCD70ED8040153FB155C8AABA0881FBFB57A8074B286FB4169D8683DD`、NativeExeSha256=`FF7C9A0F641F66F7C340AEC94C21EA9A0C745EA5A39C35B252C3A9CBDAFCCB88`、OutputRoot=`R/verification/<新UUID>`を保持する。既存case/Runの65秒（build25、実行55＋cleanup10）、firstFail/残NotRun/retry0を変えない。focusedの全体wall上限を新たに設定・延長せず既存driver/元fixtureの有限契約を使う。OS15秒/Pure60秒は局所試験だけの上限である。
+
+### 凍結・受渡し・停止条件
+
+KH-A完了はこの追補と静的self-check・独立Preへの提出までである。未決だった(1)既存Get-Identity再利用、(2)partial/複数世代/無効handle、(3)局所22件・型/counter/時間/commandを上記一方式へ確定した。実装・試験起動は行っていない。追加の仕様判断が必要なら外部仕様担当へ返し、比較・所有・期限・権限の緩和で解消しない。
+
+Pre→planner精緻化→独立作者の20pure/旧RED固定→別実装者のRead-OwnedTree局所修正→作者新GREEN/OS2→独立B/C接合→独立runner OS2/Pure20/focused10→独立Postの順である。新sourceで最小正常OSが失敗したら新findingとして停止し、harnessを一般化する連続patchへ進まない。parser/PSSA1.25.0は診断0かつ実行error0、逆diffで非所有関数本文不変を必要とする。実装者は期待値を編集しない。
+
+frozen bindingは計画どおり、最終plan/design/Invoke→Test-ContextPreflightの3入力hash→新testとCONTEXT-TEST-HANDOFF-P1→focused driverの5入力hash→HANDOFF/runner frozenの順でのみ更新する。今は更新しない。旧bytesを保存し、旧結果・承認・Run source/frozen-inputを上書きしない。CXT-D旧12PASS/独立PostとPTH-MONO Closedは維持し、関係consumer本文不変の静的証拠でCXT12の不要な再実行を避ける。LIFE14/16/17/18・標準80/87variant・製品full・提供のgateは残る。
+
+rollbackはRead-OwnedTreeの今回差分だけを12E7保存版へ戻すことであり、旧競合や旧binding不一致を解除しない。新回帰/RED/旧source・tmp・fixtureは保持する。他者編集、native/fake/EXE、製品source、認証/API/OS設定は変更しない。usageは子`/root/known_handle_race_design`の開始/終了counter・provider実metadata・週枠・親子包含を未取得とし推定しない。指定model/effortと返却実値を混同しない。
