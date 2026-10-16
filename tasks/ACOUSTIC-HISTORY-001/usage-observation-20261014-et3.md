@@ -2,6 +2,12 @@
 
 ## EO-STATIC-BASELINE01の限定是正（2026-10-16）
 
+完了境界：6属性のみの是正／独立静的6PASS→EO6GREEN／全source PSSA0／独立PostでEO-STATIC Closed。必要2hashのprobe更新・独立binding review・ValidateOnly一回→ENV01一回/32.19632秒/独立Post PASSまで接合し、ENV-RUNNERとMI限定課題もClosed。focused10/80/full/試用提供は未実施でcredit0。指定はplanner/reviewer Astra/high、作者Sol6.1/high、実装/runner Sol6.1/medium、親不変。子counter/実返却metadata/包含は欠測、合算しない。
+
+終了側共有週枠79%/10080分/reset1792667952/ordinaryUsageAllowed=true（開始76%）。アカウント共通値であり専有消費や旧方式比へ換算しない。親終了側snapshotは03:40:17.134Z、input1970658500/cached1927704832/output4406277/reasoning1445558/total1975064777/cache_write0。同一sessionの開始側03:08:44.678Zとの差はinput15958323/cached15696000/output20243/reasoning6238/total15978566/cache_write0、cached/reasoningは内数で再加算しない。着手から開始snapshotまで、この後のreview/保存/最終応答は測定外、親子包含未確認で全消費と呼ばない。
+
+手戻りは作者のCLI scriptblock引数binding、不正-LiteralPath、自動変数matchesの3件と、runnerの診断ファイル名読取誤記であり、対象試験FAIL/再試行へ混ぜない。ValidateOnlyは生成前11入力、実caseはfake追加後12であるという親依頼の集計説明も訂正し、コード/契約変更なし。低リスク改善として後続handoffへPSSAは-Path、固定driverは-File、予約変数を避ける具体条件を渡し、実装/束縛では同種起動失敗0だった。因果的な節約量は未測定、検証削減や新framework導入は行っていない。
+
 利用者が既存静的6件の追加対応を承認した。開始HEADc281448/tree clean、共有週枠76%/10080分/reset1792667952/ordinaryUsageAllowed=true。親開始側snapshotは03:08:44.678Z、input1954700177/cached1912008832/output4386034/reasoning1439320/total1959086211/cache_write0（着手からsnapshotまで欠測）。planner static_baseline_planを指定Astra/high・freshで起動した。既存6関数の個別根拠・動作不変・全PSSA0・独立回帰/Postから、必要binding/ENV01へ段階的に接合する。親モデル不変、子counter/実返却metadata/包含は未取得、週枠をtask専有消費へ換算しない。
 
 ## ENV-RUNNER-ORACLE01承認後の再開（2026-10-16）

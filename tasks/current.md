@@ -2,7 +2,9 @@
 
 ## 最新状態（2026-10-16）
 
-EO-STATIC-BASELINE01は独立Post PASS／Closed。plan88F586DD、Test96BBB420（個別理由付き関数局所6属性だけ）、oracle59B1170B/manifest89B99314。属性除去後の全bytes96FB一致、param/body/caller不変、全PSSA1.25.0通常rules診断0/engine0/exit0。独立静的6PASS→EO6GREEN各一回/retry0/9入力一致（packet fce140bd）。EO-C静的未達を解消し、実装者が旧probeEE5FのTest/plan2hashのみ更新中。binding review→ValidateOnly→ENV01一回/Postが次。ENV-RUNNER/MI/80/full/試用提供は未完了、製品EXE9B888E9F不変。計画checkpoint2bc4f49はpush済み。開始共有週枠76%（アカウント共通）。
+EO-STATIC-BASELINE01・ENV-RUNNER-ORACLE01・MI-VOLATILE-01は限定独立Post PASS／Closed。plan88F586DD/Test96BBB420/Invoke318E/design9679/probeE8B465F9、oracle59B1170B/manifest89B99314/EOtestE752。6局所属性のみ/逆bytes96FB一致、全PSSA0、独立静的6PASS→EO6GREEN。probe2hashだけ再束縛/binding review PASS、ValidateOnly一回11入力一致/dispatch0/exit0。新suite3d864e43/run e0d4d4fdのENV01一回Passed/exit0/32.196秒/dispatch1other0retry0、fake生成後12入力一致/正式6terminal Completed/unknown0residual0/独立remaining[]/環境config事後assert到達、独立Post PASS。旧FAIL保全、欠測発生理由・救済回数・finally後別OS監査は未確定。次はMI-F/EO-Fのfocused/context必要再束縛と接合review→focused10→標準80/variant→製品full→別配置試用EXE。10/80/full/提供credit0、製品EXE9B888E9F不変。結果checkpoint ab778d7までpush済み、今回正常結果も別checkpointへ保存する。共有週枠76→79%（アカウント共通、専有量不明）。
+
+以下の経緯は履歴であり、上記の最新状態を優先する。
 
 ENV-RUNNER-ORACLE01はplanD7D6E063/PrePASS、旧R01 RED1/5NA→新独立6GREEN/exit0/983ms、限定差分適合までである。新Test96FB6B4B/testE752D9DA、Invoke318E/design9679/probe旧EE5F。EO-C総合PostはCHANGES_REQUIRED：PSSAの既存ShouldProcess6診断が新旧完全一致し、新規0だが診断0条件未達（EO-STATIC-BASELINE01）。利用者へ6件の限定是正追加を照会済み、期待値一箇所以外の変更/除外/基準緩和0。binding/ValidateOnly/ENV01/80/full/提供は未解除、旧MI-E失敗/MI-VOLATILE Verified維持。計画checkpoint e070f6bはpush済み、本区切り結果も保存する。共有週枠73→75%（アカウント共通、専有量不明）。
 

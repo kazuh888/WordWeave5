@@ -2,6 +2,19 @@
 
 ## EO-STATIC-BASELINE01（2026-10-16、利用者承認後）
 
+ENV01の独立Post PASS／確定指摘0を受領した。suite3d864e43-91b2-4d59-b10c-53c651ab9cf4／run e0d4d4fd-ff06-4da1-a693-79ca4ade08d0はPassed/実exit0/32.19632秒/dispatch1/other0/retry0、12入力前後一致/sourceMatched=true。正式6terminalのhash参照一致、Completed/error=null/所有行waited・hasExited true/unknown0/residual0/killRequested0を現物接合し、重複台帳を合算しなかった。独立remainingは実配列[]、環境/config不変assert後のauthor-result到達もsourceへ対応付けた。fixture救済回数は未計装、残存確認はfinally前、終了後の別OS監査は未実施である。この限界を保持して正常1件だけを認定する。
+
+ENV-RUNNER-ORACLE01とMI-VOLATILE-01は、保存局所証拠＋今回の正常ENV01/Postを満たした範囲でClosedとする。OS欠測そのものの発生理由、旧失敗runの根本原因全体を解明済みとは主張しない。旧FAILは保持する。次はMI-F/EO-F所定の未使用focused/context入力の必要再束縛と接合review→focused10→標準80/variant→製品fullであり、現在の直接dispatch許可や全体成功creditへ拡大しない。製品EXEと実データは未変更、試用提供は未完了である。
+
+| Finding ID | 原文・位置 | Root cause | State | Packet | Canonical artifact | Evidence | Oracle | Reviewer record | Residual / out-of-scope |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ENV-RUNNER-ORACLE01 | 旧Test2044のexact path比較 | Cargo環境文字列とファイル同定canonical pathを混同 | Closed | EO/ES | plan88F5/Test96BBB/probeE8B465 | 旧R01 RED→新6GREEN、正常ENV01一回成功 | 固定forward literalのみaccept/誤表現拒否、元remaining/config事後確認到達 | EO Pre/test/Post、ES限定Post/binding、ENV01 Post PASS | focused10/80/full/試用未了、旧FAIL保全 |
+| MI-VOLATILE-01 | 保存run62900800でCommandLine欠測拒否 | 既知保持handleでも完全OS再取得を必須化 | Closed | MI/EO/ES | design9679/Invoke318E/Test96BBB/probeE8B465 | 旧RED→局所20/実型2独立PASS＋今回正常ENV01/Post | 完全登録/元handle/世代/現存矛盾拒否、未知非停止維持 | 既保存MI局所Post＋今回ENV01 Post PASS | 欠測発生理由と旧run全原因は未確定、finally後別OS監査なし |
+
+ValidateOnly一回はexit0/1.321575秒/validated=true/dispatch0/runtime=false/retry0/suite前後不存在で成功した（packet e91cf4ec）。この時点のfrozenInputsは11件で全一致。probe216のreturn後、fake.exe生成と225の追加を経て実case前に12件となるため、生成前のfakeを確認済みとはしない。親の依頼にあった「ValidateOnly12一致」は集計説明の誤りとして訂正し、コード/集合/基準は変更しない。親は同一probeE8B465/固定組のENV01一回だけを新UUID・通常ユーザーsandbox外で解除した。実成功/cleanup/残9/80/fullはまだ未判定である。
+
+ES-E/EO-D新probe E8B465F9を親が現物で事前固定し、独立binding review PASS／指摘0を受領した（packet13dd15a7）。旧TestD8AD→96BBB、plan1133→88F5の2literalのみ、逆bytes旧EE5F一致/BOM保持、他10入力構築・固定12集合・dispatch/cleanup/期限/期待本文不変、Parser0/PSSA1.25.0通常rules Stop診断[]/engine0/marker/実exit0。親はrunnerへR/verification直下の新UUIDでValidateOnly一回だけを解除した。自己hashをapproval代替にせず、ENV01はその成功受領後まで未解除である。
+
 ES-D独立runnerは固定source96BBBで静的oracle6PASS/exit0/1.2566201秒→EO6GREEN/RED0/NA0/Unexpected=null/exit0/.9649447秒、各一回/retry0、9入力前後一致を報告した（packet fce140bd）。独立Postは同sourceのresult/binding/command/process/logと既確認の全PSSA0を接合しPASS／確定指摘0。EO-STATIC-BASELINE01はClosed、EO-C静的未達は解消した。読取時のファイル名誤記は試験失敗や再実行に混入していない。親は実装者へprobeのTest/plan必要2hash literal更新だけを依頼し、旧EE5Fは実行しない。ENV01/10/80/full/製品提供の成功は未判定である。
 
 | Finding ID | 原文・位置 | Root cause | State | Packet | Canonical artifact | Evidence | Oracle | Reviewer record | Residual / out-of-scope |
