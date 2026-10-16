@@ -2,7 +2,7 @@
 
 ## 最新状態（2026-10-16）
 
-EO-STATIC-BASELINE01の既存6件は利用者が追加対応を承認した。planner Astra/highが、関数ごとの根拠付き限定対応と動作不変の検証を確定中である。検査の一括除外、ShouldProcessによるfixture/cleanup省略、製品変更は行わない。開始HEADc281448/tree clean、共有週枠76%（アカウント共通）。ENV01等は静的是正・独立Post後まで未解除である。
+EO-STATIC-BASELINE01は独立Post PASS／Closed。plan88F586DD、Test96BBB420（個別理由付き関数局所6属性だけ）、oracle59B1170B/manifest89B99314。属性除去後の全bytes96FB一致、param/body/caller不変、全PSSA1.25.0通常rules診断0/engine0/exit0。独立静的6PASS→EO6GREEN各一回/retry0/9入力一致（packet fce140bd）。EO-C静的未達を解消し、実装者が旧probeEE5FのTest/plan2hashのみ更新中。binding review→ValidateOnly→ENV01一回/Postが次。ENV-RUNNER/MI/80/full/試用提供は未完了、製品EXE9B888E9F不変。計画checkpoint2bc4f49はpush済み。開始共有週枠76%（アカウント共通）。
 
 ENV-RUNNER-ORACLE01はplanD7D6E063/PrePASS、旧R01 RED1/5NA→新独立6GREEN/exit0/983ms、限定差分適合までである。新Test96FB6B4B/testE752D9DA、Invoke318E/design9679/probe旧EE5F。EO-C総合PostはCHANGES_REQUIRED：PSSAの既存ShouldProcess6診断が新旧完全一致し、新規0だが診断0条件未達（EO-STATIC-BASELINE01）。利用者へ6件の限定是正追加を照会済み、期待値一箇所以外の変更/除外/基準緩和0。binding/ValidateOnly/ENV01/80/full/提供は未解除、旧MI-E失敗/MI-VOLATILE Verified維持。計画checkpoint e070f6bはpush済み、本区切り結果も保存する。共有週枠73→75%（アカウント共通、専有量不明）。
 

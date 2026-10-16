@@ -2,6 +2,16 @@
 
 ## EO-STATIC-BASELINE01（2026-10-16、利用者承認後）
 
+ES-D独立runnerは固定source96BBBで静的oracle6PASS/exit0/1.2566201秒→EO6GREEN/RED0/NA0/Unexpected=null/exit0/.9649447秒、各一回/retry0、9入力前後一致を報告した（packet fce140bd）。独立Postは同sourceのresult/binding/command/process/logと既確認の全PSSA0を接合しPASS／確定指摘0。EO-STATIC-BASELINE01はClosed、EO-C静的未達は解消した。読取時のファイル名誤記は試験失敗や再実行に混入していない。親は実装者へprobeのTest/plan必要2hash literal更新だけを依頼し、旧EE5Fは実行しない。ENV01/10/80/full/製品提供の成功は未判定である。
+
+| Finding ID | 原文・位置 | Root cause | State | Packet | Canonical artifact | Evidence | Oracle | Reviewer record | Residual / out-of-scope |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| EO-STATIC-BASELINE01 | 旧Testの6関数でShouldProcess推奨、plan診断0未達 | 内部fixture/回収helperの必須副作用と対話的省略推奨が不一致 | Closed | ES-A〜D | plan88F5→Test96BBB | 旧6同一診断保存→6属性のみ/全PSSA0、独立静的6PASS/EO6GREEN | 認証済み属性行だけの逆bytes96FB、param/body/caller不変、個別理由/局所scope/通常rules全体解析 | Pre/作者static/源static/最終限定Post PASS | ENV-RUNNER全体/MI/80/full/提供は未了。global除外/安全判定変更なし |
+
+ES-B immutable oracleの独立静的review PASS／指摘0を受領した。ES-C実装者は新Test96BBB420を返却し、親が現物hashを固定した。指定6属性各1行だけ、固定oracle一回6PASS/逆bytes一致/BOM維持/非所有一致、Parser0・PSSA1.25.0通常全rules診断0/engine0/完了marker/実exit0を保存した（impl packet9b3d0f70、oracle結果ea1ae69f）。独立runner static_baseline_runner（指定Sol6.1/medium）へ新sourceの固定静的oracle一回→成功時EO6回帰一回を依頼し、静的差分/証拠reviewをAstra/highへ並行した。独立Post前でありENV01/下流は未解除である。
+
+ES-B作者はpacket23598468の有限oracle59B1170B/manifest89B99314とReadOnly96FB（162096bytes）を凍結して所有返却した。commands.txtに3引数・ES-C/D別UUID・期待を固定し、対象へのdot-source/runtime/旧PSSA再解析は0。作者scriptのParser0/PSSA1.25.0 Stop診断0/engine0/完了marker/実exit0を保存した。CLI scriptblock引数binding、不正LiteralPath、自動変数matches命名の3手戻りは別logに保全し、対象動作REDに数えない。別実装者static_baseline_impl（指定Sol6.1/medium）へ6属性挿入だけ、immutable oracleの独立reviewをAstra/highへ並行依頼した。新source/6回帰/ENV01はまだ未受入である。
+
 ES-A独立Pre PASS／確定指摘0を受領した。plan88F586DD/Test96FB/回帰E752/design9679の現物hash、個別consumer、メモリ内属性挿入のParser0/各ParamBlock一個/位置引数2・名前付き1を確認した。SuppressMessageAttributeのみでCmdletBinding/Parameterを追加せず、共通parameter追加を伴わない方式である。公式PSSA局所抑制/PowerShell advanced parameter資料にも照合した。実sourceの全PSSA0と新oracle/6回帰は未検証である。ES-B作者static_baseline_tests（指定Sol6.1/high）へ新UUID内の有限AST/bytes oracle・readonly96FB固定だけを依頼し、既存sourceの変更を許可していない。
 
 利用者は既存静的6件の追加是正を承認した。planner static_baseline_plan（指定Astra/high）のplan88F586DDを現物受領し、独立Preをstatic_baseline_review（指定Astra/high）へ提出した。対応候補は対象6関数のParamBlock直前への関数局所SuppressMessageAttribute各1個・個別Justificationだけである。副作用がないとは主張せず、内部fixture/同期刺激/所有確認済み回収の省略が契約違反となるため、対話的ShouldProcess制御を追加しない。属性以外の全bytes/本文/param/consumer不変、通常rule集合の全PSSA診断0、独立AST/既存6回帰/Postを受入とする。実装/新検証/ENV01はまだ0である。
