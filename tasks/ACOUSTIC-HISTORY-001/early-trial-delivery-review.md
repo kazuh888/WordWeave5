@@ -2,6 +2,17 @@
 
 ## ENV-RUNNER-ORACLE01（2026-10-16、利用者承認後）
 
+EO-C限定差分は適合し、独立6回帰は6PASS/FAIL0/skip0/Unexpected=null/実exit0/983ms、一回のみである（runner packet 9eb35a66、source96FB6B4B/testE752D9DA、6入力前後一致）。独立reviewerはresult/binding/green.log/frozenの整合を確認し、追加finding0を返却した。ただし総合PostはCHANGES_REQUIREDである。
+
+阻害EO-STATIC-BASELINE01：plan534のPSSA診断0条件に対し、新旧TestはいずれもPSUseShouldProcessForStateChangingFunctionsが6件、engine error0/実exit1である。593 Start-FixtureProcess、652 New-CaseFixture、903 Set-CaseStimulus、1004 Set-CaseSynchronization、1040 Stop-ObservedIdentity、1235 New-RealCargoFixture。Rule/Line/Column/Message/Severityが新旧完全一致し、新規0/消失0を独立確認した（impl packet 8ff8babe）。期待operandだけを旧値へ逆置換すると旧D8AD全文bytes/BOM一致、非所有10hash一致、Parser0であり、今回の機能回帰ではない。しかし既存であることを診断0達成へ換算しない。元scope外の属性追加/他関数修正/除外/基準変更は未実施である。利用者へ6件の限定是正を追加してよいか照会した。binding/ValidateOnly/ENV01/80/full/提供は保留し、旧失敗を事後PASSにしない。
+
+| Finding | 状態 | 確認済み | 残る条件 |
+| --- | --- | --- | --- |
+| ENV-RUNNER-ORACLE01 | Implemented・局所行動Verified／未Closed | 旧R01 RED→新6GREEN、限定差分適合 | EO-C静的gateとENV01/Post |
+| EO-STATIC-BASELINE01 | Accepted・追加範囲承認待ち | 新旧同一6診断、engine error0、新規0 | 対応範囲/根拠/影響検証の確定、是正と独立Post |
+
+EO-B作者はtest E752D9DAを凍結し、ReadOnly旧D8ADを入力として旧R01一回を採取した。実exit1／ExpectedOldRed／BehaviorRed1／5NA／Unexpected0であり、実AST比較2044・UTF16復元2043の各一意抽出／元本文／source hashを記録した。packet ea23f78eのREPORT/FROZEN-before-red/static-02/old-redとresult a94f9f9bを親が接合した。Parser0/PSSA1.25.0 Stop/完了marker/実exit0、非所有4hash不変。初回静的driverの未対応-LiteralPathエラーは修正前logに保持し、行動REDへ数えない。別実装者Sol6.1/mediumへTest期待operand一箇所だけを依頼し、immutable作者成果物の独立reviewを並行した。新GREEN/ENV/下流はまだ未実行である。
+
 利用者は既定forward slash文字列への厳密一致を維持した期待値修正・続行を承認した。plannerの末尾追補plan D7D6E063を親が現物照合し、独立reviewer `runner_oracle_review`（指定gpt-6-astra/high）がEO-A Pre PASS／阻害0を返却した。既存design53、producer Invoke2022、実Test2044の一意AST statement、適用ENV01/02/03/04/06を照合した。新adapter・旧RED・新6GREEN・PSSA・binding・ENV01は未検証であり、Preを実行受入へ拡大しない。
 
 独立作者 `runner_oracle_tests`（指定gpt-6.1-sol/high）へ新Test-EnvRunnerOracleと旧R01の一回REDだけを依頼した。元Test/Invoke/製品は未変更。旧MI-E失敗と下記MI/FFの限定結果は保持する。ENV-RUNNER-ORACLE01はPlanned／PrePASSであり未Closed、MI-VOLATILEはVerified維持、80/full/試用提供は未解除である。

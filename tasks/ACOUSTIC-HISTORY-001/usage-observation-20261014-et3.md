@@ -2,6 +2,10 @@
 
 ## ENV-RUNNER-ORACLE01承認後の再開（2026-10-16）
 
+区切り：作者Sol6.1/highの旧R01 RED1/5NA、実装Sol6.1/mediumの期待operand一箇所修正、独立runner Sol6.1/mediumの6GREEN/983ms、reviewer Astra/highの限定接合適合まで。総合Postは既存PSSA6診断によりCHANGES_REQUIRED。旧も同6診断/new0/engine0を保存し、基準を緩めず追加範囲を利用者へ照会した。静的driverの未対応-LiteralPathを一度-Pathへ直した手戻りは作者logに保持し、行動REDに数えない。新実ENV/再試行/製品build/API0。開始共有73→終了側75%/10080分/reset1792667952/ordinaryUsageAllowed=true（最終応答前）。アカウント共通のため今回専有消費へ換算しない。子の取得はPre共有74%、作者74→75%のみ、他counter/実返却metadata/包含は欠測、合算しない。
+
+親終了側snapshotは2026-10-16T01:57:16.78Z、input1953463173/cached1910802432/output4382099/reasoning1438989/total1957845272/cache_write0。同一session01a08550-055c-7aa1-9834-905e4a7ce148の末尾2MiBからusageだけを取得した。今回開始snapshot欠測のため差分を算出せず、以降の記録/保存/最終応答も未取得。改善候補：限定差分へ全file診断0を課す前に、既存baselineの診断有無と許可scopeの両立をPreで確認すること。今回の差戻しを節約実績とせず、品質gateの無断変更や追加frameworkでは解消しない。
+
 利用者が既定forward slash文字列への厳密比較を維持した期待値修正・続行を承認した。開始HEAD7b5607e/tree clean、共有週枠73%/10080分/reset1792667952/ordinaryUsageAllowed=true。アカウント共通値でありtask専有消費は不明。親の開始token snapshotは未取得、前区切り末尾を今回の開始値として流用しない。
 
 planner `runner_oracle_plan` は指定gpt-6-astra/high・freshで既存計画末尾65行を追補し、plan D7D6E063を返却した。既存spec/design再利用、新構造化なし、EO-Aの独立Preを `runner_oracle_review`（指定gpt-6-astra/high・fresh）へ依頼した。作者gpt-6.1-sol/high、実装/runner gpt-6.1-sol/mediumの計画割当に従う。親モデル変更なし。各子の実返却model/effort、session/token、親子包含は未取得であり合算しない。旧失敗は保持し、製品source・EXE・データ・API・OS設定は変更しない。
