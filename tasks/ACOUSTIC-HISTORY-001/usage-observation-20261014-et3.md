@@ -8,6 +8,10 @@
 
 P7-A区切りの中間共有週枠90%/10080分/reset1792667952/ordinaryUsageAllowed=true。spec pwsh767_spec/designer pwsh767_design/reviewer pwsh767_preはいずれも指定Astra/highであり、親子counter/実返却/包含は未取得。P7-0起動1回の有限同定は8PASS、独立PreはFF追加binding漏れ1件CHANGES_REQUIRED→planner/design限定是正→再Pre PASSである。実装/互換性/P7全体の成功にはしない。最初のplanのDLL名誤記は同定結果で訂正した。旧F3retry/製品source/API0、公式source全fileのshell比較はDNS失敗の空値を証拠採用せず、一次資料の対象span対応へ限定した。週枠差は専有消費や効率改善率に換算しない。
 
+P7-B作者pwsh767_oracleは指定Astra/high、16観測をfreeze後、Parser/PSSA0を確認したが固定pwsh一回で保存finallyのAdapterFailure/exit1となり停止した。旧V01 REDも未確認、retry0/現行source変更0。作者報告の手戻りはAST準備2件/static診断2件と保存境界欠陥であり、対象behavior失敗へ合算しない。独立reviewerがOrderedHashtableの大文字/小文字key区別を現物で確認した。生stderr fileは残っておらずREPORT引用と原証拠を区別する。改善点は入力manifestのschemaを一意にし、後処理エラーが主結果を覆わない保存境界を実行前に確認することである。新frameworkや品質gate削減は導入しない。
+
+停止側共有週枠92%/10080分/reset1792667952/ordinaryUsageAllowed=true（開始85%）。親snapshot05:18:41.548Zはinput2001738852/cached1958526464/output4472939/reasoning1475248/total2006211791/cache_write0。取得開始側04:43:28.29Zとの差はinput9102303/cached9062144/output14999/reasoning3439/total9117302/cache_write0。開始前・この後の最終review/保存/応答は範囲外、cached/reasoning内数/子包含不明につき再加算しない。共有週枠差を当工程専有量や旧方式比へ換算しない。規範checkpoint3c21baaをpush済み、今回未完了・失敗結果も別checkpointへ保存する。
+
 ## focused10以後の再開（2026-10-16）
 
 区切りはF3初回FAILの証拠保存・独立Postまで。F1作者/実装/reviewerは既存割当Astra/high、runner Sol6.1/medium、親不変。context4/driver6literal再束縛・旧CXT12 file/context限定再利用・F2Pre・ValidateOnly正常/guard負例2PASSを接合後、F3はcontrol2PASS/0PASS1FAIL9NotRun/exit1/34.578秒/16入力一致。未知候補取得失敗と先行fixture errorの因果未確定、再試行/後段/修正0。scope外のPS7更新も観測し、7.6.7固定へ変える可否を利用者へ照会した。環境修理/quality緩和/新framework/実dataAPI0である。

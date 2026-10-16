@@ -10,6 +10,12 @@
 
 再PreはplanFF96F8DE/design6F845988にPASS、新規指摘0。D4のFF6literal限定更新とD2→D4、D3を含む最終組確認、逆bytes/18期待/期限保持/独立review/親manifestを受入れた。P7-Aの設計上のP1のみ閉鎖し、FF実装やFF18成功には換算しない。親はこの規範組をP7-B以降の入力として承認し、文書checkpoint後に独立作者へ進む。
 
+P7-B作者の新oracle37CD96A8/manifest5FC4DE6Fは16観測/9抽出を凍結しParser0/PSSA0を確認したが、旧sourceへの固定pwsh一回はAdapterFailure/exit1で停止した。原証拠P/a1a298af-29f3-4302-9681-419905f49616/REPORT.md、実行root P/82f079c0-6d6c-47d7-a895-074feed3959d。finally454–455でdocumentsの小文字path/sha256とenvironmentの大文字Path/SHA256を同じ小文字で参照し、OrderedHashtable/StrictModeのproperty欠落となる説明を作者から受領した。実stderrにstackはなく、位置は静的照合である。before/extractionsのみ保存、result/完了marker/元観測結果・例外は未保存。旧V01 RED/PASSと認定せず、再実行0、元3source/規範2/environment5は事後別読取で一致した。独立原因確認を依頼し、修正・再実行条件を分離する。P7-C以後未到達、製品変更0である。
+
+独立確認はCHANGES_REQUIRED/P1二件。①OrderedHashtableのschema混在を現物型/key確認で確定、開始時378–383同様にdocuments/environment loopを分離し正しいkeyを明示する。②finally446–475の事後hash/CreateNew例外が主結果と明示exitを覆い、459が既存firstUnexpectedを上書きする。主観測/主例外を保持し、事後hash/保存失敗を別項目へ残し、保存失敗でも構造化console証拠とadapter exit2へ到達させる最小修正が必要である。manifest改稿/fallback/hash省略/別root退避/retry追加は0。raw stderr fileなし、位置一致は静的根拠であり元結果未確認を維持する。
+
+次は作者の限定修正→16期待/抽出/期限不変・Parser/PSSA→独立review→親の新SHA/完全command/別未存在UUID承認である。利用者へ、この条件下の旧V01一回再実行可否を照会する。期待は元拒否/sentinel0/BehaviorMismatch/残15NotRun/保存・marker・exit1であり、AdapterFailureなら停止する。gate main/child/CIM/network非到達は静的範囲であり固定childCount値を動的監視証拠にしない。旧oracle/manifest/rootは保全し、今回追加runtime/修正は0。
+
 ## MI-F／EO-Fの再開（2026-10-16）
 
 F3初回はcontrol2PASS、focused0PASS/1FAIL/9NotRun/実exit1/34.578秒で停止した。suite b5bb9069-90e5-429b-8c5b-97c7f7f22f75／run77a4759e-0508-4cdd-966b-140c3ef89a12、ENV01の元errorはBEHAVIOR_ASSERTION: Unexpected gate failure、AP1未到達/argvEvidence0、事前15→fake後16全入力一致/sourceMatched=true/caseBodiesUnmodified=true。REPORTはR/verification/b5bb9069-90e5-429b-8c5b-97c7f7f22f75.F3-REPORT.md（A739994A）。再試行/修正/残9/80/full/製品起動0。
