@@ -1,6 +1,24 @@
 # ET3 試用EXE提供・独立レビュー記録
 
-## MISSING-IDENTITY01（2026-10-16、設計開始）
+## MISSING-IDENTITY01（2026-10-16、局所検証済み・ENV oracle矛盾で停止）
+
+MI-E一回はsuite8b8b1d3d-b9d8-428a-90fc-6537a0ee7d02／run3ef364ec-b7c1-4b9b-9d9b-dda74908bc9e、exit1/31.9297878秒/dispatch1/other0/retry0/sourceMatchedtrue/全credit0でFAIL。独立PostはCHANGES_REQUIRED（別root ENV-RUNNER-ORACLE01/P2）。RunOwner/Supervisor/nested Runner/SafetyWorker3の正式terminal全6件はCompleted/sourceMatchedtrue、記録対象はOwned/waited/hasExitedでfixtureResiduals=[]、failure/error全null。重複台帳の20/18/1/2/2/2は合算しない。FF正式/tmp0/Unobservedはgate内部failureなしと整合し、診断不具合へ換算しない。独立remaining確認Test2089とconfig事後確認1810はoracle throwで未到達、rescue counter未取得でありsuite全cleanup成功には拡大しない。MI-VOLATILEはVerified維持／Closed不可、MI-F/80/full/提供は未解除。
+
+ENV-RUNNER-ORACLE01の唯一の契約は既存plan121/design53のforward slash絶対path一語で、Invoke2022が同値をCargo子環境に設定する。Test2044だけがTest739→Get-PathHash297のGetFullPath由来canonical backslash pathを期待していた。保存cargo28052/fulltarget28648の有効90要素UTF16配列は既定文字列と完全一致し、誤期待との差は位置2/11/18/29/36/54/58/69のU+002F対U+005Cだけ。別sampleのnullをchar0へcoerceした初期読取結果は証拠から除外し、有効arrayだけで照合した。native内部argvのbackslash追補design373/379はCargo runner環境値を変更しない。是正の推奨は、観測値を任意正規化せず、独立期待値を既承認文字列へ修正して誤表現の負例を維持することである。
+
+元失敗を事後PASSへ変更せず、runner packet/3e18765c-f3df-43f9-90cd-1e37760f8110/REPORTと独立Postを保全した。execute-review-remediationの仕様/test矛盾時停止条件に従い、ENV oracle期待値修正と続行の利用者確認待ちとする。新Test/仕様変更、再実行、MI-F開始0。通常EXE9B888E9Fも終了時再照合で不変。既存規約への適合、永続data/認証/API変更なし、ローカルcheckpointと製品配布の区別を親self-checkでも確認したが独立PASSの代替ではない。
+
+MI-D probe3literalの独立static PASS／指摘0を受領し、親のValidateOnly一回はexit0/validatedtrue/dispatch0/runtimefalse/suite作成false（packet/976645fb-947f-474f-9724-9e059121e681.mi-validate-only.log）。親が新EE5FAAを事前固定し、MI-E独立runnerへ新suiteでENV01一回だけを解除した。case前後12入力・sourceMatched・正式診断とtmp・元terminal/cleanup・unknownを分離する。成功前の残9/80/full起動はせず、失敗時は既存診断を保存して停止する。自己hashを承認にせず、ローカル22件/FF18は反復しない。
+
+MI-Dのprobe束縛は新EE5FAA688B19049D74D14ED4B3603E3325ADD3FC068F4F84446DA002C9C51389で凍結した（packet/b10753dcのREPORT）。source33→318E/plan0CC4→1133/design30F4→9679の3literalだけ、逆適用全文/BOM旧62DA一致、非所有9入力不変、Parser/PSSA Stop/1.25.0/明示完了/実exit0。親はこのhashを事前固定し独立binding reviewへ提出した。selfhash取得は承認の代用ではない。ValidateOnly/ENV01はまだ未実行、未使用の旧FF test/context/focusedの再束縛は追加していない。
+
+MI-D局所Post独立PASS／指摘0。固定source318E/test8C4D/plan1133/design9679で独立MissingOs2PASS/exit0/0.854196秒→MissingPure20PASS/exit0/0.7871883秒、retry/NotRun/差分0、cleanupFailure=null（packet/6f15bcf2統合REPORTと42318d7d Pure）。元CIM2行と別合成rows、元Process/SafeHandle継続、read open/GetIdentity/add0、O1 null→O2元終了consumer Exited、lifecycle導出0とfixture実counterを区分した。作者20PASSも別証拠として接合し、同担当の再試行なし。MI-VOLATILE ClosedはENV01/Post後まで保留。別実装者へ既存FF probeのsource/plan/design3literal束縛更新だけを依頼、旧62DAを保存し12入力/dispatch/期待/期限本文不変を要求した。新runtimeはまだ解除しない。
+
+MI-C新Invoke318E6667C21B02D54DFBD8A539163365868D25F76866C9200DB8884EB1DB7A3Aを凍結（packet/a1e2d0c5のREPORT、旧33/新frozen/inverse/AST/staticを保全）。独立source static/test接合PASS／指摘0、許可1区間逆適用で旧33全文一致・他67関数と前後guard/catch不変、Parser/PSSA Stop/1.25.0配列count0/明示完了/実exit0、抑制追加なし。作者test8C4Dの新MissingPure一回は20PASS/Unexpected0/NotRun0、exit0/0.8090172秒/retry0・source/test前後不変（packet/4c344f66のREPORT）。独立runner Sol6.1/mediumへMissingOs2→成功時MissingPure20各一回だけを解除した。ENV01/ValidateOnly/旧phases/下流は未解除、旧probe62DAは束縛失効のため実行しない。
+
+MI-B test-only独立static PASS／阻害指摘0。新test8C4Dの追加逆適用と旧0C82全文一致、20oracle/元関数抽出/単一event順/型/Rows台帳保全、実型2のCIM1回＋別合成rows/EOF/15秒/同launch handle回収、保存旧REDを確認した。最終static元commandは内側Stop＋Import1.25.0/Invoke-ScriptAnalyzer各ErrorActionStop＋完了marker/exit0、外側code取得/STATIC_PROCESS_EXIT0（chunk3a5f2a/7.1655203秒）。static同logSHAは未取得だが以後無編集とbaseline前後8C4D/finalGetFileHash6245deを接合した。新source接合/20GREEN/実OS2/ENV01は未確認。helpのPhase説明補足は任意改善であり現在のfreezeを再変更しない。
+
+MI-B作者はTest-KnownHandle8C4DFC69A8485C93D90F61739C628822BAEA78EDC397AC05537FDCDBFBA356DBを凍結した（packet/fba04021のREPORT/TEST-EXPECTATIONS、旧0C82保存/追加逆適用全文一致）。旧33C2でM01一回は実Get-IdentityのCommandLine欠測拒否→BehaviorRed1/19NA/Unexpected0、exit1/全0.6115847秒、source/test前後不変。Parser/PSSA1.25.0完了0/exit0、production変更/新20/実型2は0。別実装者Astra/highへRead既知分岐だけを引き継ぎ、immutable test-only独立reviewを別fileの実装と並行して依頼した。旧拒否期待を実装に合わせて変更しない。
 
 MI-Aの計画精緻化を受領し最終plan11332260BC8ADC291BAEF3F4A4DF88A477D2E5256DA584645154A80C9F5F4DB2とdesign9679を固定した。旧KH Pure/Osの再dispatchはせず、新MissingOs2→MissingPure20を現局所受入とする。fresh作者 `missing_identity_tests`（指定Astra/high）へTest-KnownHandleのMI phaseだけを所有して期待固定・静的確認・旧M01一回の合成REDまでを依頼した。新20/実型2/ENV01はまだ解除していない。旧case期待/bytes/証拠を保持する。
 
@@ -10,9 +28,10 @@ MI-A設計は9679B02C1F3F31A6DE701656A52C4DB0DA3A39A289FC8D498C8898EFDE4AA1AE（
 
 利用者がOS情報欠測時の安全な扱いの設計と以降の作業を承認した。現HEAD a84ad3a、source33C2と保存run62900800の証拠を入力に、planner仮計画AA92（既存plan412〜）を受領しdesigner Astra/highへ限定設計を依頼した。現Get-Identityは既知保持handleを選んだ後もCommandLine欠測でsource600に到達する。等価以上の同世代証明なしに欠測を無視せず、完全登録/連続handle/世代/現存field矛盾を接合する方式をPreで確認する。欠測原因は未確定。設計・Pre・計画精緻化前の実装/runtime0。既存FF診断Closed/旧局所PASS/失敗証拠を維持し、主KH/ARGV/80/full/提供は未了である。
 
-| Finding ID | Evidence / root | State | Ownership / acceptance |
-| --- | --- | --- | --- |
-| MI-VOLATILE-01 | run62900800のCommandLine欠測とsource600。既知保持handleでも完全なOS情報再取得を必須とする分岐 | Planned | designerは既存design追補のみ。MI1–4の同世代証明・拒否負例・独立回帰/実測/Postが必要。未知非停止/期限/schemaは不変 |
+| Finding ID | 原文・位置 | Root cause | State | Packet | Canonical artifact | Evidence | Oracle | Reviewer record | Residual / out-of-scope |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| MI-VOLATILE-01 | run62900800のCommandLine欠測/source600 | 既知保持handleでも完全なOS情報再取得を必須とする | Verified | MISSING-IDENTITY01 | plan1133/design9679→Invoke318E/Test8C4D | 旧M01RED1/19NA→作者20PASS/独立OS2+Pure20PASS、許可区間のみ/他67関数不変 | 完全登録/元handle/UTC6・7/現存矛盾/危険類似入力拒否、元未知非停止 | 設計Pre/test/source/localPost PASS、MI-E Postは別rootでCHANGES_REQUIRED | ENV01全PASS前にClosed不可。欠測原因/10/80/full/提供未了 |
+| ENV-RUNNER-ORACLE01 | Test-CargoGate2044のexact native path比較 | 子環境文字列とファイル同定canonical pathを同じ表現と誤認 | Decision pending | 次packet未着手 | 既存plan121/design53を再利用しTest2044期待値だけが修正候補 | run3ef364ec/有効配列90要素/8slash差/Invoke2022、旧FAIL保全 | 既定forward文字列厳密一致とbackslash等誤表現拒否を事前固定する必要 | MI-E独立Post CHANGES_REQUIRED/P2、旧固定12一致 | skill仕様/test矛盾停止条件で利用者確認待ち。観測側正規化/判定緩和/再試行なし |
 
 ## ARGV-PATH01（CXT01再構成に依存、動的検証未完了）
 

@@ -2,6 +2,16 @@
 
 ## OS情報欠測の是正設計・実装再開（2026-10-16）
 
+終了境界：設計/Pre→旧M01実body RED→Read既知分岐だけ実装/他67関数不変→作者20PASS→独立OS2/20PASS＋局所Post→probe3literal/bindingPASS/ValidateOnly一回PASS→ENV01一回FAIL。31.9297878秒で全6gate actor Completedだが、既定forward slash環境値をbackslash canonical期待と比較する別rootENV-RUNNER-ORACLE01が顕在化した。独立PostはCHANGES_REQUIRED、MI-VOLATILEはVerified、MI-F/80/full/提供は未了。execute-review-remediationの仕様/test矛盾停止条件で利用者確認へ戻し、期待の無断変更/失敗再試行0。設計checkpoint771378aと結果checkpointを区別し、通常EXE9B888E9F不変。親自己点検は独立受入へ算入しない。
+
+親終了側共有週枠73%/10080/reset1792667952/ordinaryUsageAllowedtrue、開始63%との差はaccount共通で専有消費へ換算しない。独立runner局所開始/終了71→71、MI-E側詳細はreportに保存し担当量へ換算しない。親の終了snapshot2026-10-16T00:25:55.03Z、同session input1942532368/cached1900024704/output4363078/reasoning1433624/total1946895446/cache_write0。開始側23:36:13.42Zとの差はinput23138566/cached22996608/output47101/reasoning23897/total23185667/cache_write0。内数を再加算せず、子包含/session固有counter/実返却model metadataは欠測。着手から開始snapshotまで・ここから文書保存/commit/push/最終応答までは未取得でtask総量を取得済みと呼ばない。
+
+改善候補：同じpathでもファイル同定用canonical表現とCargo環境へ渡す固定文字列は別contractである。今回の新22対照は初回全成功であったが、正常系が次oracleへ進むまでこの既存誤判定が見えなかった。次の修正ではproducer/独立期待値の表現を先に対応付け、観測側の任意正規化で隠さない。ハーネス/基準を改変する効率化は未実施、旧方式比は未判定である。
+
+MI-B独立test-only staticPASS、旧M01 BehaviorRed1/19NAを元実bodyで確認、新20/OS2は未実施。親のこの区切りの共有週枠は70%/10080/reset1792667952/ordinaryUsageAllowedtrue、開始63%との差はaccount共通で当工程専有消費ではない。元PSSA Stop/EAStop/固定1.25.0/完了marker/実exit0のcommandprovenanceを接合して再検査を避けた。静的検査log内の同時SHAは欠測とし、以後無編集＋baseline前後hashで対応付ける。
+
+MI-A独立Pre PASS後にplan1133/design9679をcheckpoint771378aでpushした。作者Astra/highは旧test0C82を保全し、新8C4Dの旧M01実body RED1/19NAを一回採取した。別実装者Astra/highがRead既知分岐だけを所有し、reviewerAstra/highが凍結testだけを同時確認する。この間だけ2 helperで、別fileの実装と独立oracleの早期欠陥検出という利益を明示する。新20/実型2/ENV01未実行、再委譲/親model変更なし。子usage/実返却metadata欠測を推定補完しない。
+
 利用者が保存済み診断を基に「設計し、以降の作業も実施」を承認した。開始HEAD a84ad3a/tree clean、共有週枠63%/10080/reset1792667952/ordinaryUsageAllowedtrue。fresh planner `missing_identity_plan`へ指定gpt-6-astra/highで限定計画を依頼し、親モデル/時間上限/未知プロセスの扱い/実data/API/OS設定を維持する。Windows公式のhandle保持とcreation timeの一次資料を親が限定照合したが、欠測原因や今回の安全な所有証明成立を先取りしない。
 
 親開始側snapshotは2026-10-15T23:36:13.42Z、session01a08550-055c-7aa1-9834-905e4a7ce148のinput1919393802/cached1877028096/output4315977/reasoning1409727/total1923709779/cache_write0。着手からsnapshotまで欠測、cached/reasoningは内数、子token/実返却model metadata/親子包含は未取得。共有週枠や親counterをこの作業の専有消費へ換算しない。

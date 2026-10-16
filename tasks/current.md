@@ -2,7 +2,7 @@
 
 ## 最新状態（2026-10-16）
 
-MISSING-IDENTITY01は最終plan1133/design9679、独立Pre PASS／確定指摘0。fresh作者 `missing_identity_tests`（指定Astra/high）がTest-KnownHandleのMI phase期待固定/静的確認/旧M01一回の合成REDを担当中。欠測値の復元ではなく完全登録/元SafeHandle継続/UTC6・UTC7/現存field矛盾照合による等価証明をRead既知分岐へ限定する。新helper/APIなし、旧guard/未知非停止/期限維持。新20局所＋2実型が現受入で旧Pure/Os再dispatchなし。新実装/新20/実型2/ENV01は未解除。開始共有週枠63%、親モデル不変。段階成功時だけENV01一回→focused10→80/fullへ接合し、失敗の無断retryや未知停止は行わない。
+MISSING-IDENTITY01はplan1133/design9679/test8C4D/Invoke318E/probeEE5FAA。旧RED1/19NA→作者20PASS、独立OS2＋Pure20PASS、局所Post/binding/ValidateOnly PASS。MI-E一回はsuite8b8b1d3d/run3ef364ecでFAIL（31.930秒、dispatch1/retry0/sourceMatchedtrue、全credit0）。正式6actorはCompleted/unknown0/residual[]だが、Test2044が既定forward slashのCargo環境値をcanonical backslash期待と比較し拒否した（ENV-RUNNER-ORACLE01/P2）。残確認は未到達、全cleanup/ENV01成功にはしない。MI-VOLATILE Verified維持、MI-F/80/full/提供未解除。execute-review-remediationの仕様/test矛盾停止条件で、既定文字列への厳密一致を維持した期待値修正・続行の利用者確認待ち。新Test変更/再試行0、通常EXE9B888E9F不変。設計checkpoint771378aを保持し今回結果も別checkpointへ保存する。共有週枠63→73%（account共通、専有量不明）、親モデル不変。
 
 ET3の別配置試用EXE提供を継続中である。PTH-MONO-01は最終Post PASS／Closed（Invoke12E7、独立47/47＋5/5）。標準80は別の内部argvパス表記不一致でENV01 FAIL／79 NotRunであり、製品full／提供は未了である。
 
