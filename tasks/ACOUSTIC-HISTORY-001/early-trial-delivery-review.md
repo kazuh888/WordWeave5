@@ -14,6 +14,18 @@ R-B作者の4tail結果は各一回4PASS/実exit1,2,2,2/driver0/retry0であっ�
 
 Unicode brief初稿50C107…はfixture終了後stdout観測の責任が未定義でPre CHANGES_REQUIRED一件。plannerがfixture独立期待保存→作者同4実行/self-check→別runner終了後Ordinal全文/JSON7bit読取→Post→旧V01一回へ責任を分離し、最終briefFEA2E6A2E7F4703E97E02FB719C6244A338D22A6D4C5253663C80F5E5DBDA7EFで独立限定Pre PASS/追加指摘0を受領した。親がこの組を承認し、新作者Sol6.1/highへdispatchした。対象2file/driver不変、原証拠と元raw bytes未取得を保持する。
 
+R-B最終候補P/2dd54494-5095-4ea1-b363-85c23024cbebはoracleBCF9F4B823158DEBB05D0671F07414DA0542C69BF7382EA3E8F167A0B9708DE9、fixtureBD653FBCE975A8DF45869DC2A759DDF2C343C619CA9D0AAD53B9993B84F030A3。Parser/PSSA残診断/engine0・既存局所抑制1、prefix23318bytes/manifest/driver/16期待/9抽出/期限保持、候補5/保護121一致。新tail4組各一回4PASS/実exit1,2,2,2、別runnerP/17bc606c-88b8-4241-a2d9-55a367c31ac2の923機械チェック/4組PASS（result24030B06…）で主日本語・独立捕捉副次例外全文Ordinal一致/ASCII JSON/保存とexit整合を実証した。独立R-B Post PASS、Unicode P1閉鎖を受領した。923は全oracleケース数ではない。
+
+R-C親freeze P/6a702737-9b36-4df9-a247-3eaaf5f74270/R-C-FROZEN.md（C84A7EB57DBE23A012A7E89743010AA784FCAED8B178548ABD17FA6E05B61028）の完全commandを一回実行した。oracle出力P/8bff74d6-5fcf-4da3-8804-4e9c12d162ec、runner報告/validationはfreeze同dir。実exit1/1.2909336秒/retry0、V01.Invoke.Runtimeの型・message・ID・元file/行範囲で認識された`Fixed Windows pwsh 7.6.6 required`拒否、sentinel0/BehaviorMismatch/executed1failed1passed0notRun15、14入力＋freeze前後一致、11hash全Matched/postsaveerror0/afterresult各一回/主日本語値とconsole一致/ASCII JSON/markerを確認した。runner29チェックPASS（validation6802161A91D58AB5AD5D31022E5A87A1FA1071EC464C5E3643863AC17FC85BE3）、独立R-D Post PASSで目的REDと保存境界の復旧を限定Closedとした。
+
+| Finding / 原位置 | 共通原因・Packet | 最終状態 / 受入証拠 | 残余 |
+| --- | --- | --- | --- |
+| P7-B-KEY01 / 旧finally454–455 | schema別keyの消費不整合 / P7-B-RECOVERY | Closed / 分離loop、11照合、tail4、R-B/R-D Post PASS | 元manifest改稿0 |
+| P7-B-PRIMARY01 / 旧finally446–475 | 事後例外が主結果/exitを覆う / 同Packet | Closed / 主状態保持、事後エラー別記録、保存不能時console/exit2、tail4/Post PASS | created=falseとhash不一致時sourcePreserved=falseは静的範囲、OS破断保証なし |
+| P7-B-UNICODE01 / 候補553・fixture115–127 | transport encoding依存とASCII seedの検出漏れ / 同Packet | Closed / EscapeNonAscii・日本語seed/独立捕捉、同4結果Ordinal/7bit照合、独立Post PASS | 元raw bytes未取得、旧証拠保全 |
+
+Closedはこの三指摘と目的REDだけであり、承認済み旧V01一回枠は消費済みである。新16GREEN/P7-C以後/旧F3・ENV01/80/full/提供の解除は0。元失敗を事後REDへ変えず、固定childCountをOS実監視にしない。hard watchdog保証なし。次は既存P7-C以後へ別handoffし、通常EXE/source/data/APIは変更しない。
+
 ## TOOLCHAIN-PWSH-DRIFT01：7.6.7採用のPre（2026-10-16）
 
 利用者が7.6.7採用を承認。P7-0同定は実7.6.7/.NET10.0.13、5file前後SHA一致、起動1回361ms/exit0、有限同定8PASSである。pwsh.dll A583…とSMA.dll70701F20…を区別する。互換性/P7全体のPASSではない。

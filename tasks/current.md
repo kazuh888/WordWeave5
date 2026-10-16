@@ -2,6 +2,10 @@
 
 ## 最新状態（2026-10-16）
 
+P7-B保存境界の復旧はR-B/R-D独立Post PASSで限定Closed。新oracle P/2dd54494-5095-4ea1-b363-85c23024cbeb/Test-PwshVersionContract.ps1 SHA BCF9F4B823158DEBB05D0671F07414DA0542C69BF7382EA3E8F167A0B9708DE9。日本語を含むtail4組各一回/実exit1,2,2,2、別runner保存結果923チェック/4組PASSを確認した。承認済み旧V01は一回実行済み・再試行0、認識された旧7.6.6拒否/BehaviorMismatch/sentinel0/executed1failed1passed0notRun15/実exit1/正常保存、14入力＋freeze前後一致、独立R-D PASSで目的REDを確認した。
+
+次の単一未完了工程はP7-Cの7.6.7 exact版接合→D1–4再束縛→限定新runtime互換性/Postである。正本planFF96F8DE/design6F845988は不変。索引：復旧briefP/f6e31ed9/P7-B-RECOVERY.md最終FEA2E6…、作者P/2dd54494/REPORT.md、独立読取P/17bc606c/REPORT.md、親freeze/旧V01runner P/6a702737/R-C-FROZEN.md・R-C-RUNNER-REPORT.md、旧V01結果P/8bff74d6/result.json。詳しいclosure/usageは既存review/usage文書にある。旧一回枠は消費済み、再実行許可へ流用しない。新16GREEN/旧F3・ENV01/80/full/試用提供は未解除、製品source/EXE/実data/API変更0。共有週枠終了97%（開始92%、アカウント共通で専有量不明）。以下は本復旧の経緯であり上記を優先する。
+
 利用者が検証コードの修正・独立レビュー後の旧V01局所試験1回再実行を明示承認した。HEAD5901d44/tree cleanからP7-Bの保存境界2指摘だけを再開する。元oracle/manifest/runを保全し、新UUID修正版、主結果/例外と事後エラーの分離、保存失敗時console/exit2到達を確認する。16期待/9抽出/期限は不変、P7-C以後・旧F3等は未解除。開始共有週枠92%（専有量不明）。plannerが既存凍結plan/designを変えず、一回用復旧briefへ有限検証と担当を接合中である。
 
 復旧briefはP/f6e31ed9-5f00-460f-9db2-f0c94082464b/P7-B-RECOVERY.md、最終SHA FEA2E6A2E7F4703E97E02FB719C6244A338D22A6D4C5253663C80F5E5DBDA7EF、限定再Pre PASS。旧候補5de4073fのT1–4は実exit1/2/2/2/各一回で主状態・11hash・各保存一回等を実証したが、独立Postは日本語診断のconsole文字化けP1でCHANGES_REQUIRED。新候補oracle/Test-TailCase2fileだけをASCII escaped JSON＋日本語seed/副次捕捉期待値へ修正中。driver/prefix23318bytes/manifest/16期待/9抽出/期限は不変、同じ4結果を別runnerが終了後に全文/7bit読取検査→Post→旧V01一回の順である。旧V01実行0。planner選定の新作者pwsh767_unicode=Sol6.1/high、reviewer=Astra/high、runner=Sol6.1/medium、親不変。共有週枠中間96%（専有量不明）。

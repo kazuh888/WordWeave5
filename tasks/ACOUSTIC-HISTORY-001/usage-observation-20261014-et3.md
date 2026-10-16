@@ -8,6 +8,12 @@
 
 中間共有週枠96%/10080分/reset1792667952/ordinaryUsageAllowed=true。既存作者Astra/highのtail4件は主状態/11hash/保存回数/exitを確認したが、独立Postが日本語のconsole劣化を検出した。plannerが2file限定修正と同じ4実行の終了後独立読取を具体化、Pre接合不足1件を責任分離して再Pre PASS、最終brief FEA2E6…である。難度が下がった限定是正の新作者をplannerがSol6.1/highへ再選定し、pwsh767_unicodeをfresh dispatchした。reviewAstra/high・runnerSol6.1/medium・親model・品質条件は維持する。旧oracle一回枠は未消費、元4証拠は保持する。通常ruleの新警告1件は独立相談で既存基準に適合する関数局所抑制と確認し、残診断0と区別した。モデル再選定による節約量は未測定、アカウント共通差や成果物量から推定しない。
 
+完了境界：R-B保存境界/Unicode独立Post PASS→親freeze→旧V01一回/目的RED→R-D独立Post PASS。作者Sol6.1/highの新4tailは各一回4PASS、独立runner pwsh767_unicode_runner（Sol6.1/medium）の保存証拠923チェック/4組PASS、reviewerAstra/highが受入れた。R-Cは一回/実exit1/1.2909336秒/29チェックPASS/再試行0/14input＋freeze一致、認識された旧拒否・主結果と正常保存を確認した。新16GREEN/P7-C以後/旧F3/製品は未解除、実dataAPI/製品変更0。原tail4の部分実証は保持し非ASCII欠陥を明記した。手戻りは独立読取checkerの位置引数19診断→名前付き是正（対象再実行0）、Unicode期待の観測owner接合不足1件→Pre再確認、元rawbytes未取得をrawとした表現の限定である。
+
+終了側共有週枠97%/10080分/reset1792667952/ordinaryUsageAllowed=true（開始92%）。親snapshot09:19:31.217Zはinput2017373458/cached1974080000/output4500847/reasoning1482200/total2021874305/cache_write0。同一session開始08:31:48.673Zとの差はinput14301800/cached14241408/output23583/reasoning6430/total14325383/cache_write0。開始前とこの後の最終Post/記録/commit/push/応答は測定外、子counter/実provider/包含は未取得、cached/reasoningは内数として合算しない。専有消費・新旧方式比・モデル変更の削減率は未判定である。途中checkpoint9c247d7をpush済み、最終限定完了も別checkpointへ保存する。
+
+改善候補は、保存境界の初期fixtureに非ASCII主/副次例外とconsole-only失敗を含め、結果JSONとtransport後の文字列を別観測にすることである。今回の有限是正内では適用・実証済みだが、一般harness/他機能の検証基準やSkillは変更していない。旧gateや全体試験を再実行せず、凍結済み成果物と役割範囲に絞って引き継いだ。効果の比較用再実行は0である。
+
 ## TOOLCHAIN-PWSH-DRIFT01：7.6.7採用（2026-10-16、進行中）
 
 利用者の7.6.7採用承認を受領した。開始HEAD e7389c7/tree clean、共有週枠85%/10080分/reset1792667952/ordinaryUsageAllowed=trueである。完了境界は限定環境同定・仕様/設計・独立oracle・版接合/束縛・局所互換性/Postであり、旧F3原因修正・再試行や製品提供とは別である。planner pwsh767_planは指定Astra/high、同定runner pwsh767_identityは指定Sol6.1/medium・freshでdispatchした。親モデル不変、実返却metadata/子counter/親子包含は未取得である。
