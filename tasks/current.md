@@ -2,6 +2,8 @@
 
 ## 最新状態（2026-10-16）
 
+EO-STATIC-BASELINE01の既存6件は利用者が追加対応を承認した。planner Astra/highが、関数ごとの根拠付き限定対応と動作不変の検証を確定中である。検査の一括除外、ShouldProcessによるfixture/cleanup省略、製品変更は行わない。開始HEADc281448/tree clean、共有週枠76%（アカウント共通）。ENV01等は静的是正・独立Post後まで未解除である。
+
 ENV-RUNNER-ORACLE01はplanD7D6E063/PrePASS、旧R01 RED1/5NA→新独立6GREEN/exit0/983ms、限定差分適合までである。新Test96FB6B4B/testE752D9DA、Invoke318E/design9679/probe旧EE5F。EO-C総合PostはCHANGES_REQUIRED：PSSAの既存ShouldProcess6診断が新旧完全一致し、新規0だが診断0条件未達（EO-STATIC-BASELINE01）。利用者へ6件の限定是正追加を照会済み、期待値一箇所以外の変更/除外/基準緩和0。binding/ValidateOnly/ENV01/80/full/提供は未解除、旧MI-E失敗/MI-VOLATILE Verified維持。計画checkpoint e070f6bはpush済み、本区切り結果も保存する。共有週枠73→75%（アカウント共通、専有量不明）。
 
 MISSING-IDENTITY01はplan1133/design9679/test8C4D/Invoke318E/probeEE5FAA。旧RED1/19NA→作者20PASS、独立OS2＋Pure20PASS、局所Post/binding/ValidateOnly PASS。MI-E一回はsuite8b8b1d3d/run3ef364ecでFAIL（31.930秒、dispatch1/retry0/sourceMatchedtrue、全credit0）。正式6actorはCompleted/unknown0/residual[]だが、Test2044が既定forward slashのCargo環境値をcanonical backslash期待と比較し拒否した（ENV-RUNNER-ORACLE01/P2）。残確認は未到達、全cleanup/ENV01成功にはしない。MI-VOLATILE Verified維持、MI-F/80/full/提供未解除。execute-review-remediationの仕様/test矛盾停止条件で、既定文字列への厳密一致を維持した期待値修正・続行の利用者確認待ち。新Test変更/再試行0、通常EXE9B888E9F不変。設計checkpoint771378aを保持し今回結果も別checkpointへ保存する。共有週枠63→73%（account共通、専有量不明）、親モデル不変。

@@ -565,3 +565,75 @@ producer/native/fake、期限/台帳/schema、元ENV01の他の期待、UTF-16�
 主なリスクは①期待のproducer追随、②回帰が実statementと乖離、③旧bindingでのdispatch、④ENV01成功を全体成功と誤認することである。Eの独立固定、source-bound抽出、最小再束縛、credit0と段階Postで抑える。今回の仕様上の未決はない。Pre/adapter成立/新6GREEN/ENV01結果は未検証であり、追加helper・比較緩和・期限変更が必要ならこの限定計画を越えるため親へ返す。
 
 次handoffは親から `ww-reviewer` / `gpt-6-astra` / `high` への独立Preである。本追補の最終SHA、上記入力hash、既存契約と利用者の限定承認を渡し、read-onlyで判定を受ける。PASS後はEO-B作者へdispatchする。本plannerは本書以外の編集、試験/runtime、再委任、公開を行わない。開始共有週枠は親受領73%。本子の終了週枠・開始/終了token・実model metadata・親子包含は未取得、task専有量は不明である。親が既存usage記録へ接合し、削減率を推定しない。
+
+## EO-STATIC-BASELINE01：既存静的6件の限定是正（2026-10-16、独立Pre提出）
+
+親から既存静的6件の追加是正について利用者の「はい、対応してください」を受領した。開始HEADは`c281448`、statusはcleanである。仮計画を既存G1/G4/G5、EO1–3、design `9679B02C1F3F31A6DE701656A52C4DB0DA3A39A289FC8D498C8898EFDE4AA1AE`、下記6関数と実consumerへ照合し、本追補へ精緻化した。外部動作・内部処理は変更しないため新spec/design文書は非該当、局所属性方式の技術的妥当性は独立Preで確定する。本節を追加単位のplan/task-list正本とし、既存未完了項目は保持する。
+
+R/Pは前節の定義を継承する。入力Testは`96FB6B4B9640BB2055463AE5E53CD70D92E2EE332B4B1EF81B5DEACCC89F1EDF`、独立回帰は`P/Test-EnvRunnerOracle.ps1` / `E752D9DA7E4BC3CF4A14ED1A64C39184327C1BA95E8A789FAB831CEF672D7170`である。親受領ではforward期待修正後の6回帰GREEN済みである。一方、`P/8ff8babe-be07-4593-9346-28db1261c6f2/REPORT.md`と`diagnostic-comparison.json`では旧D8AD/新96FBとも固定PSSA1.25.0の同一6診断、engine error0、exit1、新規0/消失0である。旧診断だから合格とはせず、EO-C総合`CHANGES_REQUIRED`とEO-D/E以降の未解除を維持する。
+
+今回の承認はEO-Cの「当該期待値だけ」という所有制限を、下記6個の関数局所属性追加に限ってsupersedeする。診断0、動作不変、独立review、以後の束縛/ValidateOnly/一回ENV01という品質gateは変更しない。既存6GREENと旧静的失敗は旧snapshotの証拠として保持し、新sourceの受入へ流用しない。
+
+### 固定契約・個別根拠
+
+各関数の既存`param`直前に、次の属性を1個だけ挿入する。`<J>`は表の英文そのものとする。関数内param blockへの局所属性であり、script scope/Target/Scope wildcard、global設定、rule除外、severity引下げ、`CmdletBinding`/`SupportsShouldProcess`/確認promptの追加は許可しない。
+
+```powershell
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '', Justification = '<J>')]
+```
+
+| 96FB上の関数/行 | 実consumerと省略不可の理由 | 固定Justification（J） |
+| --- | --- | --- |
+| `Start-FixtureProcess`:593 | identity control、sentinel/controller/replay、real cargo fixtureが戻り値のprocess/streamを消費する。起動だけの省略は後続の観測・所有と整合しない | `Internal synthetic-test launcher; callers require a started process and captured streams. Optional WhatIf or confirmation would invalidate fixture and cleanup contracts.` |
+| `New-CaseFixture`:652 | `Invoke-GateCase`が新suite配下fixtureとRun、合成source/hashを直後の刺激・公開に渡す。部分生成のdry-run契約は存在しない | `Internal synthetic-fixture constructor; Invoke-GateCase requires complete isolated files and run metadata. Skipping construction would invalidate the case contract.` |
+| `Set-CaseStimulus`:903 | `Invoke-GateCase`がactions/flag/期限等の固定刺激を元case期待と対にして消費する。省略すると別条件の試験になる | `Internal case setup; isolated mutations and flags define the approved test stimulus. Optional skipping would test a different condition against unchanged expectations.` |
+| `Set-CaseSynchronization`:1004 | 同callerがdescriptor/hold flagを公開し、`Invoke-CaseSynchronization`が固定hookを消費する。省略すると競合/障害条件を失う | `Internal synchronization setup; descriptors and isolated hold flags establish the approved race and fault conditions. Optional skipping would invalidate those cases.` |
+| `Stop-ObservedIdentity`:1040 | 同期刺激、real-fixture失敗回収、`Invoke-GateCase` finally救済から使用。保持handle、世代、image、fixture所有の確認を通った停止だけであり、省略は刺激/回収を損なう | `Internal identity-checked fixture stop used by fault injection and failure cleanup. Existing generation, image, ownership and retained-handle checks must run; optional confirmation could leave fixture processes alive.` |
+| `New-RealCargoFixture`:1235 | `ORDER07`だけが隔離Cargo source生成・offline baselineとそのartifactを消費する。途中省略でbaseline/source束縛が壊れる | `Internal ORDER07 fixture builder; isolated Cargo files and offline baseline artifacts are required together. Optional skipping would invalidate baseline and source bindings.` |
+
+これらは副作用がないという主張ではない。副作用は合成fixtureの成立に必要であり、対話的省略契約を持たない内部test helperとして当該推奨ruleだけを局所的に適用除外する理由である。新helper0、関数名/引数/既存属性/本文/consumer/dispatch/cleanup/例外/時計/schema/期待値変更0とする。特にStopの安全判定・実停止を属性の理由で緩和しない。sourceのline移動は許容するが、BOM/encoding/改行と全既存bytesを保持する。
+
+### 有限作業・依存・所有・受入
+
+| 単位 | 依存・規模・所有 | 受入・verification |
+| --- | --- | --- |
+| ES-A 契約/Pre | XS。本plannerは本追補のみ、reviewer read-only | 既存spec/design再利用、6個の個別理由、局所配置と動作非干渉、有限oracle/所有/停止条件を独立Preで照合しPASS。必要ならplannerが本節だけ精緻化。新しい動作設計が必要ならBへ進まない |
+| ES-B 独立静的oracle凍結 | A後、S。作者は`P/<新UUID>`内の一回用静的検査script/期待manifest/結果だけ | 保存96FBをhashで固定し、6関数名・rule/空checkId/J/個数/配置のAST期待、属性挿入逆diffの全bytes一致、非所有hash一致を実装前に固定する。既存EO回帰本体/期待を編集しない。作者自身が実装を変更しない |
+| ES-C 属性追加/静的検証 | B後、XS。別実装者は`R/Test-CargoGate.ps1`の上記6属性だけ | 固定oracleで6対象すべてPASS、追加属性を除いた全bytesが96FBと一致、Parser error0。PSSA1.25.0をファイル全体・通常rule集合で実行し診断0/実行error0/実exit0。rule除外で作る0は禁止。予期外の診断は新findingとして停止 |
+| ES-D 独立6回帰/Post | C後、S。独立runnerは新UUID結果/logのみ、reviewer read-only | 新source承認hashを引数に既存EO回帰を一回実行し6GREEN/exit0。同時に凍結静的oracleを独立実行し全対象PASS。reviewerが個別理由/AST/逆diff/全PSSA/非所有一致を接合して局所Post PASS、EO-C静的未達の閉鎖を判定する |
+| ES-E 既存EO-D以後へ返却 | D PASS後、S。既存probeの必要plan/Test hash literalだけを実装者、既存freeze/handoff記録を親が所有 | 最終plan/Test→probe→親freezeの順で更新。独立束縛review、変更probeのParser/PSSA、ValidateOnly一回/dispatch0→親dispatchでENV01一回/Post→既定条件付きfocused10/80/fullの順を保持。新しい再実行権限は作らない |
+
+独立静的oracleは有限6行の結果と共通のbytes/hash検査に留め、新framework/新常設test suiteを作らない。ASTは各名前のFunctionDefinitionAstが一意、当該ParamBlockに指定属性が一個、引数とJが完全一致、他の追加属性0を確認する。除去対象は認証済み6属性の挿入span（付随indent/改行のみを含む）とし、文字列の全域replace/再format/改行正規化で本文一致を作らない。属性除去後のbyte列が保存96FBと完全一致することに加え、定義数・関数本文・既存paramのAST/署名・caller全文一致を報告する。共通parameter追加0である。入力hash不一致・抽出不能・属性型/配置不適合は静的失敗であり、動作REDと呼ばない。属性追加がコマンドbindingを変えることが判明した場合も停止し、`CmdletBinding`を足して回避しない。
+
+PSSAは既存方式の`ErrorActionPreference=Stop`、module固定1.25.0、`-ErrorAction Stop`、全診断配列/件数、全対象後`PSSA_COMPLETE count=0`、実process exit0を同じlogへ保存する。旧6診断は既存保存証拠を再利用し、旧sourceへのPSSA再実行は不要である。独立oracleはprocess/fixture起動0、実Testのdot-source/entry実行0でAST/bytesのみを読む。作者が承認した一回用commandとscript hashを親がfreezeし、runnerがCの静的結果を再解釈して省略しない。
+
+既存EO回帰はline番号でなくCommandAstのcommand/message/個数1と全文、復元statement全文、親承認ExpectedSourceSha256へ束縛されているため、属性追加によるline移動を許容する（現物93–115行を確認）。固定pwsh `F:/Program Files/PowerShell/7/pwsh.exe`から、`-NoProfile -NonInteractive -File P/Test-EnvRunnerOracle.ps1 -SourcePath R/Test-CargoGate.ps1 -ExpectedSourceSha256 <親が凍結した新SHA> -OutputRoot P/<新UUID>`を用いる。R/Pは絶対pathへ展開し、現物hash自動採番を承認に代用しない。旧D8ADのRED、96FBの6GREEN、KH/MI/FF/control/OSを再実行しない。次のENV01が失敗してもretry0、別case0、既定credit全0のまま証拠を返す。
+
+- [x] ES-0：仮計画を既存spec/design・6関数/consumer・EO回帰へ照合し、本追補へ精緻化した。
+- [ ] ES-A：独立Pre PASSを親が受領する。
+- [ ] ES-B：独立静的oracle/6期待/元96FBを凍結する。
+- [ ] ES-C：別実装者が属性6個を追加し、固定静的oracle/全PSSA診断0を得る。
+- [ ] ES-D：独立静的確認＋既存EO6回帰一回GREEN、独立PostでEO-C総合を再判定する。
+- [ ] ES-E：必要hash再束縛/ValidateOnly→ENV01一回/Post→条件付き既定gateへ返す。
+
+### exact割当・リスク・次handoff
+
+次の割当はES-A〜E各単位に適用する。非該当工程は起動せず、親が通常helper1・fresh contextで順次dispatchする。利用可能なexact ID/対応effortを使用し、指定とprovider実返却を分け、未取得は未取得とする。固定2役、親model/effort、quality gateは不変、model/skill不在はblockerでsilent fallbackなしである。
+
+| 役 | exact model / effort | 各単位の責任・難易度/リスク・選定理由 |
+| --- | --- | --- |
+| planner | `gpt-6-astra` / `high` | A計画/精緻化、B–E逸脱判断。本追補のみ。中/高、旧所有との競合とgate不変を明示する固定役 |
+| external-spec author | `gpt-6-astra` / `high` | A既存契約再利用、B–E新執筆非該当。中/高、動作/安全変更が必要なら固定役へ差戻し、現packetで処理しない |
+| designer | `gpt-6.1-sol` / `high` | A局所属性方式/既存設計再利用、B/C技術不成立時の差戻し、D/E新設計なし。中/高、属性位置/関数bindingとcleanup非干渉の判断が必要 |
+| implementer | `gpt-6.1-sol` / `medium` | Cの6属性、E必要hash literalのみ。A/B/D本文編集なし。低/中、固定した文字列/挿入spanを逆diffで検証できる |
+| test author | `gpt-6.1-sol` / `high` | B有限AST/bytes oracle凍結、C/D期待変更なし、E既存回帰再利用。中/高、過大な削除span/文字列正規化による誤PASSを防ぐ独立期待が必要 |
+| test runner | `gpt-6.1-sol` / `medium` | D固定静的oracle/既存6回帰、E既定ValidateOnly/ENV01と段階gate。A–C実runtimeなし。中/高、固定source/hashとfirstUnexpectedの忠実な証拠採取 |
+| reviewer | `gpt-6-astra` / `high` | A Pre、D独立Post、E束縛/結果Post。B/C read-only。中/高、理由のない抑制・binding変化・未達gateの解禁を独立検査 |
+
+既存7役skillを役内で用いる。plannerはplanning-and-task-breakdown、設計はapi-and-interface-design、作者はtest-driven-developmentの独立期待工程とpowershell-automation、実装/runnerはwordweave-changeの担当工程、PS編集はpowershell-automation、reviewerはreview-software-design又はcode-review-and-quality/powershell-reviewである。新skill/新文書体系を増やさない。
+
+主要リスクは抑制による欠陥の隠蔽、Stopの省略/所有弱化、AST抽出のline依存、逆diffの過大除去、旧hashでのdispatchである。個別consumer根拠＋関数局所scope＋全文byte復元＋独立oracle/Post＋必要hash再束縛で対処する。Invoke318E/design9679は前節の完全SHAを正本とし、native/fake/製品source/実data/API/OS/credential、case/variant/期限/schema/安全品質も変更禁止である。rollbackは親が本単位の6属性だけを保存96FBへ戻し旧静的未達に戻すものであり、他者編集や証拠を消さない。
+
+仕様上の利用者未決はない。技術的未決はPreでの属性配置/適用範囲の妥当性と、未実行のParser/PSSA/独立oracle成立である。これを利用者へ再質問せず担当reviewer/作者の証拠で判定する。次handoffは親から`ww-reviewer` / `gpt-6-astra` / `high`へのread-only Preであり、本plan最終hash・入力96FB/回帰E752・旧6診断・既存design9679を渡す。PASS後ES-B作者へ、別実装者→独立runner/Post→既存EO-Dへ戻す。Pre/本plan受領だけではENV01を起動しない。
+
+開始共有週枠は親受領76%。子`/root/static_baseline_plan`の終了週枠・開始/終了token・session ID・実返却model/effort・親子包含は未取得、専有消費と改善率は不明である。親が既存usage記録へ接合する。本plannerの完了境界は本追補と文書diff/hash/所有確認までであり、コード/試験編集・runtime・再委任・commit/公開0である。

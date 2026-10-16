@@ -1,5 +1,11 @@
 # ET3 試用EXE提供・独立レビュー記録
 
+## EO-STATIC-BASELINE01（2026-10-16、利用者承認後）
+
+ES-A独立Pre PASS／確定指摘0を受領した。plan88F586DD/Test96FB/回帰E752/design9679の現物hash、個別consumer、メモリ内属性挿入のParser0/各ParamBlock一個/位置引数2・名前付き1を確認した。SuppressMessageAttributeのみでCmdletBinding/Parameterを追加せず、共通parameter追加を伴わない方式である。公式PSSA局所抑制/PowerShell advanced parameter資料にも照合した。実sourceの全PSSA0と新oracle/6回帰は未検証である。ES-B作者static_baseline_tests（指定Sol6.1/high）へ新UUID内の有限AST/bytes oracle・readonly96FB固定だけを依頼し、既存sourceの変更を許可していない。
+
+利用者は既存静的6件の追加是正を承認した。planner static_baseline_plan（指定Astra/high）のplan88F586DDを現物受領し、独立Preをstatic_baseline_review（指定Astra/high）へ提出した。対応候補は対象6関数のParamBlock直前への関数局所SuppressMessageAttribute各1個・個別Justificationだけである。副作用がないとは主張せず、内部fixture/同期刺激/所有確認済み回収の省略が契約違反となるため、対話的ShouldProcess制御を追加しない。属性以外の全bytes/本文/param/consumer不変、通常rule集合の全PSSA診断0、独立AST/既存6回帰/Postを受入とする。実装/新検証/ENV01はまだ0である。
+
 ## ENV-RUNNER-ORACLE01（2026-10-16、利用者承認後）
 
 EO-C限定差分は適合し、独立6回帰は6PASS/FAIL0/skip0/Unexpected=null/実exit0/983ms、一回のみである（runner packet 9eb35a66、source96FB6B4B/testE752D9DA、6入力前後一致）。独立reviewerはresult/binding/green.log/frozenの整合を確認し、追加finding0を返却した。ただし総合PostはCHANGES_REQUIREDである。

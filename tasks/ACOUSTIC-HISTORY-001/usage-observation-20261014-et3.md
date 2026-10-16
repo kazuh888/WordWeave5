@@ -1,5 +1,9 @@
 # ET3 試用EXE提供の使用量観測
 
+## EO-STATIC-BASELINE01の限定是正（2026-10-16）
+
+利用者が既存静的6件の追加対応を承認した。開始HEADc281448/tree clean、共有週枠76%/10080分/reset1792667952/ordinaryUsageAllowed=true。親開始側snapshotは03:08:44.678Z、input1954700177/cached1912008832/output4386034/reasoning1439320/total1959086211/cache_write0（着手からsnapshotまで欠測）。planner static_baseline_planを指定Astra/high・freshで起動した。既存6関数の個別根拠・動作不変・全PSSA0・独立回帰/Postから、必要binding/ENV01へ段階的に接合する。親モデル不変、子counter/実返却metadata/包含は未取得、週枠をtask専有消費へ換算しない。
+
 ## ENV-RUNNER-ORACLE01承認後の再開（2026-10-16）
 
 区切り：作者Sol6.1/highの旧R01 RED1/5NA、実装Sol6.1/mediumの期待operand一箇所修正、独立runner Sol6.1/mediumの6GREEN/983ms、reviewer Astra/highの限定接合適合まで。総合Postは既存PSSA6診断によりCHANGES_REQUIRED。旧も同6診断/new0/engine0を保存し、基準を緩めず追加範囲を利用者へ照会した。静的driverの未対応-LiteralPathを一度-Pathへ直した手戻りは作者logに保持し、行動REDに数えない。新実ENV/再試行/製品build/API0。開始共有73→終了側75%/10080分/reset1792667952/ordinaryUsageAllowed=true（最終応答前）。アカウント共通のため今回専有消費へ換算しない。子の取得はPre共有74%、作者74→75%のみ、他counter/実返却metadata/包含は欠測、合算しない。
