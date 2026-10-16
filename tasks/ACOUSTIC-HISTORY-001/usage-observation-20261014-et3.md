@@ -1,5 +1,11 @@
 # ET3 試用EXE提供の使用量観測
 
+## ENV-RUNNER-ORACLE01承認後の再開（2026-10-16）
+
+利用者が既定forward slash文字列への厳密比較を維持した期待値修正・続行を承認した。開始HEAD7b5607e/tree clean、共有週枠73%/10080分/reset1792667952/ordinaryUsageAllowed=true。アカウント共通値でありtask専有消費は不明。親の開始token snapshotは未取得、前区切り末尾を今回の開始値として流用しない。
+
+planner `runner_oracle_plan` は指定gpt-6-astra/high・freshで既存計画末尾65行を追補し、plan D7D6E063を返却した。既存spec/design再利用、新構造化なし、EO-Aの独立Preを `runner_oracle_review`（指定gpt-6-astra/high・fresh）へ依頼した。作者gpt-6.1-sol/high、実装/runner gpt-6.1-sol/mediumの計画割当に従う。親モデル変更なし。各子の実返却model/effort、session/token、親子包含は未取得であり合算しない。旧失敗は保持し、製品source・EXE・データ・API・OS設定は変更しない。
+
 ## OS情報欠測の是正設計・実装再開（2026-10-16）
 
 終了境界：設計/Pre→旧M01実body RED→Read既知分岐だけ実装/他67関数不変→作者20PASS→独立OS2/20PASS＋局所Post→probe3literal/bindingPASS/ValidateOnly一回PASS→ENV01一回FAIL。31.9297878秒で全6gate actor Completedだが、既定forward slash環境値をbackslash canonical期待と比較する別rootENV-RUNNER-ORACLE01が顕在化した。独立PostはCHANGES_REQUIRED、MI-VOLATILEはVerified、MI-F/80/full/提供は未了。execute-review-remediationの仕様/test矛盾停止条件で利用者確認へ戻し、期待の無断変更/失敗再試行0。設計checkpoint771378aと結果checkpointを区別し、通常EXE9B888E9F不変。親自己点検は独立受入へ算入しない。

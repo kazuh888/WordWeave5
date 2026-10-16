@@ -1,5 +1,11 @@
 # ET3 試用EXE提供・独立レビュー記録
 
+## ENV-RUNNER-ORACLE01（2026-10-16、利用者承認後）
+
+利用者は既定forward slash文字列への厳密一致を維持した期待値修正・続行を承認した。plannerの末尾追補plan D7D6E063を親が現物照合し、独立reviewer `runner_oracle_review`（指定gpt-6-astra/high）がEO-A Pre PASS／阻害0を返却した。既存design53、producer Invoke2022、実Test2044の一意AST statement、適用ENV01/02/03/04/06を照合した。新adapter・旧RED・新6GREEN・PSSA・binding・ENV01は未検証であり、Preを実行受入へ拡大しない。
+
+独立作者 `runner_oracle_tests`（指定gpt-6.1-sol/high）へ新Test-EnvRunnerOracleと旧R01の一回REDだけを依頼した。元Test/Invoke/製品は未変更。旧MI-E失敗と下記MI/FFの限定結果は保持する。ENV-RUNNER-ORACLE01はPlanned／PrePASSであり未Closed、MI-VOLATILEはVerified維持、80/full/試用提供は未解除である。
+
 ## MISSING-IDENTITY01（2026-10-16、局所検証済み・ENV oracle矛盾で停止）
 
 MI-E一回はsuite8b8b1d3d-b9d8-428a-90fc-6537a0ee7d02／run3ef364ec-b7c1-4b9b-9d9b-dda74908bc9e、exit1/31.9297878秒/dispatch1/other0/retry0/sourceMatchedtrue/全credit0でFAIL。独立PostはCHANGES_REQUIRED（別root ENV-RUNNER-ORACLE01/P2）。RunOwner/Supervisor/nested Runner/SafetyWorker3の正式terminal全6件はCompleted/sourceMatchedtrue、記録対象はOwned/waited/hasExitedでfixtureResiduals=[]、failure/error全null。重複台帳の20/18/1/2/2/2は合算しない。FF正式/tmp0/Unobservedはgate内部failureなしと整合し、診断不具合へ換算しない。独立remaining確認Test2089とconfig事後確認1810はoracle throwで未到達、rescue counter未取得でありsuite全cleanup成功には拡大しない。MI-VOLATILEはVerified維持／Closed不可、MI-F/80/full/提供は未解除。

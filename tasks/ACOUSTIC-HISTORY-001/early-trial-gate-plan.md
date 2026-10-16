@@ -500,3 +500,68 @@ ENV01成功はprobeのcredit0を維持する。focused10/標準80を代替しな
 次handoffは親が本精緻化を受領後の `ww-test-author` / `gpt-6-astra` / `high` である。入力は本返却hash、design9679/独立Pre PASS、Invoke33C2、既存Test-KnownHandleと保存証拠。所有は同testの新MissingPure/MissingOs phaseと新隔離fixture/reportだけである。順序はMI-B作者freeze/旧M01RED・19NA→MI-C別実装/作者新20GREEN→MI-D独立MissingOs2・MissingPure20/必要束縛review→MI-E正常ENV01一回/Post→条件付きMI-F focused10/80/fullである。旧Pure/Osの再dispatchは含めない。全役exact割当は上表のまま。親が承認・dispatchを担い、plannerは他agent起動/実装/試験編集/公開を行わない。
 
 開始共有週枠は親受領63%、アカウント共通値である。子 `/root/missing_identity_plan` の開始/終了token、session ID、実返却model/effort、終了週枠、親子包含は未取得。今回の測定範囲は計画文書作成から最終応答前までであり、task専有消費や削減率を推定しない。親が既存usage記録へ接合する。本plannerの検証は文書diff/hash/参照/所有範囲のみ、runtime/実装/再委任/公開0である。
+
+## ENV-RUNNER-ORACLE01：固定runner期待値の限定是正（2026-10-16、独立Pre提出）
+
+親から「既定forward slash文字列への厳密比較を維持し、テスト期待値だけを直して続行」の利用者承認を受領した。開始HEADは `7b5607e`、着手時statusはcleanである。仮計画を既存外部契約G1/G4・本書のrunner一語契約・[designの固定runner契約](early-trial-gate-design.md)へ照合して本追補に精緻化した。新しい外部仕様/設計の執筆は非該当である。独立Preは未了であり、既存MIや旧未完了checklistを完了へ書き換えない。本節を今回の計画・task-list正本とする。
+
+Rは `F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate`、Pは `R/verification/argv-path01`。source確認ではInvokeの2022行が既定forward文字列を生成し、Testの2043–2044行はUTF-16配列から復元したrunnerをcanonical backslashの `Fixture.run.nativeExe.path` と `-ceq` 比較している。契約に対するoracleの誤拒否であり、観測値を正規化する理由にはならない。保存suite `R/verification/8b8b1d3d-b9d8-428a-90fc-6537a0ee7d02` / run `R/runs/3ef364ec-b7c1-4b9b-9d9b-dda74908bc9e` は失敗証拠のまま保持する。
+
+入力SHA256はdesign `9679B02C1F3F31A6DE701656A52C4DB0DA3A39A289FC8D498C8898EFDE4AA1AE`、Invoke `318E6667C21B02D54DFBD8A539163365868D25F76866C9200DB8884EB1DB7A3A`、Test `D8AD0AD44C2457DC60E64E52A6EDB455974D5F8AD9938B956CEF3E4DDAB0F7F3`、既存FF probe `EE5FAA688B19049D74D14ED4B3603E3325ADD3FC068F4F84446DA002C9C51389` であり、plannerが現物一致を確認した。旧bytesとその承認・結果を保存し、新しいhashは親の凍結記録で別に扱う。
+
+### 要求・除外・固定回帰
+
+期待値Eは次の文字列そのものである。fixture/producer/実測値から導出せず、観測側のUTF-16復元と `-ceq` を維持する。
+
+```text
+F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/cargo-gate-entry.exe
+```
+
+- EO1：Testの当該比較の期待値だけをEへ修正し、Eだけをacceptする。path存在/等価性、大小文字無視、slash置換、trim、quote除去、引数分割による救済は不可である。
+- EO2：独立作者が実Testの当該AST比較statementをsource hash・抽出件数1・元本文一致に束縛して実行する。期待条件は作者側で先に固定し、比較を別の模倣predicateへ置換しない。全Confirm関数のmock、大量fixture、新production entry/helper、構造refactorは作らない。
+- EO3：通常ユーザー・合成のみ、実API0/admin0/製品変更0を維持する。局所合格・ENV01合格をfocused10/80/fullへ加算しない。予期外の初回結果で停止する。
+
+有限回帰は6件である。R01=E accept、R02=Eの全 `/` を `\` にした値 reject、R03=先頭 `F:` だけを `f:` にした値 reject、R04=Eに ` --extra` を付加 reject、R05=E全体を二重引用符で囲む値 reject、R06=末尾ファイル名だけ `cargo-gate-entry-other.exe` にした値 reject。旧TestではR01の誤拒否1件をBehavior REDとして採り、残5件はNotApplicableとする。新Testは6件すべてGREENを要する。抽出/fixture/起動/構文失敗はREDではない。旧失敗suiteの再実行は不要である。
+
+producer/native/fake、期限/台帳/schema、元ENV01の他の期待、UTF-16復元、dispatch/cleanup/terminal、12入力の集合・型、既存creditと親承認、OS/credential/data、親モデルと品質gateは変更禁止である。回帰は同じ比較statementの利用箇所全体への静的接合を含むが、他ENV caseの実測は今回追加しない。
+
+### 有限作業・依存・所有・検証
+
+| 単位 | 依存・規模・所有 | 受入・検証 |
+| --- | --- | --- |
+| EO-A 契約再利用/Pre | XS、本plannerは本追補のみ。reviewerはread-only | 親受領→独立PreでE、6ケース、所有分離、既存spec/design再利用、停止条件を照合してPASS。文書diff/参照検査。新仕様判断が出たら固定spec authorへ戻す |
+| EO-B 独立回帰/旧RED | A後、S。作者は新 `P/Test-EnvRunnerOracle.ps1` と新UUID隔離fixture/結果だけ | 実statement抽出・最小assert捕捉と固定6期待を先に凍結し、保存旧TestでR01 RED/5NAを一回採取。作者はTest-CargoGateを編集しない。source/hash/commandと実exitを報告し、adapter失敗は停止 |
+| EO-C oracle修正/GREEN/Post | B所有返却後、XS。別実装者は `R/Test-CargoGate.ps1` の当該期待値だけ | Testは本単位では是正対象oracle実装として実装者が所有する。作者の独立回帰を変更せず、独立runnerが新6GREENを一回採取。変更ps1のParser error0/PSSA1.25.0診断0・実行error0、非所有bytes一致、独立局所Post PASSを要する |
+| EO-D 最小hash再束縛/ValidateOnly | C Post後、S。別実装者は既存 `P/Invoke-FirstFailureEnv01.ps1` の必要hash literalのみ。親は既存frozen/handoff記録 | 最終plan/Test→probe→親frozen記録の順で必要bindingだけ更新する。Invoke/design等不変、probe dispatch全文不変、12入力契約不変を独立確認。変更probeのParser/PSSAを確認し、既存probe commandのValidateOnlyを新OutputRootで一回、dispatch0/runtime0を得る |
+| EO-E ENV01一回/Post | D成功と親の固定組dispatch後、S。独立runnerは新隔離log/結果のみ | 既存FF probeの同commandからValidateOnlyだけを外し、新OutputRootでENV01を一回。retry0/他case0/credit全0、正式terminal/cleanup/前後hashを独立Post確認。FAIL/予期外は保存して停止する |
+| EO-F 条件付き既定gate再開 | E PASS/Post後。今回新source/期待の所有なし | 既存MI-F/KH-D/CXT-Eのbinding・接合確認後にfocused10→標準80/variant→既定製品fullへ各前段PASS/Postを条件に逐次返す。旧NotRunを補完しない。別失敗は別findingとして停止する |
+
+- [x] EO-0：仮計画を作り、既存外部仕様/設計と現source/hashを照合して本追補へ精緻化した。
+- [ ] EO-A：独立Pre PASSと親の受領。
+- [ ] EO-B：独立期待凍結→旧R01 RED/5NA。
+- [ ] EO-C：別実装者の期待値限定修正→独立6GREEN/静的検査→局所Post。
+- [ ] EO-D：必要bindingのみ更新→独立差分確認→ValidateOnly。
+- [ ] EO-E：ENV01一回→独立Post。失敗時停止。
+- [ ] EO-F：既定下流gateを各成功条件付きで再開。
+
+新回帰commandは作者がSourcePath・承認済みExpectedSourceSha256・新OutputRootを明示して凍結し、旧/新の相違をsource hashで識別する。本文から現在hashを採番して承認の代用にしない。固定pwsh7と既存検証方式を用い、PSSAはErrorActionPreference=Stop、固定1.25.0、診断配列/件数、全対象後の `PSSA_COMPLETE count=0`、process exit0を同一logへ残す。本追補とTest変更の双方で旧probe bindingは失効する。probe自己hashを自己埋込みせず親が最終hashを保持し、未使用のtest/driverへ連鎖更新を広げない。製品buildの反復は本局所是正の受入に含めず、既定提供gateへ到達した場合の必須test/buildは維持する。
+
+### 各単位の役割・exact model/effort・リスク
+
+次表はEO-A〜Fそれぞれに適用し、非該当役は起動しない。利用可能一覧と対応effortを親がdispatch時にも確認し、通常1 helperずつfresh contextで独立作者/実装者/runner/reviewerを分離する。7役の責任を7agent常駐へ置換しない。
+
+| 役 | exact model / effort | 難易度/リスク・選定理由と責務 |
+| --- | --- | --- |
+| planner | `gpt-6-astra` / `high` | 中/中。固定役。本追補と差戻し境界だけを所有 |
+| external-spec author | `gpt-6-astra` / `high` | 低/中。固定役。既存契約再利用で新執筆/起動なし。外部契約変更が必要なら戻す |
+| designer | `gpt-6.1-sol` / `high` | 低/中。固定文字列/最小AST回帰の既存設計再利用を担当。新設計は非該当、逸脱時だけ判断を戻す |
+| implementer | `gpt-6.1-sol` / `medium` | 低/中。Cの期待値一箇所とDの逐次hash literalだけ。明確な所有境界と非所有一致で検証できる |
+| test author | `gpt-6.1-sol` / `high` | 中/中。Bの独立6期待と実statement抽出を担当。模倣oracleやfixtureの都合で誤りを隠さない判断を要する |
+| test runner | `gpt-6.1-sol` / `medium` | 中/高。Cの6GREEN、D ValidateOnly、E一回実測、F既定手順。確定hash/exit/firstUnexpectedと停止の証拠採取を担当 |
+| reviewer | `gpt-6-astra` / `high` | 中/高。A Pre、C局所Post、D束縛、E/F Post。比較緩和や誤credit、古い承認再利用を独立検査 |
+
+担当skillは既存7役の工程内に限定する。PS作者/実装者はpowershell-automation、reviewerは該当するreview-software-design又はcode-review-and-quality/powershell-reviewを読む。model/skill不在はblockerであり無言代替しない。指定と実返却metadataを分離し、未取得値を推定しない。親model/effortは変更しない。
+
+主なリスクは①期待のproducer追随、②回帰が実statementと乖離、③旧bindingでのdispatch、④ENV01成功を全体成功と誤認することである。Eの独立固定、source-bound抽出、最小再束縛、credit0と段階Postで抑える。今回の仕様上の未決はない。Pre/adapter成立/新6GREEN/ENV01結果は未検証であり、追加helper・比較緩和・期限変更が必要ならこの限定計画を越えるため親へ返す。
+
+次handoffは親から `ww-reviewer` / `gpt-6-astra` / `high` への独立Preである。本追補の最終SHA、上記入力hash、既存契約と利用者の限定承認を渡し、read-onlyで判定を受ける。PASS後はEO-B作者へdispatchする。本plannerは本書以外の編集、試験/runtime、再委任、公開を行わない。開始共有週枠は親受領73%。本子の終了週枠・開始/終了token・実model metadata・親子包含は未取得、task専有量は不明である。親が既存usage記録へ接合し、削減率を推定しない。
