@@ -1,5 +1,19 @@
 # ET3 試用EXE提供・独立レビュー記録
 
+## MI-F／EO-Fの再開（2026-10-16）
+
+F2後ValidateOnly正常一回＋既定配置guard負例一回は2PASS/Unexpected0である（report R/verification/6cd34167-f41a-4737-a182-5472259a4d73.F2-REPORT.md、SHA24E65BCE）。正常exit0/validatedtrue/caseCount10/variantGuardtrue/runtimefalse、元Test両originと4config順序照合、負例exit1/exact Fresh direct-child UUID output requiredで拒否、両root前後未存在。生成前15入力は正常後/負例後とも一致、fake未生成を16件確認済みとしない。4config hashのnullを空設定の証明へ換算しない。build/control/caseDispatch0/retry0でありfocused10の成功ではない。親は新固定組と未存在新suiteで既定control2を含むfocused10一回へ進む前条件を受領した。最初の予期外で停止し、10PASS/独立Post前に標準80以降は解除しない。
+
+F2 driver02A011C2/HANDOFF E2D99548を親が現物事前固定し、独立接合Pre PASS／確定指摘0を受領した（impl packet94c64483）。6literal逆bytes旧15709一致/BOM、HANDOFF旧21842厳密prefix/非所有10一致、10case/slash16→17/firstFail・NotRun/control2/期限schema/cleanup不変、Parser0/PSSA1.25.0通常rules Stop診断0/engine0/marker/実exit0を照合した。F1限定再利用を現在のruntime合格へ拡張しない。runner focused_runner（指定Sol6.1/medium）へ現組のValidateOnly正常一回→成功時既定配置guard負例一回だけを依頼した。正常R/verification直下UUID、負例P直下UUID、いずれも未存在/未作成、build/control/caseDispatch0を要する。focused10はその成功受領後まで未解除である。
+
+F1独立reviewは阻害指摘0、旧C0–C11のfile/context受入を現context034F/Invoke318E/Test96BBBへ限定再利用可能と判定した。旧結果/保存copy/現hash、4literalのみ/12期待/4mocks/禁止22/P1/期限/89C6保持、Initialize-Run元50文後のC0/C8だけが診断contextメモリ代入/Get-Utcへ到達し、payload入口からwriter未到達、負例の元直接throw・未呼出Read/Confirm・6属性metadataを照合した。旧12PASSは旧組の実行証拠のまま保持する。新組runtime/旧guard2から新driverの受入/FF writer/MI実OS/cleanup/AP1/focused以降へ拡張しない。F2接合Preと新caseの親dispatchは未了である。
+
+F1作者はcontext034F2D04/P1handoffB1AE65B9を返却した（packet3f4e3031）。4literal逆bytes旧F46F一致/BOM/12期待/4typed mocks/禁止22/P1述語/期限/旧89C6不変、Parser0/PSSA1.25.0通常rules診断0/engine0/marker/実exit0。Invoke35AE→318Eは63関数一致/変更3追加2とprefix、Initialize-Run元50statement＋末尾context/Get-Utc、TestD8AD→96BBBは6局所属性＋未呼出Confirm-CaseResult比較1箇所としてconsumer接合を保存した。旧12PASSは独立review待ちの再利用候補である。別実装者focused_driver_bindings（指定Astra/high）へdriver/HANDOFFの6literalだけを引き継ぎ、immutable F1の独立reviewをfocused_bindings_review（指定Astra/high）へ並行提出した。新runtime/無条件旧12再実行は0である。
+
+planner focused_resume_plan（指定Astra/high）は既存plan88F5/design9679の適用で再開可能、新plan改訂不要と確認した。現contextF46F/P1handoff4A74は作者がInvoke/Test/plan/designの必要4literal、別実装者がdriver72244/HANDOFF331Fの必要6literal（同4＋新context/P1）を逐次更新する。過去KH-Cの3/5という当時の差分数を新制約へ誤適用せず、既存の「必要束縛」に従う。旧89C6等RED既定値と履歴は保持する。作者/実装/設計/reviewerは既存割当Astra/high、runner Sol6.1/medium、固定spec/planner Astra/high、親不変である。
+
+F1作者focused_context_bindingsへcontext/P1と新隔離証拠だけを所有して依頼した。旧CXT12保存consumer証拠はInvoke12E7→35AEまでであり、FFのprefix/Invoke-GateFailure/Initialize-Run末尾追加とMI差分、TestのEO/局所属性を新318E/96BBBへ限定静的接合する。元schema/拒否/出力個数/4typed mocks/cleanup未観測の非干渉を独立reviewが認めた範囲だけ旧12PASSを再利用し、不明なら影響受入を差し戻す。旧12やfocusedのruntimeはまだ解除していない。F2の新固定組接合Pre→focused10一回/Post→標準80/87variant→製品fullの依存を維持する。
+
 ## EO-STATIC-BASELINE01（2026-10-16、利用者承認後）
 
 ENV01の独立Post PASS／確定指摘0を受領した。suite3d864e43-91b2-4d59-b10c-53c651ab9cf4／run e0d4d4fd-ff06-4da1-a693-79ca4ade08d0はPassed/実exit0/32.19632秒/dispatch1/other0/retry0、12入力前後一致/sourceMatched=true。正式6terminalのhash参照一致、Completed/error=null/所有行waited・hasExited true/unknown0/residual0/killRequested0を現物接合し、重複台帳を合算しなかった。独立remainingは実配列[]、環境/config不変assert後のauthor-result到達もsourceへ対応付けた。fixture救済回数は未計装、残存確認はfinally前、終了後の別OS監査は未実施である。この限界を保持して正常1件だけを認定する。

@@ -1,5 +1,9 @@
 # ET3 試用EXE提供の使用量観測
 
+## focused10以後の再開（2026-10-16）
+
+利用者の「進めてください」を受領し、HEAD05c8622/tree cleanからMI-F/EO-Fを再開する。開始共有週枠79%/10080分/reset1792667952/ordinaryUsageAllowed=true。親開始側snapshotは03:52:30.455Z、input1972400705/cached1929435008/output4412371/reasoning1447721/total1976813076/cache_write0（着手からsnapshotまで欠測）。planner focused_resume_plan（指定Astra/high・fresh）へ既存計画適用と必要入力の最小再束縛順を確認した。親モデル不変、実返却metadata/子counter/包含は未取得、アカウント共通週枠を専有消費へ換算しない。完了境界は既定gateの段階PASS/独立reviewと別配置試用EXE、又は初回予期外結果の証拠保存・停止である。
+
 ## EO-STATIC-BASELINE01の限定是正（2026-10-16）
 
 完了境界：6属性のみの是正／独立静的6PASS→EO6GREEN／全source PSSA0／独立PostでEO-STATIC Closed。必要2hashのprobe更新・独立binding review・ValidateOnly一回→ENV01一回/32.19632秒/独立Post PASSまで接合し、ENV-RUNNERとMI限定課題もClosed。focused10/80/full/試用提供は未実施でcredit0。指定はplanner/reviewer Astra/high、作者Sol6.1/high、実装/runner Sol6.1/medium、親不変。子counter/実返却metadata/包含は欠測、合算しない。

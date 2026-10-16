@@ -2,6 +2,8 @@
 
 ## 最新状態（2026-10-16）
 
+MI-F/EO-F再開中。plan88F5/design9679不変、context034F2D04/P1 B1AE65B9の4literalとdriver02A011C2/HANDOFF E2D99548の6literalだけ再束縛/全PSSA0。F1独立reviewで旧CXT12 file/context限定再利用可、FF/MI/EO非干渉接合あり（runtime/新guardへ拡張しない）。F2接合Pre PASS。ValidateOnly正常＋配置guard負例各一回2PASS/Unexpected0/build・control・caseDispatch0、生成前15入力一致/両root未作成（report6cd34167）。親の新固定組freeze維持、次は既定control2含むfocused10一回/Post。標準80/87variant/製品full/別配置EXEは前段成功後、現在credit0。05c8622までpush済み、この再束縛も実行前checkpointへ保存する。開始共有週枠79%（アカウント共通）。
+
 EO-STATIC-BASELINE01・ENV-RUNNER-ORACLE01・MI-VOLATILE-01は限定独立Post PASS／Closed。plan88F586DD/Test96BBB420/Invoke318E/design9679/probeE8B465F9、oracle59B1170B/manifest89B99314/EOtestE752。6局所属性のみ/逆bytes96FB一致、全PSSA0、独立静的6PASS→EO6GREEN。probe2hashだけ再束縛/binding review PASS、ValidateOnly一回11入力一致/dispatch0/exit0。新suite3d864e43/run e0d4d4fdのENV01一回Passed/exit0/32.196秒/dispatch1other0retry0、fake生成後12入力一致/正式6terminal Completed/unknown0residual0/独立remaining[]/環境config事後assert到達、独立Post PASS。旧FAIL保全、欠測発生理由・救済回数・finally後別OS監査は未確定。次はMI-F/EO-Fのfocused/context必要再束縛と接合review→focused10→標準80/variant→製品full→別配置試用EXE。10/80/full/提供credit0、製品EXE9B888E9F不変。結果checkpoint ab778d7までpush済み、今回正常結果も別checkpointへ保存する。共有週枠76→79%（アカウント共通、専有量不明）。
 
 以下の経緯は履歴であり、上記の最新状態を優先する。
