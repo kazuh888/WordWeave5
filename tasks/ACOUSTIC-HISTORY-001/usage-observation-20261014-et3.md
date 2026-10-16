@@ -2,6 +2,12 @@
 
 ## focused10以後の再開（2026-10-16）
 
+区切りはF3初回FAILの証拠保存・独立Postまで。F1作者/実装/reviewerは既存割当Astra/high、runner Sol6.1/medium、親不変。context4/driver6literal再束縛・旧CXT12 file/context限定再利用・F2Pre・ValidateOnly正常/guard負例2PASSを接合後、F3はcontrol2PASS/0PASS1FAIL9NotRun/exit1/34.578秒/16入力一致。未知候補取得失敗と先行fixture errorの因果未確定、再試行/後段/修正0。scope外のPS7更新も観測し、7.6.7固定へ変える可否を利用者へ照会した。環境修理/quality緩和/新framework/実dataAPI0である。
+
+終了側共有週枠85%/10080分/reset1792667952/ordinaryUsageAllowed=true（開始79%）。アカウント共通で専有消費へ換算しない。親終了側snapshot04:28:19.615Zはinput1988346934/cached1945299456/output4445915/reasoning1467979/total1992792849/cache_write0。同一sessionの開始側03:52:30.455Zとの差はinput15946229/cached15864448/output33544/reasoning20258/total15979773/cache_write0。cached/reasoning内数で再加算せず、親子包含/子counter/provider metadataは未取得で合算しない。着手〜開始snapshot、この後の補足review/保存/最終応答は範囲外、全消費とは呼ばない。
+
+手戻りはF1 whitespace wrapperのexit1誤分類訂正、runner診断ファイル名読取誤記、Post読取時のpwsh/dll解決失敗2回であり、対象behavior REDや再試行へ混ぜない。親の初期JSON全文rg出力は長行で切れたため採用根拠とせず、以後必要field/file metadataだけをWinPSで読取った。改善点は、一回の正常ENV結果をtarget正常終了の保証へ拡張しないこと、実行直後とPostでのtoolchain driftを別時点として固定し、定型初因以外のfield欠測を残すことである。過去の93正常説明は訂正したが、旧試験のPassed statusを事後変更していない。
+
 利用者の「進めてください」を受領し、HEAD05c8622/tree cleanからMI-F/EO-Fを再開する。開始共有週枠79%/10080分/reset1792667952/ordinaryUsageAllowed=true。親開始側snapshotは03:52:30.455Z、input1972400705/cached1929435008/output4412371/reasoning1447721/total1976813076/cache_write0（着手からsnapshotまで欠測）。planner focused_resume_plan（指定Astra/high・fresh）へ既存計画適用と必要入力の最小再束縛順を確認した。親モデル不変、実返却metadata/子counter/包含は未取得、アカウント共通週枠を専有消費へ換算しない。完了境界は既定gateの段階PASS/独立reviewと別配置試用EXE、又は初回予期外結果の証拠保存・停止である。
 
 ## EO-STATIC-BASELINE01の限定是正（2026-10-16）

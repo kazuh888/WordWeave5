@@ -2,6 +2,19 @@
 
 ## MI-F／EO-Fの再開（2026-10-16）
 
+F3初回はcontrol2PASS、focused0PASS/1FAIL/9NotRun/実exit1/34.578秒で停止した。suite b5bb9069-90e5-429b-8c5b-97c7f7f22f75／run77a4759e-0508-4cdd-966b-140c3ef89a12、ENV01の元errorはBEHAVIOR_ASSERTION: Unexpected gate failure、AP1未到達/argvEvidence0、事前15→fake後16全入力一致/sourceMatched=true/caseBodiesUnmodified=true。REPORTはR/verification/b5bb9069-90e5-429b-8c5b-97c7f7f22f75.F3-REPORT.md（A739994A）。再試行/修正/残9/80/full/製品起動0。
+
+独立PostはFAIL維持、初回停止・証拠保全は適合と判定した。UNKNOWN-DESCENDANT-OPEN01：最初の正式FFはSupervisor OwnedTree.IdentityCatch/CleanupIncomplete、knownMatchCount0/snapshotMatchCount1のPID20688でInvoke318E:1569 GetProcessByIdが失敗、1571 Get-Identity未到達である。identity=null/waited=false/hasExited=null/killRequested=false、MIの既知保持handle分岐ではない。Runnerの同PID開始04:16:55.7220098Z/終了55.8101757Zに対しSupervisor FF56.0136209Z、RunOwner cancel56.1593637Z。取得と終了の競合は候補だが、snapshot採取時刻や原初因は一意未確定。別actorのDirectLaunchHandle/NotFoundAfterExitをSupervisor当時のownershipへ補完しない。Supervisor Owned18/Unprovable1、RunOwner20/Runner1の終了確認・残留配列空・期限内終了をunknown0/全cleanup成功へ拡張しない。正式FF2/現在tmp0、旧MI/EO局所Closedを否定する証拠はない。
+
+診断補足：今回のtargetはexit93/完了marker欠落でありfixture内部error経路も候補であるが、元I/O errorは未取得。保存Runはmode=target/当該ENV01 root/exit指定なし、target markerはrole=target/argv0/同rootを示す。実target環境記録はET3_FAKE系を採取せず、実継承exit指定の不存在までは証明しない。fake正常fullは既定0で完了marker後に返るが、93単独でErrへ一意確定しない。独立補足reviewにより、先行ENV01 run e0d4d4fdの「childExit93は正常期待値」という説明は撤回する。旧ENV01は既存oracleでPassedのまま保存するが、ENV01共通判定はtarget exit0/完了markerを保証しない（expectedExit比較はTRANS03–07のみ）。正常期待値一致やtarget正常終了を実証済みとはしない。これをfixture失敗/監視失敗の因果調査へ接合し、過去FAIL/PASSを書き換えない。
+
+別の実行前阻害TOOLCHAIN-PWSH-DRIFT01：F3実行時/runner事後は16全一致だが、Post読取時はpwsh.exeだけ不一致/他15一致となり、一時的なpwsh.exe/pwsh.dll解決失敗2件を観測した。F3凍結旧SHA BFB46AF89433268872DDB43D1CA7A3F433452EE91ED356A9786940F90118E285に対し、親のWinPS読取で現SHA FA2C8BB1E35CDD62AD15CD06A1D8F2C5961E9725A9BFA1E7CFD2C322F49E9619、exe/dll FileVersion7.6.7.500/ProductVersion7.6.7を確認した（現DLL存在true）。F3時点の7.6.6/sourceMatchedを遡及否定せず、更新主体/発生時刻やF3失敗原因と同一視しない。追加PS7実行/修理/OS設定変更は0、Windows PowerShell5.1は既存証拠・file metadata読取だけでPS7検証の代替ではない。利用者へ7.6.7前提への固定環境改訂可否を照会済み、許可なしに再採番・実行しない。製品EXE9B888E9F不変。
+
+| Finding ID | 原文・位置 | Root cause | State | Packet | Canonical artifact | Evidence | Oracle | Reviewer record | Residual / out-of-scope |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| UNKNOWN-DESCENDANT-OPEN01 | F3 ENV01/Supervisor Invoke1569 | 未登録候補の取得失敗。先行target終了/fixture errorとの因果は未確定 | Open | F3初回停止 | Invoke318E/既存所有契約 | FF正式/terminal/target記録、known0、GetIdentity前で停止 | 未登録・取得前終了/元fixture errorの有限切分けが次。未知をgone/Ownedへ救済しない | 独立Post FAIL/停止適合 | 既知MI分岐と分離、追加runtime/修正なし |
+| TOOLCHAIN-PWSH-DRIFT01 | F3事後pwsh hash/読取tool起動 | 実行環境7.6.6→7.6.7、主体/時刻未確定 | Decision pending | 次検証の環境固定 | 固定pwsh前提/利用者判断 | 旧BFB46→現FA2C8、file metadata7.6.7/一時DLL解決失敗 | 新前提の承認後、互換性と固定入力を限定再設計 | 独立Post追加観測＋親WinPS読取 | 旧結果へ遡及混同しない、修理/自動adoptなし |
+
 F2後ValidateOnly正常一回＋既定配置guard負例一回は2PASS/Unexpected0である（report R/verification/6cd34167-f41a-4737-a182-5472259a4d73.F2-REPORT.md、SHA24E65BCE）。正常exit0/validatedtrue/caseCount10/variantGuardtrue/runtimefalse、元Test両originと4config順序照合、負例exit1/exact Fresh direct-child UUID output requiredで拒否、両root前後未存在。生成前15入力は正常後/負例後とも一致、fake未生成を16件確認済みとしない。4config hashのnullを空設定の証明へ換算しない。build/control/caseDispatch0/retry0でありfocused10の成功ではない。親は新固定組と未存在新suiteで既定control2を含むfocused10一回へ進む前条件を受領した。最初の予期外で停止し、10PASS/独立Post前に標準80以降は解除しない。
 
 F2 driver02A011C2/HANDOFF E2D99548を親が現物事前固定し、独立接合Pre PASS／確定指摘0を受領した（impl packet94c64483）。6literal逆bytes旧15709一致/BOM、HANDOFF旧21842厳密prefix/非所有10一致、10case/slash16→17/firstFail・NotRun/control2/期限schema/cleanup不変、Parser0/PSSA1.25.0通常rules Stop診断0/engine0/marker/実exit0を照合した。F1限定再利用を現在のruntime合格へ拡張しない。runner focused_runner（指定Sol6.1/medium）へ現組のValidateOnly正常一回→成功時既定配置guard負例一回だけを依頼した。正常R/verification直下UUID、負例P直下UUID、いずれも未存在/未作成、build/control/caseDispatch0を要する。focused10はその成功受領後まで未解除である。
