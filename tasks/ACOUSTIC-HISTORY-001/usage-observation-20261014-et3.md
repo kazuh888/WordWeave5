@@ -1,5 +1,13 @@
 # ET3 試用EXE提供の使用量観測
 
+## P7-B保存境界の復旧・承認済み一回再実行（2026-10-16、進行中）
+
+利用者の「よいです」で修正→独立review→旧V01一回の再実行を承認受領。HEAD5901d44/tree clean、共有週枠92%/10080分/reset1792667952/ordinaryUsageAllowed=true。親モデル不変、既存P7割当を維持しplanner pwsh767_planをAstra/highで再開した。対象は保存境界2指摘と局所再試験・独立Postまでであり、P7-C以後/旧F3/実データAPI/製品変更へ拡張しない。子counter/実返却metadata/親子包含は未取得である。
+
+親取得開始snapshot08:31:48.673Zはinput2003071658/cached1959838592/output4477264/reasoning1475770/total2007548922/cache_write0。承認受領からsnapshotまで欠測、終了側未取得。cached/reasoningは内数として再加算せず、共有週枠差を専有消費へ換算しない。
+
+中間共有週枠96%/10080分/reset1792667952/ordinaryUsageAllowed=true。既存作者Astra/highのtail4件は主状態/11hash/保存回数/exitを確認したが、独立Postが日本語のconsole劣化を検出した。plannerが2file限定修正と同じ4実行の終了後独立読取を具体化、Pre接合不足1件を責任分離して再Pre PASS、最終brief FEA2E6…である。難度が下がった限定是正の新作者をplannerがSol6.1/highへ再選定し、pwsh767_unicodeをfresh dispatchした。reviewAstra/high・runnerSol6.1/medium・親model・品質条件は維持する。旧oracle一回枠は未消費、元4証拠は保持する。通常ruleの新警告1件は独立相談で既存基準に適合する関数局所抑制と確認し、残診断0と区別した。モデル再選定による節約量は未測定、アカウント共通差や成果物量から推定しない。
+
 ## TOOLCHAIN-PWSH-DRIFT01：7.6.7採用（2026-10-16、進行中）
 
 利用者の7.6.7採用承認を受領した。開始HEAD e7389c7/tree clean、共有週枠85%/10080分/reset1792667952/ordinaryUsageAllowed=trueである。完了境界は限定環境同定・仕様/設計・独立oracle・版接合/束縛・局所互換性/Postであり、旧F3原因修正・再試行や製品提供とは別である。planner pwsh767_planは指定Astra/high、同定runner pwsh767_identityは指定Sol6.1/medium・freshでdispatchした。親モデル不変、実返却metadata/子counter/親子包含は未取得である。

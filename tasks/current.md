@@ -2,6 +2,10 @@
 
 ## 最新状態（2026-10-16）
 
+利用者が検証コードの修正・独立レビュー後の旧V01局所試験1回再実行を明示承認した。HEAD5901d44/tree cleanからP7-Bの保存境界2指摘だけを再開する。元oracle/manifest/runを保全し、新UUID修正版、主結果/例外と事後エラーの分離、保存失敗時console/exit2到達を確認する。16期待/9抽出/期限は不変、P7-C以後・旧F3等は未解除。開始共有週枠92%（専有量不明）。plannerが既存凍結plan/designを変えず、一回用復旧briefへ有限検証と担当を接合中である。
+
+復旧briefはP/f6e31ed9-5f00-460f-9db2-f0c94082464b/P7-B-RECOVERY.md、最終SHA FEA2E6A2E7F4703E97E02FB719C6244A338D22A6D4C5253663C80F5E5DBDA7EF、限定再Pre PASS。旧候補5de4073fのT1–4は実exit1/2/2/2/各一回で主状態・11hash・各保存一回等を実証したが、独立Postは日本語診断のconsole文字化けP1でCHANGES_REQUIRED。新候補oracle/Test-TailCase2fileだけをASCII escaped JSON＋日本語seed/副次捕捉期待値へ修正中。driver/prefix23318bytes/manifest/16期待/9抽出/期限は不変、同じ4結果を別runnerが終了後に全文/7bit読取検査→Post→旧V01一回の順である。旧V01実行0。planner選定の新作者pwsh767_unicode=Sol6.1/high、reviewer=Astra/high、runner=Sol6.1/medium、親不変。共有週枠中間96%（専有量不明）。
+
 利用者がPowerShell 7.6.7採用を承認した。TOOLCHAIN-PWSH-DRIFT01は限定計画追補を保存し、固定exe・実ロードruntimeの同定から進める。計画は[既存plan](ACOUSTIC-HISTORY-001/early-trial-gate-plan.md)のP7節を参照する。版の厳密一致・安全判定・期限は維持し、同定→仕様/設計/Pre→独立oracle→局所変更/束縛→限定互換性/Postを完了境界とする。旧F3 FAILとUNKNOWN-DESCENDANT-OPEN01は未解決であり、ENV01/F3/残9/80/full/試用提供は今回解除しない。開始共有週枠85%（専有量不明）、親モデル不変。
 
 以下のF3結果と旧固定組は保存証拠であり、新7.6.7用の実行承認ではない。

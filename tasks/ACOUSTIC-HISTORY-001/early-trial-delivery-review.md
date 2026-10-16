@@ -1,5 +1,19 @@
 # ET3 試用EXE提供・独立レビュー記録
 
+## P7-B保存境界の復旧（2026-10-16）
+
+利用者が修正・独立review後の旧V01一回再実行を明示承認した。復旧briefはP/f6e31ed9-5f00-460f-9db2-f0c94082464b/P7-B-RECOVERY.md（B1304A985C1AA45137B61EC7F33930D96E15960C1D352887751BF6D77EA0277C）。独立R-A Pre PASS/新規阻害0であり、親が受領した。旧oracle446以後だけを別UUIDで修正しprefix1–445、16期待/9抽出、凍結main plan/design/manifestと旧証拠は保持する。
+
+主例外保持は439–443で既に保存されるclassification/message/stack/positionと主観測配列の保持であり、未保存ErrorRecord情報を復元しない。保存境界T1–4は11照合（source3/documents2/environment5/manifest1）、主状態・副次エラー分離、after/result各一回、console/marker/明示exitを確認する。T4注入はcreated=true、created=falseは未初期化参照がない制御フロー確認と区別する。作者Astra/highが修正/局所検査、独立reviewer Astra/highが確認後、親の最終SHA/完全command/新UUID凍結を経てrunner Sol6.1/mediumへ旧V01一回を渡す。現時点で修正版/旧REDの受入は未了である。
+
+R-B候補はP/5de4073f-f48f-4295-8e75-c2b93918663f、oracleFD49BCD9BD9CC37F02347877CD10A95E891350490EE93916C9D1AEE102E32B15、Test-TailCase6219B4F8850CB1E52DE6F7AD15477B43F07010EEEAD63C367ADB7E33D25E208A、manifest5FC4…不変。prefix23318bytes一致を独立確認した。static初回にfixtureのPSAvoidOverwritingBuiltInCmdlets1診断があり、作者が理由付き関数局所Suppression後static02を実行したが親はruntime前に採用を留保した。独立相談はPASS：既存PowerShellレビュー基準の明示許容、Test-FirstFailure309–311の同rule承認seam先例、usualrule/対象不変、ExcludeRules/dynamic隠蔽なしにより既存品質契約へ適合する。元警告を消去せず「局所抑制1・残診断0/Parser0/engine0」と記録する。tailの主状態保持・11照合・各保存一回・console/exit2・created=falseにも静的阻害0。親はこの組をT1–4用に承認した。局所実結果/独立Post/旧V01は未了である。
+
+R-B作者の4tail結果は各一回4PASS/実exit1,2,2,2/driver0/retry0であったが、独立PostはUnicode保持のP1一件CHANGES_REQUIRED。T2/T4のstdout内postHashErrors.stack/positionにU+FFFDがあり、UTF8 result.jsonと不一致、保存値をCP932 encode→UTF8 decodeした値と一致した。stdoutは復号後文字列の保存であり元raw bytesではない。原因はoracle553の非ASCII JSON直接出力とdriver67–88のencoding未固定、fixture115–127の主seed ASCIIのみで検出できない。console-onlyとなるT3にも波及するため旧V01へ進めない。
+
+既実証の主状態/件数/11hash/各保存一回/noRetry/実exit/T3の2保存失敗/候補5・保護25一致は保持する。最小是正はconsole JSONのEscapeNonAsciiと主seedの非ASCII化、副次例外も保存/捕捉値とconsole全文一致を確認することである。旧候補と4証拠は保存し、plannerへ新候補/newUUID/独立Pre/該当4再検証/Postを返した。16期待/9抽出/prefix/manifest/期限や旧V01一回枠は変更しない。sourcePreserved=false/created=falseは静的範囲であり実証へ水増ししない。
+
+Unicode brief初稿50C107…はfixture終了後stdout観測の責任が未定義でPre CHANGES_REQUIRED一件。plannerがfixture独立期待保存→作者同4実行/self-check→別runner終了後Ordinal全文/JSON7bit読取→Post→旧V01一回へ責任を分離し、最終briefFEA2E6A2E7F4703E97E02FB719C6244A338D22A6D4C5253663C80F5E5DBDA7EFで独立限定Pre PASS/追加指摘0を受領した。親がこの組を承認し、新作者Sol6.1/highへdispatchした。対象2file/driver不変、原証拠と元raw bytes未取得を保持する。
+
 ## TOOLCHAIN-PWSH-DRIFT01：7.6.7採用のPre（2026-10-16）
 
 利用者が7.6.7採用を承認。P7-0同定は実7.6.7/.NET10.0.13、5file前後SHA一致、起動1回361ms/exit0、有限同定8PASSである。pwsh.dll A583…とSMA.dll70701F20…を区別する。互換性/P7全体のPASSではない。
