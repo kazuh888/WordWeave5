@@ -2,6 +2,12 @@
 
 ## 最新状態（2026-10-16）
 
+P7-Cは独立動的Post PASS／Closed。Invoke898C60B1133DB6956090035AF677B4CF7FDE0FE6FDFD5D47E5CD776B00500B71、TestF0C57FE388F96D78F3BA0B14A420D9E7E6F5C7977944AD72B19E925E894DC919、Context01E0CCB3B675724FB5C9D1A64E5C312558E76508E191AE8176B7C1354A66E376は許可版literal/対応説明のみ。逆全bytes一致、Parser/PSSA0、oracleBCF9/manifest5FC4不変。8ID/16観測は一回16Passed0Failed0NotRun/実exit0/retry0、125照合PASS、14入力＋freeze前後一致・正常保存・日本語console一致を独立受入れた。証拠P/ea0d7135-f168-407c-a71a-891d49f2687f/P7-C-FROZEN.md・P7-C-RUNNER-REPORT.md、実結果P/9bcbb13b-5482-40dd-8260-a930efb8ad61/result.jsonである。
+
+次はD1 Context/P1の最終4binding接合（作者Astra/high）→D2 Slash/HANDOFF（実装Sol6.1/medium）→D4 FF6literal（作者Astra/high）、別枝D3 ENVprobe（実装Sol6.1/medium）→独立binding review→E局所互換性/Post。正本planFF96F8DE/design6F845988、実行handoffP/170dad30/P7-CDE-HANDOFF.md B251D49B…を再利用する。E16の再利用はD1後の全oracle consumer/9fragment同一性の独立証明までは未承認。Context直接12caseの旧bindingは未接合であり実行しない。旧F3/ENV01/80/full/試用提供未解除、製品source/EXE/実dataAPI変更0。共有週枠表示100%（開始97%、ordinaryUsageAllowed=true、専有量不明）のため計画既定C完了checkpointで区切り、D1–4/Eは未実施として残す。以下は経緯であり上記を優先する。
+
+利用者の「続けてください」でP7-C→D1–4→EをHEADb1c0015/tree cleanから再開した。既存Pre/仕様/設計を再利用し、最初にGREEN用oracleの旧fragment固定値の限定再束縛を計画者へ確認中である。元RED/旧manifestは保全、16期待/安全条件/期限不変、UNKNOWN/F3等は未解除。開始共有週枠97%（専有量不明）、親モデル不変。
+
 P7-B保存境界の復旧はR-B/R-D独立Post PASSで限定Closed。新oracle P/2dd54494-5095-4ea1-b363-85c23024cbeb/Test-PwshVersionContract.ps1 SHA BCF9F4B823158DEBB05D0671F07414DA0542C69BF7382EA3E8F167A0B9708DE9。日本語を含むtail4組各一回/実exit1,2,2,2、別runner保存結果923チェック/4組PASSを確認した。承認済み旧V01は一回実行済み・再試行0、認識された旧7.6.6拒否/BehaviorMismatch/sentinel0/executed1failed1passed0notRun15/実exit1/正常保存、14入力＋freeze前後一致、独立R-D PASSで目的REDを確認した。
 
 次の単一未完了工程はP7-Cの7.6.7 exact版接合→D1–4再束縛→限定新runtime互換性/Postである。正本planFF96F8DE/design6F845988は不変。索引：復旧briefP/f6e31ed9/P7-B-RECOVERY.md最終FEA2E6…、作者P/2dd54494/REPORT.md、独立読取P/17bc606c/REPORT.md、親freeze/旧V01runner P/6a702737/R-C-FROZEN.md・R-C-RUNNER-REPORT.md、旧V01結果P/8bff74d6/result.json。詳しいclosure/usageは既存review/usage文書にある。旧一回枠は消費済み、再実行許可へ流用しない。新16GREEN/旧F3・ENV01/80/full/試用提供は未解除、製品source/EXE/実data/API変更0。共有週枠終了97%（開始92%、アカウント共通で専有量不明）。以下は本復旧の経緯であり上記を優先する。

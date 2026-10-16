@@ -1,5 +1,15 @@
 # ET3 試用EXE提供の使用量観測
 
+## P7-C以後の再開（2026-10-16、進行中）
+
+利用者の「続けてください」でHEADb1c0015/tree clean、共有週枠97%/10080分/reset1792667952/ordinaryUsageAllowed=trueからP7-C→D1–4→Eを再開した。親モデル不変。planner pwsh767_plan=Astra/highへ既存適用とoracle固定fragmentの影響を確認、旧fragment又は許可版置換を受ける現行guardを根拠に、親の新manifest必要仮説を撤回した。oracleBCF9/manifest5FC4は編集不要である。既Pre成立の版literal2fileだけをpwsh767_version_impl=Sol6.1/mediumへdispatch、plannerの別文書read-only適用確認と並行する具体独立利益を確認した。子counter/実provider/包含は未取得。
+
+親開始snapshot10:12:36.385Zはinput2019089003/cached1975761792/output4506949/reasoning1483345/total2023595952/cache_write0。着手からsnapshotまで欠測、終了側未取得。cached/reasoningは内数として加算せず、共有週枠を専有量へ換算しない。今回完了境界は既存P7-C/D/Eの限定Post又は初回予期外の保存・停止であり、UNKNOWN/F3/ENV01/full/製品提供は解除しない。
+
+今回は計画既定のP7-C完了checkpointで区切った。Invoke/Testの2fileはSol6.1/medium、Context1fileはAstra/highが許可版literalのみ編集、逆全bytesと静的0を確認。reviewerAstra/highが3file静的Post/無変更oracle適用Preを受入れ、runnerSol6.1/mediumの新16一回は16Passed/0Failed/0NotRun/exit0/retry0、125保存照合PASS、14入力＋freeze一致、独立動的Post PASS／C Closedであった。D1–4/E/旧F3等は新たに開始せず、製品source/data/API変更0。新manifest不要という現物根拠で親の仮説を撤回し、不要な作者作業とoracle改稿を避けた。過去の復旧・Unicode・旧REDは無変更につき反復せず、C変更の影響範囲だけを検証した。モデル/quality/期限変更0、効果比較のための実行0。
+
+終了側共有週枠表示100%/10080分/reset1792667952/ordinaryUsageAllowed=true（開始97%）。表示100%から利用不能を断定しないが、週枠を気にする利用者の意向と中途状態を避けるためC完了を保存し後続未了を明記する。値はアカウント共通で専有消費に換算しない。親snapshot10:29:30.785Zはinput2024627976/cached1981269888/output4519183/reasoning1487715/total2029147159/cache_write0。開始側10:12:36.385Zとの差はinput5538973/cached5508096/output12234/reasoning4370/total5551207/cache_write0。開始前・この後の最終Post/記録/保存/応答は測定外、子counter/provider実返却/親子包含は未取得。cached/reasoningは内数として加算しない。終端checkpointへ今回の限定完了と次handoffを保存する。
+
 ## P7-B保存境界の復旧・承認済み一回再実行（2026-10-16、進行中）
 
 利用者の「よいです」で修正→独立review→旧V01一回の再実行を承認受領。HEAD5901d44/tree clean、共有週枠92%/10080分/reset1792667952/ordinaryUsageAllowed=true。親モデル不変、既存P7割当を維持しplanner pwsh767_planをAstra/highで再開した。対象は保存境界2指摘と局所再試験・独立Postまでであり、P7-C以後/旧F3/実データAPI/製品変更へ拡張しない。子counter/実返却metadata/親子包含は未取得である。

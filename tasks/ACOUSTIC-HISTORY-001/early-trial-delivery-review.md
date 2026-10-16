@@ -1,5 +1,17 @@
 # ET3 試用EXE提供・独立レビュー記録
 
+## P7-C版接合（2026-10-16、限定完了）
+
+既存planFF96F8DE/design6F845988のPreとP7-B復旧/目的REDのPostを再利用した。plannerの実行handoffはP/170dad30-7c4c-41b1-a9c7-6ccb5401098f/P7-CDE-HANDOFF.md（B251D49B…）。親が仮説として挙げた新manifest必要性は、現oracle408–409の旧text又は許可版置換受理と現sourceのthrow literal認識を根拠に撤回した。oracleBCF9/manifest5FC4は不変である。
+
+実装者Sol6.1/mediumはInvoke20/1045/1083、Test26/742/2130の各4literalだけを7.6.7へ変更した。Invoke898C60B1133DB6956090035AF677B4CF7FDE0FE6FDFD5D47E5CD776B00500B71、TestF0C57FE388F96D78F3BA0B14A420D9E7E6F5C7977944AD72B19E925E894DC919、各4byte差分/逆全bytes一致、BOM/長さ保持。作者Astra/highはContext15/113だけを変更し01E0CCB3B675724FB5C9D1A64E5C312558E76508E191AE8176B7C1354A66E376、27793bytes逆一致/BOMなし保持、binding4/12期待不変。全3fileのParser/PSSA1.25通常診断/engine0・marker・実exit0を確認した。
+
+独立reviewer Astra/highは3file静的Post＋既oracle適用Pre PASSを返した。9fragmentが各一意で型/親scope/位置と許可置換一致、runtime seam各1逆一致、現在throw由来classifier/schema→型→版/producer/16期待が整合し非関連例外の誤PASS変更0と確認した。親はP/ea0d7135-f168-407c-a71a-891d49f2687f/P7-C-FROZEN.md（4FC41BE8A1A7EABAA35E49CE4F5B8C2F94A00EE494C992D0ED27743553013A2A）の14入力・完全argvを承認し、runnerSol6.1/mediumへ新16観測一回を渡した。出力予定P/9bcbb13b-5482-40dd-8260-a930efb8ad61。現時点で16GREEN/Context12/D1–4/Eは未受入、旧F3等も未解除である。
+
+実行結果は8ID/16観測すべて独立期待一致、16Passed/0Failed/0NotRun/実exit0/起動一回/retry0であった。REPORT同freeze dirのP7-C-RUNNER-REPORT.md（711324BFC3FA2068B206FE7D7627DA0B6C8BF09571997D972089C903DA01B3FD）、result（549D8501BED961B9A168CD5FC527598B04D28751D5532BA3C934E473EACB40C0）、125照合（351FB5230C314420FAE8811B4FE50AAFAE45301907DDAA71B712C83AB83876D0）。14入力＋freeze前後一致、11hash全Matched/postsave0/source3beforeafter一致、after/result各一回/最終正常保存、consoleの日本語Ordinal/ASCII JSON/marker整合を確認した。
+
+独立動的PostはPASS／P7-C Closed。拒否は元sourceの型/message/ID/file/行範囲と一致し、欠落Schemaのsentinel0,0,0、null Typeの1,0,0、版拒否Versionの1,1,0、producer単一string7.6.7を実証した。非関連例外のPASSは認められない。全source消費不変のD1後証明まではE16再利用未承認、Context12/D1–4/E/旧F3等は未解除、局所抽出main非到達は静的根拠でOS実監視ではない。raw bytes/hard watchdog保証なし。共有週枠表示100%につき既定C完了checkpointで区切り、後続を新たに開始せず未了として保存する。通常EXE・製品source・学習データ/APIは変更していない。
+
 ## P7-B保存境界の復旧（2026-10-16）
 
 利用者が修正・独立review後の旧V01一回再実行を明示承認した。復旧briefはP/f6e31ed9-5f00-460f-9db2-f0c94082464b/P7-B-RECOVERY.md（B1304A985C1AA45137B61EC7F33930D96E15960C1D352887751BF6D77EA0277C）。独立R-A Pre PASS/新規阻害0であり、親が受領した。旧oracle446以後だけを別UUIDで修正しprefix1–445、16期待/9抽出、凍結main plan/design/manifestと旧証拠は保持する。
