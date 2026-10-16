@@ -637,3 +637,111 @@ PSSAは既存方式の`ErrorActionPreference=Stop`、module固定1.25.0、`-Erro
 仕様上の利用者未決はない。技術的未決はPreでの属性配置/適用範囲の妥当性と、未実行のParser/PSSA/独立oracle成立である。これを利用者へ再質問せず担当reviewer/作者の証拠で判定する。次handoffは親から`ww-reviewer` / `gpt-6-astra` / `high`へのread-only Preであり、本plan最終hash・入力96FB/回帰E752・旧6診断・既存design9679を渡す。PASS後ES-B作者へ、別実装者→独立runner/Post→既存EO-Dへ戻す。Pre/本plan受領だけではENV01を起動しない。
 
 開始共有週枠は親受領76%。子`/root/static_baseline_plan`の終了週枠・開始/終了token・session ID・実返却model/effort・親子包含は未取得、専有消費と改善率は不明である。親が既存usage記録へ接合する。本plannerの完了境界は本追補と文書diff/hash/所有確認までであり、コード/試験編集・runtime・再委任・commit/公開0である。
+
+## TOOLCHAIN-PWSH-DRIFT01：7.6.7固定前提の限定改訂（2026-10-16、仕様/設計反映・再Pre提出）
+
+利用者の「7.6.7でよい」という固定環境改訂の承認を親から受領した。開始HEAD `e7389c7`、status clean、本書旧SHA `88F586DD99BFFCFDF13CC675CDAC42CFA625D8E0CF40F97C91F7C912AD897BDE`。本節が今回の計画・task-listと固定環境改訂の唯一の規範追補である。既存plan/designの将来実行に対する固定7.6.6前提は、下記同定・Pre・実装・検証・束縛の完了後に7.6.7へ置き換える。過去runの7.6.6観測・承認・FAIL/PASSと.NET10.0.12根拠は当時の証拠として保持し、全履歴を置換しない。親受領だけで旧hash検査を無効化しない。
+
+仮計画から、既存design末尾のP7-S01–05/V01–08と内部接合設計を受領し本節を精緻化した。独立PreはFF回帰の内部hash/入力binding所有漏れ1件でCHANGES_REQUIREDである。下記D4を追加し、designerのFF追補と独立再Pre PASSを親が受領してから作者/実装へdispatchする。指摘以外の可逆seam、拒否時I/O、循環回避、.NET対象span、既存局所commandsの整合は親から受領済みである。既存未完了checklistを完了へ変更せず、`tasks/plan.md`・`tasks/todo.md`も保持する。
+
+### 完了境界・要求・除外
+
+- P7-R1：指定絶対pathのpwsh 7.6.7のmetadata、実version、実runtimeと重要binaryの安定hashを証拠で同定し、現行のversion producer/validatorを7.6.7 exactへ整合させる。範囲許可、最低版、7.6.x wildcard、旧7.6.6併用への緩和は行わない。
+- P7-R2：新runtimeに影響される局所契約の独立互換性確認、必要な現行binding、ValidateOnlyと独立Postまでを完了境界とする。source上の不変根拠と旧runtimeでの実測を区別し、新runtimeで未実行の対象をPASSへ換算しない。
+- P7-R3：UNKNOWN-DESCENDANT-OPEN01は次の別packetへ返す。旧F3 suite `b5bb9069-90e5-429b-8c5b-97c7f7f22f75` / run `77a4759e` のcontrol2PASS・focused0PASS/1FAIL/9NotRun、known0/GetProcessById(1569)失敗・target93/完了marker欠落は保持し、原因は未確定である。7.6.7への試験後の更新を旧FAILの原因・治癒とは扱わない。
+
+新ENV01/F3/focused10/残9/標準80/variant/製品full/試用提供の実行・retry解除は本packetの対象外である。未知processのgone/Owned救済、CIM欠測の推定補完、ownership/全argv exact/期限/回収/terminal/quality gateの変更、OSインストール・rollback・pwsh修理・global設定・PATH変更・追加権限・実API/実data/admin・新常設frameworkは0とする。製品source/native/fake/V2/通常EXEを変更しない。
+
+### 入力証拠と同定工程
+
+親受領の旧pwsh exe SHAは `BFB46AF89433268872DDB43D1CA7A3F433452EE91ED356A9786940F90118E285`、更新後exe SHAは `FA2C8BB1E35CDD62AD15CD06A1D8F2C5961E9725A9BFA1E7CFD2C322F49E9619`、exe/dll FileVersion=7.6.7.500・ProductVersion=7.6.7である。前turnに一時DLL解決失敗、最後のWinPS読取でDLL存在true。これらは実7.6.7起動・同梱.NET版・安定性・互換性の証明ではない。plannerはruntimeを起動していない。
+
+計画中の親追加受領：現exe SHAは再読取一致、pwsh.dll SHAは `A583A3721FEEBC4F9552A02358BC81BBDD41E2E18BB3F424226F2B1E0BF07DEB` である。runtimeconfigのincludedFrameworksはMicrosoft.NETCore.App/WindowsDesktop.App 10.0.13である（この受領時点の実ロードruntimeは未取得）。親が取得した[公式PowerShell v7.6.7 release](https://github.com/PowerShell/PowerShell/releases/tag/v7.6.7)にはper-user powershell.config.json読取IO/JSON対応、PATH/MSIX周辺、Microsoft.PowerShell.Native更新、.NET SDK10.0.402が含まれる。patch版だけを互換性根拠にせず、designerが既存config snapshot/PATHと.NET10.0.12依存箇所への非干渉を照合する。既取得の一次資料/metadata読取を反復せず、P7-0では不足項目を補う。
+
+P7-0同定結果受領：`P/870de181-c1f9-4bac-8834-12acde439ec5/report.md` は実PSVersion=7.6.7、実.NET FrameworkDescription/Environment.Version=10.0.13、固定process pathを記録した。exe/pwsh.dll/SMA.dll/runtimeconfig/depsの5fileは前後SHA一致、version-only起動1回361ms/exit0、collector8PASS/0FAIL/0SKIP、timeoutなしである。System.Management.Automation.dll SHAは `70701F20AFBBF4E763924C2BDD0C0E9A20EEC35A0E4EFF439E0CCF77F20D6B26` であり、A583…をSMA.dllとした旧計画の誤記を訂正した。これは採取区間の同定証拠であり、WindowsDesktop個別ロード・全経路互換性・恒久安定は未確認である。一次sourceと実.NET10.0.13のconsumer対応はdesigner待ちであり、P7-0全体をClosedにせず、後続Pre/精緻化/旧F3未解除を維持する。
+
+P7-0では親又はrunnerが、固定 `F:/Program Files/PowerShell/7/` のexe、System.Management.Automation.dll、pwsh.runtimeconfig.json、pwsh.deps.jsonを読取り、存在/size/version/SHAとruntime設定を同じsnapshotへ記録する。最初と最後の2回のhash一致を有限な安定性証拠とし、恒久不変を主張しない。公式PowerShell 7.6.7 release/tagと対応runtime sourceを照合する工程を含む。release未発見・local runtimeとの不整合は未確認/阻害として返し、別versionの資料で代替しない。
+
+承認済みversion-only確認が必要な場合は、親が固定exeからprofile無し・noninteractiveの一回に限定し、PSVersion/PSHOME/process実path/.NET FrameworkDescriptionとEnvironment.Versionを取得する。上限15秒、追加child0、profile/import/network/製品/gate入口0。timeout/起動/DLLエラー/再hash差分が出たら停止し、修理や起動再試行へ進まない。実返却runtimeに対応するProcess.SafeHandle/Refresh/StartTimeの公式sourceをdesignerが既存consumerへ対応付ける。configの要求runtimeだけから実ロード版を推定しない。
+
+### 現行消費側の列挙・所有
+
+R/Pは前節の絶対rootである。以下はplannerの直下現行fileに対するtargeted rg結果であり、保存UUID配下のsnapshotは変更対象に含めない。
+
+| 対象 | 現行前提・依存 | 所有/扱い |
+| --- | --- | --- |
+| `R/Invoke-CargoGate.ps1` | 20説明、1045実PSVersion、1083 Run.pwshVersionの7.6.6 exact | 別実装者。指定version literal/対応説明のみ。predicate構造・例外伝播不変 |
+| `R/Test-CargoGate.ps1` | 26説明、742 Run producer、2130実PSVersionの7.6.6 exact | 別実装者。本packetではharness本体としてversion literalのみ。既存80期待とEO/ES属性は不変 |
+| `P/Test-ContextPreflight.ps1` | 15説明、113実PSVersion、37–48 Invoke/Test/plan/design binding | 独立作者。version確認と必要bindingのみ。元context12ケース/adapterを保持 |
+| `P/CONTEXT-TEST-HANDOFF-P1.md` | 39旧再現説明、72以降snapshot/binding | 独立作者。今回の新snapshot追補だけ。旧RED再現説明を改稿しない |
+| `P/Invoke-ArgvPathFocusedSlash.ps1` | 19説明、43–52 Invoke/Test/context/P1/plan/design binding。実version前提はTest原文から取り込む | 別実装者。必要hashと今回runtime説明のみ。case集合/dispatch全文不変 |
+| `P/HANDOFF.md` | 40旧実行前提、135–140入力binding | 別実装者。新snapshot/停止境界を追補、現行入口を新組へ結び旧指示を再利用不可と明示 |
+| `P/Invoke-FirstFailureEnv01.ps1` | 21説明、120–126 Invoke/Test/plan/design binding | 別実装者。必要hash/説明のみ。既定12入力契約/単一ENV01 dispatchを変更せず実行禁止を保持 |
+| `P/Test-FirstFailure.ps1` | 202–203 Initialize-Run先頭50文hash、659–660 Test preflight18文hash、716–725のTest/Slash/KH/Context全体SHA | 独立作者。D4で2内部hash＋4入力bindingの6literalだけを最終組へ更新。18期待/診断本文/期限/抽出・拒否検査は不変 |
+| `early-trial-gate-design.md` | 99/147/396/425/450/638に7.6.6、487/727に.NET10.0.12 source根拠 | spec author→designerが順次当該追補のみ所有。版選択は本節を参照し、同定証拠/互換性設計を記録。全履歴置換なし |
+
+`P/Invoke-ArgvPathFocused.ps1`の70にも7.6.6 exactがあるが、旧source/hash/配置を持つ非現行入口であり更新・実行しない。`context-before-E5FE.ps1`、旧CONTEXT-TEST-HANDOFF、FROZEN/suite/run/log/toolchain.json、UUID下のfrozen/current/before copiesも保全する。`Test-ArgvPathEvidence`、`Test-ContextRejectionPredicate`、`Test-KnownHandle`、`Test-FirstFailure`の7.6.6表記は旧検証対象の説明として保持し、新runtime実行時の適用範囲は今回handoffに記録する。ただしFF本文全体を変更禁止とはせず、Preで判明した上表の6literalだけをD4の例外所有とする。その他の実行必須validatorが見つかれば無断で所有を拡大せずplannerへ返す。
+
+開始入力はInvoke318E6667・Test96BBB420・context034F2D04・P1 B1AE65B9・Slash02A011C2・HANDOFF E2D99548・ENVprobe E8B465F9、design9679B02Cである（完全SHAは親の凍結表/現行handoffを参照）。native source381F5E1D/EXE FF7C9A0F、fake3482075B、argv oracle7D74D443は不変として各作業前後に照合する。短縮SHAだけを実行承認入力に使わない。
+
+### 有限単位・依存・受入・必要検証
+
+| 単位 | 依存/規模/担当file | 受入条件とverification |
+| --- | --- | --- |
+| P7-0 環境同定 | S、source変更0。runner新UUIDの一回用証拠/logのみ | 固定exe/dll/config/depsの前後hash、実version/runtime、公式release/sourceの対応を採取。不一致/欠測を成功にしない。上記15秒一回を超えない |
+| P7-A 外部契約/設計/Pre | 0後、S、spec author→designerが既存design追補、planner本節 | 観測可能なversion一致/拒否/無副作用・既存安全不変をspec authorが確定し、designerが実runtime/API影響/実行到達範囲/正確なcommandsを設計。独立Pre PASS後planner精緻化と親受領。現stageだけでruntime再開不可 |
+| P7-B 独立有限oracle | A後、S、作者は`P/<新UUID>/`内の一回用script/manifest/証拠 | 下記V01–V08の入力/期待/抽出位置・件数・元statement全文を実装前にfreeze。旧sourceのV01拒否を期待する旧契約証拠は保存し、新契約に対するREDと区別する。adapter失敗は行動REDへ数えない |
+| P7-C version局所接合 | B後、M、別実装者Invoke/Testの2本→返却後作者Contextの1本 | 7.6.7 exact producer/validatorに統一し、版literal/対応説明と後段許可binding以外のbytes不変。独立V01–V08、Parser0/PSSA1.25.0診断0/実行error0/exit0。作者oracleを実装者が変更しない |
+| P7-D1 context束縛 | C局所Post後、S、作者Context/P1の2本 | 最終plan/design/Invoke/TestをContextへ、次にContext SHAをP1へ。context12の期待/抽出本文不変を独立確認、親が新hash承認。自己hash自己埋込みなし |
+| P7-D2 focused束縛 | D1後、S、別実装者Slash/HANDOFFの2本 | 上流最終hash→Slash→HANDOFF→親frozenの有向順で再束縛。case/variant/dispatch/停止契約不変。旧組混入拒否・全入力一致を独立review。実case0 |
+| P7-D3 ENVprobe束縛 | C/最終plan/design後、S、別実装者ENVprobeの1本 | 必要Invoke/Test/plan/design hashのみ更新、既定12入力集合/型/順序/前後照合/元例外優先/dispatch全文不変を独立review。ENV01実行0 |
+| P7-D4 FF回帰束縛 | D2の最終Slash確定後、D1/Cの最終Context/Invoke/Testを入力。S、独立作者`Test-FirstFailure.ps1`の1本 | 2内部hash＋4全体SHAだけを更新。元50文/18文のversion差分と許可済み最終Test/Slash/KH/Contextを根拠に親承認manifestへ束縛。6literal逆適用後の全bytes一致、18期待/診断/期限/非所有hash不変、Parser/PSSA0、独立binding review。FF18実行はD3を含む最終組が揃ったEだけ |
+| P7-E 新runtime互換性/Post | D1–4後、S、独立runner新UUIDログのみ、reviewer read-only | 下記限定局所集合を各一回、firstUnexpected停止。前後hash/実runtime/command/exit/件数/非実行範囲を独立確認。成功でPWSH改訂だけClosed。UNKNOWN-DESCENDANT/F3/80/fullへcredit0 |
+
+P7-C完了時とP7-E完了時をcheckpointとする。P7-Dは3–5file超の一括作業にせずD1→D2→D4、別枝D3を順次所有返却する。D4のFF全体SHAは親の最終manifestへ加え、上流Slash/Contextへ逆埋込みして循環させない。plan/designを変更すると下流bindingが失効するため、Aの精緻化を終えてfreezeしてからDへ進む。後の計画変更は影響するbindingだけを再reviewする。親のcurrent/review/runner/usage記録は子所有に含めず、既存文書へ接合する。
+
+FF Pre指摘の根拠は、705のAssert-SourcePreserved→725の4旧全体SHA拒否→729のAssert-ProbeStaticが18loop743より前にあることである。旧Test D8AD/Slash72244/KH0C82/ContextF46Fと旧2内部hashでは新組のFF18へ到達しない。D4はこの6期待hashだけを更新し、実行時の現物hash自動採番、hash検査削除、別adapter/framework、18行動期待の追随変更を禁止する。最終SHAはまだ未確定であり、親が実装後の許可差分と逆bytesを照合して承認する。
+
+有限version oracleはV01=実版7.6.7＋Run7.6.7 accept、V02=実版7.6.7＋Run7.6.6 reject、V03=実版7.6.6＋Run7.6.7 reject、V04=実版7.6.8＋Run7.6.7 reject、V05=実版7.6.7＋Run7.6.8 reject、V06=Run版欠落/null reject、V07=Run版`7.6.7 ` reject、V08=producerのpwshVersionが厳密にstring `7.6.7`である、の8安定ID・16観測とする。実版3入口×V01/03/04の9、Run側V01/02/05/06欠落/06null/07の6、producerの1である。各ASTは親scope/型/一意件数/offset/元全文を固定し、V01は原文実行、V03/04だけPSVersion.ToString()の単一ASTをObservedVersion局所引数へ可逆置換する。逆置換全文Ordinal一致を必須とし、自動変数上書き・別predicate再実装は0である。Run側は元Assert-Field→version型foreach→版Ifを順次抽出し、欠落とnullの拒否位置を分ける。各後続sentinelは正常1/throw時0を確認し無関係例外を成功拒否にしない。V08はNew-CaseFixtureの元valueだけを評価し、toolchain観測producerと混同しない。各5秒/全60秒の前後検査、main/CIM/child0、firstUnexpected停止であり、hard watchdogとは呼ばない。詳細はdesignの「独立作者用の有限抽出契約」を正とする。
+
+P7-Eの順序はV01–V08の16観測→既存Context12→MI MissingOs2→成功時MissingPure20→D4後のFF18→EO6→現行Slash/ENVprobeのValidateOnly各1回である。designの「P7-Eの既存commandと到達範囲」の8本を一括実行せず各結果後に次へ進む。version oracleは`P/<新UUID>/Test-PwshVersionContract.ps1`、既存各interface/引数はdesign記載を維持する。最終SHAと変数展開済み完全argvはsource確定後に親manifestへfreezeし、それまで実行承認を作らない。V/Context/MI/FF/EOのOutputRootはP直下の別UUID、ValidateOnly2本はR/verification直下の別UUIDであり作成しない。
+
+MIの実子上限1個・10秒自終了/全15秒finally込み、Pure各5秒/全60秒、Context各15秒/全120秒、FF各5秒/全60秒を保持する。EO6に存在しないhard deadlineを宣言しない。Contextは自身のStartTime/git読取を許し登録/Start/Stop/CIMはtrap、MI Osは実CIM登録1回と別の合成欠測rows、FFはprivate診断/JSON/atomic保存と合成dispatchまででmain/process/CIM/cleanup0である。ValidateOnlyはpreflight/config4path/tool/self読取とgit check-ignoreまで、初回write/import/rustc/fixture/dispatch前にreturnする。Run版拒否前の既存JSON/immutable台帳/CIM/期限読取や拒否後の診断terminal I/Oは保全し、S02をすべてのI/Oゼロとは解釈しない。未解決原因を再現させるOS刺激は追加しない。
+
+designerの.NET10.0.13公式Process.cs/Process.Windows.csの指定spanと10.0.12対応箇所の同形確認を受領した。StartTime cache、Refresh後のhandle継続、SafeHandle再利用、GetProcessTimesのthrowIfExited=false/借用ownsHandle=falseを既存Add-KnownProcess/Read-OwnedTreeへ結ぶsource根拠である。全file/binary完全一致の証明ではなく、実型はEのMIで検証する。HTTP全file比較のDNS失敗/空値は証拠に採用しない。Cargo config4pathとpowershell.config.jsonは異なるconsumerであり、NoProfileからPowerShell設定非読取を推定しない。
+
+既成功のnative argv/opaque UTF-16/期限/unknown非停止等のsource契約は変更span外のbytes/ASTと独立Postの対応が一致する範囲だけ再利用する。旧実OS/Cargo/native→pwsh/Start-Process PATH接合のPASSは7.6.6限定として残す。P7-Eの局所成功だけで7.6.7の全経路互換性を宣言しない。実native/Cargo接合はUNKNOWN-DESCENDANT packet後の既定gate再開時の未了条件である。全体test/releaseは製品提供時の既存条件を維持し、本docs/harness改訂で無関係な製品buildを反復しない。
+
+PSSAは既存ErrorActionPreference=Stop、module1.25.0、全ファイル通常rule、診断配列/件数、最終`PSSA_COMPLETE count=0`、実exit0を記録する。変更ps1/一回用oracleを対象とし、rule除外・mock結果・旧logによる代替なし。独立局所実行は親が承認した最終hashと新OutputRootに束縛し、現物hash採番だけで承認を作らない。
+
+### 各単位のexactモデル/effort・難度/リスク
+
+以下の割当はP7-0/A/B/C/D1/D2/D3/D4/Eの各単位の全7責任へ適用する。表の担当工程以外は非該当として起動せず、役の統合で独立性を省略しない。全値は今回呼出可能一覧のexact ID/対応effortであり、親model/effortを変更しない。
+
+| 役 | model / effort | 工程・理由 |
+| --- | --- | --- |
+| planner | `gpt-6-astra` / `high` | 全単位の依存/所有/精緻化、固定役。中難度/高risk：環境改訂と旧障害救済の混同を防ぐ |
+| external-spec author | `gpt-6-astra` / `high` | Aで限定外部契約、他単位は変更要求時の差戻し。固定役、中/高：利用者の版選択と安全契約の境界を定義 |
+| designer | `gpt-6-astra` / `high` | 0/Aのruntime/source照合、B–E設計逸脱判断。高/高：Process handle/APIとAST consumerの成立性が未検証 |
+| implementer | `gpt-6.1-sol` / `medium` | Cの2本、D2の2本、D3の1本のみ。低〜中/中：確定literal/spanの限定編集を逆bytes/独立oracleで検査可能 |
+| test author | `gpt-6-astra` / `high` | Bの独立8ID/16観測、C/D1のContext/P1、D4のFF6literal。高/高：実predicate抽出と版/束縛不整合を誤PASSにしない独立期待が必要 |
+| test runner | `gpt-6.1-sol` / `medium` | 0の同定、C/Dの局所確認、E独立実行。中/高：有限commandとfirstUnexpected/境界を忠実に記録し、原因推論/期待編集をしない |
+| reviewer | `gpt-6-astra` / `high` | A Pre、C局所Post、D binding review、E独立Post。高/高：未知所有/旧credit救済、循環binding、未実行の互換性宣言を防ぐ |
+
+0/Aは環境/source対応のため高risk、B/Cは多重version判定の抜けで高risk、D1–4は古い承認と新sourceの混在で中〜高risk、Eは実runtime/保持handleを含み高riskである。D4は作者`gpt-6-astra/high`が独立期待hashを所有し、reviewer`gpt-6-astra/high`が逆bytes/最終bindingを検査し、runner`gpt-6.1-sol/medium`がEでFF18を実行する。D4に実装者のtest編集を割り当てない。通常補助1役・fresh context・親dispatch、再委任なし。起動指定とprovider返却metadataは区別し、未取得を推定しない。利用不能model/effort/skillはblockerであり黙って置換しない。skillは既存7役の担当範囲とPS編集/監査に必要なpowershell-automation/powershell-reviewのみを適用し、新skillや常設仕組みを導入しない。
+
+### task-list・停止・次handoff
+
+- [x] P7-plan0：承認済みversion選択、現行consumer/binding、旧障害との分離を仮計画へ記録した。
+- [ ] P7-0：固定環境のread-only/有限version-only同定と一次資料対応を受領する。
+- [ ] P7-A：external-spec→design→独立Pre、planner精緻化と親受領を完了する。
+- [ ] P7-B/C：作者8ID/16観測凍結→別実装者version接合→独立局所検査/Postを完了する。
+- [ ] P7-D1/D2/D3/D4：所有を順次返却し、FF6literalを含む必要bindingの独立reviewを完了する。
+- [ ] P7-E：限定新runtime集合/ValidateOnly/独立Postを完了し、未了の実経路互換性を明記する。
+- [ ] 次packet：保存F3証拠を入力にUNKNOWN-DESCENDANT-OPEN01の因果診断を別計画化する。本checkboxは原因修正/再試行承認ではない。
+
+一次source/consumer対応、Vの可逆抽出方法、局所command到達範囲はdesignerから受領済みである。残る未決はFF6literalのdesigner追補と独立再Pre、未実装の最終source/hash/完全argv、局所実行の実証である。実runtime版と採取区間の前後hash一致は上記P7-0結果で取得済み、再取得しない。版選択やD4の技術的所有是正の利用者再承認は不要である。別の版・修理・権限・安全判定変更が必要になった場合だけ具体的不足を親へ返す。予期外FAIL/欠測/hash変化は停止し、同じ試験の自動retryや失敗skipを行わない。
+
+次handoffは親→designer `gpt-6-astra/high`の既存design FF箇所限定追補→reviewer `gpt-6-astra/high`の独立再Preである。PASSと本計画の親受領後に作者`gpt-6-astra/high`のBへ進み、B/C/D1–4/Eの順序と独立性を保持する。Preの未解決指摘があればplannerへ戻し実装へ飛ばない。rollbackは今回source差分の取消しと証拠保全だけを親が扱い、OSを7.6.6へ戻さない。旧sourceを戻してもruntime不一致の停止状態であり実行許可ではない。
+
+本plannerの完了境界は本追補の保存・diff/参照/所有/hash確認までである。開始共有週枠85%は親受領値、子`/root/pwsh767_plan`の終了週枠/開始終了token/provider返却model・effort/包含関係は未取得。親が既存usageへ接合し、専有量/改善率を推定しない。plannerのcode/test/runtime/再委任/commit/公開は0である。

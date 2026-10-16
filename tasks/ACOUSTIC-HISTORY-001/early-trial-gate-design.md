@@ -828,3 +828,138 @@ MI-Dの独立接合/Pre・局所Postと再束縛ValidateOnly(dispatch0/runtime0)
 MI-Aの完了は本節、文書diff/参照確認と独立Preへのhandoffである。実装者はRead-OwnedTreeの既知分岐だけ、作者は既存testのMI phaseだけを所有する。新helperを必要とする場合や上記証明が実型で成立しない場合は具体的不足を親/plannerへ返し、外部G5を弱めて実装しない。残るリスクは信頼済み台帳producerの将来変更、同期OS/API停滞、process属性の欠測原因未確定、実suiteに別失敗が残ることである。保持handle同一性は外部からの強制Close/並行再関連付けへの一般的防御ではなく、既存単一actorの所有/lifecycle不変を前提とする。
 
 設計着手時の既存dirtyはplanとusageであり、作業中の親review更新も保持した。本子のtoken/週枠/実返却model・effort/親子包含は未取得、親のusageへ接合する。設計書以外の編集・試験実行・process fixture起動・再委譲・公開は0。設計のみなので製品cargo test/buildは非該当である。
+
+## TOOLCHAIN-PWSH-DRIFT01：7.6.7外部契約（P7-A、仕様レビュー提出）
+
+2026-10-16。利用者の「7.6.7でよい」という承認を親から受領した。要求の正本は[計画](early-trial-gate-plan.md)の同名P7節（P7-R1–R3）であり、本節はその観測可能な受入条件を定める。版選択の規範を二重化しない。対象は現行の `R/Invoke-CargoGate.ps1`、`R/Test-CargoGate.ps1`、`P/Test-ContextPreflight.ps1` の実版検査・Run版検査・producerと必要な束縛である。Rは本書既定cargo-gate root、Pは `R/verification/argv-path01`。所有は本節だけ、状態は親レビュー・承認待ちであり、後続設計・実装は本節の承認前に依存しない。
+
+前提は「固定版変更だけが承認済み」「旧障害の原因は未確定」「既存安全条件は維持」の三点である。既存7.6.6/.NET10.0.12の記載は当時の証拠として保存する。将来実行の7.6.7への切替は計画P7の同定・Pre・実装・検証・束縛完了後に限り有効であり、版選択の承認や本追補の保存だけで旧hash検査を失効させない。非現行入口・保存snapshot・旧runを7.6.7へ書き換えない。
+
+### 観測可能な約束と追跡
+
+| 安定受入ID / 要求根拠 | 契約と必要な受入証拠 |
+| --- | --- |
+| P7-S01 / P7-R1・利用者の版選択 | 固定実path `F:/Program Files/PowerShell/7/pwsh.exe` の実版が厳密に `7.6.7` である時だけ各実版検査を通過する。Runの既存UTF-8 JSON field `pwshVersion` は文字列 `7.6.7` の時だけ版検査を通過し、producerもこの文字列を出力する。数値化、trim、最低版・範囲・wildcard・旧版併用へ広げない。他の既存検査は引き続き必要であり、版一致はgate全体の起動承認やPASSではない。証拠はV01–V08と3file内の対象検査/producerの網羅対応である |
+| P7-S02 / P7-R1・P7-R2 | 版欠落/null/不一致は既存の拒否として観測され、警告だけで続行しない。新しい例外型・文言・結果schemaは約束せず、元の拒否・例外伝播を保つ。拒否後に次のgate処理、Cargo/native/製品起動、Run版の自動補正、設定/PATH変更へ進まない。有限局所検査自身の隔離fixture/証拠保存は無副作用の対象外であり、既存実データ・公開済み証拠の書換えは0である |
+| P7-S03 / P7-R2 | 変更による既存ownership、未知process非停止、全argv exact、期限、回収、取消し、terminal、品質gateの緩和は0である。元の取消し/期限処理を保持し、新しいretryや待機延長を追加しない。hash不一致・欠測・予期外FAILは停止し、自動retry/skip/別版へのfallbackをしない。証拠は限定差分外の不変照合、計画P7-Eの新runtime局所集合、独立Postである |
+| P7-S04 / P7-R2 | 現行承認入力は同じ最終source・plan/design・入口/handoffの組へ束縛する。旧新混在や未承認hashでは実行を許さない。旧保存結果を上書きせず、新しい検証結果は既定の新UUID隔離rootに保存し、対象hash・実runtime・実行範囲・件数・exit・未実施を対応付ける。新しい永続schema・既存記録の移行は追加しない。証拠は必要bindingの独立照合と現行Slash/ENVprobeのValidateOnly各1回である |
+| P7-S05 / P7-R3・対象外指定 | 旧F3のcontrol2PASS、focused0PASS/1FAIL/9NotRun、完了marker欠落は保持する。7.6.7同定や局所検査成功を旧FAILの原因確定・治癒・再実行許可に換算しない。UNKNOWN-DESCENDANT-OPEN01は別packetであり、本packetによるENV01/F3/focused10/残9/標準80/variant/製品full/試用提供の解除は0である。証拠は結果/handoffの未了明記と当該dispatch0である |
+
+画面・利用者操作・UI入出力・アクセシビリティの変更はない。操作面は既存検証入口と既存Run入出力だけであり、新しいCLI引数や承認操作は追加しない。nativeのIME/mic/pen/TTS・実認証等の既存未了受入はそのまま残る。
+
+### 有限の正常・境界・失敗例
+
+各例は他の既存前提が満たされている時の**版検査だけ**の期待である。「通過」は対象処理の起動を意味しない。実版の合成入力は局所検査用であり、旧/未来pwshの実起動を要求しない。
+
+| 計画受入ID / 対応仕様 | 実版入力 / Run.pwshVersion | 期待 |
+| --- | --- | --- |
+| V01 / P7-S01 | `7.6.7` / `"7.6.7"` | 正常：対象の版検査を通過 |
+| V02 / P7-S01・02 | `7.6.7` / `"7.6.6"` | 旧Run版を拒否 |
+| V03 / P7-S01・02 | `7.6.6` / `"7.6.7"` | 旧実版を拒否 |
+| V04 / P7-S01・02 | `7.6.8` / `"7.6.7"` | 未来実版も拒否し、最低版条件にしない |
+| V05 / P7-S01・02 | `7.6.7` / `"7.6.8"` | 未来Run版を拒否 |
+| V06 / P7-S01・02 | `7.6.7` / field欠落、JSON `null` | 二つの入力を個別に拒否。既存schema/StrictModeで先に拒否される経路も証拠として区別 |
+| V07 / P7-S01・02 | `7.6.7` / `"7.6.7 "` | 末尾space一個でも拒否し、正規化しない |
+| V08 / P7-S01 | 既存producerが作るRun | `pwshVersion` の型がstring、値が厳密に `7.6.7` |
+
+V01–V08は8個の安定IDであり、V06の二入力や3fileの対応を「8実行」と誤集計しない。作者は必要な各観測を明記し、未実施/adapter失敗を版拒否PASSへ数えない。例外がどの既存検査から出たかとP7-S02の後続非到達を区別して記録する。hash混在・予期外失敗はP7-S03/04の失敗例であり、成功後の旧F3再開はP7-S05で禁止する操作である。
+
+### 現在の証拠、未決と引継ぎ
+
+[P7-0報告](../../target/early-trial-build/et3/cargo-gate/verification/argv-path01/870de181-c1f9-4bac-8834-12acde439ec5/report.md)は固定実exeの `PSVersion=7.6.7`、実 `.NET 10.0.13`、5file前後hash一致、version-only一回361ms/exit0を記録している。これは同定区間の証拠であり、P7-S01–05の実装/互換性受入は未実施である。hash `A583A3721FEEBC4F9552A02358BC81BBDD41E2E18BB3F424226F2B1E0BF07DEB` はpwsh.dll、SMA.dllは `70701F20AFBBF4E763924C2BDD0C0E9A20EEC35A0E4EFF439E0CCF77F20D6B26` である。計画の旧SMA表記の訂正は親/plannerへ返す。
+
+未決は(1)各実predicate/producerに対する有限例の到達・抽出成立性、(2)実.NET10.0.13と既存consumerの互換性根拠、(3)承認対象の最終command/hashと局所集合の到達範囲である。これらはdesigner/独立Preの責任へ渡し、本節で内部API・AST手段・新しい実行commandを決めない。仕様を満たすために型変換、検査順序、安全条件又は対象fileの拡大が必要なら、未承認の変更として親へ戻す。現在の入力に、利用者へ再質問が必要な版選択の曖昧さはない。
+
+本仕様作業の完了境界は本節の保存・文書差分/参照確認と親へのhandoffである。`agent-skills:spec-driven-development` のSpecify工程だけを適用した。計画割当はexternal-spec author `gpt-6-astra/high`、実返却model/effort・開始終了token・週枠・親子包含は未取得である。親が既存usageへ接合する。アプリ/test/planの編集、runtime起動、再委任、commit、公開は0である。
+
+## TOOLCHAIN-PWSH-DRIFT01：内部接合設計（P7-A、独立Pre提出）
+
+2026-10-16。planner指定designer `gpt-6-astra/high`。入力は計画P7節（受領SHA `FF5DFF7F5155BDA89069D29A58B3C81222F858871AD18613E9E59151CACE7DE0`）、上記P7-S01–05/V01–08、P7-0報告である。親から仕様本文を設計入力として承認した旨と本節の逐次所有を受領した。仕様冒頭の承認待ち表記は当時の作者提出状態として保存する。独立Preとplanner精緻化は未了であり、本節は実行許可ではない。AGENTS、development-team、KPI、`agent-skills:api-and-interface-design`を読了し、既存private関数と証拠境界へ適用した。UI変更はなくwordweave-egui-uiは非該当、REST/新module/常設frameworkは不要である。
+
+### 受入から実sourceへの対応
+
+以下の行番号は着手時のInvoke `318E6667…`、Test `96BBB420…`、Context `034F2D04…`に対する位置であり、作者は最終SHAとASTの一意選択で再同定する。行番号だけを抽出条件にしない。
+
+| ID | module / 型・責任 | 最小変更と証拠 |
+| --- | --- | --- |
+| S01・S02 / V01–07 | InvokeのInitialize-Run、実版1045、Run schema1054–1057、version型1080–1082、値1083。実版はToString()、RunはIDictionaryのstring field | 実版とRun版の`7.6.6` literalを`7.6.7`へ。実版拒否文中の対応版表示も同時更新する。条件演算子、型guard、schema、順序、throw先は保持する |
+| S01・S02 / V01・03・04 | Test mainの2130、Contextの113。前者IfStatementAst、後者Assert-TestCondition CommandAst | 実版literalと対応説明だけ。Contextのbool→既存assert→throwを使い、独自の比較関数に置換しない |
+| S01 / V08 | TestのNew-CaseFixture内`$run` HashtableAst、742のpwshVersion value PipelineAst | 値のstring literalだけ。toolchain.jsonの2188は実PSVersion.ToString()の観測producerでありRun producerと混同せず変更0。case表80/EO/ESは不変 |
+| S03 | InvokeのGet-Identity589–617、Add-KnownProcess710–721、Read-OwnedTree1418以降、FF/catch/finally | version以外のbytes/AST不変とMI/FF/EOの独立新runtime証拠。保持handleを新しく取得する設計変更0 |
+| S04 | Context/P1、Slash/HANDOFF、ENVprobeの固定入力 | 最終plan/design/Invoke/Test→Context→P1→Slash→HANDOFF→親の凍結表。ENVprobeは最終plan/design/Invoke/Testから別枝で束縛。自己hashを自己埋込みしない |
+| S03・S04 / FF18到達 | Test-FirstFailureの内部2hashとTest/Slash/KH/Contextの4入力SHA | P7-D4で最終D2後に独立作者が6literalだけを更新し、独立review後のFF全体SHAを親manifestへ束縛する。FF18行動期待は変更しない |
+| S05 | 親結果/handoff、各入口のValidateOnly return | 旧FAIL保持、実case dispatch0と未了を明記。P7完了から未知子孫調査・再実行へ自動遷移しない |
+
+### 拒否位置、状態と副作用
+
+Invokeの実版拒否より前にはRunPath/InvocationPayloadPathのscript変数代入とparameter-set検査がある。Test mainの実版拒否前はpath/reparse/不存在/Windows principalの読取、Contextは境界/不存在/reparseの読取と局所trap等の初期化である。これらの版拒否前にCargo/native/製品のStartはない。Testは2132のgit check-ignoreと2140以降の初回directory write、Contextは129のgit check-ignoreと131以降のfixture保存へ版一致後にだけ進む。
+
+Run版拒否はより後である。InvokeはRunOwner時にInitialize-RejectionContext（895以降）を実行し、Read-JsonがUTF-8/JSONを読みImmutable台帳を更新し、CIM/self/launcher照合、RunDirectory/ValidationInput/期限/RunBudget更新、Assert-Controlを経てRun版に達する。schema field欠落はAssert-Field、nullはversion型guardで拒否される。mainはInitialize-Run成功後だけ4役dispatchへ進む。失敗時は既存catchがfailure/abort/statusを設定し、既に確立したrejection contextがあればfinallyのComplete-BootstrapAudit→Write-Terminalへ進み得る。したがってS02は後続gate起動・自動補正の非到達であり、既存診断I/Oや検査前の読取まで0とは主張しない。例外を捕まえて成功へ直すadapter、検査の前倒し、診断保存の削除は採用しない。
+
+新async/cancellation境界はない。元Assert-Control/monotonic時計/cleanup期限、MIの登録→元ProcessとSafeHandle保持→終了観測→abort→FF一回→元throw→cleanup→terminalの順を保存する。Run/FF/terminalの永続schemaとatomic公開順は不変、新証拠だけを新UUIDへ保存する。拒否/timeout/hash変化からの復旧は証拠保存と親への返却であり、自動retry・skip・旧版fallback・未知process停止は0である。
+
+### .NET 10.0.13と旧10.0.12契約の対応
+
+P7-0の実.NET10.0.13と5file前後SHA一致を実環境入力とする。公式v10.0.13の[Process.cs](https://github.com/dotnet/runtime/blob/v10.0.13/src/libraries/System.Diagnostics.Process/src/System/Diagnostics/Process.cs)111–118（SafeHandle）、184–194（StartTime）、1089–1117（Refresh/GetOrOpenProcessHandle）と、[Process.Windows.cs](https://github.com/dotnet/runtime/blob/v10.0.13/src/libraries/System.Diagnostics.Process/src/System/Diagnostics/Process.Windows.cs)106–113（RefreshCore）、218–221（StartTimeCore）、637–654（GetProcessTimes）、697–734（GetProcessHandle）を読取確認した。StartTimeはcache、Refresh/Windows RefreshCoreはそれと保持handleを消さず、SafeHandleは保持参照を再利用する。未cache開始時刻はthrowIfExited=falseで保持handleを使い、借用wrapperはownsHandle=falseである。
+
+旧[Process.cs v10.0.12](https://github.com/dotnet/runtime/blob/v10.0.12/src/libraries/System.Diagnostics.Process/src/System/Diagnostics/Process.cs#L1089-L1117)と[Process.Windows.cs v10.0.12](https://github.com/dotnet/runtime/blob/v10.0.12/src/libraries/System.Diagnostics.Process/src/System/Diagnostics/Process.Windows.cs#L637-L734)の対応するRefresh/GetOrOpenProcessHandle、GetProcessTimes/GetProcessHandle本文を公式raw表示で照合し同形を確認した。旧MI設計727の意味と新tagの上記実装は整合する。全fileのbytes一致や同梱binaryとの完全同一性は未確認である。補助的なshell HTTP全file比較はDNS失敗で取得0だったため、その空値比較結果は証拠から除外した。
+
+consumerはAdd-KnownProcessのpinnedHandle保存とRead-OwnedTreeの前後ReferenceEquals/IsClosed/IsInvalid、1530のRefresh、1531のStartTime、UTC6/UTC7/key照合である。StartTimeを毎回新しいOS照会とみなす根拠は新tagにもない。source上の成立と実型成立を分け、MI MissingOs2で同じ実Process/SafeProcessHandleのlive→EOF終了を確認し、MissingPure20で欠測guard/1tick差/参照変化/例外を確認する。旧OS PASSを新runtime PASSへ流用しない。
+
+親取得済み[PowerShell v7.6.7 release](https://github.com/PowerShell/PowerShell/releases/tag/v7.6.7)のconfig読取IO/JSON耐性、PATH/MSIX、Native更新に対し、既存Get-ConfigSnapshot（Test798–805）が読むのは4個の**Cargo** configでありpowershell.config.jsonではない。Run JSONはRead-JsonのUTF-8厳密decode→System.Text.Json重複key確認→ConvertFrom-Jsonであり、PowerShell起動設定読取とは別consumerである。固定絶対exeとNoProfileはPATH探索/profileを避けるがPowerShell設定の完全な非読取を意味しない。既存4path snapshot、Get-EnvironmentSnapshotのPATH、固定native argv/sourceは変更0。局所JSON/AST/ScriptBlockの実行成立はContext/FF/EOへ、実native→pwsh/Cargo PATH接合は別packet後の既存gateへ残す。MSIX/Native更新が無影響であるという全経路の断定はしない。
+
+### 独立作者用の有限抽出契約
+
+P7-Bは新UUID内の一回用oracleだけを作り、production/test mainをdot-sourceしない。型名と親scopeを条件に以下を各一意抽出し、SHA・開始/終了offset・元statement全文・件数をmanifestへ固定する。今回read-only AST確認では実版IfがInvoke1045/Test2130各1、Context assertion113が1、Run `$run` のpwshVersion value742が1であった。Test2188の観測producerは別scopeとして除外する。Parse error/個数不一致/逆照合不一致はAdapterFailure、受入RED/PASSに数えない。
+
+- 実版3判定：V01は元statementをそのまま実行する。V03/04だけ`$PSVersionTable.PSVersion.ToString()`のInvokeMemberExpressionAst一個を局所string引数`$ObservedVersion`へ置換する。Windows条件と比較/throw/assert本文を保持し、逆置換した全文が元Extent.TextとOrdinal一致することを要する。自動変数の上書きや別の比較式の再実装はしない。Contextでは元Assert-TestCondition一関数も抽出する。3入口×V01/03/04=9観測である。
+- Run判定：Initialize-Runの元Assert-Field呼出1、元Assert-Field定義1、cargoVersion/pwshVersionのforeach1、Run版If1を順序どおり抽出する。候補は独立fixtureのIDictionaryで、全schema keyを満たしcargoVersionは非空string、対象fieldのみ差し替える。V01/02/05/06欠落/06null/07=6観測。欠落は元Assert-Fieldで停止し型/値検査非到達、nullは型guardで停止することを記録する。前段のCIM/期限/OSを局所検査へ持ち込まず、その省略を明記する。
+- V08：New-CaseFixture内`$run`のpwshVersion keyに対応する元value PipelineAst一個を評価し、string型と独立期待`7.6.7`を検査する。fixture producer全体を起動しない。JSON往復を同じ観測内で検査しても別case/PASSへ水増ししない。
+
+合計は8受入ID・16個の独立観測である。各観測の後続sentinelはthrow時非到達、正常時1回を記録し、元statement以外の非関連例外を期待拒否としない。新oracleは同期の局所評価のみ、各5秒/全60秒を前後で検査し、hard watchdogとは呼ばない。実child/network/CIM/gate main0、firstUnexpected停止。旧sourceがV01を拒否する旧契約結果と、新契約で期待するREDを別recordにする。全16の旧結果を要求して最初の不一致後も回し続けない。既存条件をこのseamで抽出できなければ作者はPreへ差し戻す。
+
+### Pre指摘のFF束縛接合（P7-D4）
+
+独立PreのCHANGES_REQUIRED一件を受け、planner精緻化（plan SHA `FF96F8DE80D3E7602F85F7846AF3C8C4C45AB1FF7A4B3F0806AE6A3DCEF817D2`）のD4を接合する。既存Test-FirstFailure.ps1は202–203でInitialize-Run先頭50文、659–660でTest main preflight18文の結合text hashを固定している。version literal変更で両hashが変わる。さらに716–725のTest旧D8AD/Slash72244/KH0C82/ContextF46Fの4whole-file SHAが最終組と一致しない。705のAssert-SourcePreserved→725の入力照合→729のAssert-ProbeStaticは743の18case loopより前であり、旧FFをそのまま呼んでも18caseへ到達しない。これはadapter/binding拒否でありFF行動FAILではない。
+
+D4は最終D2のSlash、D1のContext、CのInvoke/Testと既存KHの承認済み組を入力とし、独立test author `gpt-6-astra/high`がTest-FirstFailure.ps1一fileの**2内部hash＋4入力SHAの6literalだけ**を所有する。内部hashは元50文/18文の許可version差分と元のExtent.Text結合/UTF-8 hash算法に対応付け、4入力は親承認manifestに対応付ける。実行時に現物hashを採番して受理する変更、hash検査削除、抽出/診断本文・18期待・各5秒/全60秒・非所有hashの変更は0である。作者は6literal逆適用後の全bytes一致を証拠とし、独立binding review、Parser/PSSA診断0を経て親がFF全体SHAを最終manifestへ加える。上流Slash/Contextへの逆埋込みはしない。D4自体ではFF18を実行せず、D3を含む最終組と親freezeが揃ったP7-Eでだけ下記FF commandを使用する。
+
+### P7-Eの既存commandと到達範囲
+
+すべて親承認の最終hashを引数又は事前manifestへ固定し、同じ固定exeをNoLogo/NoProfile/NonInteractiveで呼ぶ。`$r`は絶対R、`$p="$r/verification/argv-path01"`、`$invoke="$r/Invoke-CargoGate.ps1"`、`$test="$r/Test-CargoGate.ps1"`、`$context="$p/Test-ContextPreflight.ps1"`、`$probe="$p/Invoke-FirstFailureEnv01.ps1"`とする。`$approved*Sha`は親承認の大文字64hex、`$fresh*`は未存在・非reparse・ignoredの別UUID絶対pathであり、現物hash読取を承認に代用しない。V用oracleはP7-Bの新UUID直下`Test-PwshVersionContract.ps1`を`$versionOracle`へ指定する内部検証成果物であり、既存CLIを増やさない。
+
+```powershell
+& 'F:/Program Files/PowerShell/7/pwsh.exe' -NoLogo -NoProfile -NonInteractive -File $versionOracle -InvokePath $invoke -ExpectedInvokeSha256 $approvedInvokeSha -TestPath $test -ExpectedTestSha256 $approvedTestSha -ContextPath $context -ExpectedContextSha256 $approvedContextSha -OutputRoot $freshVersion
+& 'F:/Program Files/PowerShell/7/pwsh.exe' -NoLogo -NoProfile -NonInteractive -File $context -DriverSha256 $approvedSlashSha -OutputRoot $freshContext
+& 'F:/Program Files/PowerShell/7/pwsh.exe' -NoLogo -NoProfile -NonInteractive -File "$p/Test-KnownHandle.ps1" -SourcePath $invoke -ExpectedSourceSha256 $approvedInvokeSha -OutputRoot $freshMissingOs -Phase MissingOs
+& 'F:/Program Files/PowerShell/7/pwsh.exe' -NoLogo -NoProfile -NonInteractive -File "$p/Test-KnownHandle.ps1" -SourcePath $invoke -ExpectedSourceSha256 $approvedInvokeSha -OutputRoot $freshMissingPure -Phase MissingPure
+& 'F:/Program Files/PowerShell/7/pwsh.exe' -NoLogo -NoProfile -NonInteractive -File "$p/Test-FirstFailure.ps1" -SourcePath $invoke -ExpectedSourceSha256 $approvedInvokeSha -ProbePath $probe -ExpectedProbeSha256 $approvedProbeSha -OutputRoot $freshFirstFailure
+& 'F:/Program Files/PowerShell/7/pwsh.exe' -NoLogo -NoProfile -NonInteractive -File "$p/Test-EnvRunnerOracle.ps1" -SourcePath $test -ExpectedSourceSha256 $approvedTestSha -OutputRoot $freshEnvOracle
+& 'F:/Program Files/PowerShell/7/pwsh.exe' -NoLogo -NoProfile -NonInteractive -File "$p/Invoke-ArgvPathFocusedSlash.ps1" -NativeSourceSha256 $approvedNativeSourceSha -NativeExeSha256 $approvedNativeExeSha -OutputRoot $freshSlash -ValidateOnly
+& 'F:/Program Files/PowerShell/7/pwsh.exe' -NoLogo -NoProfile -NonInteractive -File $probe -NativeSourceSha256 $approvedNativeSourceSha -NativeExeSha256 $approvedNativeExeSha -OutputRoot $freshProbe -ValidateOnly
+```
+
+上記は一括shellではなく、各commandのexit/件数/hash/firstUnexpectedを親又はrunnerが確認してから次の1本へ進む列である。失敗時残りはNotRunとし再実行しない。V/Context/MI/FF/EOのOutputRootはP直下、最後2個はR/verification直下で、ValidateOnlyはそれらを作成しない。oracle自身/既存KH/FF/EO/入口のSHAも事前の親manifestに含め、前後一致を採る。P7-0の5環境file前後値、実PSVersion/FrameworkDescription/Environment.Versionを各実行の証拠へ対応させる。未取得なら旧値で埋めない。
+
+特に5本目のFF commandはD4の6literal接合・独立review・FF全体SHA承認完了を実行前提とする。旧FFへの新SourcePath/ProbePath引数だけでは内部/固定入力hashは更新されず、この前提を満たさない。
+
+| 局所集合 | 実到達・許容I/O | 上限と非到達 |
+| --- | --- | --- |
+| V16観測 | 上記元predicate/value、隔離manifest/results | 各5秒/全60秒、CIM/実child/main0 |
+| Context12 | 元producer prefix/Initialize-Run等、JSON/sidecar/Runと合成identity。現在processのStartTime読取、git check-ignoreあり | 各15秒/全120秒。登録・監視・Start/Stop/CIM等は既存trap。driver guard2観測は既存12内で、全Slash ValidateOnly実行とは別。最終Slash SHAを明示するためContextにSlash hashを埋め込む循環はない |
+| MI MissingOs2→MissingPure20 | Osは元typed Get-Identity/Add-KnownProcess/Read/termination、実CIM登録1回＋別の合成欠測rows。Pureは既存adapter/型代用 | Osは実合成pwsh子1、子10秒自終了、全15秒finally込み、保持launch handle/EOF回収のみ。Os成功後だけPure各5秒/全60秒。製品/native/Cargo0 |
+| FF18 | D4完了後のprivate FF projector/writer/Invoke-GateFailure、隔離JSON/atomic保存と合成dispatch | 各5秒/全60秒の前後検査。Invoke/ENVprobeのmain0、実process/CIM/cleanup0。probe12入力/dispatch本文も静的照合。6literal以外の本文/期待不変 |
+| EO6 | Test内UTF-16復元＋比較statementと独立string fixture | 実process0、main0、JSON証拠のみ。現scriptにhard deadlineはない。同期有限6件であり新watchdog保証を加えない |
+| Slash/ENVprobe ValidateOnly各1 | Testのprefix＋main読取preflight18文、Cargo config4path、Pester ListAvailable、Get-Command rustc、tool hash/self path/Get-Process、git check-ignore | ValidateOnly returnが初回write/Pester import/rustc起動/fixture/dispatchより前。新suite/case/ENV01を作らない。Get-Process読取をprocess起動と混同しない |
+
+既存KH/FFのコメントにある7.6.6は旧成立条件として保存し、実exact-version validatorではないことを読取確認した。新runtimeは本handoff/親manifestで指定する。Contextが読む旧toolchain.jsonはfake source/exe hashの照合に使用し、旧pwshVersionを新runtime実測へ転記しない。
+
+### Preから次担当への引継ぎとリスク
+
+独立Preは本設計の16観測/seam、既存拒否時診断I/O、commands/到達範囲、順次bindingを確認し、plannerがP7-B以降を精緻化する。作者は承認後にoracle/manifestを作り、実装者は指定3fileのversion literal/対応表示だけを順次所有し、D1–D4は最終文書凍結後に行う。D4は独立作者へ逐次所有し、FF一fileの6literalだけを接合する。最終SHAは未確定なので、上記commandの変数展開済み完全argv/hash表はrunner dispatch前に親が凍結する。未確定値を現在hashで自動承認しない。
+
+変更ps1と新oracleはParser error0、PSSA1.25.0全通常rule診断0、Stop設定・診断配列・`PSSA_COMPLETE count=0`・実exit0を要する。version/説明/許可bindingを逆適用したbytes一致とcase/dispatch/MI/FF/EO本文不変を独立確認する。FFはD4の6literalだけが例外であり、逆適用後の全bytes一致を要する。診断の巨大化、モデル/gate変更、全体build追加は本設計の範囲外である。
+
+残るリスクは同期API/I/Oが返らない場合の強制中断保証なし、PowerShell設定/Native/PATHの全経路未実測、CIM欠測と旧UNKNOWN-DESCENDANTの原因未確定である。これらをliteral更新や局所PASSで消さない。型guardの変更、追加必須validator、抽出の別predicate化が必要になった場合は具体的spanと不足をplanner/specへ返す。本設計の完了は追補・diff/参照確認とhandoffまでであり、P7-Eや実装完了ではない。
+
+着手時dirtyはplan/design/usage/currentであり他者差分を保持した。本子のprovider返却model/effort・開始終了token/週枠/親子包含は未取得。検証対象runtimeの明示起動・gate/fixture実行・source/test/設定編集・再委任・commit/公開は0。read-only AST parseと公式source読取、文書編集だけを実施した。

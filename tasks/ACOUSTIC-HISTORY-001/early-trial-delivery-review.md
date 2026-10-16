@@ -1,5 +1,15 @@
 # ET3 試用EXE提供・独立レビュー記録
 
+## TOOLCHAIN-PWSH-DRIFT01：7.6.7採用のPre（2026-10-16）
+
+利用者が7.6.7採用を承認。P7-0同定は実7.6.7/.NET10.0.13、5file前後SHA一致、起動1回361ms/exit0、有限同定8PASSである。pwsh.dll A583…とSMA.dll70701F20…を区別する。互換性/P7全体のPASSではない。
+
+独立Pre（pwsh767_pre、指定Astra/high）はplanFF5DFF7F/designD29184B5にCHANGES_REQUIRED、確定指摘1件を返した。P7-EのTest-FirstFailure.ps1は202–203/659–660の内部AST hashと716–725のTest/Slash/KH/Context旧全体hashで18case loopより前に停止するため、追加binding所有が必要である。plannerへ2内部hash＋4入力bindingだけの限定更新・逆照合・独立reviewを返した。18期待/診断本文/期限・検査自身は維持する。影響確認の仮hashを承認値に使わない。
+
+他の確認範囲ではV8ID/16観測の可逆seam、schema→型→版、拒否時既存診断I/O、ContextへのDriverSha引数、MI実型/保持handle、EO/ValidateOnlyのhard deadline非保証は整合した。実装/runtime検証は未実施であり、FF binding是正のPre再確認後に進む。旧F3FAIL/UNKNOWN-DESCENDANT、ENV/F3/80/full/試用提供の未解除は維持する。
+
+再PreはplanFF96F8DE/design6F845988にPASS、新規指摘0。D4のFF6literal限定更新とD2→D4、D3を含む最終組確認、逆bytes/18期待/期限保持/独立review/親manifestを受入れた。P7-Aの設計上のP1のみ閉鎖し、FF実装やFF18成功には換算しない。親はこの規範組をP7-B以降の入力として承認し、文書checkpoint後に独立作者へ進む。
+
 ## MI-F／EO-Fの再開（2026-10-16）
 
 F3初回はcontrol2PASS、focused0PASS/1FAIL/9NotRun/実exit1/34.578秒で停止した。suite b5bb9069-90e5-429b-8c5b-97c7f7f22f75／run77a4759e-0508-4cdd-966b-140c3ef89a12、ENV01の元errorはBEHAVIOR_ASSERTION: Unexpected gate failure、AP1未到達/argvEvidence0、事前15→fake後16全入力一致/sourceMatched=true/caseBodiesUnmodified=true。REPORTはR/verification/b5bb9069-90e5-429b-8c5b-97c7f7f22f75.F3-REPORT.md（A739994A）。再試行/修正/残9/80/full/製品起動0。

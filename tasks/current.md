@@ -2,6 +2,14 @@
 
 ## 最新状態（2026-10-16）
 
+利用者がPowerShell 7.6.7採用を承認した。TOOLCHAIN-PWSH-DRIFT01は限定計画追補を保存し、固定exe・実ロードruntimeの同定から進める。計画は[既存plan](ACOUSTIC-HISTORY-001/early-trial-gate-plan.md)のP7節を参照する。版の厳密一致・安全判定・期限は維持し、同定→仕様/設計/Pre→独立oracle→局所変更/束縛→限定互換性/Postを完了境界とする。旧F3 FAILとUNKNOWN-DESCENDANT-OPEN01は未解決であり、ENV01/F3/残9/80/full/試用提供は今回解除しない。開始共有週枠85%（専有量不明）、親モデル不変。
+
+以下のF3結果と旧固定組は保存証拠であり、新7.6.7用の実行承認ではない。
+
+P7-0同定は起動1回/361ms/exit0、実7.6.7/.NET10.0.13、5file前後SHA一致である。証拠は`target/early-trial-build/et3/cargo-gate/verification/argv-path01/870de181-c1f9-4bac-8834-12acde439ec5/report.md`。A583…はpwsh.dll、System.Management.Automation.dllは70701F20…である。有限同定8PASSは互換性PASSではなく、実runtime一次資料対応とP7-A以後は未了である。
+
+P7-Aは実.NET公式source対象spanとMI consumerを照合し、仕様/設計/精緻化を受領した。初回PreのFF固定hash漏れ1件をD4（6literal限定更新）へ接合し、再Pre PASS/新規指摘0。規範planFF96F8DE/design6F845988を親が承認した。次は独立V8ID/16観測oracle→局所版変更→D1–4束縛→限定互換性/Post。実装/runtime互換性は未実施、旧F3等未解除。共有週枠の中間値90%はアカウント共通である。
+
 F3初回FAILで停止。control2PASS/focused0PASS1FAIL9NotRun/exit1/34.578秒、suite b5bb9069/run77a4759e、REPORT A739994A。plan88F5/design9679/Invoke318E/Test96BBB/context034F/P1B1AE/driver02A011/HANDOFF E2D995、実行時16入力一致/sourceMatchedtrue。独立Post FAIL/停止適合、UNKNOWN-DESCENDANT-OPEN01：Supervisor未登録候補PID20688のGetProcessById(1569)失敗、GetIdentity前/known0/Unprovable1。先行target終了93/完了marker欠落と取得の競合やfixture errorが候補、原初因未確定、別actorの終了証拠でownership補完不可。旧ENV01 Passedの93を正常期待値とした説明は撤回し、target正常終了未保証を注記した（旧結果は保持）。別阻害TOOLCHAIN-PWSH-DRIFT01：試験後pwshだけ旧BFB46→現FA2C8、exe/dll metadata7.6.7を親WinPSで読取確認、一時DLL解決失敗。実行時7.6.6/一致へ遡及混同せず、利用者へ7.6.7前提の固定変更可否を照会済み。次は環境選択受領→互換性/固定組見直しと未登録取得失敗・fixture errorの限定因果調査。新runtime/再試行/修正/残9/80/full/提供0、製品EXE9B888E9F不変。F1限定再利用/F2Pre/ValidateOnly2PASSは保持、checkpoint0043eeeまでpush済み、今回FAILも別checkpointへ保存する。共有週枠79→85%（アカウント共通、専有量不明）。
 
 EO-STATIC-BASELINE01・ENV-RUNNER-ORACLE01・MI-VOLATILE-01は限定独立Post PASS／Closed。plan88F586DD/Test96BBB420/Invoke318E/design9679/probeE8B465F9、oracle59B1170B/manifest89B99314/EOtestE752。6局所属性のみ/逆bytes96FB一致、全PSSA0、独立静的6PASS→EO6GREEN。probe2hashだけ再束縛/binding review PASS、ValidateOnly一回11入力一致/dispatch0/exit0。新suite3d864e43/run e0d4d4fdのENV01一回Passed/exit0/32.196秒/dispatch1other0retry0、fake生成後12入力一致/正式6terminal Completed/unknown0residual0/独立remaining[]/環境config事後assert到達、独立Post PASS。旧FAIL保全、欠測発生理由・救済回数・finally後別OS監査は未確定。次はMI-F/EO-Fのfocused/context必要再束縛と接合review→focused10→標準80/variant→製品full→別配置試用EXE。10/80/full/提供credit0、製品EXE9B888E9F不変。結果checkpoint ab778d7までpush済み、今回正常結果も別checkpointへ保存する。共有週枠76→79%（アカウント共通、専有量不明）。
