@@ -1,5 +1,15 @@
 # 現在のタスク要約
 
+## P7-D4 guard限定接合（2026-10-18、再開）
+
+親が精緻化plan01AD21496978F7D4D03191FACEB0C6A5F8679D52C2C3FE2BBF787E60D78EE32Cを受領し、作者p7_d1_author（Astra/high）へG2を解除した。所有はFF7literalとdesign予約候補rootのみ。元承認記録snapshot保存後に新driver/fixture/manifestと静的証拠を作成し、別静的review→親freezeまでは行動実行0。限定設計は184289A3…のPre PASS対象のまま保持する。
+
+独立G1 Pre PASS/阻害0を受領した。元consumer/7helper閉包・承認証拠鎖・MI内外変異位置/parse・sentinel/元拒否stack・保存/exit/期限を確認済み。plannerが限定計画だけを設計後精緻化中、親受領後G2作者へ進む。G01–03/FF18/Eは未実行、Preを動作PASSへ換算しない。
+
+G1限定設計184289A35BF03FD4101789E39120F4F9E159B4947BB30AB195A7314F7E879A4Aを受領し、別reviewer p7_binding_review（Astra/high）へPreを提出した。元consumer全文＋8helperの無改変抽出、承認本文/MI内外1字変異の最大3観測、7literal逆全bytes・5/60秒・FF18期待不変である。planは仮835C…でありPre→精緻化→親受領までFF編集/runtime0。E前提baseline2件は既存CXT-D受入のinputsとの一致を親が確認し、既存review冒頭に索引を保存した。
+
+利用者が検査の厳しさを維持した限定設計→独立レビュー→修正・検証を明示承認した。HEADfea71cb/tree cleanから開始。planner p7_guard_plan（Astra/high）が追加guardの接合と有限検証を既存凍結plan/designとは別の限定追補へ確定中。承認済みD1–D3は維持、FF AD492926…は未編集、Eは草案/未実行。旧F3/ENV01/80/full/製品提供は未解除である。親モデルは変更しない。
+
 ## D1–4／E再開
 
 独立確認結果：旧MI入力33C2の復元Read-OwnedTreeは08600941…、承認済みMI後318Eは3768A05D…であり、318Eと現898Cの関数全文はOrdinal一致、版literalは双方0個であった。不一致は今回の7.6.7変更ではなく、先行MI変更と旧FF本文保全guardの未接合に帰属する。D4は停止checkpoint、次は追加範囲の承認→plannerによる限定接合設計→独立Preである。FF18動作・解消方式は未確認であり、機械的な期待値置換は承認していない。

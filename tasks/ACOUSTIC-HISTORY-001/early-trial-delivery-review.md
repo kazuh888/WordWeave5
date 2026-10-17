@@ -1,5 +1,15 @@
 # ET3 試用EXE提供・独立レビュー記録
 
+## P7-D4 guard限定接合（2026-10-18、進行中）
+
+G1独立Pre PASS/阻害0（reviewer p7_binding_review、指定Astra/high）を受領した。対象design184289A35BF03FD4101789E39120F4F9E159B4947BB30AB195A7314F7E879A4A/仮plan835C、凍結main2文書・承認snapshot811BF一致。MI帰属の旧証拠を再利用し、元consumer BB5B1C53…/7helper閉包、変異offset/MI内外/parse、前後validator/復元算法不変、sentinelとexact拒否stack、5/60秒、CreateNew保存/marker/実exit/最大3観測/親freezeを独立確認した。実候補script/stack成立・G01–03/FF18/Eは未実証。
+
+plannerは01AD21496978F7D4D03191FACEB0C6A5F8679D52C2C3FE2BBF787E60D78EE32Cへ限定精緻化し、親が受領してG2作者p7_d1_author=Astra/highへFF7literalと候補rootだけを解除した。候補root P/d03fbe3a-1318-4b39-8ba5-110b588e1640 に承認記録approval-review.snapshot.md（811BFEC050ECA27D06E16497B30500F9E3CB45C7DC4525CFF6E03D7BA0A64128）を非上書き保存したとの通知を受領し、親の索引更新を再開した。design/最終planは以後freeze入力として保持、上流へ逆bindingしない。作者runtime0、別静的review/親freeze前のG3実行は禁止する。
+
+利用者が限定設計→独立レビュー→修正・検証を承認した。planner新追補p7-guard-binding-plan.md（仮SHA835C7A749F9D501142966C8D75DE30E987406223875459382FB5123E241BCFCA）、designer Astra/highへ限定design所有で引継いだ。既存凍結main plan/designは変更せず、旧6literalと追加guard1literal以外のFF本文不変、承認MI出典と未知変異拒否を要求する。実装/行動実行はPreまで0。
+
+親のE前提read-only確認：独立受入済みCXT-D `P/cxt-runner-20261016-approved-b` のresult.jsonは既存REPORT記載SHA6C32037803AA5C694A193BEB11327E8D3732166957EB17898462250A553197E9と一致した。REPORTの15入力/bytes前後一致・toolchain279bytes/V2 6362bytesとinputs.json（0C31523A8A07F9DFC2FD1BE2A46A6E5D0EDC9DC397E92EAF57E5C642E4BBF11E）の完全値を対応付けた。toolchain.json A16668FDD9C5F3A684FD6C7A43CBBC7CEC34F9F3A8FA36575C1798466BA6785A、V2Case572E56BE23FDD59B949A678BAEACAFE4E035434D064B9B4D28425D781AFF1168は現物と一致した。現物hashだけから新規承認したものではなく、過去独立受入の固定15入力へ由来を結んだ。後続runner/reviewerへこの索引を渡しE freezeへ接合する。旧CXT-Dのruntime環境や成功を新E実行結果へ転記しない。
+
 ## D1–4／E再開
 
 ### D4追加validatorによる停止

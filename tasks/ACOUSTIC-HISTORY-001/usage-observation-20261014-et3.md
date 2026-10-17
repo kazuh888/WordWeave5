@@ -1,5 +1,11 @@
 # ET3 試用EXE提供の使用量観測
 
+## P7-D4 guard限定接合（2026-10-18、進行中）
+
+ユーザーの追加承認でHEADfea71cb/tree cleanから再開。完了境界は追加guardの限定設計/Pre→修正/局所検証/Post→最終束縛が成立する場合のみ既存E、又は最初の未解消阻害で停止。旧F3/focused10/80/full/製品EXE提供へ拡大しない。planner p7_guard_plan=Astra/high、以降は計画者割当を明示し通常補助1役で順次実施する。親モデル不変、実provider/子counter/親子包含は未取得。
+
+開始共有週枠6%/10080分/reset1792882581/ordinaryUsageAllowed=true。親観測2026-10-17T23:23:31.481Zはinput2042290465/cached1998153728/output4557945/reasoning1504103/total2046848410/cache_write0。依頼から観測前は欠測、cached/reasoningは内数として再加算せず、共有週枠を専有量へ換算しない。
+
 ## D1–4／E再開（進行中）
 
 区切り：D1–D3は独立Post PASS、D4は追加必須validatorが許可6literal外であるため編集前停止、Eは草案のみ/実行0。独立read-only確認を依頼し、期待値の自動採番・検査削除・範囲無断拡大を避けた。作者Astra/highとrunnerSol6.1/mediumの並行はFF所有と新UUID草案所有が非重複で、実行準備以外の追加工程は開始していない。初回unexpected停止境界へ到達したので、未完了を成功扱いしない。
