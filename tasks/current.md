@@ -1,5 +1,15 @@
 # 現在のタスク要約
 
+## D1–4／E再開
+
+独立確認結果：旧MI入力33C2の復元Read-OwnedTreeは08600941…、承認済みMI後318Eは3768A05D…であり、318Eと現898Cの関数全文はOrdinal一致、版literalは双方0個であった。不一致は今回の7.6.7変更ではなく、先行MI変更と旧FF本文保全guardの未接合に帰属する。D4は停止checkpoint、次は追加範囲の承認→plannerによる限定接合設計→独立Preである。FF18動作・解消方式は未確認であり、機械的な期待値置換は承認していない。
+
+最新：D1–D3は独立Post PASSのまま、D4は未編集で停止した。FF230のRead-OwnedTree復元本文guardは期待08600941…に対して承認Invokeからの同算法実算3768A05D…となり、許可6literal外である。plan683の追加validator停止条件に従い、FF AD492926…/全bytesを保持した。作者停止証拠P/35186079-b5d6-4e51-b19e-a608b67dadc9/REPORT.md、E草案P/f3f85d34-7dbf-49ff-81b7-82d1d756c7d4/P7-E-DRAFT.md。E新58期待＋ValidateOnly2は全NotRun、最終freezeなし。次は旧guardの由来・先行承認変更との対応を確認し、必要な追加範囲を計画者へ返す段階であり、現在値への機械置換はしない。toolchain.json/V2Caseの完全承認baseline確認も未了。以下の「更新中」は停止前の経緯である。
+
+D1–D3は独立binding Post PASS、Context464A…/P1914C…/Slash80ED…/HANDOFF59CA…/ENVprobe0B6C…を親承認した。完全値と証拠は既存review文書へ集約。C16は動作consumer/9fragment/adapter同一の独立証明により局所版判定16観測だけEへ再利用可。旧before/afterContextSHAを新source実証に補完せず、Eの新freeze/前後hash/環境は別採取する。D4 FF6literalを作者Astra/highが更新中、別runnerSol6.1/mediumは最終FF未承認の手順草案だけを準備中でruntime0。次はD4独立review/親freeze→E局所確認、ENV01/旧F3/full/製品は未解除である。
+
+利用者が照合値の再束縛と互換性確認を依頼し、続行を再確認した。HEADc156a9d/tree cleanから既存planFF96F8DE/design6F845988・P7-C独立Postを再利用してD1を開始した。担当p7_d1_authorは計画者指定Astra/high、所有Context/P1だけ、親モデル不変。12期待・9fragment・16期待・安全判定・期限を変更せず、D1→独立review→D2/D3/D4→最終freeze→Eを順に進める。開始共有週枠0%/10080分/reset1792882581/ordinaryUsageAllowed=trueであり、前回100%とresetを跨ぐ差分は取らない。旧F3/ENV01/80/full/製品提供は今回解除せず、試用EXEはその未解決と必須製品検証・build/reviewの完了後という既存条件を保持する。
+
 ## 最新状態（2026-10-16）
 
 P7-Cは独立動的Post PASS／Closed。Invoke898C60B1133DB6956090035AF677B4CF7FDE0FE6FDFD5D47E5CD776B00500B71、TestF0C57FE388F96D78F3BA0B14A420D9E7E6F5C7977944AD72B19E925E894DC919、Context01E0CCB3B675724FB5C9D1A64E5C312558E76508E191AE8176B7C1354A66E376は許可版literal/対応説明のみ。逆全bytes一致、Parser/PSSA0、oracleBCF9/manifest5FC4不変。8ID/16観測は一回16Passed0Failed0NotRun/実exit0/retry0、125照合PASS、14入力＋freeze前後一致・正常保存・日本語console一致を独立受入れた。証拠P/ea0d7135-f168-407c-a71a-891d49f2687f/P7-C-FROZEN.md・P7-C-RUNNER-REPORT.md、実結果P/9bcbb13b-5482-40dd-8260-a930efb8ad61/result.jsonである。

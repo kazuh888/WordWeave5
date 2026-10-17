@@ -1,5 +1,13 @@
 # ET3 試用EXE提供の使用量観測
 
+## D1–4／E再開（進行中）
+
+区切り：D1–D3は独立Post PASS、D4は追加必須validatorが許可6literal外であるため編集前停止、Eは草案のみ/実行0。独立read-only確認を依頼し、期待値の自動採番・検査削除・範囲無断拡大を避けた。作者Astra/highとrunnerSol6.1/mediumの並行はFF所有と新UUID草案所有が非重複で、実行準備以外の追加工程は開始していない。初回unexpected停止境界へ到達したので、未完了を成功扱いしない。
+
+親開始snapshot2026-10-17T22:56:45.048Zはinput2028440816/cached1984480896/output4528198/reasoning1491323/total2032969014、今回取得snapshot23:15:56.098Zはinput2038608015/cached1994502016/output4551546/reasoning1503335/total2043159561。差分input10167199/cached10021120/output23348/reasoning12012/total10190547、cache_write0。着手前区間とこの後の確認・記録・保存・応答は測定外、子counter/包含/実providerは未取得。cached/reasoningは内数で再加算しない。共有週枠観測0→5%/10080分、resetは開始1792882581/今回1792882580と1秒表記差がある。アカウント共通表示であり、この作業だけの消費率や正確なreset同一性は断定しない。
+
+利用者の再束縛・互換性確認依頼と続行を受領。HEADc156a9d/tree clean、開始共有週枠0%/10080分/reset1792882581/ordinaryUsageAllowed=true。前回100%とはresetを跨ぐため単純差分/専有量を算出しない。既存plan/design/PreとCの16PASS独立Postを再利用し、新planner文書や全7役の再起動は行わない。既存計画の明示割当D1作者Astra/highをfresh p7_d1_authorへdispatchした。親モデル不変、子counter/実provider/包含は未取得。完了境界はD1–4再束縛・独立review・E局所互換性/Post又は初回予期外結果の保存・停止であり、旧F3/ENV01/full/製品提供へ拡張しない。親開始counterは別取得の観測値を後段へ接合し、未取得区間を推定しない。
+
 ## P7-C以後の再開（2026-10-16、進行中）
 
 利用者の「続けてください」でHEADb1c0015/tree clean、共有週枠97%/10080分/reset1792667952/ordinaryUsageAllowed=trueからP7-C→D1–4→Eを再開した。親モデル不変。planner pwsh767_plan=Astra/highへ既存適用とoracle固定fragmentの影響を確認、旧fragment又は許可版置換を受ける現行guardを根拠に、親の新manifest必要仮説を撤回した。oracleBCF9/manifest5FC4は編集不要である。既Pre成立の版literal2fileだけをpwsh767_version_impl=Sol6.1/mediumへdispatch、plannerの別文書read-only適用確認と並行する具体独立利益を確認した。子counter/実provider/包含は未取得。
