@@ -2,6 +2,14 @@
 
 ## P7-D4 guard限定接合（2026-10-18、再開）
 
+G3独立PostはFAIL（AdapterFailure）維持/停止適合である。言語設定の特定は欠測のため断定せず、英語raw frame期待に対する日本語実表記不一致だけを確定した。既存承認内の原因担当差戻しとしてplannerへlocale拒否識別の限定追補を依頼中。旧plan/design/runを変更せず、同一型/完全文言/file/44・230/先頭frame名・順序/sentinel/出力0を厳密に保つ再設計→独立Pre→新候補/新freeze前には再実行しない。FF AF179…に追加修正は行わない。
+
+G3一回は実exit2/Passed1/AdapterFailure1/NotRun1で停止した。G01受理、G02は元型・文言・virtual file/line44/guard230で拒否したが日本語stack表記が固定英語期待と一致しなかった。G03/FF18/E未実行、retry0、D4未Closed。O/結果F989EC04…、freeze-dir/G3-RUNNER-REPORT.md 9F0D81C2…へ保存、42入力＋manifest＋freezeの外側44hash一致、saveErrors[]、PASSmarkerなし。新実7.6.7/.NET10.0.13、同一run UICulture未取得。独立PostへFAIL/停止適合を提出し、表示言語に依存した検証側adapterを限定設計へ差戻す準備中。旧結果をPASSへ読み替えず自動retryしない。
+
+G2 cycle2独立PASS/R1解消。最終driver6163E245…/manifestF41DB193…/FF AF179383…を親freeze P/85d2597a-74d3-4d49-ab07-8a8fbb7d9ea3/G3-FROZEN.md（9C3FD5B8…）へ固定し、別runner p7_e_runner（Sol6.1/medium）へG01–03一回のみ解除した。42入力前後一致/実exit/元拒否stack/保存/markerを確認し、最初のunexpectedで停止する。G3独立PostまではD4未Closed、E/旧F3/full/製品は未解除。
+
+G2静的reviewは阻害1件でCHANGES_REQUIRED。driver7E5B…の観測内期限判定が既存AdapterFailureをFailedへ上書きしexit2優先を失うため、同predicateだけを作者が是正中。FF AF179383…の7literal逆全bytes、42入力、8関数、fixture1byte差分は独立確認済み。旧候補/manifest/証拠を保持し、driver静的再確認→限定再review→親freezeまでG3実行0。E baseline2件のaccepted-b由来も独立確認済みだがE未解除である。
+
 親が精緻化plan01AD21496978F7D4D03191FACEB0C6A5F8679D52C2C3FE2BBF787E60D78EE32Cを受領し、作者p7_d1_author（Astra/high）へG2を解除した。所有はFF7literalとdesign予約候補rootのみ。元承認記録snapshot保存後に新driver/fixture/manifestと静的証拠を作成し、別静的review→親freezeまでは行動実行0。限定設計は184289A3…のPre PASS対象のまま保持する。
 
 独立G1 Pre PASS/阻害0を受領した。元consumer/7helper閉包・承認証拠鎖・MI内外変異位置/parse・sentinel/元拒否stack・保存/exit/期限を確認済み。plannerが限定計画だけを設計後精緻化中、親受領後G2作者へ進む。G01–03/FF18/Eは未実行、Preを動作PASSへ換算しない。

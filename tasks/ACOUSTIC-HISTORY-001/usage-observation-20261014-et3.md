@@ -2,6 +2,10 @@
 
 ## P7-D4 guard限定接合（2026-10-18、進行中）
 
+G3失敗checkpoint：G1 Pre PASS→G2構築時の変数名/最終期限不足是正→独立static cycle1分類優先指摘→同predicateだけ是正/cycle2 PASS→別runner一回でPassed1/AdapterFailure1/NotRun1/exit2→独立Post FAIL/停止適合。原因は日本語実stackと英語raw期待の不一致、同一runUICulture欠測。旧G02をPASSへ再集計せず、旧結果/全候補を保持し、FF/closure/fixture等の不変部分はSHA根拠で静的確認を再利用した。E/FF18/製品build等は未実施。localeの原因担当差戻しだけをplannerへ依頼中で自動再実行0。
+
+中間親snapshot2026-10-17T23:59:14.978Zはinput2063102278/cached2018860288/output4596296/reasoning1521382/total2067698574/cache_write0。開始23:23:31.481Zとの差はinput20811813/cached20706560/output38351/reasoning17279/total20850164。この後の再設計・保存・応答は測定外、子counter/実provider/親子包含は未取得。共有週枠観測6→12%/10080分、resetは開始1792882581/今回1792882580と1秒表記差、アカウント共通で専有率へ換算しない。モデル方式間の効率増減は未判定である。
+
 ユーザーの追加承認でHEADfea71cb/tree cleanから再開。完了境界は追加guardの限定設計/Pre→修正/局所検証/Post→最終束縛が成立する場合のみ既存E、又は最初の未解消阻害で停止。旧F3/focused10/80/full/製品EXE提供へ拡大しない。planner p7_guard_plan=Astra/high、以降は計画者割当を明示し通常補助1役で順次実施する。親モデル不変、実provider/子counter/親子包含は未取得。
 
 開始共有週枠6%/10080分/reset1792882581/ordinaryUsageAllowed=true。親観測2026-10-17T23:23:31.481Zはinput2042290465/cached1998153728/output4557945/reasoning1504103/total2046848410/cache_write0。依頼から観測前は欠測、cached/reasoningは内数として再加算せず、共有週枠を専有量へ換算しない。
