@@ -8,9 +8,9 @@
 
 FFの7literal接合AF179383…とG2静的cycle2は独立PASS。旧G3一回はG01Passed/G02AdapterFailure/G03NotRun/actualexit2で、独立PostはFAIL維持・停止適合。G02は元guardに拒否されたが、日本語stackと英語固定表示期待が不一致。旧run UICulture欠測、旧結果を再集計しない。旧証拠・詳細SHAは[review冒頭](ACOUSTIC-HISTORY-001/early-trial-delivery-review.md)を参照する。
 
-現在はlocale設計23DD36FE…の独立Pre PASSと精緻化plan35246F36…を親受領し、作者p7_d1_author（Astra/high）が新N=packet/4e5f72fc-b5bc-45e1-9052-dc4d47e3e03f内driver/manifestだけを作成中。固定資源format＋固定frame fields、ja-JP限定の同一run前後culture/資源検査、元42＋追加4=46/内部post48である。旧FF/8helper/3fixture/3期待/各5秒・全60秒/AdapterFailureexit2優先は不変。公式raw source取得は未成立、根拠は承認SMAのIL/ja衛星である。
+locale設計23DD36FE…/plan35246F36…のL1 PreとL2静的reviewは独立PASS。新N=packet/4e5f72fc-b5bc-45e1-9052-dc4d47e3e03fのdriver3F0269D5…/manifest25B9DE97…は許可5群/helpの逆旧driver全bytes一致、Parser/PSSA通常診断/engine0。固定日本語の等価Unicode表記と新manifest4path表記接合だけを追加是正し、旧版/停止証拠は保全した。固定資源format＋固定frame fields、ja-JP同一run前後culture/資源、旧42＋追加4=46/内部post48、元FF/helper/fixture/3期待/5・60秒/AdapterFailureexit2優先を維持する。公式raw source未取得、根拠は承認SMAのIL/ja衛星である。
 
-次はL2静的review→親の新freeze→別runner（Sol6.1/medium）で新Q=packet/b5517847-0aff-42cf-85f2-80ac79f064a1へ最大3観測一回→独立Post。新観測は未解除、D4未Closed。後続FF18/E・旧F3/ENV01/focused10の再実行・80/full/build/製品提供/API/実データ/admin/OS変更は本単位では未解除である。E前提baseline2件の受入由来は独立確認済み。
+L3一回は3Passed/Unexpected0/NotRun0/実exit0/marker1/saveErrors0、同run ja-JP全8点と資源前後一致、内部48/外側49入力保全、独立Post PASSでlocale/D4限定Closedを親受入れた。freeze packet/eaf19631-5bf8-4bcd-8998-dbcc8d422b1b/L3-FROZEN.md=1BA6F26E…、同dir runner report=E1E88FC2…、Q=packet/b5517847-0aff-42cf-85f2-80ac79f064a1/result.json=B01AD52D…である。次は既存P7-E（58行動期待＋ValidateOnly2）の最終入力・完全argvをrunner Sol6.1/mediumが新草案へ接合し、親freeze後だけ一回検証する。Eはまだ実行0。旧F3/UNKNOWN/ENV01/focused10/80/full/build/製品提供/API/実data/admin/OS変更は未解除である。
 
 索引：[locale plan](ACOUSTIC-HISTORY-001/p7-guard-locale-plan.md)／[locale design](ACOUSTIC-HISTORY-001/p7-guard-locale-design.md)／[旧guard plan](ACOUSTIC-HISTORY-001/p7-guard-binding-plan.md)／[旧guard design](ACOUSTIC-HISTORY-001/p7-guard-binding-design.md)／[usage](ACOUSTIC-HISTORY-001/usage-observation-20261014-et3.md)。失敗保存checkpoint7d6709fはpush済み。以下は旧経緯であり本節と索引正本を優先する。
 
