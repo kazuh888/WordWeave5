@@ -1,6 +1,31 @@
 # ET3 試用EXE提供・独立レビュー記録
 
-## P7-E隔離外新run・実行手順不備（2026-10-18、全体未Closed）
+## P7-E／R-ARGV-01 最終受入（2026-10-18、限定Closed）
+
+U4独立Post PASSを親受領し、P7-E局所互換性とR-ARGV-01を限定Closedとした。受入は正O01 Context Reused12＋今回fresh46、ValidateOnly2 PASS、旧C16 Reused16を分離した集計であり、全58freshとはしない。誤O02の追加Contextはcredit0、旧全体FAILと旧C9単独原因未確定は維持する。今回のsnapshot C=`F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/262f8735-ffb1-40d5-be03-0ed699c8d2cd`、実行HEAD2579cb04871bc0971c2e7d3254308d7854f0d544である。
+
+plan35E17D27…に基づく6完成receipt/index9BA5C1CE…の独立Pre PASS後、親freeze1C4D344EBEFD1BB95F96415E87E587B57302769503C5A890A1CA003D2BCA400Bで52固定＋自己SHA外側固定＝53入力、全13保存先とmetadata guard全文を接合した。guardはParser/PSSA1.25通常診断/engine0/Stop/実exit0、接合も独立Pre PASS。fresh runner e_receipt_runner（指定Sol6.1/medium）が各cmdを加工せずtoolへ渡し、各一回/修正再実行0。実cmd全文6件と承認receiptは完全一致、正しい入口/Phase/root/元schema/順序/期限を独立Post確認した。MissingOs2/Pure20/FF18は全Passedかつ既定期限内、EO6はSixGreen/既定有限同期。ValidateOnly2は元validated/件数/dispatch又はvariantGuard/runtime=false/suiteRoot/終了後root不存在を満たす。
+
+全6 tool/child実exit0、起動元非admin前後false、前証拠保存先行、CreateNew出力保存成功・problems空を独立確認した。MissingOsは所有synthetic子launch1/CIM1/stdinClose1/wait1/kill0/termination1であり、ユーザーapp停止ではない。入力53×13snapshot＝689行はSHA/length/mtime/属性の前後差分0、85生成artifactの実SHA/length不一致0、guard本文/保存名/exit0/markerも整合する。child token/各sourceRuntimeの欠測/provider返却model-effort/専有usageは未取得で旧/別process値から補完しない。ストリームはPowerShell復号text、stderr全6空、raw bytes・失敗経路の動的保証とは呼ばない。
+
+| 固定成果物（C内） | SHA256 |
+| --- | --- |
+| U3-RUNNER-REPORT.md | 4ED5163F0F690EA62ED064F7D82A3772C01B44E87248E833CF5F550E5F2934FF |
+| U3-RUNNER-RESULT.json | A4F9A9128D67BA3E420185D12797327828884CD141BE4BE8B79408EA8D0AA5D1 |
+| U3-ARTIFACT-SHA256.json | E0BD0CF74BB6E7AA674C9870C7EAB781B250DE192687BFB8E4DDB1F73AFC116C |
+| U3-TOOL-LOG.json | D7E6CE055E6BE2B5BBAC93FF8690332395FF50AC7D57B7AE6ED48E8D19D64A24 |
+| U3-GUARD-COMMANDS.json | 802C072E13129430D000EAD6EFEE476A85852C9CC4D3B4ABE3FDE3068E2B17AB |
+| FINAL.inputs.json | D7F42189CEED1A02D2DFB6FD3133B494A55BD24CC2D11EB80866CDAE1DAC44A1 |
+
+Closure matrixの現状態は以下を正とする。plan内Planned行は実行前freeze snapshotであり、hash保全のため追従改稿しない。
+
+| Finding | 原文・位置／root cause | State・Packet・owner／canonical | Oracle・独立Gate evidence | Residual／対象外 |
+| --- | --- | --- | --- | --- |
+| R-ARGV-01 | 旧Outside runner report D9CC5FBD…のO02でroot置換後command全文置換が不成立、Contextを誤反復。実行時文字列置換/slot依存 | Closed／receipt resume／test author。完成6receipt/index＋親freeze1C4D344E… | 旧誤O02を入口/Phase/fullargv照合で静的拒否。6receipt Pre PASS、外側接合Pre PASS、fresh6実cmd全文一致＋53保全＋新46/ValidateOnly2 PASS、U4独立Post PASS | 新controllerの失敗・ストリーム障害経路は動的未評価。旧FAIL/誤O02credit0維持。source/期待変更0、旧F3/新native/製品へのcredit0 |
+
+今回完了境界は局所互換性だけである。UNKNOWN-DESCENDANT-OPEN01／旧F3、実ENV01/focused10/80/full/build/製品EXE提供は解除0。Windows製品delivery必須cargo test/buildと残る実機確認を省略しない。全生成物と旧証拠は保存し、cleanup・rollback削除は行っていない。
+
+## P7-E隔離外新run・実行手順不備（2026-10-18、旧snapshot・全体FAIL）
 
 限定復旧の唯一の追加計画[p7-e-receipt-resume-plan.md](p7-e-receipt-resume-plan.md) SHA35E17D27B84A7D309E0EE39CD2A61F089B54B97E2409CDAF4C4B2A01A9A6228Eを親受領。R-ARGV-01をPlannedで追跡し、旧Outside42＋正O01result/旧runner report＋新plan=45、receipt6/index/親freezeを加えて53入力へ固定する。作者Astra/highがU1/U2の候補だけ作成、同snapshot独立Preと親freeze後は誤実行担当と分離したfresh runner Sol6.1/mediumが無加工receipt.cmdを実行する。新46/ValidateOnly2とO01 Reused12/C16 Reused16を分離し、実行前の入口file/Phase/root/schema/完全argv照合を要求。期待/期限/権限拡張0、新実行0である。
 
@@ -18,7 +43,7 @@ O02では実行担当がinline shell本文を生成する際root置換を先に�
 
 隔離外・通常ユーザーでの今回作成能力は実証した。旧C9との時点/ACL/token条件は同一でなく、隔離が単独原因とは未確定である。旧E FAILと旧証拠は維持し、今回をC9の後付け成功や製品PASSへ合算しない。次はE再実行の別承認と新freezeが必要であり、今回の診断承認をE/旧F3/full/build/製品提供へ拡張しない。
 
-## P7-D4 guard限定接合（2026-10-18、進行中）
+## P7-D4 guard限定接合（2026-10-18、Closed・以下履歴）
 
 P7-E独立Post FAIL/停止適合。親freeze packet/c16410aa-87dc-45e7-84dd-c7bce9184b12/P7-E-FROZEN.md=745CA52FF26BD4A7522E21F71FE3A9E1BDB4FD02D15FF792C7AC63E3364276C5、最終草案packet/3792f3fa-96e0-4806-a1bc-0302e5e0fcd8/P7-E-FINAL-DRAFT.md=4823069DD29266352EFC5F3B69DF5B8B6D69CFE64942D009E262A5FF70E3F82C/同dir索引45820726035C4E7BB11A7E3A9D5AB752DBBE9BDF6EEE06E81E3DC36F5B45A3BAで一回実行。Context C0–8Passed/C9Unexpected/C10–11NotRun/実exit2、残6command未実行。全58期待は9Passed/1Unexpected/48NotRun、ValidateOnly2NotRun、retry0。34入力開始/終了/最終一致、保存24 artifact一致、後続root不存在を独立確認した。result packet/8d3792d8-6e67-43b9-9d52-741832c9d1a0/result.json=F3DC847AB9FADBE8C8C063559B614F516D9D574832AD9BFE1443D4B60ADD9209、freeze-dir report31D03FB23A6B88471041FD14C6A7A3C18AFA606DC0A6ED6E4C5C19D8B4498E41/artifact索引571F1132F3F54DD1974F9AB95EC63B3904F74A7512406CB033266EA90E2B3EA5。C9 Context342のNew-Item Junctionでアクセス拒否、元consumer/reparse拒否未到達で本体不具合とは断定しない。旧accepted-b REPORT3/23/40は隔離外・非admin・junction後consumer拒否到達、今回はuse_default隔離内・非adminという差を確認したが、時点/入力/版/ACLも同一でなく単独原因未確定。親事後read-onlyでsuite/ENV01の属性8208（reparseなし）とjunction不存在を確認、作成直前証拠には補完しない。次案は新UUIDのjunction作成1回・同process token/親target ACL/属性/完全ErrorRecord採取、隔離外は別承認であり新観測/E再実行/管理者化/期待緩和0で停止する。
 

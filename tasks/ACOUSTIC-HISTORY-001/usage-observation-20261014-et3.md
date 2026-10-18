@@ -1,10 +1,14 @@
 # ET3 試用EXE提供の使用量観測
 
-## P7-E隔離外再実行とreceipt復旧（2026-10-18、進行中）
+## P7-E隔離外再実行とreceipt復旧（2026-10-18、限定Closed）
+
+終了：U1/U2の6receiptは初回Parser/PSSA通常診断/engine0・実exit0、入口/Phase/root/schema/fullargvと旧argv（root以外）一致、旧誤O02静的拒否。独立Pre→親53入力/13保存先/外側guard固定・静的0・独立接合Pre→fresh runner Sol6.1/medium各一回→独立Post PASS。fresh46Passed/ValidateOnly2PASS、Reused12/C16Reused16は分離、53×13=689入力行と85artifact保全、修正再実行0。R-ARGV-01とP7-Eを限定Closedとし、旧失敗を成功へ改稿していない。共有source/期待/期限/権限変更0。親current冒頭は最新結果と正本索引へ集約し、旧経緯はreview/既存履歴へ保全した。不要なContext追加反復を止めたことは事実だが、方式間の使用量削減効果は未判定である。
+
+親終了snapshot2026-10-18T04:27:16.098Z=input2111801295/cached2067015424/output4717352/reasoning1574886/total2116518647/cache_write0。本節開始との差分input18333477/cached18176768/output47675/reasoning23757/total18381152。本記録/保存/最終応答は未反映、開始snapshot前も欠測、子counter/provider実値/親子包含は未取得で合算しない。cached/reasoningは内数。共有週枠47→53%/10080分、reset末尾は1792882580→1792882581と1秒表記差、アカウント共通で本タスク専有率に換算しない。fresh runnerは開始終了52→52%を返却、これも無消費とは解釈しない。
 
 HEAD27cab19/treecleanから利用者承認の隔離外Eを再開。親開始snapshot2026-10-18T03:55:40.297Z=input2093467818/cached2048838656/output4669677/reasoning1551129/total2098137495/cache_write0、共有週枠47%/10080分/reset1792882580。着手からsnapshotまで欠測、子counter/provider実値/包含は未取得。旧固定組を再利用してrunner Sol6.1/mediumが新7root草案作成→独立Pre Astra/high→親freeze→正Context12PASS後、O02のinline置換順序ミスでContextを反復した。追加Context12 credit0、MissingOs等0、後段停止、全体PostFAIL/正O01単独PASS/42保全。これは検査本体でなく当方の実行手順の手戻りであり、正常実行として隠さない。
 
-独立Postが正O01 Reuse12を受入れ可としたため、固定入力/runtime/証拠・新前後保全を条件に不要なContext反復を避ける限定計画35E17D27…をplanner Astra/highが作成、作者Astra/highへ6tool receipt/indexだけを委任した。実行時文字列置換を廃止し、独立Pre/親freeze後にfresh runner Sol6.1/mediumを使う。通常補助1役ずつ/再帰0/親model不変。新source/期待/期限/権限変更0、53入力。終了counterは工程終了時に採取し、週枠差を専有消費量に換算しない。
+独立Postが正O01 Reuse12を受入れ可としたため、固定入力/runtime/証拠・新前後保全を条件に不要なContext反復を避ける限定計画35E17D27…をplanner Astra/highが作成、作者Astra/highへ6tool receipt/indexだけを委任した。実行時文字列置換を廃止し、独立Pre/親freeze後にfresh runner Sol6.1/mediumを使用した。通常補助1役ずつ/再帰0/親model不変。新source/期待/期限/権限変更0、53入力。終了counterは上記の工程区切りで採取し、週枠差を専有消費量に換算しない。
 
 ## P7-C9 junction一回診断（2026-10-18、限定Closed）
 

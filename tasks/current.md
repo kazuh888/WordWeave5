@@ -1,26 +1,20 @@
 # 現在のタスク要約
 
-## 最新状態：P7-D4 Closed／P7-E実行手順の限定修正（2026-10-18）
+## 最新状態：P7-E／R-ARGV-01限定Closed（2026-10-18）
 
-目標は検査の厳しさを維持したD4接合と、その後のP7-E局所互換性である。利用者が限定設計→独立レビュー→修正・検証を承認済み。D1–D3 Closed/C16限定Reuseは維持、親モデル不変、通常補助1役で進める。
+目標はET3の安全なWindows試用EXE提供である。今回は利用者承認の隔離外・通常ユーザーによるP7-E局所互換性まで完了、製品EXEの作成・提供は未実施である。
 
-本節のpacketは`target/early-trial-build/et3/cargo-gate/verification/argv-path01`である。
+- D1–D4接合は独立Post PASS。P7-Eは正O01 ContextのReused12＋今回fresh46、ValidateOnly2の合格を独立Postで受入れた。旧C16 Reused16は別計上し、全58freshとはしない。
+- 呼び出し取り違えR-ARGV-01は、実行時文字列置換を廃止した6固定receipt/indexの静的・独立Pre→親freeze→fresh runner一回→独立Post PASSで限定Closed。試験source/期待/期限は変更0、53入力×13snapshot（689行）一致、85 artifact不一致0、各一回/実exit0/起動元非admin前後false/保存成功である。
+- 正本candidateはpacket/262f8735-ffb1-40d5-be03-0ed699c8d2cd。freeze1C4D344E…、index9BA5C1CE…、U3 report4ED5163F…、U3 resultA4F9A912…、FINAL.inputsD7F42189…。完全SHA/argv/結果の対応はreview冒頭と固定artifact索引を参照する。
+- 旧E FAIL、誤O02の追加Context credit0、旧C9原因未確定を保持する。J単独診断は隔離外非adminでリンク1回作成成功/独立Post PASSだが、旧C9の単独原因証明や製品PASSにはしない。
+- child token/各sourceRuntimeの欠測/実provider model-effort/子usage包含は未取得のまま。実data/API/admin化/OS・ACL・PATH設定変更/ユーザーapp操作は0、通常release EXEも変更0である。
 
-FFの7literal接合AF179383…とG2静的cycle2は独立PASS。旧G3一回はG01Passed/G02AdapterFailure/G03NotRun/actualexit2で、独立PostはFAIL維持・停止適合。G02は元guardに拒否されたが、日本語stackと英語固定表示期待が不一致。旧run UICulture欠測、旧結果を再集計しない。旧証拠・詳細SHAは[review冒頭](ACOUSTIC-HISTORY-001/early-trial-delivery-review.md)を参照する。
+packet=`target/early-trial-build/et3/cargo-gate/verification/argv-path01`。
 
-locale設計23DD36FE…/plan35246F36…のL1 PreとL2静的reviewは独立PASS。新N=packet/4e5f72fc-b5bc-45e1-9052-dc4d47e3e03fのdriver3F0269D5…/manifest25B9DE97…は許可5群/helpの逆旧driver全bytes一致、Parser/PSSA通常診断/engine0。固定日本語の等価Unicode表記と新manifest4path表記接合だけを追加是正し、旧版/停止証拠は保全した。固定資源format＋固定frame fields、ja-JP同一run前後culture/資源、旧42＋追加4=46/内部post48、元FF/helper/fixture/3期待/5・60秒/AdapterFailureexit2優先を維持する。公式raw source未取得、根拠は承認SMAのIL/ja衛星である。
+次の未解決はUNKNOWN-DESCENDANT-OPEN01／旧F3の原因切り分けと安全性確認である。今回のP7-E/J成功を旧F3へcreditしない。旧F3/実ENV01/focused10/80/variant/full/build/製品提供は今回解除0、別の限定計画・必要な承認後に進める。Windows製品deliveryの必須`cargo test --all-targets --locked`と`cargo build --release --locked --bin wordweave5`、残る実機受入は保持する。DPI150/200%だけは既承認の試用時確認である。
 
-L3一回3Passed/Unexpected0/NotRun0/実exit0/marker1/saveErrors0、ja-JP全8点/資源前後一致、内部48/外側49保全、独立Post PASSでlocale/D4限定Closed。freeze packet/eaf19631-5bf8-4bcd-8998-dbcc8d422b1b/L3-FROZEN.md=1BA6F26E…、同dir report=E1E88FC2…、Q=packet/b5517847-0aff-42cf-85f2-80ac79f064a1/result.json=B01AD52D…である。
-
-P7-Eは最終草案4823069D…/索引45820726…/親freeze packet/c16410aa-87dc-45e7-84dd-c7bce9184b12/P7-E-FROZEN.md=745CA52F…を固定し、別runner Sol6.1/mediumが入口1 Contextだけ一回実行。C0–8 Passed/C9 Unexpected/C10–11 NotRun/実exit2で停止、後続6command0/retry0。全58行動期待では9Passed/1Unexpected/48NotRun、ValidateOnly2は別枠NotRun。C9は検証用junction作成時のアクセス拒否でconsumer未到達。34入力前後/最終一致・保存24 artifactを独立Post確認、FAIL維持/停止適合、E未Closedである。result packet/8d3792d8-6e67-43b9-9d52-741832c9d1a0/result.json=F3DC847A…、freeze-dir report=31D03FB2…。
-
-利用者承認の隔離外・通常ユーザーjunction単独診断は独立Post PASS/限定Closed。J-plan B1AC4279…、候補packet/289725bd-b80a-4ba5-9d3b-673b7eba04ba内script8FE4E77E…/J-FROZEN BFB8F5D4…/J3-RUNNER-REPORT5CCFACD5…、実行root packet/7ef4d4a9-a4bd-45bd-9194-46970e71afe0/result.json8465A70F…である。attempt1/retry0、同process admin前後false、作成成功/診断完了/実exit0、欠測保存エラー0、内外37入力保全、保存13 artifactを独立確認。synthetic空target/linkは保全、削除0。製品未評価、失敗時ErrorRecord保存経路の動的試験0。
-
-隔離外E新runは全体Post FAIL、正O01 Context12は独立単独PASS。候補packet/41b01c28-5fe3-43a3-b510-14bafdd179c2の草案1F9C6F2A…/索引02964CB1…/freezeD00D8049…を受領したrunnerがO02のroot置換後に完全command置換を適用し、MissingOsでなくContextを別rootへ反復した。誤O02credit0/以降0/入力42保全/adminfalse。正12Passed/46NotRun＋operationalUnexpected1、ValidateOnly2NotRunである。正result packet/9244f7ae-d0c6-4f8d-88d4-3a228343fa88/result.json=C11F70C6…、candidate内report=D9CC5FBD…。
-
-独立Postは正12の限定Reuse可（固定入力/runtime/境界維持・正証拠を新freezeへ固定・残りの新前後保全が条件）と判定した。利用者の隔離外E承認内の手順是正plan35E17D27…を親受領し、作者Astra/highが6固定tool本文receipt/indexを作成中。旧Outside42+正result/report+plan=45、receipt6/index/親freezeを加え53入力。実行時文字列置換を廃止し入口file/Phase/新root/schema/完全argvの独立Pre→親新freeze後にfresh runner Sol6.1/mediumが残6本/新46だけを確認する。現時点再開0/自動retry0/正Context再実行0/誤root再使用0、旧EFAIL/C9単独原因未確定維持。管理者化/設定変更/期待緩和、旧F3/UNKNOWN/ENV01/focused10/80/full/build/製品提供/API/実dataは未解除である。
-
-索引：[review冒頭](ACOUSTIC-HISTORY-001/early-trial-delivery-review.md)／[receipt復旧計画](ACOUSTIC-HISTORY-001/p7-e-receipt-resume-plan.md)／[junction診断計画](ACOUSTIC-HISTORY-001/p7-junction-diagnostic-plan.md)／[locale plan](ACOUSTIC-HISTORY-001/p7-guard-locale-plan.md)／[locale design](ACOUSTIC-HISTORY-001/p7-guard-locale-design.md)／[旧guard plan](ACOUSTIC-HISTORY-001/p7-guard-binding-plan.md)／[旧guard design](ACOUSTIC-HISTORY-001/p7-guard-binding-design.md)／[usage](ACOUSTIC-HISTORY-001/usage-observation-20261014-et3.md)。D4 closure7e4c9fd/E停止d81dc52/J単独診断27cab19はpush済み。以下は旧経緯であり本節と索引正本を優先する。
+索引：[検証・closure matrix／完全SHA](ACOUSTIC-HISTORY-001/early-trial-delivery-review.md)／[receipt復旧plan](ACOUSTIC-HISTORY-001/p7-e-receipt-resume-plan.md)／[P7 main plan](ACOUSTIC-HISTORY-001/early-trial-gate-plan.md)／[P7 main design](ACOUSTIC-HISTORY-001/early-trial-gate-design.md)／[usage](ACOUSTIC-HISTORY-001/usage-observation-20261014-et3.md)。checkpoint2579cb0までpush済み。以下は旧経緯であり、本節と索引正本を優先する。
 
 ## D1–4／E再開
 
