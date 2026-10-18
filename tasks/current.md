@@ -1,6 +1,6 @@
 # 現在のタスク要約
 
-## 最新状態：P7-D4 guard／locale接合（2026-10-18）
+## 最新状態：P7-D4 Closed／P7-EのC9 fixture作成で停止（2026-10-18）
 
 目標は検査の厳しさを維持したD4接合と、その後のP7-E局所互換性である。利用者が限定設計→独立レビュー→修正・検証を承認済み。D1–D3 Closed/C16限定Reuseは維持、親モデル不変、通常補助1役で進める。
 
@@ -10,9 +10,13 @@ FFの7literal接合AF179383…とG2静的cycle2は独立PASS。旧G3一回はG01
 
 locale設計23DD36FE…/plan35246F36…のL1 PreとL2静的reviewは独立PASS。新N=packet/4e5f72fc-b5bc-45e1-9052-dc4d47e3e03fのdriver3F0269D5…/manifest25B9DE97…は許可5群/helpの逆旧driver全bytes一致、Parser/PSSA通常診断/engine0。固定日本語の等価Unicode表記と新manifest4path表記接合だけを追加是正し、旧版/停止証拠は保全した。固定資源format＋固定frame fields、ja-JP同一run前後culture/資源、旧42＋追加4=46/内部post48、元FF/helper/fixture/3期待/5・60秒/AdapterFailureexit2優先を維持する。公式raw source未取得、根拠は承認SMAのIL/ja衛星である。
 
-L3一回は3Passed/Unexpected0/NotRun0/実exit0/marker1/saveErrors0、同run ja-JP全8点と資源前後一致、内部48/外側49入力保全、独立Post PASSでlocale/D4限定Closedを親受入れた。freeze packet/eaf19631-5bf8-4bcd-8998-dbcc8d422b1b/L3-FROZEN.md=1BA6F26E…、同dir runner report=E1E88FC2…、Q=packet/b5517847-0aff-42cf-85f2-80ac79f064a1/result.json=B01AD52D…である。次は既存P7-E（58行動期待＋ValidateOnly2）の最終入力・完全argvをrunner Sol6.1/mediumが新草案へ接合し、親freeze後だけ一回検証する。Eはまだ実行0。旧F3/UNKNOWN/ENV01/focused10/80/full/build/製品提供/API/実data/admin/OS変更は未解除である。
+L3一回3Passed/Unexpected0/NotRun0/実exit0/marker1/saveErrors0、ja-JP全8点/資源前後一致、内部48/外側49保全、独立Post PASSでlocale/D4限定Closed。freeze packet/eaf19631-5bf8-4bcd-8998-dbcc8d422b1b/L3-FROZEN.md=1BA6F26E…、同dir report=E1E88FC2…、Q=packet/b5517847-0aff-42cf-85f2-80ac79f064a1/result.json=B01AD52D…である。
 
-索引：[locale plan](ACOUSTIC-HISTORY-001/p7-guard-locale-plan.md)／[locale design](ACOUSTIC-HISTORY-001/p7-guard-locale-design.md)／[旧guard plan](ACOUSTIC-HISTORY-001/p7-guard-binding-plan.md)／[旧guard design](ACOUSTIC-HISTORY-001/p7-guard-binding-design.md)／[usage](ACOUSTIC-HISTORY-001/usage-observation-20261014-et3.md)。失敗保存checkpoint7d6709fはpush済み。以下は旧経緯であり本節と索引正本を優先する。
+P7-Eは最終草案4823069D…/索引45820726…/親freeze packet/c16410aa-87dc-45e7-84dd-c7bce9184b12/P7-E-FROZEN.md=745CA52F…を固定し、別runner Sol6.1/mediumが入口1 Contextだけ一回実行。C0–8 Passed/C9 Unexpected/C10–11 NotRun/実exit2で停止、後続6command0/retry0。全58行動期待では9Passed/1Unexpected/48NotRun、ValidateOnly2は別枠NotRun。C9は検証用junction作成時のアクセス拒否でconsumer未到達。34入力前後/最終一致・保存24 artifactを独立Post確認、FAIL維持/停止適合、E未Closedである。result packet/8d3792d8-6e67-43b9-9d52-741832c9d1a0/result.json=F3DC847A…、freeze-dir report=31D03FB2…。
+
+旧accepted-bは隔離外・非admin、今回use_default隔離内・非adminという差は確定。ACL/OS/隔離の単独原因は未確定。次は専用新UUIDのjunction作成1回に限定したtoken/ACL/属性/完全ErrorRecord診断案であり、隔離外実行は別承認が必要。新診断/E再実行/admin化/期待緩和は未解除。旧F3/UNKNOWN/ENV01/focused10/80/full/build/製品提供/API/実data/OS変更も未解除である。
+
+索引：[review冒頭](ACOUSTIC-HISTORY-001/early-trial-delivery-review.md)／[locale plan](ACOUSTIC-HISTORY-001/p7-guard-locale-plan.md)／[locale design](ACOUSTIC-HISTORY-001/p7-guard-locale-design.md)／[旧guard plan](ACOUSTIC-HISTORY-001/p7-guard-binding-plan.md)／[旧guard design](ACOUSTIC-HISTORY-001/p7-guard-binding-design.md)／[usage](ACOUSTIC-HISTORY-001/usage-observation-20261014-et3.md)。D4 closure checkpoint7e4c9fdはpush済み。以下は旧経緯であり本節と索引正本を優先する。
 
 ## D1–4／E再開
 

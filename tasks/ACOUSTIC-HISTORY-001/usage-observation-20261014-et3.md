@@ -2,6 +2,10 @@
 
 ## P7-D4 guard限定接合（2026-10-18、進行中）
 
+P7-E停止checkpoint：既存7commandの草案接合だけをrunner Sol6.1/mediumへ委任し、親freeze後にContext一回を実行、C9 junction fixture作成のアクセス拒否で停止した。9Passed/1Unexpected/48NotRun＋ValidateOnly2NotRun、後続0/retry0、34入力保全、独立Post FAIL/停止適合。read-only比較で旧accepted-b隔離外と今回隔離内の境界差は判明したが原因未確定。新診断/再実行は未実施、検査rule/期待の緩和0である。
+
+親snapshot2026-10-18T00:31:57.244Zはinput2083234256/cached2038670720/output4646283/reasoning1543643/total2087880539/cache_write0。開始との差はinput40943791/cached40516992/output88338/reasoning39540/total41032129、前checkpoint以降はinput3868124/cached3831808/output8900/reasoning1898/total3877024。独立Post返却/この記録/保存/最終応答は未反映、子counter/実provider/包含は未取得で合算しない。共有週枠18%/10080分/reset1792882580、アカウント共通で専有量へ換算しない。方式比較の効率増減は未判定である。
+
 locale/D4限定Closed checkpoint：L2のUnicode/BOM診断1と4path表記不一致は静的段階で停止・証拠保全し、等価ASCII literalと新manifest4値だけを是正。検査rule/期待/閾値を緩めず独立static PASS→親freeze→別runner一回3Passed→独立Post PASSとなった。無変更helper/fixtureの全static反復0、path-only修正後の同driver PSSA反復0、動的retry0。次E準備は独立review後の別範囲として実行0である。
 
 親中間snapshot2026-10-18T00:26:58.66Zはinput2079366132/cached2034838912/output4637383/reasoning1541745/total2084003515/cache_write0。開始との差はinput37075667/cached36685184/output79438/reasoning37642/total37155105。以降の保存/準備/応答は未反映、子counter/実provider/包含は未取得、cached/reasoningは内数。L3 runner共有週枠17→17%、親checkpoint18%/10080分/reset1792882580、開始6%/reset1792882581と1秒表示差、アカウント共通で専有量へ換算しない。通常開発方式の効率比較は未判定である。
