@@ -1,5 +1,11 @@
 # ET3 試用EXE提供の使用量観測
 
+## P7-E隔離外再実行とreceipt復旧（2026-10-18、進行中）
+
+HEAD27cab19/treecleanから利用者承認の隔離外Eを再開。親開始snapshot2026-10-18T03:55:40.297Z=input2093467818/cached2048838656/output4669677/reasoning1551129/total2098137495/cache_write0、共有週枠47%/10080分/reset1792882580。着手からsnapshotまで欠測、子counter/provider実値/包含は未取得。旧固定組を再利用してrunner Sol6.1/mediumが新7root草案作成→独立Pre Astra/high→親freeze→正Context12PASS後、O02のinline置換順序ミスでContextを反復した。追加Context12 credit0、MissingOs等0、後段停止、全体PostFAIL/正O01単独PASS/42保全。これは検査本体でなく当方の実行手順の手戻りであり、正常実行として隠さない。
+
+独立Postが正O01 Reuse12を受入れ可としたため、固定入力/runtime/証拠・新前後保全を条件に不要なContext反復を避ける限定計画35E17D27…をplanner Astra/highが作成、作者Astra/highへ6tool receipt/indexだけを委任した。実行時文字列置換を廃止し、独立Pre/親freeze後にfresh runner Sol6.1/mediumを使う。通常補助1役ずつ/再帰0/親model不変。新source/期待/期限/権限変更0、53入力。終了counterは工程終了時に採取し、週枠差を専有消費量に換算しない。
+
 ## P7-C9 junction一回診断（2026-10-18、限定Closed）
 
 HEADd81dc52/tree cleanから利用者の限定承認で開始。planner Astra/high→作者Astra/high→独立Pre Astra/high→runner Sol6.1/medium一回→独立Post Astra/highを通常補助1役ずつ実施、親model不変。単独script/新計画だけを追加、外部仕様/設計/本体実装役は既存観測・保存契約を再利用して非起動。新framework/module/Pester/構成基盤0。初回static4指摘は関数命名と明示引数だけ是正、最終Parser/PSSA通常診断/engine0、dynamic attempt1/retry0/作成成功/診断完了/実exit0/37入力保全、独立Post PASS。失敗ErrorRecordの動的試験は0、旧E/本体へのcredit0。
