@@ -2,6 +2,8 @@
 
 ## P7-D4 guard限定接合（2026-10-18、進行中）
 
+locale差戻しは同じ7役責任・exact割当を再利用し、planner/設計/独立Preを補助1役ずつ実施した。公式raw sourceはcache miss/DNSで未取得、既承認SMAの公開ILと同定済みja衛星/資源のread-only一次証拠で厳密field対応を確認し、限定Pre PASS/最終plan35246F36…を受領した。作者Astra/highは新rootのdriver/manifestだけを変更中。元42入力/FF/8関数/fixtureの重複copy・無変更全static再実行を避け、追加4入力/新run文化資源/既存3観測だけを次freezeへ接合する。PowerShell対象ps7固定7.6.7、既存有限harnessを維持し、新module/Pester/config/log基盤やgate設定は変更しない。親currentの本turn重複経緯を最新状態＋正本索引へ集約したが、使用量削減の実測効果とはまだ判定しない。
+
 G3失敗checkpoint：G1 Pre PASS→G2構築時の変数名/最終期限不足是正→独立static cycle1分類優先指摘→同predicateだけ是正/cycle2 PASS→別runner一回でPassed1/AdapterFailure1/NotRun1/exit2→独立Post FAIL/停止適合。原因は日本語実stackと英語raw期待の不一致、同一runUICulture欠測。旧G02をPASSへ再集計せず、旧結果/全候補を保持し、FF/closure/fixture等の不変部分はSHA根拠で静的確認を再利用した。E/FF18/製品build等は未実施。localeの原因担当差戻しだけをplannerへ依頼中で自動再実行0。
 
 中間親snapshot2026-10-17T23:59:14.978Zはinput2063102278/cached2018860288/output4596296/reasoning1521382/total2067698574/cache_write0。開始23:23:31.481Zとの差はinput20811813/cached20706560/output38351/reasoning17279/total20850164。この後の再設計・保存・応答は測定外、子counter/実provider/親子包含は未取得。共有週枠観測6→12%/10080分、resetは開始1792882581/今回1792882580と1秒表記差、アカウント共通で専有率へ換算しない。モデル方式間の効率増減は未判定である。
