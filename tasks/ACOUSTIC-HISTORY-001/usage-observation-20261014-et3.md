@@ -1,5 +1,11 @@
 # ET3 試用EXE提供の使用量観測
 
+## P7-C9 junction一回診断（2026-10-18、限定Closed）
+
+HEADd81dc52/tree cleanから利用者の限定承認で開始。planner Astra/high→作者Astra/high→独立Pre Astra/high→runner Sol6.1/medium一回→独立Post Astra/highを通常補助1役ずつ実施、親model不変。単独script/新計画だけを追加、外部仕様/設計/本体実装役は既存観測・保存契約を再利用して非起動。新framework/module/Pester/構成基盤0。初回static4指摘は関数命名と明示引数だけ是正、最終Parser/PSSA通常診断/engine0、dynamic attempt1/retry0/作成成功/診断完了/実exit0/37入力保全、独立Post PASS。失敗ErrorRecordの動的試験は0、旧E/本体へのcredit0。
+
+親開始snapshot2026-10-18T03:39:40.554Z=input2084962628/cached2040382848/output4652036/reasoning1544892/total2089614664/cache_write0、終了03:53:55.218Z=input2091894471/cached2047274624/output4664929/reasoning1549846/total2096559400/cache_write0。差分input6931843/cached6891776/output12893/reasoning4954/total6944736。着手から開始snapshotまでと本記録/保存/最終応答は欠測、子counter/provider返却model-effort/包含は未取得で合算しない。cached/reasoningは内数で再加算しない。共有週枠45→47%/10080分/reset1792882580、planner返却reset末尾1秒差は表記差として残し専有率へ換算しない。通常開発方式の効率比較は未判定である。
+
 ## P7-D4 guard限定接合（2026-10-18、進行中）
 
 P7-E停止checkpoint：既存7commandの草案接合だけをrunner Sol6.1/mediumへ委任し、親freeze後にContext一回を実行、C9 junction fixture作成のアクセス拒否で停止した。9Passed/1Unexpected/48NotRun＋ValidateOnly2NotRun、後続0/retry0、34入力保全、独立Post FAIL/停止適合。read-only比較で旧accepted-b隔離外と今回隔離内の境界差は判明したが原因未確定。新診断/再実行は未実施、検査rule/期待の緩和0である。

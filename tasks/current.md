@@ -14,9 +14,11 @@ L3一回3Passed/Unexpected0/NotRun0/実exit0/marker1/saveErrors0、ja-JP全8点/
 
 P7-Eは最終草案4823069D…/索引45820726…/親freeze packet/c16410aa-87dc-45e7-84dd-c7bce9184b12/P7-E-FROZEN.md=745CA52F…を固定し、別runner Sol6.1/mediumが入口1 Contextだけ一回実行。C0–8 Passed/C9 Unexpected/C10–11 NotRun/実exit2で停止、後続6command0/retry0。全58行動期待では9Passed/1Unexpected/48NotRun、ValidateOnly2は別枠NotRun。C9は検証用junction作成時のアクセス拒否でconsumer未到達。34入力前後/最終一致・保存24 artifactを独立Post確認、FAIL維持/停止適合、E未Closedである。result packet/8d3792d8-6e67-43b9-9d52-741832c9d1a0/result.json=F3DC847A…、freeze-dir report=31D03FB2…。
 
-旧accepted-bは隔離外・非admin、今回use_default隔離内・非adminという差は確定。ACL/OS/隔離の単独原因は未確定。次は専用新UUIDのjunction作成1回に限定したtoken/ACL/属性/完全ErrorRecord診断案であり、隔離外実行は別承認が必要。新診断/E再実行/admin化/期待緩和は未解除。旧F3/UNKNOWN/ENV01/focused10/80/full/build/製品提供/API/実data/OS変更も未解除である。
+利用者承認の隔離外・通常ユーザーjunction単独診断は独立Post PASS/限定Closed。J-plan B1AC4279…、候補packet/289725bd-b80a-4ba5-9d3b-673b7eba04ba内script8FE4E77E…/J-FROZEN BFB8F5D4…/J3-RUNNER-REPORT5CCFACD5…、実行root packet/7ef4d4a9-a4bd-45bd-9194-46970e71afe0/result.json8465A70F…である。attempt1/retry0、同process admin前後false、作成成功/診断完了/実exit0、欠測保存エラー0、内外37入力保全、保存13 artifactを独立確認。synthetic空target/linkは保全、削除0。製品未評価、失敗時ErrorRecord保存経路の動的試験0。
 
-索引：[review冒頭](ACOUSTIC-HISTORY-001/early-trial-delivery-review.md)／[locale plan](ACOUSTIC-HISTORY-001/p7-guard-locale-plan.md)／[locale design](ACOUSTIC-HISTORY-001/p7-guard-locale-design.md)／[旧guard plan](ACOUSTIC-HISTORY-001/p7-guard-binding-plan.md)／[旧guard design](ACOUSTIC-HISTORY-001/p7-guard-binding-design.md)／[usage](ACOUSTIC-HISTORY-001/usage-observation-20261014-et3.md)。D4 closure checkpoint7e4c9fdはpush済み。以下は旧経緯であり本節と索引正本を優先する。
+隔離外・通常ユーザーでのリンク作成能力は実証したが、旧C9と時点/ACL/token条件が同一でなく単独原因未確定。旧E FAILは維持する。次はこの境界を反映したE再実行の別承認と新freezeであり、今回の承認では実行しない。E再実行/admin化/設定変更/期待緩和、旧F3/UNKNOWN/ENV01/focused10/80/full/build/製品提供/API/実dataは未解除である。
+
+索引：[review冒頭](ACOUSTIC-HISTORY-001/early-trial-delivery-review.md)／[junction診断計画](ACOUSTIC-HISTORY-001/p7-junction-diagnostic-plan.md)／[locale plan](ACOUSTIC-HISTORY-001/p7-guard-locale-plan.md)／[locale design](ACOUSTIC-HISTORY-001/p7-guard-locale-design.md)／[旧guard plan](ACOUSTIC-HISTORY-001/p7-guard-binding-plan.md)／[旧guard design](ACOUSTIC-HISTORY-001/p7-guard-binding-design.md)／[usage](ACOUSTIC-HISTORY-001/usage-observation-20261014-et3.md)。D4 closure7e4c9fd/E停止記録d81dc52はpush済み。以下は旧経緯であり本節と索引正本を優先する。
 
 ## D1–4／E再開
 
