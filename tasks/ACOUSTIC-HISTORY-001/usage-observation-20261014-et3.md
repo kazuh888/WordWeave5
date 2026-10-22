@@ -1,5 +1,9 @@
 # ET3 試用EXE提供の使用量観測
 
+## UNKNOWN-DESCENDANT-OPEN01 診断実装・隔離内6対照（2026-10-22、再開）
+
+利用者が検証用診断記録と隔離内の純合成6対照を承認した。開始HEADba7f0e4、tree clean。親開始snapshot2026-10-22T13:14:55.662Z=input2127501789/cached2082464896/output4744033/reasoning1581227/total2132245822/cache_write0。共有週枠24%/10080分/reset1793097272でアカウント共通、専有量不明。開始snapshot前・子counter・実provider model/effort・親子包含は未取得。境界は診断追加と局所6対照/独立検証・レビューであり、新実OS試験・製品buildは0を維持する。
+
 ## UNKNOWN-DESCENDANT-OPEN01 保存証拠監査・限定計画（2026-10-22、実行なし）
 
 開始HEAD05e78f5、親snapshot2026-10-22T12:44:33.682Z=input2114163467/cached2069198592/output4726221/reasoning1577879/total2118889688/cache_write0。共有週枠21%/10080分/reset1793097272はアカウント共通で専有量不明。開始snapshot以前、子counter、実provider model/effort、親子包含は未取得で合算しない。今回の境界は保存証拠の読取と必要な再検証計画であり、製品実装・旧試験再実行・EXE更新の成功を計上しない。

@@ -70,3 +70,40 @@ case内の複数入力は入力数を別記し、6caseを6呼出と偽らない�
 結果は「元fixture Errと監視取得失敗が同runに共存」「設定exit」「採取できたが因果不明」「診断欠測」を区別するだけである。新試験は当時の環境を復元せず、観測追加自体も時機へ影響する。sidecar取得に成功してもSupervisor unknownを救済せず、新ENV01成功でも旧F3はFAILのままである。未知候補の取得retry、他actorのhandleによる救済、target正常性oracle強化は本案に含めない。前二者はG5境界を変え、後者は外部期待判断を要するためである。
 
 実装handoffは上記2fileの観測spanだけ、テスト作者handoffはO1–O6と既存消費者互換性である。残る判断は独立Pre、必要な局所seamの成立、診断公開APIの上書き禁止確認、最終hash/command、実OS一回枠の承認である。開始statusの他者変更2fileと計画untrackedを保持した。子usage開始/終了counter・親子包含は未取得で、親が取得可能範囲を記録する。文書以外の編集、実試験、OS照会/停止、リンク作成、API、再委任、commit/pushは0である。
+
+## U-D追補：承認済み診断の内部契約（2026-10-22）
+
+planner指定`gpt-6.1-sol/high`、実provider metadata・子usage開始/終了は未取得である。入力計画SHA256は`7D8AFBEB3AFCAD08563354E8690167BAB20EB149BDA2110BA7F1B1D3DB77D746`、[限定Pre](unknown-descendant-review.md)の3gateと親受領の利用者承認を適用する。本節は上記の未確定writer/接続/seamだけを更新する。既承認ET-07/G4/G5/FF1–3を再利用し、外部期待変更0である。診断追加と隔離内O1–O6は承認済み、新OS/ENV01/native/fullは解除0である。
+
+**Rustのprivate契約と保存。** `TargetFailureStage`は既記8値＋`TreeDelegated`、文字列は上記表記へ固定する。`target`の局所closureは元`io::Result<i32>`を返し、stage更新以外の元操作順を保つ。
+
+- `encode_environment(keys:&[&str], lookup:impl FnMut(&str)->Option<OsString>)->String`は既存12key＋承認7keyだけを順番にJSON化する。productionは`env::var_os`を渡し、observeの既存保存回数を保つ。null/空/UTF-16は従前どおりである。
+- `encode_target_failure(pid:u32, stage:TargetFailureStage, error:&io::Error)->Vec<u8>`は既定7fieldだけを返す純関数とする。内部のmessage選別と8192bytes判定は別statement境界とし、上限超過時のnull/TooLong化は一度だけである。新crate/汎用serializerは導入しない。
+- `try_write_target_failure(root:&Path, pid:u32, stage:TargetFailureStage, error:&io::Error, write_once:impl FnOnce(&Path,&[u8])->io::Result<()>)->io::Result<()>`は固定final pathと上記bytesを一度だけ渡す。productionの`write_once`は既存`write_new`であり、直接CreateNew→write_all→sync_allを行う。tmp/rename方式を採用しない。
+- writerの`Ok(())`はWriteSynced、`Err`は診断失敗である。Published判定は外側の完全JSON parse＋SHA成功に限る。targetのErr分岐はwriter結果を局所値に保持して捨て、`?`伝播せず、借用元の同じ`io::Error`をmainへ返す。Ok(code)分岐はwriter呼出0である。writer結果は新sidecar fieldや新stderrへ出さず、O3/O4の返却値・呼出counterで測る。
+- O4のfile境界fakeはin-memory CreateNew/WriteAll/SyncAll状態と各失敗を持つ。実`write_new`の抽出片をこの境界へ結び、衝突時はwrite0、partial/write/sync失敗時は残byte保持、open1/retry0を確認する。FSアクセス・削除・別名救済0である。同期I/Oの期限・cancel限界は既設計のままである。
+
+**PSのlocal接続とwire。** `Read-OwnedTree`内だけにsnapshot開始/完了UTC、candidate試行UTC、stageを置く。各candidate直前に試行値をnullへ戻し、既存未登録取得列だけで`LookupHandle→PinHandle→ReadIdentity`を更新する。既知枝やparentなしの枝へ前候補の値を持ち越さない。
+
+snapshot/失敗UTC取得とrecord作成はbest-effortの局所try/catchとする。元`$caught`を先に保持し、既存Get-IdentityFailureObservation/producerFailure fallbackの後で、candidate試行があった場合だけ`$observation.acquisition`を追加する。作成失敗はkeyなし、単一値の欠測/型不正はnullであり、元exceptionへData追加や再throwをしない。Get-IdentityFailureObservation、New-FirstFailureRecord、Invoke-GateFailureのsignatureは変更0である。
+
+入力位置は`FailureObservation.osObservation.acquisition`、出力位置は`record.failure.osObservation.acquisition`である。acquisitionがIDictionaryの場合だけ新9keyを射影し、それ以外はkeyごと省略する。内側は厳密に`snapshotStartedUtc,snapshotCompletedUtc,attemptUtc,failedUtc,stage,exceptionHResult,innerType,innerHResult,nativeErrorCode`、時刻は既存Get-Utcで検証するUTC7string又はnull、stageは上記3値又はnull、codeはInt32範囲整数又はnull、innerTypeは既存ASCII1–256文字又はnullである。例外type本体は従前のosObservation.exceptionType、直接inner一階層だけを採取する。入力の未知keyは出力しない。acquisitionなしでは旧12key＋既存任意producerFailureのみを維持し、envelope/failureのkey集合とFF byte上限は変更0である。
+
+**単一processの局所seamと独立期待。** 作者は新UUID内に抽出unitを作り、凍結前に生成を完了する。PSは既存AST一意抽出方式、Rustは一意fn境界とoffset/length/元byte hashを固定する。compile対象は抽出済みRust test unitだけであり、元fakeのmain/run/cargo/tree/externを含めず実行しない。新module/framework/OS注入口は作らない。
+
+| 対照／要求 | 実コードとの接点・独立観測 |
+| --- | --- |
+| O1／U-R1,3 | 新旧observeのkeys/records構築片を抽出し、var_os取得だけを合成lookupへ置換する。19keyの厳密集合と各null/空/値を独立期待で照合し、環境変更0である |
+| O2／G4,U-R4 | 新旧targetの元bodyを抽出する。args/env/flag/observe/wait/stream/number/completed書込/tree境界だけをin-memory入力・sinkへ結び、成功0/指定93のOk・出力byte・操作列・markerとwriter0を比較する |
+| O3／U-R1,3 | 同targetの各8操作境界へ一度ずつ合成Errを返し、stage、元errorのkind/raw値と独立payload同一性、mainの元Err93分岐の静的不変、sidecar一回を確認する。TreeDelegatedはnative treeを呼ばず合成delegationで識別する |
+| O4／FF3,U-R4 | 実encoder/writerとwrite_new抽出片を使用する。message選別と上限判定statementへ独立の非許可文字列/過長UTF-16/過大encoded値を入力し、null化・8192以内・書込一回・診断Err時の元Err保持を測る。新エラーliteralを本体へ足して刺激を作らない |
+| O5／U-R2,4 | `$parents`算出以降の未登録candidate statementsと同じcatch/finallyを抽出し、合成tryへ置く。GetProcessById呼出だけをthrow可能なlocal lookupへ、SafeHandle getter/Get-Identity/Add-KnownProcess/FF呼出をcounter付きfakeへ結ぶ。lookup失敗でidentity/登録/kill0、元Unprovableと追加scalarを実catchから取得する |
+| O6／G5,FF1–3,U-R2,4 | 実New-FirstFailureRecord/Get-UtcとInvoke-GateFailureを抽出し、writerだけをin-memory失敗へ結ぶ。旧形/追加形の厳密集合、invalid→null、8192上限、元status/AbortTick/AbortUtc/throwと一回性を照合する。異actor/世代不一致の記録組は独立oracleでunknownとし、既存所有判定が不変である静的証拠と分ける |
+
+置換は上表境界だけである。作者は元statementの位置・原文・置換個数・置換後byte hashをmanifestへ固定し、逆置換で原文byte一致を必須とする。PSの他枝を含めたRead-OwnedTree全体やRust mainを実行してcounter0を主張しない。lookup/identity/登録/kill等の実OS到達は抽出unitの静的禁止検査とfake counterを併記する。実装の非所有逆diffは別に、許可spanをbeforeへ戻した全fileのbyte/SHA一致を検査し、adapter逆照合だけで代用しない。
+
+Rust targetのfault差込点は既存fallible呼出13箇所だけである：Observe1、WaitRelease1、StdoutWrite5、StderrWrite2、StdoutFlush1、StderrFlush1、ExitSetting(number)1、CompletedWrite1である。O3はfull target経路の各stageを1入力ずつ選び、同じstageの未到達別枝へ追加faultを配らない。境界fake化の補助置換はargs_os1、flag is_file6、set_var2、tree1、既存completed内process::id1、新sidecar呼出用process::id1を上限とし、encoder/writer新helperの関数内byteは抽出のまま保持する。導入stage更新とclosure以外の呼出増減はPreへ返す。stageは最後に着手した取得段階であり、ReadIdentity後の既存検証失敗をOS取得失敗と断定しない。
+
+oldREDはbaselineにも存在する上記keys片/target body/candidate catch/projectorを動かし、O1の追加7key欠測、O3のErr時sidecar呼出欠測、O5のacquisition欠測を独立のbehavior assertionで検出する。baseline向けadapterは存在しない新helperを要求せず、診断呼出counterの初期0を保持するだけである。O2と旧FF互換はbaseline PASSを期待する。新writer専用O4/追加形O6を旧版で無理に動かさずNotApplicableと別計上する。抽出一意性/逆照合/compile失敗や未実装helper不在はAdapterFailureでありREDではない。入力数をcase数と別記し、5秒/30秒・firstUnexpected停止・残NotRun・retry0を維持する。
+
+handoffはU-D差分Pre→独立作者のoracle/完全command固定→実装者の上記2file局所変更→最終hash/親freeze→別runner/Postである。作者へ追加設計判断を残さない。上限statement抽出等の一意性が成立しなければAdapterFailureで親へ返し、新frameworkやOS試験へ広げない。本追補は文書静的確認だけであり、runtime成立・UNKNOWN閉鎖・旧F3治癒は未検証、他者編集保持・実装/テスト編集/対象実行/再委任/公開0である。

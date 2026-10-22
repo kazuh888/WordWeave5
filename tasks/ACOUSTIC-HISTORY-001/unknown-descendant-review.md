@@ -24,3 +24,9 @@
 ## 次の承認境界
 
 利用者へ求める次の範囲は、検証用fake/監督scriptの診断追加と、通常の隔離環境内での独立した純合成6対照・局所静的検査である。実装前gateを具体化してから進め、実データ・API送信・admin・OS設定変更・既成功試験の一括反復は含めない。実OS合成ENV01一件一回は最終source/commandを凍結した後の別承認とし、今回の承認へ混在させない。F3/focused10/80/full/build/試用EXEはまだ未実施である。
+
+## 承認受領とU-D差分Pre（2026-10-22）
+
+利用者が上記の診断追加と隔離内純合成6対照を明示承認した。計画追補7D8AFBEB3AFCAD08563354E8690167BAB20EB149BDA2110BA7F1B1D3DB77D746、設計追補B92FE83EB555829AF2EC111E95C9E0109747CB0FEB31CD5B83977760836C27D7へ接合した。designer指定Sol6.1/high、独立reviewer指定Sol6.1/highで、追補37行と計画末尾だけを差分Pre確認した。
+
+U-D限定Pre PASS、作者着手を阻害するfindingなしである。直接CreateNew／writer Result非伝播（設計82–84）、candidate値の初期化／FF完全wire位置／追加9key型制約／欠測旧strict keys（86–90/101）、抽出逆bytes／8stage・13fault／oldRED・baseline PASS・NotApplicable・AdapterFailure区別（92–107）が具体化された。作者と実装者は別担当とし、実装者はU-E期待固定・静的Pre・親受領後に着手する。未検証はadapterと実装の成立であり、完成hash/commandのfreeze、別runner/Postを省略しない。新OS試験・UNKNOWN閉鎖・旧F3治癒の承認ではない。

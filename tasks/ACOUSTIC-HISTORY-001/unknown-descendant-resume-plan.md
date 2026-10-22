@@ -104,3 +104,45 @@ U-C初回指定 `gpt-6-astra / high` は `Selected model is at capacity` で起�
 難度・リスクは高のままである。選定理由は、対象が既存証拠監査と72行の限定設計へ有界化され、全体の再設計を伴わず、同世代証明・未知非停止・actor間証拠の分離・oracle・観測保存を固定観点で独立照合する作業であることにある。Sol6.1/highは親が呼出可能かつ対応effortとして確認した候補であり、現行のbounded設計reviewへ割り当てる。モデル名だけから能力優越・合格・検証削減を推定しない。Sol5.6/highを同時起動せず、新指定も利用不能なら再度blockerとしてplannerへ戻す。
 
 次handoffは親からfresh `ww-reviewer` へexact `model=gpt-6.1-sol`、`reasoning_effort=high` を明示する。必要Skill `review-software-design` を全文読了し、既存U-C受入・禁止事項を維持してread-only独立Preを行う。レビュー対象は上記U-A/U-Bと必要な直接参照だけ、出力は根拠位置付き判定・指摘・残る未検証である。実装・試験・OS照会・再委任・公開0、親が結果を保存する。planner・外部仕様の固定Astra、親model、品質gate、権限は変更しない。実provider model/effortは起動指定と分離し、未取得なら推測しない。
+
+## U-D～G：承認済み診断追加と隔離内6対照（2026-10-22）
+
+開始HEAD `ba7f0e4`、着手時clean。利用者が「検証用プログラムへの診断記録の追加と、隔離環境内で合成データによる6種類の局所試験」を明示承認した。検査の厳しさ・unknown非停止・元Err/status/abort/期限・旧FAILを保持する。新OS ENV01／native／F3／full／製品build、admin／OS設定／実data／API、既成功試験の反復は解除0である。本節は従前の「文書のみ」をこの承認範囲だけ更新する。U-A原因調査・U-C済みreviewの再実行はしない。
+
+親は開始baseline6件をread-onlyで照合済みと報告した：Invoke `898C60B1133DB6956090035AF677B4CF7FDE0FE6FDFD5D47E5CD776B00500B71`、Test `F0C57FE388F96D78F3BA0B14A420D9E7E6F5C7977944AD72B19E925E894DC919`、fake `3482075BF7479E61942978830AE91FDDF5301133E1A2F43EDB9B65DDAA0FA016`、固定pwsh.exe `FA2C8…`／pwsh.dll `A583…`／SMA.dll `7070…` は一致である。完全環境hashは親の照合記録をmanifestへ転記し、省略prefixで実行照合しない。plannerは重複照合していない。これはfile一致であり今回processの実ロードruntime観測ではない。固定PS7.6.7と実ロードruntimeが不一致なら停止し、更新承認へ読み替えない。
+
+### 実装前3gateの具体化
+
+1. **公開方式**：既存`write_new`相当の最終path直接`CreateNew`を第一選択として固定する。tmp→renameは採用しない。固定`target-<pid>.failure.json`へ一回、上書き／削除／別名fallback／retry0。途中失敗で部分fileが残る場合は保全し、完全JSON parse＋hash成功だけをPublishedとする。元Err返却とmain exit93は変更0である。writerの内部戻り値・呼出点・失敗の非伝播とその観測方法はU-Dで設計担当が確定する。
+2. **FF互換性**：acquisitionなしでは旧12key（既存任意producerFailure条件も同じ）の厳密集合を維持する。acquisitionありの時だけ外側にその1keyを許し、内側は設計の9fieldのみ、型/null/UTC7/ASCII制約を独立期待として固定する。任意の余分なkeyを許す比較へ変えない。旧`Test-FirstFailure.ps1:173–181`本文・期待を変更せず、旧形と追加形の局所oracleをO5/O6へ分けて入れる。既存公開PS関数signatureを増やさずlocalな観測値で接続する案を優先し、必要なsignature差分が残ればdesignerが明示してPreへ返す。
+3. **seam・hash・command**：既存の純合成抽出runner方式を維持する。一意AST/statement抽出、許可置換の個数・位置、逆bytes一致、未到達main／OS／登録／killを静的境界と必要counterで分ける。Rust側の局所抽出/seamとPS側の値注入点・返却形はU-Dが確定し、作者へ設計判断を移さない。baseline完全hashは編集前に固定し、作者の完成oracle→実装候補→最終new hash→親freezeの順とする。新hashを実装前の条件にはしない。完全commandは作成済みのscript/局所Rust compile対象・固定tool path・Phase・新UUID絶対rootを含めて静的Preへ提出し、親freeze後だけ実行する。実行時文字列置換0、freeze自身のhashは外側から渡し循環埋込み0である。
+
+### 有限単位・所有・受入
+
+| 単位／依存 | 所有・実施範囲 | 受入と必要検証 |
+| --- | --- | --- |
+| U-D／本追補受領 | designerは`unknown-descendant-design.md`末尾だけ。上記writer内部interface、FF optional接続、Rust/PS局所seamの3点を短く確定する | O1～O6を設計9C45の期待のまま実装可能にし、公開PS signature変更・新framework不要を示す。reviewerは新差分だけPre確認。既存U-Cの全面再review0 |
+| U-E／U-D差分Pre | 独立test authorはR/verification/argv-path01の新UUID内のoracle・合成入力・期待manifestのみ。本体`fake.rs`／`Invoke-CargoGate.ps1`／既存Test/FF testを編集しない | O1～O6の期待、複数入力数、AdapterFailure区別、case5秒／集合30秒、firstUnexpected・残NotRun・retry0を固定する。完全静的検査／局所compile／実行commandを用意し、新対照以外のdispatch0を静的確認。未実装機能をadapter failureでRED扱いしない |
+| U-F／U-E期待固定・静的Pre・親受領 | implementerはR/`fake.rs`の7key・stage/sidecar観測spanとR/`Invoke-CargoGate.ps1`のsnapshot/取得段階・任意FF射影spanだけ。両fileのbeforeを先に保全する | 非所有逆diff一致、旧argv/stream/exit/marker順・所有判定・登録/回収・ENV01期待不変。変更PS Parser0/PSSA1.25通常診断0・engine0、Rust局所compile成功。必要な新candidate command/hashは完成後に確定し、既存mainや実OSを起動しない |
+| U-G／新候補静的Pre・親freeze | 別runnerは新UUIDログ/結果のみ、reviewerはread-only。新O1～O6を各入力一回だけ順次実施する | 前後入力一致、実runtime、完全argv、実exit、保存・marker、6caseと入力数別計上、元failure保持、strict FF互換、unknown保持を独立Post確認する。保存/adapter失敗・超過・driftで停止、後続NotRun。局所Post成功でもUNKNOWN閉鎖／旧F3治癒／新OS解除0 |
+
+U-D完了後、plannerは確定seam/interfaceとcommandの所在だけ本書へ接合する。通常補助1役ずつ、test authorとimplementerは別agentかつ別file所有である。本節では以前の設計表の「test authorがfake本体を編集」を更新し、検証用fakeも診断追加の実装としてimplementerへ割り当てる。テスト作者が本体を変更して自分の期待へ合わせる経路を作らない。
+
+### ignored成果物の保存と再現性
+
+既存R/verification/argv-path01の新UUID packetへ`before/`原本2fileと完全SHA/length、oracle、合成入力、候補・ログを保存し、旧packetと原本を上書きしない。trackedの`tasks/ACOUSTIC-HISTORY-001/unknown-descendant-artifacts.md`を親が所有し、baselineの取得元・完全hash、before/output絶対path、固定toolchain、許可span、完全command／freeze／結果索引を記録する。authorは`unknown-descendant-tests.patch`、implementerは`unknown-descendant-harness.patch`を同tasks directoryの自分の担当成果物として保存し、新規oracleの全内容・本体before→after差分を再現可能にする。親は最終hash対応とpatchの適用先を索引へ接合する。保存sourceは合成harnessとoracleだけで、実data・秘密・binary・runtimeログをtracked化しない。保全beforeへのdry-run適用とafter hash一致は独立reviewの対象とし、稼働中Rへ再適用しない。plannerは本書以外を編集しない。新config/module/framework/Pester導入0である。
+
+### U-D～G exact割当・次dispatch
+
+| 役 | model / effort | 難度・リスクと理由 |
+| --- | --- | --- |
+| planner／必要時external-spec | `gpt-6-astra` / `high` | 高、固定。今回外部期待は再利用しspec作者不起動 |
+| designer | `gpt-6.1-sol` / `high` | 高、既承認案の3interface差分に限定。前回Astra capacityを記録した上で今回の利用可能候補から明示再選定し、全面再設計をしない |
+| test author | `gpt-6.1-sol` / `high` | 高、strict旧keysと元Err保持の独立期待・局所seamを作るため。前表の候補Astra/highから本承認単位に限り明示変更 |
+| implementer | `gpt-6.1-sol` / `high` | 高、2fileの診断差分でも元例外・所有判定への波及を防ぐ必要がある |
+| test runner | `gpt-6.1-sol` / `medium` | 中、凍結済みcommandと一回・停止規則の独立実行。独自設計・期待変更なし |
+| reviewer | `gpt-6.1-sol` / `high` | 高、作者・実装者とは別fresh agentでstrict互換・非干渉・保存証拠を独立評価。U-C再選定を継続 |
+
+親は上記exact model/effortで起動する。capacityやSkill欠落はblockerとして戻し、別モデルへ自動fallbackしない。親model・品質gateは変更0。次は **U-D designer1役** へ設計9C45、本追補、review18～20行の3gateだけを渡し、必要Skill `agent-skills:api-and-interface-design` 読了後の限定文書差分を依頼する。設計の追加判断をtest authorへ丸投げしない。以後作者はtest-driven-development、実装/runnerはwordweave-changeの担当工程、reviewerは設計差分にreview-software-design、コード差分にcode-review-and-qualityを適用し、PowerShell既存code変更の必要Skillも担当が確認する。
+
+開始共有週枠24／10080min／reset1793097272、親usage snapshot2026-10-22T13:14:55.662Zを親が保存する。account共通・子包含不明でありtask消費へ換算しない。plannerの今回作業は限定追補と文書検証のみ、source変更・実試験・OS照会・再委任0である。

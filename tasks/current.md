@@ -1,10 +1,10 @@
 # 現在のタスク要約
 
-## 最新状態：UNKNOWN-DESCENDANT-OPEN01 診断追加案の承認待ち（2026-10-22）
+## 最新状態：UNKNOWN-DESCENDANT-OPEN01 診断追加・隔離内6対照を再開（2026-10-22）
 
 利用者の「進めてください」を受け、保存証拠監査→最小観測設計→独立限定Pre PASSを完了した。旧runの72/72保全、actor別exit93/known0/取得失敗を整理し、現Invokeの版4出現をメモリ上で戻して旧318E本文の完全SHA一致を確認した。ただし元fixtureエラー／継承値／snapshot世代が欠測で原因は未確定、UNKNOWNはOpenである。P7-Eの既合格を再実行せず、実試験・実装・製品EXE更新0。
 
-次は検証用診断追加と隔離内の純合成6対照の利用者承認→実装前gate（CreateNew公開方式、FF厳密key互換、局所seam、入力hash/完全command）確定→独立テスト作成/実装/局所検証である。新実OS ENV01一件一回は別承認、旧F3/full/build/製品提供未解除。親モデル変更0、review担当のcapacity失敗は計画者がSol6.1/highへ明示再選定した。実provider/子usage/親子包含は未取得。
+利用者が検証用診断追加と隔離内の純合成6対照を明示承認した。実装前gate（CreateNew公開方式、FF厳密key互換、局所seam、入力hash/完全command）を具体化し、独立テスト作成→実装→局所検証へ進む。開始時にInvoke898C/TestF0C/fake348207と固定pwsh/SMAの6hash一致を確認した。新実OS ENV01一件一回は別承認、旧F3/full/build/製品提供未解除。親モデル変更0、review担当のcapacity失敗は計画者がSol6.1/highへ明示再選定した。実provider/子usage/親子包含は未取得。
 
 索引：[計画](ACOUSTIC-HISTORY-001/unknown-descendant-resume-plan.md)／[証拠監査](ACOUSTIC-HISTORY-001/unknown-descendant-evidence-audit.md)／[観測設計](ACOUSTIC-HISTORY-001/unknown-descendant-design.md)／[独立Preと承認境界](ACOUSTIC-HISTORY-001/unknown-descendant-review.md)。旧P7-E完了記録は以下を保持する。
 
