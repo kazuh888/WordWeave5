@@ -1,0 +1,1825 @@
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/author-report.md b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/author-report.md
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/author-report.md
+@@ -0,0 +1,29 @@
++# ACOUSTIC-HISTORY-001 U-E 作者前半 handoff
++
++計画者指定test author `gpt-6.1-sol/high`。実provider metadata、子usage開始/終了カウンター、親子包含は未取得である。TDDの独立期待／RED準備だけを担当した。AGENTS/team/TDD/KPI、設計B92FE83E全文・計画U-D–G・reviewを読了した。PowerShell automation skillはps7と静的抽出の規約確認だけに適用し、新PS実行script、framework、Pesterを追加していない。
++
++## 完了とPending
++
++親との追加合意により、今回は独立期待＋baseline抽出＋旧O1 unitの保存で返す。全U-EやO1–O6の実行準備完了とは呼ばない。親は書類のみを`6a833b2`へ更新したと通知した。sourceのbeforeは開始baselineで保全した。製品・検証本体の編集0、設定変更0、実試験・compile0、再委任・公開0である。
++
++- `expectations.json`：U-R1–4/G4/G5/FF1–3から独立に導いた6case、49scenario rows、展開後51inputs。内訳はO1=3/O2=2/O3=9/O4=14/O5=5/O6=18である。O3は8stage＋TreeDelegatedの9inputs、O6の非IDictionaryはstring/array/plain objectの3inputsである。複数呼出を含むO6-once等はinput組と呼出数を混同しない。
++- `baseline-extraction.json`：旧sourceの14一意span、位置・原文・SHA。PSはAST抽出、Rustは一意fn/statement境界である。fake mainとRead-OwnedTree全体の原文は静的保全証拠としてだけ保存し、compile unitへ含めていない。
++- `old-o1-binding.json`＋`old-o1.rs`：旧environment構築片をそのまま使い、`env::var_os(key)`1箇所だけを合成lookupへ置換した。位置・逆bytes一致を固定した。新helper不在を要求せず、既存12keyの値が壊れた場合はAdapterFailureとする。旧版の追加7key欠測だけをBehaviorREDとする。
++- `manifest.json`：before2sourceの完全SHA/length、親照合済み9hash、rustc実体/driver/PSSA hash、旧O1完全command、予定results root、停止条件、未完成commandを明記した。rustc version/実ロードruntimeは未実行・未取得である。
++
++Pendingはnew source hash、許可spanの非所有逆diff、O2/O3/O5/O6の実行unit組立、新O4 helper/statement束縛、new O1–O6完全command、独立Pre、最終freezeである。候補が存在するまで新helper内部の構造を推測していない。候補後は同じ作者が期待を変えず、抽出位置・置換個数・逆bytesだけを束縛する。
++
++## 静的証拠と失敗の区分
++
++`static-evidence.json`の29項目はStaticPASS、failure0である。before2source hash/length、設計hash、strict19/7/12/9keys、14span元bytes、O1許可置換1箇所・逆bytes・unit内一意出現・禁止境界不在・3inputs・5秒/30秒検査を確認した。これはruntimeまたはcompile成功を意味しない。
++
++初回`static-evidence-attempt1.json`は29項目中9spanが失敗した。原因はPowerShell原本のUTF-8 BOM3bytesをbyte offsetへ加えていなかった作者fixtureのmetadata欠陥である。原文・hash・期待・許可置換・検査29項目は変更せず、9個のPS byteOffsetに3を足し、説明metadataを補正した。補正後の14spanを原本bytesから再検査してPASSとなった。初回失敗は保持した。これはBehaviorREDではない。
++
++## runnerへの期待
++
++現存する旧O1の完全commandはmanifestの`Old-O1-Compile`と`Old-O1-Run`にある。親の完成物Pre/freeze後のみ実施する。compile exit0が前提であり、compile error、未存在helper、hash/adapter不一致はAdapterFailureである。run予定はexit1、BehaviorRED行3件、各行は同じ7key欠測を示す。任意の異常をREDとして受理しない。想定外または超過はexit2で直ちに止まる。5秒/集合30秒は前後検査であり同期呼出の強制取消し保証ではない。親は集合全体の時計を管理する。
++
++旧O2はPASS、新writer専用O4と追加形O6は旧版NotApplicableとして別計上する。旧O3/有効candidateのO5はsidecar/acquisition欠測によるBehaviorRED期待であるが、まだ実測していない。保存された旧実OS障害の原初因は今回再調査せず、局所unitは当時のOS競合やUNKNOWN閉鎖を証明しない。
++
++復元用tracked patchは`tasks/ACOUSTIC-HISTORY-001/unknown-descendant-tests.patch`である。全作者text artifactの新規作成差分を含む。before2sourceは不変のignored原本として保持し、patchへ原本全量やbinary/runtimeは入れていない。適用先はこのUUID packetだけであり、稼働中Rへの再適用0である。
++
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/baseline-extraction.json b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/baseline-extraction.json
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/baseline-extraction.json
+@@ -0,0 +1,171 @@
++{
++  "schemaVersion": 1,
++  "taskId": "ACOUSTIC-HISTORY-001",
++  "designSha256": "B92FE83EB555829AF2EC111E95C9E0109747CB0FEB31CD5B83977760836C27D7",
++  "sourceExecutionCount": 0,
++  "metadata": "UTF-8 byte offsets include the original PowerShell BOM (3 bytes); AST character offsets exclude BOM. Text fragments are evidence, not imported or executed.",
++  "spans": [
++    {
++      "name": "environment-construction",
++      "byteLength": 463,
++      "byteOffset": 5078,
++      "characterLength": 463,
++      "characterOffset": 5078,
++      "sha256": "8B609BE813BE9A67A235FFD939BFFF2380E3A26B968A4605D71257E9D5AEEBD9",
++      "text": "    let keys = [\"LOCALAPPDATA\", \"TEMP\", \"TMP\", \"PATH\", \"CARGO_BUILD_JOBS\", \"CARGO_TARGET_DIR\", \"CARGO_LOG\",\n        \"CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_RUNNER\", \"WW5_CARGO_GATE_RUN_PATH\", \"WW5_CARGO_GATE_RUN_ID\",\n        \"WW5_ET2_CHILD\", \"WW5_ET2_BASE\"];\n    let records = keys.iter().map(|key| {\n        let value = env::var_os(key).map(|v| units(&v)).unwrap_or_else(|| \"null\".into());\n        format!(\"\\\"{key}\\\":{value}\")\n    }).collect::<Vec<_>>().join(\",\");\n",
++      "language": "rust"
++    },
++    {
++      "name": "target",
++      "byteLength": 2554,
++      "byteOffset": 7188,
++      "characterLength": 2554,
++      "characterOffset": 7188,
++      "sha256": "E2F18E80DFD3AE8E908CDE0692A2466F9DEB8C9A9F25698781B93D44BCA78057",
++      "text": "fn target(root: &Path) -> io::Result<i32> {\n    observe(root, \"target\")?;\n    let args: Vec<OsString> = env::args_os().skip(1).collect();\n    let is_list = args.iter().any(|arg| arg == \"--list\");\n    let is_exact = args.iter().any(|arg| arg == \"--exact\");\n    if !is_list && !is_exact && root.join(\"spawn-descendants.flag\").is_file() { return tree(root); }\n    let hold_file = if is_list { \"hold-list.flag\" } else if is_exact { \"hold-g0.flag\" } else { \"hold-full.flag\" };\n    if root.join(hold_file).is_file() {\n        let release = if is_list { \"release-list\" } else if is_exact { \"release-g0\" } else { \"release-full\" };\n        env::set_var(\"ET3_FAKE_RELEASE\", release);\n    }\n    if is_exact && args.first().is_some_and(|name| name == \"fixture::network\") && root.join(\"hold-network.flag\").is_file() {\n        env::set_var(\"ET3_FAKE_RELEASE\", \"release-g0\");\n    }\n    wait_release(root, \"ET3_FAKE_RELEASE\")?;\n    if is_list {\n        if root.join(\"integration-case.flag\").is_file() {\n            io::stdout().write_all(b\"fixture::recording: test\\nfixture::network: test\\nfixture::integration: test\\n3 tests, 0 benchmarks\\n\")?;\n        } else {\n            io::stdout().write_all(b\"fixture::recording: test\\nfixture::network: test\\n2 tests, 0 benchmarks\\n\")?;\n        }\n    } else if is_exact {\n        let name = args.first().ok_or_else(|| io::Error::other(\"missing exact name\"))?.to_string_lossy();\n        if root.join(\"g0-fail.flag\").is_file() {\n            io::stdout().write_all(format!(\"running 1 test\\ntest {name} ... FAILED\\ntest result: FAILED. 0 passed; 1 failed\\n\").as_bytes())?;\n            return Ok(101);\n        }\n        io::stdout().write_all(format!(\"running 1 test\\ntest {name} ... ok\\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out\\n\").as_bytes())?;\n        if !root.join(\"g0-no-marker.flag\").is_file() {\n            io::stderr().write_all(format!(\"ET2_CASE_COMPLETE:{name}:Administrator=False\\n\").as_bytes())?;\n        }\n    } else {\n        io::stdout().write_all(STDOUT)?;\n        io::stderr().write_all(STDERR)?;\n    }\n    io::stdout().flush()?;\n    io::stderr().flush()?;\n    // Exit-bit stimuli apply to the full target only; safety remains a separate\n    // positive prerequisite unless an explicit safety-failure flag is present.\n    let code = if is_list || is_exact { 0 } else { number(\"ET3_FAKE_EXIT_U32\", 0, u32::MAX as u64)? as u32 };\n    write_new(&root.join(format!(\"target-{}.completed.json\", process::id())),\n        format!(\"{{\\\"exitU32\\\":{code}}}\").as_bytes())?;\n    Ok(code as i32)\n}",
++      "language": "rust"
++    },
++    {
++      "name": "write_new",
++      "byteLength": 189,
++      "byteOffset": 1836,
++      "characterLength": 189,
++      "characterOffset": 1836,
++      "sha256": "1AC3405ED7110735EECD279309ED61BC29F30314989CA8C39CA236C89954D6C9",
++      "text": "fn write_new(path: &Path, bytes: &[u8]) -> io::Result<()> {\n    let mut file = OpenOptions::new().write(true).create_new(true).open(path)?;\n    file.write_all(bytes)?;\n    file.sync_all()\n}",
++      "language": "rust"
++    },
++    {
++      "name": "units",
++      "byteLength": 131,
++      "byteOffset": 2027,
++      "characterLength": 131,
++      "characterOffset": 2027,
++      "sha256": "A6E59F45A611A61FCD3A175E9F976CC0A1594109245ADF3AF3E29E6F5D0AF656",
++      "text": "fn units(value: &OsStr) -> String {\n    format!(\"[{}]\", value.encode_wide().map(|v| v.to_string()).collect::<Vec<_>>().join(\",\"))\n}",
++      "language": "rust"
++    },
++    {
++      "name": "main",
++      "byteLength": 200,
++      "byteOffset": 14242,
++      "characterLength": 200,
++      "characterOffset": 14242,
++      "sha256": "F19AA651AFD9574B70DE4709B16284EDD16F8F1819919BE41CDC2767EDD74325",
++      "text": "fn main() {\n    match run() {\n        Ok(code) => process::exit(code),\n        Err(error) => {\n            eprintln!(\"ET3_FAKE_FIXTURE_ERROR:{error}\");\n            process::exit(93);\n        }\n    }\n}",
++      "language": "rust"
++    },
++    {
++      "name": "Get-Utc",
++      "byteLength": 410,
++      "byteOffset": 14415,
++      "characterLength": 410,
++      "characterOffset": 14402,
++      "sha256": "30CA8CA79750A822BAD0C20B9B66D687CE03EB63E1D390B73D4C589BF1A3374E",
++      "text": "function Get-Utc {\n    param([object]$Value)\n    if ($Value -isnot [string] -or $Value -cnotmatch '^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{7}Z$') {\n        throw 'Expected a UTC timestamp with seven fractional digits'\n    }\n    return [DateTimeOffset]::ParseExact($Value, 'yyyy-MM-ddTHH:mm:ss.fffffffZ',\n        [Globalization.CultureInfo]::InvariantCulture, [Globalization.DateTimeStyles]::AssumeUniversal)\n}",
++      "language": "powershell"
++    },
++    {
++      "name": "Get-IdentityFailureObservation",
++      "byteLength": 2602,
++      "byteOffset": 31610,
++      "characterLength": 2602,
++      "characterOffset": 31597,
++      "sha256": "E0B047BEC0A6B5513A2E37680CB5D528248E69BC53CAFF07CD2EF6A2C4813B7A",
++      "text": "function Get-IdentityFailureObservation {\n    param([object]$Row, [object[]]$Rows, [object[]]$KnownValues, [Management.Automation.ErrorRecord]$Caught)\n    $observation = @{ pid = $null; parentPid = $null; creationUtc = $null; pathPresent = $null; commandPresent = $null\n        snapshotMatchCount = $null; knownMatchCount = $null; exceptionType = $null; exceptionLine = $null\n        rowFilterMatchCount = $null; rowFilterPathPresent = $null; rowFilterCommandPresent = $null }\n    foreach ($mapping in @(@('ProcessId', 'pid', 1), @('ParentProcessId', 'parentPid', 0))) {\n        $property = $Row.PSObject.Properties[$mapping[0]]\n        if ($null -eq $property) { continue }\n        $value = $property.Value\n        if (($value -is [byte] -or $value -is [sbyte] -or $value -is [int16] -or $value -is [uint16] -or\n                $value -is [int] -or $value -is [uint32] -or $value -is [long] -or $value -is [uint64]) -and\n            $value -ge $mapping[2] -and $value -le [uint32]::MaxValue) { $observation[$mapping[1]] = $value }\n    }\n    $creation = $Row.PSObject.Properties['CreationDate']\n    if ($null -ne $creation -and $creation.Value -is [DateTime] -and $creation.Value.Kind -ne [DateTimeKind]::Unspecified) {\n        $observation.creationUtc = $creation.Value.ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ss.fffffffZ', [Globalization.CultureInfo]::InvariantCulture)\n    }\n    $observation.pathPresent = $null -ne $Row.PSObject.Properties['ExecutablePath'] -and $null -ne $Row.ExecutablePath\n    $observation.commandPresent = $null -ne $Row.PSObject.Properties['CommandLine'] -and $null -ne $Row.CommandLine\n    if ($null -ne $observation.pid) {\n        $observation.snapshotMatchCount = @($Rows | Where-Object { $_.ProcessId -eq $observation.pid }).Count\n        $observation.knownMatchCount = @($KnownValues | Where-Object { $_.identity.pid -eq $observation.pid }).Count\n    }\n    $observation.exceptionType = $Caught.Exception.GetType().FullName\n    if ($Caught.InvocationInfo.ScriptLineNumber -gt 0) { $observation.exceptionLine = $Caught.InvocationInfo.ScriptLineNumber }\n    $filter = $Caught.Exception.Data['ET3.IdentityRowFilterObservation']\n    if ($filter -is [Collections.IDictionary]) {\n        if ($filter['rowFilterMatchCount'] -is [int] -and $filter['rowFilterMatchCount'] -ge 0) {\n            $observation.rowFilterMatchCount = $filter['rowFilterMatchCount']\n        }\n        foreach ($name in @('rowFilterPathPresent', 'rowFilterCommandPresent')) {\n            if ($filter[$name] -is [bool]) { $observation[$name] = $filter[$name] }\n        }\n    }\n    return $observation\n}",
++      "language": "powershell"
++    },
++    {
++      "name": "New-FirstFailureRecord",
++      "byteLength": 6056,
++      "byteOffset": 6454,
++      "characterLength": 6056,
++      "characterOffset": 6441,
++      "sha256": "8C56A54E037453D70B9D0029A9BC9070891D0086CE9F9C190743371111290421",
++      "text": "function New-FirstFailureRecord {\n    # Pure fixed-field projection; no input enumeration or implicit scalar conversion.\n    [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseShouldProcessForStateChangingFunctions', '',\n        Justification = 'Pure in-memory diagnostic projection; no state changes or external operations.')]\n    param([hashtable]$Context, [object]$Callsite, [object]$FailureObservation,\n        [string]$Status, [object]$AbortUtc, [object]$AbortTick)\n    $integer = {\n        param([object]$Value, [long]$Minimum, [long]$Maximum)\n        return (($Value -is [byte] -or $Value -is [sbyte] -or $Value -is [int16] -or\n            $Value -is [uint16] -or $Value -is [int32] -or $Value -is [uint32] -or\n            $Value -is [int64] -or $Value -is [uint64]) -and $Value -ge $Minimum -and $Value -le $Maximum)\n    }\n    $utc = {\n        param([object]$Value)\n        try { $null = Get-Utc -Value $Value; return $true }\n        catch { return $false }\n    }\n    $exceptionType = {\n        param([object]$Value)\n        if ($Value -is [string] -and $Value.Length -ge 1 -and $Value.Length -le 256 -and\n            $Value -cmatch '^[A-Za-z0-9_.+\\x60]+$') { return $Value }\n        return $null\n    }\n    $runGuid = [guid]::Empty\n    if ($null -eq $Context -or $Context.runId -isnot [string] -or $Context.runId.Length -ne 36 -or\n        -not [guid]::TryParseExact($Context.runId, 'D', [ref]$runGuid) -or\n        $Context.runDirectory -isnot [string] -or -not [IO.Path]::IsPathFullyQualified($Context.runDirectory) -or\n        $Context.runSha256 -isnot [string] -or $Context.runSha256 -cnotmatch '^[A-F0-9]{64}$' -or\n        $Context.gateSourceSha256 -isnot [string] -or $Context.gateSourceSha256 -cnotmatch '^[A-F0-9]{64}$' -or\n        $Context.role -isnot [string] -or $Context.role -cnotin @('RunOwner', 'Supervisor', 'Runner', 'SafetyWorker') -or\n        -not (& $integer $Context.actorPid 1 ([int]::MaxValue)) -or $Context.actorPid -ne $PID -or\n        -not (& $utc $Context.actorStartTimeUtc) -or\n        -not (& $integer $Context.actorStartTicks 0 ([long]::MaxValue)) -or\n        $Context.actorStartTicks -ne (Get-Utc -Value $Context.actorStartTimeUtc).UtcTicks -or\n        $Callsite -isnot [string] -or\n        $Callsite -cnotin @('OwnedTree.IdentityCatch', 'OwnedTree.RunBoundParentEdge', 'GateFailure.Other') -or\n        $Status -cnotin @('Rejected', 'Cancelled', 'TimedOut', 'OwnerLost', 'CleanupIncomplete', 'Completed') -or\n        $AbortUtc -isnot [DateTimeOffset] -or $AbortUtc.Offset -ne [TimeSpan]::Zero -or\n        $AbortTick -isnot [double] -or -not [double]::IsFinite($AbortTick) -or $AbortTick -lt 0) { return $null }\n    $failure = $null\n    if ($FailureObservation -is [Collections.IDictionary]) {\n        $failure = @{ ownership = $null; killRequested = $null; waited = $null; hasExited = $null\n            candidate = $null; osObservation = $null }\n        if ($FailureObservation['ownership'] -is [string] -and $FailureObservation['ownership'] -ceq 'Unprovable') {\n            $failure.ownership = 'Unprovable'\n        }\n        foreach ($field in @('killRequested', 'waited')) {\n            if ($FailureObservation[$field] -is [bool] -and -not $FailureObservation[$field]) { $failure[$field] = $false }\n        }\n        $identity = $FailureObservation['identity']\n        if ($identity -is [Collections.IDictionary]) {\n            $failure.candidate = @{ pid = $null; startTimeUtc = $null }\n            if (& $integer $identity['pid'] 1 ([int]::MaxValue)) { $failure.candidate.pid = $identity['pid'] }\n            if (& $utc $identity['startTimeUtc']) { $failure.candidate.startTimeUtc = $identity['startTimeUtc'] }\n        }\n        $observation = $FailureObservation['osObservation']\n        if ($observation -is [Collections.IDictionary]) {\n            $projected = @{ pid = $null; parentPid = $null; creationUtc = $null; pathPresent = $null; commandPresent = $null\n                snapshotMatchCount = $null; knownMatchCount = $null; exceptionType = $null; exceptionLine = $null\n                rowFilterMatchCount = $null; rowFilterPathPresent = $null; rowFilterCommandPresent = $null }\n            foreach ($field in @('pid', 'parentPid', 'snapshotMatchCount', 'knownMatchCount', 'exceptionLine', 'rowFilterMatchCount')) {\n                $minimum = if ($field -cin @('pid', 'exceptionLine')) { 1 } else { 0 }\n                $maximum = if ($field -cin @('pid', 'parentPid')) { [long][uint32]::MaxValue } else { [long][int]::MaxValue }\n                if (& $integer $observation[$field] $minimum $maximum) { $projected[$field] = $observation[$field] }\n            }\n            foreach ($field in @('pathPresent', 'commandPresent', 'rowFilterPathPresent', 'rowFilterCommandPresent')) {\n                if ($observation[$field] -is [bool]) { $projected[$field] = $observation[$field] }\n            }\n            if (& $utc $observation['creationUtc']) { $projected.creationUtc = $observation['creationUtc'] }\n            $projected.exceptionType = & $exceptionType $observation['exceptionType']\n            if ($observation['producerFailure'] -is [Collections.IDictionary]) {\n                $producer = $observation['producerFailure']\n                $projected.producerFailure = @{ exceptionType = (& $exceptionType $producer['exceptionType']); exceptionLine = $null }\n                if (& $integer $producer['exceptionLine'] 1 ([int]::MaxValue)) {\n                    $projected.producerFailure.exceptionLine = $producer['exceptionLine']\n                }\n            }\n            $failure.osObservation = $projected\n        }\n    }\n    return @{ diagnosticKind = 'FirstGateFailure'; schemaVersion = 1; runId = $Context.runId\n        runSha256 = $Context.runSha256; gateSourceSha256 = $Context.gateSourceSha256; role = $Context.role\n        actor = @{ pid = $Context.actorPid; startTimeUtc = $Context.actorStartTimeUtc }\n        callsite = $Callsite; status = $Status; firstAbortUtc = $AbortUtc.ToString('yyyy-MM-ddTHH:mm:ss.fffffffZ')\n        firstAbortTickSeconds = $AbortTick; failure = $failure }\n}",
++      "language": "powershell"
++    },
++    {
++      "name": "Invoke-GateFailure",
++      "byteLength": 2201,
++      "byteOffset": 4251,
++      "characterLength": 2201,
++      "characterOffset": 4238,
++      "sha256": "52AC8E99BCCB04B2B12A1353D766D37522FD3E9CE00D146E0D16F09CA19109DE",
++      "text": "function Invoke-GateFailure {\n    param([string]$Status, [string]$Message, [object]$Callsite = 'GateFailure.Other', [object]$FailureObservation = $null)\n    $script:Status = $Status\n    if ($null -eq $script:AbortTick) {\n        $script:AbortTick = $script:Clock.Elapsed.TotalSeconds\n        $script:AbortUtc = [DateTimeOffset]::UtcNow\n    }\n    $originalStatus = $script:Status\n    $originalTick = $script:AbortTick\n    $originalUtc = $script:AbortUtc\n    $diagnosticState = $null\n    $ownsAttempt = $false\n    try {\n        $stateVariable = Get-Variable -Name FirstFailureState -Scope Script -ErrorAction SilentlyContinue\n        if ($null -ne $stateVariable -and $stateVariable.Value -is [hashtable]) {\n            $diagnosticState = $stateVariable.Value\n            if ($diagnosticState.attempted -is [bool] -and -not $diagnosticState.attempted) {\n                $diagnosticState.attempted = $true\n                $ownsAttempt = $true\n                $diagnosticState.inProgress = $true\n                $diagnosticState.outcome = 'Skipped'\n                if ($diagnosticState.context -is [hashtable] -and $script:SourceMatched -is [bool] -and $script:SourceMatched) {\n                    $record = New-FirstFailureRecord -Context $diagnosticState.context -Callsite $Callsite `\n                        -FailureObservation $FailureObservation -Status $originalStatus -AbortUtc $originalUtc -AbortTick $originalTick\n                    if ($null -ne $record) {\n                        $diagnosticState.outcome = 'Attempting'\n                        Write-FirstFailureRecord -RunDirectory $diagnosticState.context.runDirectory -Record $record\n                        $diagnosticState.outcome = 'Published'\n                    }\n                }\n            }\n        }\n    }\n    catch {\n        # Diagnostic failure must never replace the original gate failure.\n        if ($ownsAttempt) { $diagnosticState.outcome = 'Failed' }\n    }\n    finally {\n        if ($ownsAttempt) { $diagnosticState.inProgress = $false }\n        $script:Status = $originalStatus\n        $script:AbortTick = $originalTick\n        $script:AbortUtc = $originalUtc\n    }\n    throw [InvalidOperationException]::new($Message)\n}",
++      "language": "powershell"
++    },
++    {
++      "name": "Write-FirstFailureRecord",
++      "byteLength": 1901,
++      "byteOffset": 12512,
++      "characterLength": 1901,
++      "characterOffset": 12499,
++      "sha256": "F8A7977DA6B86AE474EEAA6F62A7281204CBC26D321F7C8C5A2A00F8D37F9A18",
++      "text": "function Write-FirstFailureRecord {\n    # Only a projector-created record reaches this single-attempt writer.\n    param([string]$RunDirectory, [hashtable]$Record)\n    $rootPath = Get-CanonicalPath -Path $script:Root\n    $runsPath = Get-CanonicalPath -Path (Join-Path $rootPath 'runs') -Boundary $rootPath\n    $runPath = Get-CanonicalPath -Path $RunDirectory -Boundary $runsPath\n    $expectedPath = Get-CanonicalPath -Path (Join-Path $runsPath $Record.runId) -Boundary $runsPath\n    if (-not [string]::Equals($runPath, $expectedPath, [StringComparison]::OrdinalIgnoreCase) -or\n        -not [IO.Directory]::Exists($runPath)) { throw 'Diagnostic run boundary mismatch' }\n    $actorNumber = $Record.actor.pid.ToString([Globalization.CultureInfo]::InvariantCulture)\n    $startTicks = (Get-Utc -Value $Record.actor.startTimeUtc).UtcTicks.ToString([Globalization.CultureInfo]::InvariantCulture)\n    $finalPath = Get-CanonicalPath -Path (Join-Path $runPath \"first-failure-$($Record.role)-$actorNumber-$startTicks.json\") `\n        -Boundary $runPath -AllowMissing\n    $temporaryPath = Get-CanonicalPath -Path ($finalPath + '.tmp') -Boundary $runPath -AllowMissing\n    foreach ($path in @($finalPath, $temporaryPath)) {\n        if (-not [string]::Equals([IO.Path]::GetDirectoryName($path), $runPath, [StringComparison]::OrdinalIgnoreCase)) {\n            throw 'Diagnostic parent mismatch'\n        }\n    }\n    $json = ConvertTo-Json -InputObject $Record -Depth 5 -Compress\n    $bytes = [Text.UTF8Encoding]::new($false).GetBytes($json)\n    if ($bytes.Length -gt 8192) { throw 'Diagnostic byte limit exceeded' }\n    $stream = [IO.File]::Open($temporaryPath, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::None)\n    try {\n        $stream.Write($bytes, 0, $bytes.Length)\n        $stream.Flush($true)\n    }\n    finally { $stream.Dispose() }\n    [IO.File]::Move($temporaryPath, $finalPath, $false)\n}",
++      "language": "powershell"
++    },
++    {
++      "name": "Read-OwnedTree",
++      "byteLength": 16246,
++      "byteOffset": 77301,
++      "characterLength": 16246,
++      "characterOffset": 77288,
++      "sha256": "775D318F5AFE713C62D2C993FE84AE06C4015A92047A9E2367227E7E4A960483",
++      "text": "function Read-OwnedTree {\n    if ($Mode -ceq 'RunOwner' -and $null -eq $script:Manifest -and\n        [IO.File]::Exists((Join-Path $script:RunDirectory 'manifest.json'))) { Read-Manifest }\n    $rows = Get-OsProcess\n    foreach ($known in @($script:Known.Values)) {\n        $known.handle.Refresh()\n        if ($known.handle.HasExited -and $null -eq $known.exitUtc) {\n            $known.exitUtc = $known.handle.ExitTime.ToUniversalTime()\n        }\n    }\n    $changed = $true\n    while ($changed) {\n        $changed = $false\n        foreach ($row in $rows) {\n            if ([int]$row.ProcessId -eq $PID) { continue }\n            $handle = $null\n            try {\n                # Reuse only a unique generation proved against this original snapshot.\n                $samePid = @($script:Known.GetEnumerator() | Where-Object { $_.Value.identity.pid -eq [int]$row.ProcessId })\n                if ($samePid.Count -gt 0) {\n                    $sameRows = @($rows | Where-Object { [int]$_.ProcessId -eq [int]$row.ProcessId })\n                    if ($sameRows.Count -ne 1) { throw 'Known process snapshot row is not unique' }\n                    $creation = $row.CreationDate\n                    if ($creation -isnot [DateTime] -or $creation.Kind -eq [DateTimeKind]::Unspecified) {\n                        throw 'CIM process creation time is unavailable or has no time zone'\n                    }\n                    $precision = 'yyyy-MM-ddTHH:mm:ss.ffffffZ'\n                    $creationUtc = $creation.ToUniversalTime().ToString($precision, [Globalization.CultureInfo]::InvariantCulture)\n                    $sameGeneration = @(\n                        foreach ($entry in $samePid) {\n                            $knownKey = Get-IdentityKey $entry.Value.identity\n                            if (-not [string]::Equals($entry.Key, $knownKey, [StringComparison]::Ordinal)) {\n                                throw 'Known process ledger key does not match its identity'\n                            }\n                            $knownUtc = (Get-Utc $entry.Value.identity.startTimeUtc).UtcDateTime\n                            if ($knownUtc.ToString($precision, [Globalization.CultureInfo]::InvariantCulture) -ceq $creationUtc) {\n                                $entry\n                            }\n                        }\n                    )\n                    if ($sameGeneration.Count -gt 1) { throw 'Known process generation is ambiguous' }\n                    if ($sameGeneration.Count -eq 1) {\n                        $entry = $sameGeneration[0]\n                        $knownIdentity = $entry.Value.identity\n                        if ($knownIdentity.path -isnot [string] -or\n                            ($knownIdentity.parentPid -isnot [int] -and $knownIdentity.parentPid -isnot [long]) -or\n                            $knownIdentity.commandLineUtf16 -isnot [array]) {\n                            throw 'Known process identity is incomplete'\n                        }\n                        # Borrowed handles never enter the local new-handle disposal path.\n                        $borrowedPinned = $entry.Value.pinnedHandle\n                        if ($null -eq $borrowedPinned -or $borrowedPinned.IsClosed -or $borrowedPinned.IsInvalid) {\n                            throw 'Known process pinned handle is unavailable'\n                        }\n                        $borrowedProcess = $entry.Value.handle\n                        if ($borrowedProcess -isnot [Diagnostics.Process] -or $borrowedProcess.Id -ne [int]$row.ProcessId -or\n                            -not [object]::ReferenceEquals($borrowedProcess.SafeHandle, $borrowedPinned)) {\n                            throw 'Known process does not retain the registered handle'\n                        }\n                        if ($null -eq $row.PSObject.Properties['ExecutablePath'] -or\n                            $null -eq $row.PSObject.Properties['CommandLine']) {\n                            throw 'Known process snapshot identity properties are absent'\n                        }\n                        if (($null -ne $row.ExecutablePath -and $row.ExecutablePath -isnot [string]) -or\n                            ($null -ne $row.CommandLine -and $row.CommandLine -isnot [string])) {\n                            throw 'Known process snapshot path or command has an invalid type'\n                        }\n                        if ($null -eq $row.ExecutablePath -or $null -eq $row.CommandLine) {\n                            # Missing values are not observations; retain only a fully proved registration.\n                            Assert-Field $knownIdentity @('pid', 'startTimeUtc', 'path', 'parentPid', 'commandLineUtf16')\n                            if ($knownIdentity.Count -ne 5 -or\n                                ($knownIdentity.pid -isnot [int] -and $knownIdentity.pid -isnot [long]) -or\n                                $knownIdentity.pid -le 0 -or $knownIdentity.pid -gt [int]::MaxValue -or\n                                $knownIdentity.pid -ne $borrowedProcess.Id -or\n                                $knownIdentity.path -isnot [string] -or [string]::IsNullOrWhiteSpace($knownIdentity.path) -or\n                                -not [IO.Path]::IsPathFullyQualified($knownIdentity.path) -or\n                                ($knownIdentity.parentPid -isnot [int] -and $knownIdentity.parentPid -isnot [long]) -or\n                                $knownIdentity.parentPid -lt 0 -or $knownIdentity.parentPid -gt [int]::MaxValue -or\n                                $knownIdentity.commandLineUtf16 -isnot [array]) {\n                                throw 'Known process registration is incomplete'\n                            }\n                            $null = Get-Utc $knownIdentity.startTimeUtc\n                            foreach ($unit in $knownIdentity.commandLineUtf16) {\n                                if (($unit -isnot [int] -and $unit -isnot [long]) -or $unit -lt 0 -or $unit -gt 65535) {\n                                    throw 'Known process registered command has an invalid code unit'\n                                }\n                            }\n                            $knownEvidence = $entry.Value.ownershipEvidence\n                            Assert-Field $knownEvidence @('kind', 'osQueryStatus')\n                            if ($knownEvidence.kind -isnot [string] -or\n                                $knownEvidence.kind -cnotin @('OsQuery', 'DirectLaunchHandle') -or\n                                $knownEvidence.osQueryStatus -isnot [string] -or\n                                -not [string]::Equals($knownEvidence.osQueryStatus, 'Observed', [StringComparison]::Ordinal)) {\n                                throw 'Known process registration has no complete observation evidence'\n                            }\n                            foreach ($field in @('ProcessId', 'ParentProcessId', 'CreationDate')) {\n                                if ($null -eq $row.PSObject.Properties[$field]) {\n                                    throw 'Known process snapshot generation properties are absent'\n                                }\n                            }\n                            if (($row.ProcessId -isnot [uint32] -and $row.ProcessId -isnot [int] -and\n                                    $row.ProcessId -isnot [long]) -or\n                                $row.ProcessId -le 0 -or $row.ProcessId -gt [int]::MaxValue -or\n                                ($row.ParentProcessId -isnot [uint32] -and $row.ParentProcessId -isnot [int] -and\n                                    $row.ParentProcessId -isnot [long]) -or\n                                $row.ParentProcessId -lt 0 -or $row.ParentProcessId -gt [int]::MaxValue) {\n                                throw 'Known process snapshot PID or parent has an invalid type or range'\n                            }\n                            if ([int]$row.ProcessId -ne $knownIdentity.pid -or\n                                [int]$row.ParentProcessId -ne $knownIdentity.parentPid) {\n                                throw 'Known process snapshot PID or parent contradicts its registration'\n                            }\n                            $borrowedProcess.Refresh()\n                            $retainedStarted = $borrowedProcess.StartTime.ToUniversalTime()\n                            if (-not [string]::Equals(\n                                    $retainedStarted.ToString($precision, [Globalization.CultureInfo]::InvariantCulture),\n                                    $creationUtc, [StringComparison]::Ordinal) -or\n                                -not [string]::Equals(\n                                    $retainedStarted.ToString('yyyy-MM-ddTHH:mm:ss.fffffffZ', [Globalization.CultureInfo]::InvariantCulture),\n                                    $knownIdentity.startTimeUtc, [StringComparison]::Ordinal)) {\n                                throw 'Known process retained start time does not match its snapshot and registration'\n                            }\n                            if ($null -ne $row.ExecutablePath) {\n                                $observedPath = Get-CanonicalPath -Path ([string]$row.ExecutablePath)\n                                if (-not (Test-EqualData $observedPath $knownIdentity.path)) {\n                                    throw 'Known process snapshot path contradicts its registration'\n                                }\n                            }\n                            if ($null -ne $row.CommandLine) {\n                                $observedCommand = ConvertTo-CodeUnit -Text ([string]$row.CommandLine)\n                                if (-not (Test-EqualData $observedCommand $knownIdentity.commandLineUtf16)) {\n                                    throw 'Known process snapshot command contradicts its registration'\n                                }\n                            }\n                        }\n                        else {\n                            $knownActual = Get-Identity $borrowedProcess $rows\n                            if (-not (Test-EqualData $knownActual $knownIdentity) -or\n                                -not [string]::Equals((Get-IdentityKey $knownActual), $entry.Key, [StringComparison]::Ordinal)) {\n                                throw 'Known process snapshot and retained identity do not match'\n                            }\n                        }\n                        if ($borrowedPinned.IsClosed -or $borrowedPinned.IsInvalid -or\n                            -not [object]::ReferenceEquals($borrowedProcess.SafeHandle, $borrowedPinned)) {\n                            throw 'Known process pinned handle changed during identity observation'\n                        }\n                        continue\n                    }\n                }\n                $parents = @($script:Known.Values | Where-Object { $_.identity.pid -eq [int]$row.ParentProcessId })\n                if ($parents.Count -eq 0) { continue }\n                $handle = [Diagnostics.Process]::GetProcessById([int]$row.ProcessId)\n                $null = $handle.SafeHandle\n                $identity = Get-Identity $handle $rows\n                $key = Get-IdentityKey $identity\n                if ($script:Known.ContainsKey($key)) { throw 'New process identity unexpectedly matches an existing ledger key' }\n                $started = Get-Utc $identity.startTimeUtc\n                $validParents = @($parents | Where-Object {\n                        $started -ge (Get-Utc $_.identity.startTimeUtc) -and\n                        ($null -eq $_.exitUtc -or $started.UtcDateTime -le $_.exitUtc)\n                    })\n                if ($validParents.Count -ne 1) { throw 'Process edge cannot be proved inside parent lifetime' }\n                Add-KnownProcess -Handle $handle -Identity $identity -Role 'Target'\n                $handle = $null\n                $changed = $true\n            }\n            catch {\n                # Never promote PID-only metadata or a mismatching generation into Owned.\n                $caught = $_\n                try { $observation = Get-IdentityFailureObservation -Row $row -Rows $rows -KnownValues @($script:Known.Values) -Caught $caught }\n                catch {\n                    $observation = @{ pid = $null; parentPid = $null; creationUtc = $null; pathPresent = $null; commandPresent = $null\n                        snapshotMatchCount = $null; knownMatchCount = $null; exceptionType = $null; exceptionLine = $null\n                        rowFilterMatchCount = $null; rowFilterPathPresent = $null; rowFilterCommandPresent = $null\n                        producerFailure = @{ exceptionType = $_.Exception.GetType().FullName; exceptionLine = $_.InvocationInfo.ScriptLineNumber } }\n                }\n                $script:Unprovable.Add(@{ identity = $null; killRequested = $false; waited = $false\n                    hasExited = $null; ownership = 'Unprovable'\n                    error = \"Unproved descendant identity; PID=$($row.ProcessId): $($caught.Exception.Message)\"\n                    osObservation = $observation\n                    ownershipEvidence = @{ kind = 'OsQuery'; intentSha256 = $null; launcherIdentity = $null\n                        exitTimeUtc = $null; osQueryStatus = 'Unavailable' } })\n                if (-not $script:Aborting) {\n                    Invoke-GateFailure 'CleanupIncomplete' 'Descendant generation or retained handle could not be proved' -Callsite 'OwnedTree.IdentityCatch' -FailureObservation ($script:Unprovable[$script:Unprovable.Count - 1])\n                }\n            }\n            finally {\n                if ($null -ne $handle) { $handle.Dispose() }\n            }\n        }\n    }\n    # At the two run-wide owners, a run-bound command with a missing parent edge\n    # is an unresolved candidate, never a license to kill by image name.\n    if ($Mode -cin @('RunOwner', 'Supervisor')) {\n        foreach ($row in $rows) {\n            if ([int]$row.ProcessId -eq $PID -or $null -eq $row.CommandLine) { continue }\n            if (@($script:Owners | Where-Object { $_.identity.pid -eq [int]$row.ProcessId }).Count -gt 0) { continue }\n            if (@($script:Known.Values | Where-Object { $_.identity.pid -eq [int]$row.ProcessId }).Count -gt 0) { continue }\n            if ($null -ne $script:Fixture -and [int]$row.ParentProcessId -eq $script:Fixture.controllerIdentity.pid) { continue }\n            $command = ([string]$row.CommandLine).Replace('/', '\\')\n            $runBound = $command.IndexOf($script:RunDirectory.Replace('/', '\\'), [StringComparison]::OrdinalIgnoreCase) -ge 0\n            if (-not $runBound -and $null -ne $script:Manifest -and $null -ne $row.ExecutablePath) {\n                $runBound = @($script:Manifest.artifacts | Where-Object {\n                    [IO.Path]::GetFullPath($_.executable.path) -ieq [IO.Path]::GetFullPath([string]$row.ExecutablePath)\n                }).Count -gt 0\n            }\n            if (-not $runBound) {\n                continue\n            }\n            $candidateHandle = $null\n            $candidateIdentity = $null\n            try {\n                $candidateHandle = [Diagnostics.Process]::GetProcessById([int]$row.ProcessId)\n                $null = $candidateHandle.SafeHandle\n                $candidateIdentity = Get-Identity $candidateHandle $rows\n            } catch {\n                $script:Failure = \"Run-bound process $($row.ProcessId) disappeared before ownership could be proved\"\n            } finally {\n                if ($null -ne $candidateHandle) { $candidateHandle.Dispose() }\n            }\n            $script:Unprovable.Add(@{ identity = $candidateIdentity; killRequested = $false; waited = $false\n                hasExited = $null; ownership = 'Unprovable'; error = \"Unproved run-bound OS parent edge; PID=$($row.ProcessId)\"\n                ownershipEvidence = @{ kind = 'OsQuery'; intentSha256 = $null; launcherIdentity = $null\n                    exitTimeUtc = $null; osQueryStatus = 'Unavailable' } })\n            if (-not $script:Aborting) { Invoke-GateFailure 'CleanupIncomplete' 'Run-bound process has no proved parent edge' -Callsite 'OwnedTree.RunBoundParentEdge' -FailureObservation ($script:Unprovable[$script:Unprovable.Count - 1]) }\n        }\n    }\n    Get-FaultTarget $rows\n}",
++      "language": "powershell"
++    },
++    {
++      "name": "candidate-tail",
++      "byteLength": 1095,
++      "byteOffset": 88093,
++      "characterLength": 1095,
++      "characterOffset": 88080,
++      "sha256": "9C093DDA7626FF518167F6546D7B3649044BEBCB38D8D5EBEA211165E9923FE1",
++      "text": "$parents = @($script:Known.Values | Where-Object { $_.identity.pid -eq [int]$row.ParentProcessId })\n                if ($parents.Count -eq 0) { continue }\n                $handle = [Diagnostics.Process]::GetProcessById([int]$row.ProcessId)\n                $null = $handle.SafeHandle\n                $identity = Get-Identity $handle $rows\n                $key = Get-IdentityKey $identity\n                if ($script:Known.ContainsKey($key)) { throw 'New process identity unexpectedly matches an existing ledger key' }\n                $started = Get-Utc $identity.startTimeUtc\n                $validParents = @($parents | Where-Object {\n                        $started -ge (Get-Utc $_.identity.startTimeUtc) -and\n                        ($null -eq $_.exitUtc -or $started.UtcDateTime -le $_.exitUtc)\n                    })\n                if ($validParents.Count -ne 1) { throw 'Process edge cannot be proved inside parent lifetime' }\n                Add-KnownProcess -Handle $handle -Identity $identity -Role 'Target'\n                $handle = $null\n                $changed = $true\n            ",
++      "language": "powershell"
++    },
++    {
++      "name": "candidate-catch",
++      "byteLength": 1653,
++      "byteOffset": 89202,
++      "characterLength": 1653,
++      "characterOffset": 89189,
++      "sha256": "884A52D8921FC7FA3291CB5A5A65BCE55EF4F1C6FC8ABE4B06BD6FBFE1CED4E0",
++      "text": "catch {\n                # Never promote PID-only metadata or a mismatching generation into Owned.\n                $caught = $_\n                try { $observation = Get-IdentityFailureObservation -Row $row -Rows $rows -KnownValues @($script:Known.Values) -Caught $caught }\n                catch {\n                    $observation = @{ pid = $null; parentPid = $null; creationUtc = $null; pathPresent = $null; commandPresent = $null\n                        snapshotMatchCount = $null; knownMatchCount = $null; exceptionType = $null; exceptionLine = $null\n                        rowFilterMatchCount = $null; rowFilterPathPresent = $null; rowFilterCommandPresent = $null\n                        producerFailure = @{ exceptionType = $_.Exception.GetType().FullName; exceptionLine = $_.InvocationInfo.ScriptLineNumber } }\n                }\n                $script:Unprovable.Add(@{ identity = $null; killRequested = $false; waited = $false\n                    hasExited = $null; ownership = 'Unprovable'\n                    error = \"Unproved descendant identity; PID=$($row.ProcessId): $($caught.Exception.Message)\"\n                    osObservation = $observation\n                    ownershipEvidence = @{ kind = 'OsQuery'; intentSha256 = $null; launcherIdentity = $null\n                        exitTimeUtc = $null; osQueryStatus = 'Unavailable' } })\n                if (-not $script:Aborting) {\n                    Invoke-GateFailure 'CleanupIncomplete' 'Descendant generation or retained handle could not be proved' -Callsite 'OwnedTree.IdentityCatch' -FailureObservation ($script:Unprovable[$script:Unprovable.Count - 1])\n                }\n            }",
++      "language": "powershell"
++    },
++    {
++      "name": "candidate-finally-body",
++      "byteLength": 76,
++      "byteOffset": 90876,
++      "characterLength": 76,
++      "characterOffset": 90863,
++      "sha256": "D8FB12B82A628EA2D9F00E2095A8B1966907825CF19C1CF8C64F42AEA27FF6B4",
++      "text": "{\n                if ($null -ne $handle) { $handle.Dispose() }\n            }",
++      "language": "powershell"
++    }
++  ],
++  "toolchain": [
++    {
++      "length": 110592,
++      "sha256": "CA9988AF88B1463F6857FDFE909299FEE50A63260B3E5F7DBCB5B4D3318B27BC",
++      "path": "C:/Users/安井　一広/.rustup/toolchains/stable-x86_64-pc-windows-msvc/bin/rustc.exe"
++    },
++    {
++      "path": "C:/Users/安井　一広/.rustup/toolchains/stable-x86_64-pc-windows-msvc/bin/rustc_driver.dll",
++      "state": "Missing"
++    },
++    {
++      "length": 17822,
++      "sha256": "2B219F688BCDD67101040F845E530B22907D39BBF49089B4B5B2AFABA7996791",
++      "path": "C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/PSScriptAnalyzer/1.25.0/PSScriptAnalyzer.psd1"
++    },
++    {
++      "length": 227360,
++      "sha256": "145BA1459672DA808757B2BC6C6494926A13D92353CCD6A0354A0D5D8FE14A5F",
++      "path": "C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/PSScriptAnalyzer/1.25.0/Microsoft.Windows.PowerShell.ScriptAnalyzer.dll"
++    }
++  ]
++}
++
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/expectations.json b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/expectations.json
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/expectations.json
+@@ -0,0 +1,751 @@
++{
++  "schemaVersion": 1,
++  "taskId": "ACOUSTIC-HISTORY-001",
++  "unit": "U-E",
++  "packetId": "ef551043-d22a-44a7-903b-1e9540efc910",
++  "approval": "Parent-received user approval: diagnostics plus isolated pure synthetic O1-O6; U-D independent Pre PASS. No execution until completed candidate binding, independent Pre and parent freeze.",
++  "expectationsFixed": true,
++  "sourceOfExpectations": "unknown-descendant-design.md SHA256 B92FE83EB555829AF2EC111E95C9E0109747CB0FEB31CD5B83977760836C27D7 lines 29-109; inherited G4/G5/FF1-3; never inferred from current implementation.",
++  "timing": {
++    "caseSeconds": 5,
++    "suiteSeconds": 30,
++    "checks": "before and after; no claim of hard cancellation of synchronous calls",
++    "retry": 0,
++    "firstUnexpected": "stop, preserve all evidence, subsequent NotRun",
++    "expectedOldRED": "does not stop as unexpected; each RED must be precise documented behavior mismatch",
++    "timeout": "UnexpectedFailure; never PASS or BehaviorRED"
++  },
++  "classification": {
++    "BehaviorRED": "compiled, valid adapter/fixture, real extracted behavior produces specified missing diagnostics",
++    "AdapterFailure": "source/hash mismatch, parse/compile error, missing helper, nonunique extraction, unsupported statement boundary, wrong adapter count/position, reverse-byte mismatch",
++    "NotApplicable": "old O4 and added-shape O6; does not count PASS or RED",
++    "NotRun": "not executed, including this author handoff"
++  },
++  "invariants": {
++    "prohibited": [
++      "fake main/run/cargo/tree/native extern execution",
++      "real process lookup or stop",
++      "PS main dot-source",
++      "environment mutation",
++      "filesystem data writes from tested boundary",
++      "network/API/admin/setting changes",
++      "new framework/module/Pester",
++      "old 80/P7/MissingOs/Context12 reruns"
++    ],
++    "sourcePreservation": "Separate whole-file reverse diff to before bytes/SHA for permitted implementation spans. Adapter reverse proof does not substitute for this.",
++    "psSignaturesUnchanged": [
++      "Get-IdentityFailureObservation",
++      "New-FirstFailureRecord",
++      "Invoke-GateFailure"
++    ],
++    "stageAuthority": "diagnostic only; stage does not establish ownership, same generation or causal proof"
++  },
++  "schemas": {
++    "environmentKeys": [
++      "LOCALAPPDATA",
++      "TEMP",
++      "TMP",
++      "PATH",
++      "CARGO_BUILD_JOBS",
++      "CARGO_TARGET_DIR",
++      "CARGO_LOG",
++      "CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_RUNNER",
++      "WW5_CARGO_GATE_RUN_PATH",
++      "WW5_CARGO_GATE_RUN_ID",
++      "WW5_ET2_CHILD",
++      "WW5_ET2_BASE",
++      "ET3_FAKE_ROOT",
++      "ET3_FAKE_MODE",
++      "ET3_FAKE_EXIT_U32",
++      "ET3_FAKE_RELEASE",
++      "ET3_FAKE_WAIT_MS",
++      "ET3_FAKE_BUILD_RELEASE",
++      "ET3_FAKE_INVOCATIONS"
++    ],
++    "sidecar": {
++      "exactKeys": [
++        "schemaVersion",
++        "pid",
++        "stage",
++        "errorKind",
++        "rawOsError",
++        "messageUtf16",
++        "messageStatus"
++      ],
++      "schemaVersion": 1,
++      "pid": "u32, synthetic 7",
++      "stage": [
++        "Observe",
++        "WaitRelease",
++        "StdoutWrite",
++        "StderrWrite",
++        "StdoutFlush",
++        "StderrFlush",
++        "ExitSetting",
++        "CompletedWrite",
++        "TreeDelegated"
++      ],
++      "errorKind": "original io::ErrorKind debug spelling",
++      "rawOsError": "original i32 or null",
++      "messageUtf16": "u16 array at most 2048 units or null",
++      "messageStatus": [
++        "Captured",
++        "NotAllowlisted",
++        "TooLong"
++      ],
++      "utf8BytesMaximum": 8192,
++      "publication": "WriteSynced is not Published; only complete JSON parse plus SHA succeeds as Published",
++      "path": "root/target-7.failure.json, CreateNew once, no temp/rename/retry/alternate path"
++    },
++    "envelopeExactKeys": [
++      "diagnosticKind",
++      "schemaVersion",
++      "runId",
++      "runSha256",
++      "gateSourceSha256",
++      "role",
++      "actor",
++      "callsite",
++      "status",
++      "firstAbortUtc",
++      "firstAbortTickSeconds",
++      "failure"
++    ],
++    "failureExactKeys": [
++      "ownership",
++      "killRequested",
++      "waited",
++      "hasExited",
++      "candidate",
++      "osObservation"
++    ],
++    "osObservationExactKeys": [
++      "pid",
++      "parentPid",
++      "creationUtc",
++      "pathPresent",
++      "commandPresent",
++      "snapshotMatchCount",
++      "knownMatchCount",
++      "exceptionType",
++      "exceptionLine",
++      "rowFilterMatchCount",
++      "rowFilterPathPresent",
++      "rowFilterCommandPresent"
++    ],
++    "optionalProducerFailureExactKeys": [
++      "exceptionType",
++      "exceptionLine"
++    ],
++    "optionalAcquisitionExactKeys": [
++      "snapshotStartedUtc",
++      "snapshotCompletedUtc",
++      "attemptUtc",
++      "failedUtc",
++      "stage",
++      "exceptionHResult",
++      "innerType",
++      "innerHResult",
++      "nativeErrorCode"
++    ],
++    "acquisitionTypes": {
++      "times": "strict UTC7 string validated by actual Get-Utc, else null",
++      "stage": "LookupHandle|PinHandle|ReadIdentity or null",
++      "codes": "integer numeric types within signed Int32, not bool/string/double; else null",
++      "innerType": "ASCII allowed type name 1..256 chars, else null",
++      "container": "IDictionary only, else omit acquisition key",
++      "unknownKeys": "never projected"
++    },
++    "unknown": {
++      "ownership": "Unprovable",
++      "killRequested": false,
++      "waited": false,
++      "hasExited": null,
++      "snapshotIsNotHandle": true,
++      "otherActorEvidenceIsNotOwnership": true,
++      "pidMatchIsNotGeneration": true
++    }
++  },
++  "cases": [
++    {
++      "id": "O1",
++      "acceptanceIds": [
++        "U-R1",
++        "U-R3"
++      ],
++      "oldExpected": "BehaviorRED (exactly seven keys missing)",
++      "newExpected": "PASS",
++      "inputCount": 3,
++      "inputs": [
++        {
++          "id": "O1-null",
++          "lookup": "all requested allowlisted keys -> None",
++          "expectedValue": null
++        },
++        {
++          "id": "O1-empty",
++          "lookup": "all requested allowlisted keys -> empty OsString",
++          "expectedValue": []
++        },
++        {
++          "id": "O1-wide",
++          "lookup": "all requested allowlisted keys -> OsString::from_wide([65,55357,56832,55296])",
++          "expectedValue": [
++            65,
++            55357,
++            56832,
++            55296
++          ]
++        }
++      ],
++      "assertions": [
++        "strict 19-key set in fixed approved order",
++        "preserve all twelve original key values",
++        "exactly one lookup per selected key, no extra key enumeration",
++        "no process environment read/write",
++        "old missing helper not required"
++      ]
++    },
++    {
++      "id": "O2",
++      "acceptanceIds": [
++        "G4",
++        "U-R4"
++      ],
++      "oldExpected": "PASS",
++      "newExpected": "PASS",
++      "inputCount": 2,
++      "inputs": [
++        {
++          "id": "O2-zero",
++          "args": [],
++          "flags": [],
++          "exitSetting": 0,
++          "expectedOk": 0
++        },
++        {
++          "id": "O2-explicit93",
++          "args": [],
++          "flags": [],
++          "exitSetting": 93,
++          "expectedOk": 93
++        }
++      ],
++      "expectedStdout": [
++        0,
++        255,
++        13,
++        10,
++        65,
++        195,
++        169,
++        240,
++        159,
++        152,
++        128
++      ],
++      "expectedStderr": [
++        254,
++        0,
++        66,
++        10,
++        13,
++        230,
++        151,
++        165
++      ],
++      "operationOrder": [
++        "Observe",
++        "Args",
++        "SpawnFlag",
++        "HoldFullFlag",
++        "WaitRelease",
++        "StdoutWrite",
++        "StderrWrite",
++        "StdoutFlush",
++        "StderrFlush",
++        "ExitSetting",
++        "CompletedWrite"
++      ],
++      "assertions": [
++        "full target path exactly once",
++        "completed path target-7.completed.json",
++        "completed bytes exact {\"exitU32\":0} or {\"exitU32\":93}",
++        "sidecar writer call count 0",
++        "explicit93 remains Ok(93); never internal Err93",
++        "stream bytes and original operation ordering preserved"
++      ]
++    },
++    {
++      "id": "O3",
++      "acceptanceIds": [
++        "U-R1",
++        "U-R3"
++      ],
++      "oldExpected": "BehaviorRED (missing sidecar call only)",
++      "newExpected": "PASS",
++      "inputCount": 9,
++      "inputs": [
++        {
++          "id": "O3-Observe",
++          "stage": "Observe",
++          "path": "full target; first reachable call at this stage only",
++          "error": {
++            "kind": "PermissionDenied",
++            "rawOsError": 5,
++            "payload": "io::Error::from_raw_os_error(5)"
++          }
++        },
++        {
++          "id": "O3-WaitRelease",
++          "stage": "WaitRelease",
++          "path": "full target; first reachable call at this stage only",
++          "error": {
++            "kind": "PermissionDenied",
++            "rawOsError": 5,
++            "payload": "io::Error::from_raw_os_error(5)"
++          }
++        },
++        {
++          "id": "O3-StdoutWrite",
++          "stage": "StdoutWrite",
++          "path": "full target; first reachable call at this stage only",
++          "error": {
++            "kind": "PermissionDenied",
++            "rawOsError": 5,
++            "payload": "io::Error::from_raw_os_error(5)"
++          }
++        },
++        {
++          "id": "O3-StderrWrite",
++          "stage": "StderrWrite",
++          "path": "full target; first reachable call at this stage only",
++          "error": {
++            "kind": "PermissionDenied",
++            "rawOsError": 5,
++            "payload": "io::Error::from_raw_os_error(5)"
++          }
++        },
++        {
++          "id": "O3-StdoutFlush",
++          "stage": "StdoutFlush",
++          "path": "full target; first reachable call at this stage only",
++          "error": {
++            "kind": "PermissionDenied",
++            "rawOsError": 5,
++            "payload": "io::Error::from_raw_os_error(5)"
++          }
++        },
++        {
++          "id": "O3-StderrFlush",
++          "stage": "StderrFlush",
++          "path": "full target; first reachable call at this stage only",
++          "error": {
++            "kind": "PermissionDenied",
++            "rawOsError": 5,
++            "payload": "io::Error::from_raw_os_error(5)"
++          }
++        },
++        {
++          "id": "O3-ExitSetting",
++          "stage": "ExitSetting",
++          "path": "full target; first reachable call at this stage only",
++          "error": {
++            "kind": "PermissionDenied",
++            "rawOsError": 5,
++            "payload": "io::Error::from_raw_os_error(5)"
++          }
++        },
++        {
++          "id": "O3-CompletedWrite",
++          "stage": "CompletedWrite",
++          "path": "full target; first reachable call at this stage only",
++          "error": {
++            "kind": "PermissionDenied",
++            "rawOsError": 5,
++            "payload": "io::Error::from_raw_os_error(5)"
++          }
++        },
++        {
++          "id": "O3-TreeDelegated",
++          "stage": "TreeDelegated",
++          "path": "spawn-descendants flag -> synthetic tree delegation; no native tree",
++          "error": {
++            "kind": "PermissionDenied",
++            "rawOsError": 5
++          }
++        }
++      ],
++      "assertions": [
++        "original returned error kind/raw code and independent custom-error payload identity preserved where custom payload is used",
++        "exact stage in sidecar",
++        "sidecar call once; no retry",
++        "later original operation boundaries 0 after fault",
++        "static original main Err->stderr prefix->exit93 bytes unchanged",
++        "old adapter initializes diagnostic counter0; no absent helper required"
++      ]
++    },
++    {
++      "id": "O4",
++      "acceptanceIds": [
++        "FF3",
++        "U-R4"
++      ],
++      "oldExpected": "NotApplicable",
++      "newExpected": "PASS",
++      "inputCount": 14,
++      "inputs": [
++        {
++          "id": "O4-allowliteral",
++          "boundary": "real encoder",
++          "message": "invalid fixture integer",
++          "status": "Captured",
++          "unitsMaximum": 2048
++        },
++        {
++          "id": "O4-rawos",
++          "boundary": "real encoder",
++          "rawOsError": 5,
++          "status": "Captured",
++          "expectedMessage": "exact std::io::Error::from_raw_os_error(5).to_string(), independently obtained in fixture"
++        },
++        {
++          "id": "O4-deniedmessage",
++          "boundary": "real encoder",
++          "message": "SYNTHETIC_SECRET_DO_NOT_SAVE",
++          "rawOsError": null,
++          "status": "NotAllowlisted",
++          "messageUtf16": null
++        },
++        {
++          "id": "O4-2048",
++          "boundary": "message selection statement input",
++          "allowlisted": true,
++          "units": 2048,
++          "status": "Captured"
++        },
++        {
++          "id": "O4-2049",
++          "boundary": "message selection statement input",
++          "allowlisted": true,
++          "units": 2049,
++          "status": "TooLong",
++          "messageUtf16": null
++        },
++        {
++          "id": "O4-8192",
++          "boundary": "encoded-byte bound statement input",
++          "bytes": 8192,
++          "expected": "not dropped solely by byte bound"
++        },
++        {
++          "id": "O4-8193",
++          "boundary": "encoded-byte bound statement input",
++          "bytes": 8193,
++          "status": "TooLong",
++          "messageUtf16": null,
++          "serializeFallbackCount": 1
++        },
++        {
++          "id": "O4-writeok",
++          "boundary": "real write_new -> memory OpenOptions/File",
++          "open": 1,
++          "write": 1,
++          "sync": 1,
++          "result": "WriteSynced",
++          "published": "requires external parse+SHA"
++        },
++        {
++          "id": "O4-collision",
++          "boundary": "memory CreateNew",
++          "initialBytes": [
++            17,
++            34,
++            51
++          ],
++          "open": 1,
++          "write": 0,
++          "sync": 0,
++          "result": "Err",
++          "remainingBytes": [
++            17,
++            34,
++            51
++          ]
++        },
++        {
++          "id": "O4-openfail",
++          "boundary": "memory CreateNew",
++          "open": 1,
++          "write": 0,
++          "sync": 0,
++          "result": "Err",
++          "fileCreated": false
++        },
++        {
++          "id": "O4-writefail",
++          "boundary": "memory WriteAll",
++          "open": 1,
++          "write": 1,
++          "sync": 0,
++          "result": "Err",
++          "remainingBytes": []
++        },
++        {
++          "id": "O4-partial",
++          "boundary": "memory WriteAll",
++          "open": 1,
++          "write": 1,
++          "sync": 0,
++          "result": "Err",
++          "remainingBytes": "exact prefix written before injected Err; never deleted or replaced"
++        },
++        {
++          "id": "O4-syncfail",
++          "boundary": "memory SyncAll",
++          "open": 1,
++          "write": 1,
++          "sync": 1,
++          "result": "Err",
++          "remainingBytes": "entire original encoded buffer preserved"
++        },
++        {
++          "id": "O4-originalerr",
++          "boundary": "real target Err + diagnostic writer Err",
++          "expected": "same original error returned; writer failure does not replace it"
++        }
++      ],
++      "assertions": [
++        "real encoder/writer/write_new extracted bytes unchanged",
++        "strict seven-field sidecar schema and UTF8<=8192",
++        "fixed path once; no removal/rename/fallback",
++        "synthetic file state stays in memory",
++        "fault stimulus at approved statement only; do not add production literal for test"
++      ]
++    },
++    {
++      "id": "O5",
++      "acceptanceIds": [
++        "U-R2",
++        "U-R4"
++      ],
++      "oldExpected": "four candidate-attempt inputs BehaviorRED (acquisition absent); diagnostic-construction injection NotApplicable",
++      "newExpected": "PASS",
++      "inputCount": 5,
++      "inputs": [
++        {
++          "id": "O5-lookup",
++          "stage": "LookupHandle",
++          "lookup": 1,
++          "pin": 0,
++          "identity": 0,
++          "registration": 0,
++          "kill": 0
++        },
++        {
++          "id": "O5-pin",
++          "stage": "PinHandle",
++          "lookup": 1,
++          "pin": 1,
++          "identity": 0,
++          "registration": 0,
++          "kill": 0
++        },
++        {
++          "id": "O5-identity",
++          "stage": "ReadIdentity",
++          "lookup": 1,
++          "pin": 1,
++          "identity": 1,
++          "registration": 0,
++          "kill": 0
++        },
++        {
++          "id": "O5-inner",
++          "stage": "LookupHandle",
++          "exception": "direct inner Win32Exception NativeErrorCode5 plus nested secret inner; store only direct scalar level",
++          "lookup": 1,
++          "pin": 0,
++          "identity": 0,
++          "registration": 0,
++          "kill": 0
++        },
++        {
++          "id": "O5-diagnosticfail",
++          "stage": "LookupHandle",
++          "diagnosticConstruction": "throws after original caught retained",
++          "expected": "acquisition omitted, original Unprovable/FF preserved"
++        }
++      ],
++      "assertions": [
++        "actual extracted candidate catch/finally used",
++        "Get-IdentityFailureObservation/fallback retains original caught error",
++        "lookup/pin/identity/register counters reflect only reached boundaries",
++        "counter+static banned-call scan both required",
++        "per-candidate reset prevents stale carry to known/parentless branches; static proof separate from runtime subset",
++        "no whole Read-OwnedTree or PS main execution"
++      ]
++    },
++    {
++      "id": "O6",
++      "acceptanceIds": [
++        "G5",
++        "FF1",
++        "FF2",
++        "FF3",
++        "U-R2",
++        "U-R4"
++      ],
++      "oldExpected": "legacy subset PASS; added-shape subset NotApplicable",
++      "newExpected": "PASS",
++      "inputCount": 18,
++      "scenarioRowCount": 16,
++      "inputExpansion": "O6-nondictionary is three independent inputs: string, array, plain object. Int32 boundary pairs occupy different fields in one record each. O6-once is one two-invocation input. Actor/generation rows are independent pair-oracle inputs, not production ownership tests.",
++      "inputs": [
++        {
++          "id": "O6-legacy",
++          "acquisition": "absent",
++          "subset": "legacy",
++          "osKeys": 12
++        },
++        {
++          "id": "O6-producer",
++          "acquisition": "absent",
++          "producerFailure": "valid fixed two scalars",
++          "subset": "legacy",
++          "osKeys": 13
++        },
++        {
++          "id": "O6-nondictionary",
++          "acquisition": "string/array/object not IDictionary",
++          "expected": "key omitted",
++          "subset": "added"
++        },
++        {
++          "id": "O6-valid",
++          "acquisition": {
++            "snapshotStartedUtc": "2026-01-02T03:04:05.0000000Z",
++            "snapshotCompletedUtc": "2026-01-02T03:04:05.0000001Z",
++            "attemptUtc": "2026-01-02T03:04:05.0000002Z",
++            "failedUtc": "2026-01-02T03:04:05.0000003Z",
++            "stage": "LookupHandle",
++            "exceptionHResult": -2147024891,
++            "innerType": "System.ComponentModel.Win32Exception",
++            "innerHResult": -2147467259,
++            "nativeErrorCode": 5,
++            "ignoredSecret": "SYNTHETIC_SECRET_DO_NOT_SAVE"
++          },
++          "subset": "added"
++        },
++        {
++          "id": "O6-nullfields",
++          "acquisition": {},
++          "expected": "exact nine keys all null",
++          "subset": "added"
++        },
++        {
++          "id": "O6-invalidtypes",
++          "acquisition": {
++            "snapshotStartedUtc": 4,
++            "snapshotCompletedUtc": "2026-01-02T03:04:05Z",
++            "attemptUtc": "2026-01-02T03:04:05.0000000+00:00",
++            "failedUtc": "not-a-time",
++            "stage": "Owned",
++            "exceptionHResult": "5",
++            "innerType": "日本語",
++            "innerHResult": true,
++            "nativeErrorCode": 5.1
++          },
++          "expected": "exact nine keys all null",
++          "subset": "added"
++        },
++        {
++          "id": "O6-int32",
++          "codes": [
++            -2147483648,
++            2147483647
++          ],
++          "expected": "retain boundary integers",
++          "subset": "added"
++        },
++        {
++          "id": "O6-outofrange",
++          "codes": [
++            -2147483649,
++            2147483648
++          ],
++          "expected": "null each invalid code",
++          "subset": "added"
++        },
++        {
++          "id": "O6-type256",
++          "innerType": "A repeated256",
++          "expected": "retained",
++          "subset": "added"
++        },
++        {
++          "id": "O6-type257",
++          "innerType": "A repeated257",
++          "expected": "null",
++          "subset": "added"
++        },
++        {
++          "id": "O6-writerthrow",
++          "writer": "in-memory throw",
++          "status": "TimedOut",
++          "abortTick": 1.25,
++          "abortUtc": "2026-01-02T03:04:05.0000000Z",
++          "expected": "original status/tick/utc/throw preserved; diagnostic outcome Failed",
++          "subset": "legacy"
++        },
++        {
++          "id": "O6-cancel",
++          "writer": "in-memory throw",
++          "status": "Cancelled",
++          "abortTick": 1.25,
++          "abortUtc": "2026-01-02T03:04:05.0000000Z",
++          "expected": "original status/tick/utc/throw preserved; no retry",
++          "subset": "legacy"
++        },
++        {
++          "id": "O6-once",
++          "invocations": 2,
++          "writerCount": 1,
++          "expected": "each original failure throws; first abort clocks stable",
++          "subset": "legacy"
++        },
++        {
++          "id": "O6-bytebudget",
++          "boundary": "real projector plus independent JSON serializer; existing writer byte limit static and approved memory writer seam",
++          "maxBytes": 8192,
++          "expected": "no successful publication above8192; failure preserves original failure",
++          "subset": "legacy"
++        },
++        {
++          "id": "O6-actor",
++          "records": "same PID but different actor/source hash",
++          "expected": "unknown; no ownership rescue",
++          "subset": "independent-pair"
++        },
++        {
++          "id": "O6-generation",
++          "records": "same PID but mismatched creation/startFileTimeUtc",
++          "expected": "unknown; no ownership rescue",
++          "subset": "independent-pair"
++        }
++      ],
++      "assertions": [
++        "strict envelope/failure/actor/candidate and os key sets",
++        "acquisition only optional outer key and exact nine inner keys",
++        "no message/stack/path/argv payload leakage",
++        "real Get-Utc, New-FirstFailureRecord, Invoke-GateFailure extracted",
++        "writer replaced only at approved in-memory boundary",
++        "diagnostic failures never alter original status/AbortTick/AbortUtc/throw",
++        "unknown pair oracle is not proof of production ownership behavior; separate preserved-source proof"
++      ]
++    }
++  ],
++  "runtimeState": "NotRun",
++  "newCandidateBinding": "Pending; do not infer future helper structure; author returns after implementer candidate. Expectations above stay fixed."
++}
++
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/manifest.json b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/manifest.json
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/manifest.json
+@@ -0,0 +1,125 @@
++{
++  "schemaVersion": 1,
++  "taskId": "ACOUSTIC-HISTORY-001",
++  "phase": "U-E expectations frozen; new candidate binding pending",
++  "packetRoot": "F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910",
++  "assignment": {
++    "requestedModel": "gpt-6.1-sol",
++    "requestedEffort": "high",
++    "providerMetadata": "NotAvailable",
++    "usageCounters": "NotAvailable; parent-owned measurement"
++  },
++  "inputs": {
++    "design": {
++      "path": "tasks/ACOUSTIC-HISTORY-001/unknown-descendant-design.md",
++      "sha256": "B92FE83EB555829AF2EC111E95C9E0109747CB0FEB31CD5B83977760836C27D7"
++    },
++    "fakeBefore": {
++      "path": "before/fake.rs",
++      "sha256": "3482075BF7479E61942978830AE91FDDF5301133E1A2F43EDB9B65DDAA0FA016",
++      "length": 14443,
++      "copyMethod": "Copy-Item; immutable"
++    },
++    "invokeBefore": {
++      "path": "before/Invoke-CargoGate.ps1",
++      "sha256": "898C60B1133DB6956090035AF677B4CF7FDE0FE6FDFD5D47E5CD776B00500B71",
++      "length": 154848,
++      "copyMethod": "Copy-Item; immutable"
++    },
++    "parentVerifiedHashes": {
++      "source": "tasks/ACOUSTIC-HISTORY-001/unknown-descendant-artifacts.md baseline table",
++      "test": "F0C57FE388F96D78F3BA0B14A420D9E7E6F5C7977944AD72B19E925E894DC919",
++      "pwshExe": "FA2C8BB1E35CDD62AD15CD06A1D8F2C5961E9725A9BFA1E7CFD2C322F49E9619",
++      "pwshDll": "A583A3721FEEBC4F9552A02358BC81BBDD41E2E18BB3F424226F2B1E0BF07DEB",
++      "sma": "70701F20AFBBF4E763924C2BDD0C0E9A20EEC35A0E4EFF439E0CCF77F20D6B26",
++      "runtimeconfig": "8A6363FBA1F89C0688E3594EF4FE7B9036126F04957C5FE56858CBA020B76B33",
++      "deps": "A01883AEEB2217AEB1D7EC944D649376104E7A874CA4EA71E7F36448C1519DC2",
++      "jaSma": "F672B902371AD615A7AD211EE387B73C65386E7686610B6DCCA9A91927D8DC94"
++    }
++  },
++  "toolchain": {
++    "rustcPath": "C:/Users/安井　一広/.rustup/toolchains/stable-x86_64-pc-windows-msvc/bin/rustc.exe",
++    "rustcSha256": "CA9988AF88B1463F6857FDFE909299FEE50A63260B3E5F7DBCB5B4D3318B27BC",
++    "driverPath": "C:/Users/安井　一広/.rustup/toolchains/stable-x86_64-pc-windows-msvc/bin/rustc_driver-573e106f78c6e3e0.dll",
++    "driverSha256": "50B9168C1D7BF98A7C4417EED0C8098DAAB7033B13EBB0BCA752945708EA9EC7",
++    "rustcRuntimeVersion": "NotInvoked",
++    "pssaVersion": "1.25.0 metadata only",
++    "pssaPsd1": "2B219F688BCDD67101040F845E530B22907D39BBF49089B4B5B2AFABA7996791",
++    "pssaDll": "145BA1459672DA808757B2BC6C6494926A13D92353CCD6A0354A0D5D8FE14A5F",
++    "psRuntime": "7.6.7 required; actual test runtime NotRun"
++  },
++  "cases": [
++    {
++      "id": "O1",
++      "inputs": 3
++    },
++    {
++      "id": "O2",
++      "inputs": 2
++    },
++    {
++      "id": "O3",
++      "inputs": 9
++    },
++    {
++      "id": "O4",
++      "inputs": 14
++    },
++    {
++      "id": "O5",
++      "inputs": 5
++    },
++    {
++      "id": "O6",
++      "inputs": 18
++    }
++  ],
++  "counts": {
++    "cases": 6,
++    "syntheticInputs": 51,
++    "scenarioRows": 49,
++    "actualTestsExecuted": 0,
++    "compilations": 0
++  },
++  "readyForStaticPre": [
++    "expectations.json (all six independent expectations)",
++    "baseline-extraction.json (14 uniquely extracted spans, original bytes/hash, no execution)",
++    "old-o1-binding.json (single allowed lookup adapter and exact inverse)",
++    "old-o1.rs (baseline O1 three-input executable source, compile/run pending)"
++  ],
++  "pending": [
++    "all candidate source hashes and permitted implementation reverse diff",
++    "O2/O3/O5/O6 executable adapter assembly; only baseline extraction fixed",
++    "O4 new helper extraction and message/budget statement binding; do not guess helper structure",
++    "candidate all-six invocation commands and runtime total-input accounting",
++    "independent Pre and parent final freeze, before any compile/run"
++  ],
++  "commandDrafts": [
++    {
++      "phase": "Old-O1-Compile",
++      "ready": true,
++      "command": "& 'C:/Users/安井　一広/.rustup/toolchains/stable-x86_64-pc-windows-msvc/bin/rustc.exe' --edition=2021 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1.rs' -o 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-unit.exe'",
++      "expectedExit": 0,
++      "precondition": "Parent approved complete packet Pre/freeze; recheck unit+tool hashes. Compile failure is AdapterFailure."
++    },
++    {
++      "phase": "Old-O1-Run",
++      "ready": true,
++      "command": "& 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-unit.exe'",
++      "expectedExit": 1,
++      "expectedLines": 3,
++      "expectedClassification": "BehaviorRED for exactly seven missing environment keys, one per null/empty/UTF16 input",
++      "precondition": "Successful frozen compile, parent freeze, no prior run of this input set"
++    },
++    {
++      "phase": "New-O1-O6",
++      "ready": false,
++      "command": null,
++      "reason": "Candidate source and adapters do not exist yet; exact executable command must be supplied after author binding before independent Pre/freeze. Not an executable authorization."
++    }
++  ],
++  "resultsRoot": "F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/results",
++  "preservation": "No existing packet/source/test expectation edited; before copies immutable; no source target invocation/import; no compiler/test execution; no new setting/config/framework.",
++  "executionGate": "Not authorized by this manifest; parent independent Pre/freeze required. FirstUnexpected stop; preserve partial data; retry0.",
++  "restorePatch": "tasks/ACOUSTIC-HISTORY-001/unknown-descendant-tests.patch; applies only new text artifacts to their exact paths; before raw copies remain ignored and are not embedded in tracked patch."
++}
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-binding.json b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-binding.json
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-binding.json
+@@ -0,0 +1,20 @@
++{
++  "name": "environment-construction",
++  "byteLength": 463,
++  "byteOffset": 5078,
++  "characterLength": 463,
++  "characterOffset": 5078,
++  "sha256": "8B609BE813BE9A67A235FFD939BFFF2380E3A26B968A4605D71257E9D5AEEBD9",
++  "language": "rust",
++  "adapter": {
++    "allowedReplacement": "env::var_os(key)",
++    "replacement": "lookup(key)",
++    "count": 1,
++    "positionWithinFragment": 318,
++    "originalText": "    let keys = [\"LOCALAPPDATA\", \"TEMP\", \"TMP\", \"PATH\", \"CARGO_BUILD_JOBS\", \"CARGO_TARGET_DIR\", \"CARGO_LOG\",\n        \"CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_RUNNER\", \"WW5_CARGO_GATE_RUN_PATH\", \"WW5_CARGO_GATE_RUN_ID\",\n        \"WW5_ET2_CHILD\", \"WW5_ET2_BASE\"];\n    let records = keys.iter().map(|key| {\n        let value = env::var_os(key).map(|v| units(&v)).unwrap_or_else(|| \"null\".into());\n        format!(\"\\\"{key}\\\":{value}\")\n    }).collect::<Vec<_>>().join(\",\");\n",
++    "adaptedText": "    let keys = [\"LOCALAPPDATA\", \"TEMP\", \"TMP\", \"PATH\", \"CARGO_BUILD_JOBS\", \"CARGO_TARGET_DIR\", \"CARGO_LOG\",\n        \"CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_RUNNER\", \"WW5_CARGO_GATE_RUN_PATH\", \"WW5_CARGO_GATE_RUN_ID\",\n        \"WW5_ET2_CHILD\", \"WW5_ET2_BASE\"];\n    let records = keys.iter().map(|key| {\n        let value = lookup(key).map(|v| units(&v)).unwrap_or_else(|| \"null\".into());\n        format!(\"\\\"{key}\\\":{value}\")\n    }).collect::<Vec<_>>().join(\",\");\n",
++    "reverseBytesEqual": true
++  },
++  "state": "StaticBoundOldOnly"
++}
++
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1.rs b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1.rs
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1.rs
+@@ -0,0 +1,71 @@
++// ACOUSTIC-HISTORY-001 O1 baseline-only unit. Does not include fake main/run/extern.
++// Compile/run only after parent Pre/freeze. Expected exit 1: 3 BehaviorRED inputs.
++// Missing helper/compile errors are AdapterFailure; they are never BehaviorRED.
++#![cfg(windows)]
++use std::ffi::{OsStr, OsString};
++use std::os::windows::ffi::{OsStrExt, OsStringExt};
++
++fn units(value: &OsStr) -> String {
++    format!("[{}]", value.encode_wide().map(|v| v.to_string()).collect::<Vec<_>>().join(","))
++}
++
++fn actual(mut lookup: impl FnMut(&str) -> Option<OsString>) -> String {
++    let keys = ["LOCALAPPDATA", "TEMP", "TMP", "PATH", "CARGO_BUILD_JOBS", "CARGO_TARGET_DIR", "CARGO_LOG",
++        "CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_RUNNER", "WW5_CARGO_GATE_RUN_PATH", "WW5_CARGO_GATE_RUN_ID",
++        "WW5_ET2_CHILD", "WW5_ET2_BASE"];
++    let records = keys.iter().map(|key| {
++        let value = lookup(key).map(|v| units(&v)).unwrap_or_else(|| "null".into());
++        format!("\"{key}\":{value}")
++    }).collect::<Vec<_>>().join(",");
++    format!("{{{records}}}")
++}
++
++const EXPECTED_KEYS: [&str; 19] = ["LOCALAPPDATA", "TEMP", "TMP", "PATH", "CARGO_BUILD_JOBS", "CARGO_TARGET_DIR", "CARGO_LOG", "CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_RUNNER", "WW5_CARGO_GATE_RUN_PATH", "WW5_CARGO_GATE_RUN_ID", "WW5_ET2_CHILD", "WW5_ET2_BASE", "ET3_FAKE_ROOT", "ET3_FAKE_MODE", "ET3_FAKE_EXIT_U32", "ET3_FAKE_RELEASE", "ET3_FAKE_WAIT_MS", "ET3_FAKE_BUILD_RELEASE", "ET3_FAKE_INVOCATIONS"];
++
++fn main() {
++    let suite_started = std::time::Instant::now();
++    let mut expected_red = 0;
++    for (id, expected_value, fixture) in [
++        ("O1-null", "null", None),
++        ("O1-empty", "[]", Some(OsString::new())),
++        ("O1-wide", "[65,55357,56832,55296]", Some(OsString::from_wide(&[65,55357,56832,55296]))),
++    ] {
++        let case_started = std::time::Instant::now();
++        if suite_started.elapsed().as_secs_f64() >= 30.0 {
++            eprintln!("UnexpectedFailure:O1:suite deadline before input");
++            std::process::exit(2);
++        }
++        let mut looked_up = Vec::new();
++        let observed = actual(|key| {
++            looked_up.push(key.to_string());
++            fixture.clone()
++        });
++        let expected = format!("{{{}}}", EXPECTED_KEYS.iter()
++            .map(|key| format!("\"{key}\":{expected_value}"))
++            .collect::<Vec<_>>().join(","));
++        // Check the known baseline defect precisely; do not accept an arbitrary mismatch as RED.
++        let baseline_keys = &EXPECTED_KEYS[..12];
++        let expected_baseline = format!("{{{}}}", baseline_keys.iter()
++            .map(|key| format!("\"{key}\":{expected_value}"))
++            .collect::<Vec<_>>().join(","));
++        if observed != expected_baseline ||
++            looked_up.iter().map(String::as_str).collect::<Vec<_>>().as_slice() != baseline_keys {
++            eprintln!("AdapterFailure:{id}:baseline behavior differed from frozen twelve-key construction");
++            std::process::exit(2);
++        }
++        if observed == expected {
++            eprintln!("UnexpectedPASS:{id}:missing seven-key defect was not reproduced");
++            std::process::exit(2);
++        }
++        if case_started.elapsed().as_secs_f64() > 5.0 ||
++            suite_started.elapsed().as_secs_f64() > 30.0 {
++            eprintln!("UnexpectedFailure:{id}:deadline exceeded");
++            std::process::exit(2);
++        }
++        expected_red += 1;
++        println!("BehaviorRED:{id}:missing=ET3_FAKE_ROOT,ET3_FAKE_MODE,ET3_FAKE_EXIT_U32,ET3_FAKE_RELEASE,ET3_FAKE_WAIT_MS,ET3_FAKE_BUILD_RELEASE,ET3_FAKE_INVOCATIONS");
++    }
++    assert_eq!(expected_red, 3);
++    std::process::exit(1);
++}
++
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/static-evidence-attempt1.json b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/static-evidence-attempt1.json
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/static-evidence-attempt1.json
+@@ -0,0 +1,165 @@
++{
++  "targetExecution": 0,
++  "failures": [
++    "span exact bytes: Get-Utc",
++    "span exact bytes: Get-IdentityFailureObservation",
++    "span exact bytes: New-FirstFailureRecord",
++    "span exact bytes: Invoke-GateFailure",
++    "span exact bytes: Write-FirstFailureRecord",
++    "span exact bytes: Read-OwnedTree",
++    "span exact bytes: candidate-tail",
++    "span exact bytes: candidate-catch",
++    "span exact bytes: candidate-finally-body"
++  ],
++  "runtimeHost": "7.6.7",
++  "files": [
++    {
++      "length": 41808,
++      "sha256": "85F9ECD19F9A9D4F292A1ADE8E40538D8B0873AC423445F9512DE42A1E338DA9",
++      "name": "baseline-extraction.json"
++    },
++    {
++      "length": 23180,
++      "sha256": "A1914AD22D864A30FEFEA90801F349F152EB23177E92E75774863F880047FAD4",
++      "name": "expectations.json"
++    },
++    {
++      "length": 5958,
++      "sha256": "F5793B16E37A239FB07F6655F16956499A1C19ED3DE7DACB3D04F2D40B1E36FD",
++      "name": "manifest.json"
++    },
++    {
++      "length": 1504,
++      "sha256": "57BDAF5F6154E12B3EB1360A25B197D52375CE54EEA71945D96DCB15F34A6E09",
++      "name": "old-o1-binding.json"
++    },
++    {
++      "length": 3634,
++      "sha256": "17BCA7FAD61F5AE02D9CAC26B1A5C8D6B77E38740E82AB8D5156A23B1F72D835",
++      "name": "old-o1.rs"
++    }
++  ],
++  "unitRuns": 0,
++  "status": "StaticFAIL",
++  "schemaVersion": 1,
++  "checks": [
++    {
++      "pass": true,
++      "name": "six independent acceptance cases"
++    },
++    {
++      "pass": true,
++      "name": "expanded input count51 / scenario rows49"
++    },
++    {
++      "pass": true,
++      "name": "approved exact environment19"
++    },
++    {
++      "pass": true,
++      "name": "strict sidecar7 / legacy12 / acquisition9"
++    },
++    {
++      "pass": true,
++      "name": "six unique case IDs"
++    },
++    {
++      "pass": true,
++      "name": "frozen design SHA"
++    },
++    {
++      "pass": true,
++      "name": "fakeBefore immutable SHA/length"
++    },
++    {
++      "pass": true,
++      "name": "invokeBefore immutable SHA/length"
++    },
++    {
++      "pass": true,
++      "name": "span exact bytes: environment-construction"
++    },
++    {
++      "pass": true,
++      "name": "span exact bytes: target"
++    },
++    {
++      "pass": true,
++      "name": "span exact bytes: write_new"
++    },
++    {
++      "pass": true,
++      "name": "span exact bytes: units"
++    },
++    {
++      "pass": true,
++      "name": "span exact bytes: main"
++    },
++    {
++      "pass": false,
++      "name": "span exact bytes: Get-Utc"
++    },
++    {
++      "pass": false,
++      "name": "span exact bytes: Get-IdentityFailureObservation"
++    },
++    {
++      "pass": false,
++      "name": "span exact bytes: New-FirstFailureRecord"
++    },
++    {
++      "pass": false,
++      "name": "span exact bytes: Invoke-GateFailure"
++    },
++    {
++      "pass": false,
++      "name": "span exact bytes: Write-FirstFailureRecord"
++    },
++    {
++      "pass": false,
++      "name": "span exact bytes: Read-OwnedTree"
++    },
++    {
++      "pass": false,
++      "name": "span exact bytes: candidate-tail"
++    },
++    {
++      "pass": false,
++      "name": "span exact bytes: candidate-catch"
++    },
++    {
++      "pass": false,
++      "name": "span exact bytes: candidate-finally-body"
++    },
++    {
++      "pass": true,
++      "name": "adapter reverse bytes exact"
++    },
++    {
++      "pass": true,
++      "name": "one allowed adapter occurrence original"
++    },
++    {
++      "pass": true,
++      "name": "one allowed adapter occurrence adapted"
++    },
++    {
++      "pass": true,
++      "name": "bound compiled fragment exact occurrence"
++    },
++    {
++      "pass": true,
++      "name": "standalone unit no fake main/run/extern/OS boundaries"
++    },
++    {
++      "pass": true,
++      "name": "old O1 exactly3 fixture IDs"
++    },
++    {
++      "pass": true,
++      "name": "deadline5/30 / unexpected immediate exit"
++    }
++  ],
++  "compilerInvocations": 0,
++  "note": "Static evidence only. No behavioral reproduction or GREEN claim. Candidate adapters pending."
++}
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/static-evidence.json b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/static-evidence.json
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/static-evidence.json
+@@ -0,0 +1,155 @@
++{
++  "targetExecution": 0,
++  "failures": [],
++  "runtimeHost": "7.6.7",
++  "files": [
++    {
++      "name": "baseline-extraction.json",
++      "length": 41833,
++      "sha256": "736A0F5F4042BF9CC2031FC504A4A880261226E31FB27BC32A6265E8E155E4BF"
++    },
++    {
++      "name": "expectations.json",
++      "length": 23180,
++      "sha256": "A1914AD22D864A30FEFEA90801F349F152EB23177E92E75774863F880047FAD4"
++    },
++    {
++      "name": "manifest.json",
++      "length": 5958,
++      "sha256": "F5793B16E37A239FB07F6655F16956499A1C19ED3DE7DACB3D04F2D40B1E36FD"
++    },
++    {
++      "name": "old-o1-binding.json",
++      "length": 1504,
++      "sha256": "57BDAF5F6154E12B3EB1360A25B197D52375CE54EEA71945D96DCB15F34A6E09"
++    },
++    {
++      "name": "old-o1.rs",
++      "length": 3634,
++      "sha256": "17BCA7FAD61F5AE02D9CAC26B1A5C8D6B77E38740E82AB8D5156A23B1F72D835"
++    }
++  ],
++  "unitRuns": 0,
++  "status": "StaticPASS",
++  "schemaVersion": 1,
++  "checks": [
++    {
++      "pass": true,
++      "name": "six independent acceptance cases"
++    },
++    {
++      "pass": true,
++      "name": "expanded input count51 / scenario rows49"
++    },
++    {
++      "pass": true,
++      "name": "approved exact environment19"
++    },
++    {
++      "pass": true,
++      "name": "strict sidecar7 / legacy12 / acquisition9"
++    },
++    {
++      "pass": true,
++      "name": "six unique case IDs"
++    },
++    {
++      "pass": true,
++      "name": "frozen design SHA"
++    },
++    {
++      "pass": true,
++      "name": "fakeBefore immutable SHA/length"
++    },
++    {
++      "pass": true,
++      "name": "invokeBefore immutable SHA/length"
++    },
++    {
++      "pass": true,
++      "name": "span exact bytes: environment-construction"
++    },
++    {
++      "pass": true,
++      "name": "span exact bytes: target"
++    },
++    {
++      "pass": true,
++      "name": "span exact bytes: write_new"
++    },
++    {
++      "pass": true,
++      "name": "span exact bytes: units"
++    },
++    {
++      "pass": true,
++      "name": "span exact bytes: main"
++    },
++    {
++      "pass": true,
++      "name": "span exact bytes: Get-Utc"
++    },
++    {
++      "pass": true,
++      "name": "span exact bytes: Get-IdentityFailureObservation"
++    },
++    {
++      "pass": true,
++      "name": "span exact bytes: New-FirstFailureRecord"
++    },
++    {
++      "pass": true,
++      "name": "span exact bytes: Invoke-GateFailure"
++    },
++    {
++      "pass": true,
++      "name": "span exact bytes: Write-FirstFailureRecord"
++    },
++    {
++      "pass": true,
++      "name": "span exact bytes: Read-OwnedTree"
++    },
++    {
++      "pass": true,
++      "name": "span exact bytes: candidate-tail"
++    },
++    {
++      "pass": true,
++      "name": "span exact bytes: candidate-catch"
++    },
++    {
++      "pass": true,
++      "name": "span exact bytes: candidate-finally-body"
++    },
++    {
++      "pass": true,
++      "name": "adapter reverse bytes exact"
++    },
++    {
++      "pass": true,
++      "name": "one allowed adapter occurrence original"
++    },
++    {
++      "pass": true,
++      "name": "one allowed adapter occurrence adapted"
++    },
++    {
++      "pass": true,
++      "name": "bound compiled fragment exact occurrence"
++    },
++    {
++      "pass": true,
++      "name": "standalone unit no fake main/run/extern/OS boundaries"
++    },
++    {
++      "pass": true,
++      "name": "old O1 exactly3 fixture IDs"
++    },
++    {
++      "pass": true,
++      "name": "deadline5/30 / unexpected immediate exit"
++    }
++  ],
++  "compilerInvocations": 0,
++  "note": "Static-only recheck after BOM metadata correction; 29 unchanged checks. First failure retained in static-evidence-attempt1.json. Only PS byte offsets +3 and explanatory metadata changed. Runtime and compiler remain0."
++}
+
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-compile.receipt.json b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-compile.receipt.json
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-compile.receipt.json
+@@ -0,0 +1,8 @@
++{
++  "cmd": "# ACOUSTIC-HISTORY-001 old O1 Compile; fixed capture receipt. No command/source replacement.\n# Compiler is outside the case5/suite30 test clock. No compiler timeout extension is claimed.\n# Run checks case5/total30 before/after; synchronous hard cancellation is not guaranteed.\nSet-StrictMode -Version 3.0\n$ErrorActionPreference = 'Stop'\n$PSNativeCommandUseErrorActionPreference = $false\n$taskOutputRoot = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/616fa13d-d949-4462-bfc6-0df66c902b6a'\n$taskBinary = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-unit.exe'\n$taskPhase = 'Compile'\n$taskExpectedExit = 0\n$taskUtf8 = [Text.UTF8Encoding]::new($false, $true)\n$taskFixed = @(\n    @{ path = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/before/fake.rs'; sha256 = '3482075BF7479E61942978830AE91FDDF5301133E1A2F43EDB9B65DDAA0FA016' },\n    @{ path = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/before/Invoke-CargoGate.ps1'; sha256 = '898C60B1133DB6956090035AF677B4CF7FDE0FE6FDFD5D47E5CD776B00500B71' },\n    @{ path = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1.rs'; sha256 = '17BCA7FAD61F5AE02D9CAC26B1A5C8D6B77E38740E82AB8D5156A23B1F72D835' },\n    @{ path = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-binding.json'; sha256 = '57BDAF5F6154E12B3EB1360A25B197D52375CE54EEA71945D96DCB15F34A6E09' },\n    @{ path = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/baseline-extraction.json'; sha256 = '736A0F5F4042BF9CC2031FC504A4A880261226E31FB27BC32A6265E8E155E4BF' },\n    @{ path = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/expectations.json'; sha256 = 'A1914AD22D864A30FEFEA90801F349F152EB23177E92E75774863F880047FAD4' },\n    @{ path = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/manifest.json'; sha256 = 'F5793B16E37A239FB07F6655F16956499A1C19ED3DE7DACB3D04F2D40B1E36FD' },\n    @{ path = 'F:/Kazuhiro/GitHub/WordWeave5/tasks/ACOUSTIC-HISTORY-001/unknown-descendant-design.md'; sha256 = 'B92FE83EB555829AF2EC111E95C9E0109747CB0FEB31CD5B83977760836C27D7' },\n    @{ path = 'C:/Users/安井　一広/.rustup/toolchains/stable-x86_64-pc-windows-msvc/bin/rustc.exe'; sha256 = 'CA9988AF88B1463F6857FDFE909299FEE50A63260B3E5F7DBCB5B4D3318B27BC' },\n    @{ path = 'C:/Users/安井　一広/.rustup/toolchains/stable-x86_64-pc-windows-msvc/bin/rustc_driver-573e106f78c6e3e0.dll'; sha256 = '50B9168C1D7BF98A7C4417EED0C8098DAAB7033B13EBB0BCA752945708EA9EC7' },\n    @{ path = 'F:/Program Files/PowerShell/7/pwsh.exe'; sha256 = 'FA2C8BB1E35CDD62AD15CD06A1D8F2C5961E9725A9BFA1E7CFD2C322F49E9619' },\n    @{ path = 'F:/Program Files/PowerShell/7/pwsh.dll'; sha256 = 'A583A3721FEEBC4F9552A02358BC81BBDD41E2E18BB3F424226F2B1E0BF07DEB' },\n    @{ path = 'F:/Program Files/PowerShell/7/System.Management.Automation.dll'; sha256 = '70701F20AFBBF4E763924C2BDD0C0E9A20EEC35A0E4EFF439E0CCF77F20D6B26' },\n    @{ path = 'F:/Program Files/PowerShell/7/pwsh.runtimeconfig.json'; sha256 = '8A6363FBA1F89C0688E3594EF4FE7B9036126F04957C5FE56858CBA020B76B33' },\n    @{ path = 'F:/Program Files/PowerShell/7/pwsh.deps.json'; sha256 = 'A01883AEEB2217AEB1D7EC944D649376104E7A874CA4EA71E7F36448C1519DC2' },\n    @{ path = 'F:/Program Files/PowerShell/7/ja/System.Management.Automation.resources.dll'; sha256 = 'F672B902371AD615A7AD211EE387B73C65386E7686610B6DCCA9A91927D8DC94' }\n)\n$taskProblems = [Collections.Generic.List[string]]::new()\n$taskStdoutLines = [Collections.Generic.List[string]]::new()\n$taskStderrLines = [Collections.Generic.List[string]]::new()\n$taskStdout = $null\n$taskStderr = $null\n$taskActualExit = $null\n$taskRootCreated = $false\n$taskRecord = [ordered]@{\n    schemaVersion = 1\n    taskId = 'ACOUSTIC-HISTORY-001'\n    receipt = ('OldO1-' + $taskPhase)\n    phase = $taskPhase\n    outputRoot = $taskOutputRoot\n    expectedExit = $taskExpectedExit\n    actualExit = $null\n    nativeAttempted = $false\n    attempts = 0\n    retry = 0\n    nativeCommand = '& ''C:/Users/安井　一広/.rustup/toolchains/stable-x86_64-pc-windows-msvc/bin/rustc.exe'' --edition=2021 ''F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1.rs'' -o ''F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-unit.exe'''\n    outputEncoding = 'PowerShell decoded text, UTF-8 without BOM; not native raw bytes'\n    compilerOutsideTestClock = $true\n    caseLimitSeconds = 5\n    suiteLimitSeconds = 30\n    before = $null\n    after = $null\n    compiledArtifact = $null\n    compileReceiptHashBefore = $null\n    compileReceiptHashAfter = $null\n    testElapsedSeconds = $null\n    expectedBehaviorRedLines = 0\n    observedBehaviorRedLines = 0\n    classification = 'NotRun'\n    accepted = $false\n    streamsSaved = $false\n    beforeSaved = $false\n    problems = $null\n}\nfunction Get-ReceiptGuard {\n    $taskHashes = @(\n        foreach ($taskInput in $taskFixed) {\n            $taskInputHash = (Get-FileHash -LiteralPath $taskInput.path -Algorithm SHA256).Hash\n            if ($taskInputHash -cne $taskInput.sha256) { throw ('Fixed input/runtime drift: ' + $taskInput.path) }\n            @{ path = $taskInput.path; sha256 = $taskInputHash }\n        }\n    )\n    if ($PSVersionTable.PSVersion.ToString() -cne '7.6.7') { throw 'PS runtime version mismatch' }\n    if (-not [string]::Equals([Environment]::ProcessPath, [IO.Path]::GetFullPath('F:/Program Files/PowerShell/7/pwsh.exe'),\n        [StringComparison]::OrdinalIgnoreCase)) { throw 'PS runtime executable path mismatch' }\n    if (-not [string]::Equals([Management.Automation.PSObject].Assembly.Location,\n        [IO.Path]::GetFullPath('F:/Program Files/PowerShell/7/System.Management.Automation.dll'),\n        [StringComparison]::OrdinalIgnoreCase)) { throw 'Loaded SMA path mismatch' }\n    $taskIdentity = [Security.Principal.WindowsIdentity]::GetCurrent()\n    try {\n        if ($null -eq $taskIdentity.User) { throw 'User SID unavailable' }\n        $taskAdmin = [Security.Principal.WindowsPrincipal]::new($taskIdentity).IsInRole(\n            [Security.Principal.WindowsBuiltInRole]::Administrator)\n        if ($taskAdmin -ne $false) { throw 'Non-administrator execution required' }\n        return @{ utc = [DateTimeOffset]::UtcNow.ToString('o'); fixedInputs = $taskHashes\n            psVersion = $PSVersionTable.PSVersion.ToString(); processPath = [Environment]::ProcessPath\n            smaLocation = [Management.Automation.PSObject].Assembly.Location\n            isAdmin = $taskAdmin; userSid = $taskIdentity.User.Value; pid = $PID }\n    }\n    finally { $taskIdentity.Dispose() }\n}\nfunction Write-ReceiptNew {\n    param([string]$Path, [object]$Value)\n    $taskBytes = $taskUtf8.GetBytes((ConvertTo-Json -InputObject $Value -Depth 12))\n    $taskFile = [IO.File]::Open($Path, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::None)\n    try {\n        $taskFile.Write($taskBytes, 0, $taskBytes.Length)\n        $taskFile.Flush($true)\n    }\n    finally { $taskFile.Dispose() }\n}\ntry {\n    if (Test-Path -LiteralPath $taskOutputRoot) { throw 'Fresh results UUID already exists' }\n    $taskAncestor = [IO.DirectoryInfo]::new([IO.Path]::GetDirectoryName($taskOutputRoot))\n    while ($null -ne $taskAncestor) {\n        $taskAncestor.Refresh()\n        if (-not $taskAncestor.Exists) { throw 'Results ancestor missing' }\n        if (($taskAncestor.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {\n            throw 'Results ancestor is a reparse point'\n        }\n        $taskAncestor = $taskAncestor.Parent\n    }\n    $null = New-Item -ItemType Directory -Path $taskOutputRoot -ErrorAction Stop\n    $taskRootCreated = $true\n    $taskStdout = [IO.StreamWriter]::new([IO.File]::Open(\n        (Join-Path $taskOutputRoot 'stdout.txt'), [IO.FileMode]::CreateNew,\n        [IO.FileAccess]::Write, [IO.FileShare]::Read), $taskUtf8)\n    $taskStderr = [IO.StreamWriter]::new([IO.File]::Open(\n        (Join-Path $taskOutputRoot 'stderr.txt'), [IO.FileMode]::CreateNew,\n        [IO.FileAccess]::Write, [IO.FileShare]::Read), $taskUtf8)\n    $taskRecord.before = Get-ReceiptGuard\n    if (Test-Path -LiteralPath $taskBinary) { throw 'Compiler output already exists; never overwrite' }\n    Write-ReceiptNew -Path (Join-Path $taskOutputRoot 'before.json') -Value $taskRecord\n    $taskRecord.beforeSaved = $true\n    $taskRecord.nativeAttempted = $true\n    $taskRecord.attempts = 1\n    & 'C:/Users/安井　一広/.rustup/toolchains/stable-x86_64-pc-windows-msvc/bin/rustc.exe' --edition=2021 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1.rs' -o 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-unit.exe' 2>&1 | ForEach-Object {\n        if ($_ -is [Management.Automation.ErrorRecord]) {\n            $taskStderrLines.Add($_.ToString())\n            $taskStderr.WriteLine($_.ToString())\n        }\n        else {\n            $taskStdoutLines.Add([string]$_)\n            $taskStdout.WriteLine([string]$_)\n        }\n    }\n    $taskActualExit = $LASTEXITCODE\n    $taskRecord.actualExit = $taskActualExit\n    if ($taskActualExit -eq 0) {\n        $taskItem = Get-Item -LiteralPath $taskBinary\n        $taskRecord.compiledArtifact = @{ path = $taskBinary; length = $taskItem.Length\n            sha256 = (Get-FileHash -LiteralPath $taskBinary -Algorithm SHA256).Hash }\n        $taskRecord.classification = 'CompilePASS'\n    }\n    else { $taskRecord.classification = 'AdapterFailure' }\n}\ncatch { $taskProblems.Add($_.ToString()) }\nfinally {\n    if ($taskRootCreated) {\n        try { $taskRecord.after = Get-ReceiptGuard }\n        catch { $taskProblems.Add('PostGuard: ' + $_.ToString()) }\n    }\n    $taskStreamFailures = 0\n    foreach ($taskWriter in @($taskStdout, $taskStderr)) {\n        if ($null -eq $taskWriter) { $taskStreamFailures++ }\n        else {\n            try {\n                $taskWriter.Flush()\n                $taskWriter.BaseStream.Flush($true)\n            }\n            catch {\n                $taskStreamFailures++\n                $taskProblems.Add('StreamSave: ' + $_.ToString())\n            }\n            finally {\n                try { $taskWriter.Dispose() }\n                catch {\n                    $taskStreamFailures++\n                    $taskProblems.Add('StreamClose: ' + $_.ToString())\n                }\n            }\n        }\n    }\n    $taskRecord.streamsSaved = $taskStreamFailures -eq 0\n    $taskRecord.problems = @($taskProblems.ToArray())\n}\n$taskRecord.accepted = $taskProblems.Count -eq 0 -and $taskRecord.beforeSaved -and\n    $taskRecord.streamsSaved -and $null -ne $taskActualExit -and\n    $taskActualExit -eq $taskExpectedExit -and\n    $taskRecord.classification -ceq 'CompilePASS'\nif (-not $taskRootCreated) {\n    Write-Output 'RECEIPT_NOT_STARTED; fresh root guard failed; no prior output modified'\n    exit 2\n}\ntry { Write-ReceiptNew -Path (Join-Path $taskOutputRoot 'execution.json') -Value $taskRecord }\ncatch {\n    Write-Output ('RECEIPT_SAVE_FAILED: ' + $_.ToString())\n    exit 2\n}\n$taskRecord | ConvertTo-Json -Depth 12\nif ($taskProblems.Count -ne 0 -or -not $taskRecord.beforeSaved -or\n    -not $taskRecord.streamsSaved -or $null -eq $taskActualExit) { exit 2 }\n# Preserve actual native0/1/2 exactly. Acceptance is separately recorded, never inferred from exit1 alone.\nexit $taskActualExit\n",
++  "shell": "F:/Program Files/PowerShell/7/pwsh.exe",
++  "login": false,
++  "workdir": "F:/Kazuhiro/GitHub/WordWeave5",
++  "max_output_tokens": 3000,
++  "yield_time_ms": 1000
++}
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-run.receipt.json b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-run.receipt.json
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-run.receipt.json
+@@ -0,0 +1,8 @@
++{
++  "cmd": "# ACOUSTIC-HISTORY-001 old O1 Run; fixed capture receipt. No command/source replacement.\n# Compiler is outside the case5/suite30 test clock. No compiler timeout extension is claimed.\n# Run checks case5/total30 before/after; synchronous hard cancellation is not guaranteed.\nSet-StrictMode -Version 3.0\n$ErrorActionPreference = 'Stop'\n$PSNativeCommandUseErrorActionPreference = $false\n$taskOutputRoot = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/d3a00d97-8a53-4c73-a0d9-cc8f9fa3df7f'\n$taskBinary = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-unit.exe'\n$taskPhase = 'Run'\n$taskExpectedExit = 1\n$taskCompileExecution = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/616fa13d-d949-4462-bfc6-0df66c902b6a/execution.json'\n$taskUtf8 = [Text.UTF8Encoding]::new($false, $true)\n$taskFixed = @(\n    @{ path = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/before/fake.rs'; sha256 = '3482075BF7479E61942978830AE91FDDF5301133E1A2F43EDB9B65DDAA0FA016' },\n    @{ path = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/before/Invoke-CargoGate.ps1'; sha256 = '898C60B1133DB6956090035AF677B4CF7FDE0FE6FDFD5D47E5CD776B00500B71' },\n    @{ path = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1.rs'; sha256 = '17BCA7FAD61F5AE02D9CAC26B1A5C8D6B77E38740E82AB8D5156A23B1F72D835' },\n    @{ path = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-binding.json'; sha256 = '57BDAF5F6154E12B3EB1360A25B197D52375CE54EEA71945D96DCB15F34A6E09' },\n    @{ path = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/baseline-extraction.json'; sha256 = '736A0F5F4042BF9CC2031FC504A4A880261226E31FB27BC32A6265E8E155E4BF' },\n    @{ path = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/expectations.json'; sha256 = 'A1914AD22D864A30FEFEA90801F349F152EB23177E92E75774863F880047FAD4' },\n    @{ path = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/manifest.json'; sha256 = 'F5793B16E37A239FB07F6655F16956499A1C19ED3DE7DACB3D04F2D40B1E36FD' },\n    @{ path = 'F:/Kazuhiro/GitHub/WordWeave5/tasks/ACOUSTIC-HISTORY-001/unknown-descendant-design.md'; sha256 = 'B92FE83EB555829AF2EC111E95C9E0109747CB0FEB31CD5B83977760836C27D7' },\n    @{ path = 'C:/Users/安井　一広/.rustup/toolchains/stable-x86_64-pc-windows-msvc/bin/rustc.exe'; sha256 = 'CA9988AF88B1463F6857FDFE909299FEE50A63260B3E5F7DBCB5B4D3318B27BC' },\n    @{ path = 'C:/Users/安井　一広/.rustup/toolchains/stable-x86_64-pc-windows-msvc/bin/rustc_driver-573e106f78c6e3e0.dll'; sha256 = '50B9168C1D7BF98A7C4417EED0C8098DAAB7033B13EBB0BCA752945708EA9EC7' },\n    @{ path = 'F:/Program Files/PowerShell/7/pwsh.exe'; sha256 = 'FA2C8BB1E35CDD62AD15CD06A1D8F2C5961E9725A9BFA1E7CFD2C322F49E9619' },\n    @{ path = 'F:/Program Files/PowerShell/7/pwsh.dll'; sha256 = 'A583A3721FEEBC4F9552A02358BC81BBDD41E2E18BB3F424226F2B1E0BF07DEB' },\n    @{ path = 'F:/Program Files/PowerShell/7/System.Management.Automation.dll'; sha256 = '70701F20AFBBF4E763924C2BDD0C0E9A20EEC35A0E4EFF439E0CCF77F20D6B26' },\n    @{ path = 'F:/Program Files/PowerShell/7/pwsh.runtimeconfig.json'; sha256 = '8A6363FBA1F89C0688E3594EF4FE7B9036126F04957C5FE56858CBA020B76B33' },\n    @{ path = 'F:/Program Files/PowerShell/7/pwsh.deps.json'; sha256 = 'A01883AEEB2217AEB1D7EC944D649376104E7A874CA4EA71E7F36448C1519DC2' },\n    @{ path = 'F:/Program Files/PowerShell/7/ja/System.Management.Automation.resources.dll'; sha256 = 'F672B902371AD615A7AD211EE387B73C65386E7686610B6DCCA9A91927D8DC94' }\n)\n$taskProblems = [Collections.Generic.List[string]]::new()\n$taskStdoutLines = [Collections.Generic.List[string]]::new()\n$taskStderrLines = [Collections.Generic.List[string]]::new()\n$taskStdout = $null\n$taskStderr = $null\n$taskActualExit = $null\n$taskRootCreated = $false\n$taskClock = [Diagnostics.Stopwatch]::new()\n$taskRecord = [ordered]@{\n    schemaVersion = 1\n    taskId = 'ACOUSTIC-HISTORY-001'\n    receipt = ('OldO1-' + $taskPhase)\n    phase = $taskPhase\n    outputRoot = $taskOutputRoot\n    expectedExit = $taskExpectedExit\n    actualExit = $null\n    nativeAttempted = $false\n    attempts = 0\n    retry = 0\n    nativeCommand = '& ''F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-unit.exe'''\n    outputEncoding = 'PowerShell decoded text, UTF-8 without BOM; not native raw bytes'\n    compilerOutsideTestClock = $true\n    caseLimitSeconds = 5\n    suiteLimitSeconds = 30\n    before = $null\n    after = $null\n    compiledArtifact = $null\n    compileReceiptHashBefore = $null\n    compileReceiptHashAfter = $null\n    testElapsedSeconds = $null\n    expectedBehaviorRedLines = 3\n    observedBehaviorRedLines = 0\n    classification = 'NotRun'\n    accepted = $false\n    streamsSaved = $false\n    beforeSaved = $false\n    problems = $null\n}\nfunction Get-ReceiptGuard {\n    $taskHashes = @(\n        foreach ($taskInput in $taskFixed) {\n            $taskInputHash = (Get-FileHash -LiteralPath $taskInput.path -Algorithm SHA256).Hash\n            if ($taskInputHash -cne $taskInput.sha256) { throw ('Fixed input/runtime drift: ' + $taskInput.path) }\n            @{ path = $taskInput.path; sha256 = $taskInputHash }\n        }\n    )\n    if ($PSVersionTable.PSVersion.ToString() -cne '7.6.7') { throw 'PS runtime version mismatch' }\n    if (-not [string]::Equals([Environment]::ProcessPath, [IO.Path]::GetFullPath('F:/Program Files/PowerShell/7/pwsh.exe'),\n        [StringComparison]::OrdinalIgnoreCase)) { throw 'PS runtime executable path mismatch' }\n    if (-not [string]::Equals([Management.Automation.PSObject].Assembly.Location,\n        [IO.Path]::GetFullPath('F:/Program Files/PowerShell/7/System.Management.Automation.dll'),\n        [StringComparison]::OrdinalIgnoreCase)) { throw 'Loaded SMA path mismatch' }\n    $taskIdentity = [Security.Principal.WindowsIdentity]::GetCurrent()\n    try {\n        if ($null -eq $taskIdentity.User) { throw 'User SID unavailable' }\n        $taskAdmin = [Security.Principal.WindowsPrincipal]::new($taskIdentity).IsInRole(\n            [Security.Principal.WindowsBuiltInRole]::Administrator)\n        if ($taskAdmin -ne $false) { throw 'Non-administrator execution required' }\n        return @{ utc = [DateTimeOffset]::UtcNow.ToString('o'); fixedInputs = $taskHashes\n            psVersion = $PSVersionTable.PSVersion.ToString(); processPath = [Environment]::ProcessPath\n            smaLocation = [Management.Automation.PSObject].Assembly.Location\n            isAdmin = $taskAdmin; userSid = $taskIdentity.User.Value; pid = $PID }\n    }\n    finally { $taskIdentity.Dispose() }\n}\nfunction Write-ReceiptNew {\n    param([string]$Path, [object]$Value)\n    $taskBytes = $taskUtf8.GetBytes((ConvertTo-Json -InputObject $Value -Depth 12))\n    $taskFile = [IO.File]::Open($Path, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::None)\n    try {\n        $taskFile.Write($taskBytes, 0, $taskBytes.Length)\n        $taskFile.Flush($true)\n    }\n    finally { $taskFile.Dispose() }\n}\ntry {\n    if (Test-Path -LiteralPath $taskOutputRoot) { throw 'Fresh results UUID already exists' }\n    $taskAncestor = [IO.DirectoryInfo]::new([IO.Path]::GetDirectoryName($taskOutputRoot))\n    while ($null -ne $taskAncestor) {\n        $taskAncestor.Refresh()\n        if (-not $taskAncestor.Exists) { throw 'Results ancestor missing' }\n        if (($taskAncestor.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {\n            throw 'Results ancestor is a reparse point'\n        }\n        $taskAncestor = $taskAncestor.Parent\n    }\n    $null = New-Item -ItemType Directory -Path $taskOutputRoot -ErrorAction Stop\n    $taskRootCreated = $true\n    $taskStdout = [IO.StreamWriter]::new([IO.File]::Open(\n        (Join-Path $taskOutputRoot 'stdout.txt'), [IO.FileMode]::CreateNew,\n        [IO.FileAccess]::Write, [IO.FileShare]::Read), $taskUtf8)\n    $taskStderr = [IO.StreamWriter]::new([IO.File]::Open(\n        (Join-Path $taskOutputRoot 'stderr.txt'), [IO.FileMode]::CreateNew,\n        [IO.FileAccess]::Write, [IO.FileShare]::Read), $taskUtf8)\n    $taskRecord.before = Get-ReceiptGuard\n    $taskCompileHash = (Get-FileHash -LiteralPath $taskCompileExecution -Algorithm SHA256).Hash\n    $taskRecord.compileReceiptHashBefore = $taskCompileHash\n    $taskCompile = Get-Content -LiteralPath $taskCompileExecution -Raw -Encoding utf8 | ConvertFrom-Json -AsHashtable\n    if ($taskCompile.receipt -cne 'OldO1-Compile' -or $taskCompile.actualExit -ne 0 -or\n        $taskCompile.accepted -ne $true -or $taskCompile.streamsSaved -ne $true -or\n        $taskCompile.problems.Count -ne 0 -or $null -eq $taskCompile.compiledArtifact) {\n        throw 'Accepted compile receipt required'\n    }\n    if ($taskCompile.compiledArtifact.path -cne $taskBinary -or\n        (Get-FileHash -LiteralPath $taskBinary -Algorithm SHA256).Hash -cne $taskCompile.compiledArtifact.sha256) {\n        throw 'Compiled unit drift'\n    }\n    $taskRecord.compiledArtifact = $taskCompile.compiledArtifact\n    if ($taskClock.Elapsed.TotalSeconds -gt 5 -or $taskClock.Elapsed.TotalSeconds -gt 30) {\n        throw 'Test deadline before run'\n    }\n    Write-ReceiptNew -Path (Join-Path $taskOutputRoot 'before.json') -Value $taskRecord\n    $taskRecord.beforeSaved = $true\n    $taskRecord.nativeAttempted = $true\n    $taskRecord.attempts = 1\n    $taskClock.Start()\n    & 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-unit.exe' 2>&1 | ForEach-Object {\n        if ($_ -is [Management.Automation.ErrorRecord]) {\n            $taskStderrLines.Add($_.ToString())\n            $taskStderr.WriteLine($_.ToString())\n        }\n        else {\n            $taskStdoutLines.Add([string]$_)\n            $taskStdout.WriteLine([string]$_)\n        }\n    }\n    $taskActualExit = $LASTEXITCODE\n    $taskRecord.actualExit = $taskActualExit\n    $taskClock.Stop()\n    $taskRecord.testElapsedSeconds = $taskClock.Elapsed.TotalSeconds\n    if ($taskClock.Elapsed.TotalSeconds -gt 5 -or $taskClock.Elapsed.TotalSeconds -gt 30) {\n        throw 'O1 case5/suite30 deadline exceeded'\n    }\n    $taskCompileHashAfter = (Get-FileHash -LiteralPath $taskCompileExecution -Algorithm SHA256).Hash\n    $taskRecord.compileReceiptHashAfter = $taskCompileHashAfter\n    if ($taskCompileHashAfter -cne $taskRecord.compileReceiptHashBefore -or\n        (Get-FileHash -LiteralPath $taskBinary -Algorithm SHA256).Hash -cne $taskRecord.compiledArtifact.sha256) {\n        throw 'Compile receipt or unit drift after run'\n    }\n    $taskExpectedLines = @(\n        'BehaviorRED:O1-null:missing=ET3_FAKE_ROOT,ET3_FAKE_MODE,ET3_FAKE_EXIT_U32,ET3_FAKE_RELEASE,ET3_FAKE_WAIT_MS,ET3_FAKE_BUILD_RELEASE,ET3_FAKE_INVOCATIONS',\n        'BehaviorRED:O1-empty:missing=ET3_FAKE_ROOT,ET3_FAKE_MODE,ET3_FAKE_EXIT_U32,ET3_FAKE_RELEASE,ET3_FAKE_WAIT_MS,ET3_FAKE_BUILD_RELEASE,ET3_FAKE_INVOCATIONS',\n        'BehaviorRED:O1-wide:missing=ET3_FAKE_ROOT,ET3_FAKE_MODE,ET3_FAKE_EXIT_U32,ET3_FAKE_RELEASE,ET3_FAKE_WAIT_MS,ET3_FAKE_BUILD_RELEASE,ET3_FAKE_INVOCATIONS'\n    )\n    $taskRecord.observedBehaviorRedLines = @($taskStdoutLines | Where-Object { $_ -cmatch '^BehaviorRED:' }).Count\n    $taskExactRed = $taskActualExit -eq 1 -and $taskStdoutLines.Count -eq 3 -and $taskStderrLines.Count -eq 0\n    for ($taskLineIndex = 0; $taskLineIndex -lt 3 -and $taskExactRed; $taskLineIndex++) {\n        $taskExactRed = $taskStdoutLines[$taskLineIndex] -ceq $taskExpectedLines[$taskLineIndex]\n    }\n    if ($taskActualExit -eq 2) { $taskRecord.classification = 'AdapterFailure' }\n    elseif ($taskExactRed) { $taskRecord.classification = 'BehaviorRED' }\n    else { $taskRecord.classification = 'UnexpectedBehavior' }\n}\ncatch { $taskProblems.Add($_.ToString()) }\nfinally {\n    if ($taskRootCreated) {\n        try { $taskRecord.after = Get-ReceiptGuard }\n        catch { $taskProblems.Add('PostGuard: ' + $_.ToString()) }\n    }\n    $taskStreamFailures = 0\n    foreach ($taskWriter in @($taskStdout, $taskStderr)) {\n        if ($null -eq $taskWriter) { $taskStreamFailures++ }\n        else {\n            try {\n                $taskWriter.Flush()\n                $taskWriter.BaseStream.Flush($true)\n            }\n            catch {\n                $taskStreamFailures++\n                $taskProblems.Add('StreamSave: ' + $_.ToString())\n            }\n            finally {\n                try { $taskWriter.Dispose() }\n                catch {\n                    $taskStreamFailures++\n                    $taskProblems.Add('StreamClose: ' + $_.ToString())\n                }\n            }\n        }\n    }\n    $taskRecord.streamsSaved = $taskStreamFailures -eq 0\n    $taskRecord.problems = @($taskProblems.ToArray())\n}\n$taskRecord.accepted = $taskProblems.Count -eq 0 -and $taskRecord.beforeSaved -and\n    $taskRecord.streamsSaved -and $null -ne $taskActualExit -and\n    $taskActualExit -eq $taskExpectedExit -and\n    $taskRecord.classification -ceq 'BehaviorRED'\nif (-not $taskRootCreated) {\n    Write-Output 'RECEIPT_NOT_STARTED; fresh root guard failed; no prior output modified'\n    exit 2\n}\ntry { Write-ReceiptNew -Path (Join-Path $taskOutputRoot 'execution.json') -Value $taskRecord }\ncatch {\n    Write-Output ('RECEIPT_SAVE_FAILED: ' + $_.ToString())\n    exit 2\n}\n$taskRecord | ConvertTo-Json -Depth 12\nif ($taskProblems.Count -ne 0 -or -not $taskRecord.beforeSaved -or\n    -not $taskRecord.streamsSaved -or $null -eq $taskActualExit) { exit 2 }\n# Preserve actual native0/1/2 exactly. Acceptance is separately recorded, never inferred from exit1 alone.\nexit $taskActualExit\n",
++  "shell": "F:/Program Files/PowerShell/7/pwsh.exe",
++  "login": false,
++  "workdir": "F:/Kazuhiro/GitHub/WordWeave5",
++  "max_output_tokens": 3000,
++  "yield_time_ms": 1000
++}
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-receipts-static.json b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-receipts-static.json
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-receipts-static.json
+@@ -0,0 +1,169 @@
++{
++  "status": "StaticPASS",
++  "checks": [
++    {
++      "name": "Compile Parser0",
++      "pass": true
++    },
++    {
++      "name": "Compile exactly one fixed direct native command",
++      "pass": true
++    },
++    {
++      "name": "Compile immediate native LASTEXITCODE preserved",
++      "pass": true
++    },
++    {
++      "name": "Compile final explicit native exit",
++      "pass": true
++    },
++    {
++      "name": "Compile CreateNew stream/evidence sites",
++      "pass": true
++    },
++    {
++      "name": "Compile separate stdout/stderr",
++      "pass": true
++    },
++    {
++      "name": "Compile pre/post fixed input guards",
++      "pass": true
++    },
++    {
++      "name": "Compile no command substitution/mains/framework",
++      "pass": true
++    },
++    {
++      "name": "Compile fixed runtime and ordinary user",
++      "pass": true
++    },
++    {
++      "name": "Compile exec_command argument set",
++      "pass": true
++    },
++    {
++      "name": "Compile no artifact overwrite",
++      "pass": true
++    },
++    {
++      "name": "Compiler outside test timing",
++      "pass": true
++    },
++    {
++      "name": "Run Parser0",
++      "pass": true
++    },
++    {
++      "name": "Run exactly one fixed direct native command",
++      "pass": true
++    },
++    {
++      "name": "Run immediate native LASTEXITCODE preserved",
++      "pass": true
++    },
++    {
++      "name": "Run final explicit native exit",
++      "pass": true
++    },
++    {
++      "name": "Run CreateNew stream/evidence sites",
++      "pass": true
++    },
++    {
++      "name": "Run separate stdout/stderr",
++      "pass": true
++    },
++    {
++      "name": "Run pre/post fixed input guards",
++      "pass": true
++    },
++    {
++      "name": "Run no command substitution/mains/framework",
++      "pass": true
++    },
++    {
++      "name": "Run fixed runtime and ordinary user",
++      "pass": true
++    },
++    {
++      "name": "Run exec_command argument set",
++      "pass": true
++    },
++    {
++      "name": "Run exact3 independently fixed RED lines",
++      "pass": true
++    },
++    {
++      "name": "Run native2 classified AdapterFailure",
++      "pass": true
++    },
++    {
++      "name": "Run case5/suite30 pre/post",
++      "pass": true
++    },
++    {
++      "name": "Run compile artifact binding before/after",
++      "pass": true
++    },
++    {
++      "name": "Unchanged expectations.json",
++      "pass": true
++    },
++    {
++      "name": "Unchanged manifest.json",
++      "pass": true
++    },
++    {
++      "name": "Unchanged old-o1.rs",
++      "pass": true
++    },
++    {
++      "name": "Both fixed fresh results roots absent",
++      "pass": true
++    }
++  ],
++  "receipts": [
++    {
++      "guardCalls": 2,
++      "nativePath": "C:/Users/安井　一広/.rustup/toolchains/stable-x86_64-pc-windows-msvc/bin/rustc.exe",
++      "phase": "compile",
++      "createNewSites": 3,
++      "parseErrors": [],
++      "nativeCount": 1,
++      "hashCount": 16,
++      "sha256": "86812D051C3AE56B8C047E79938FA52B127015B79F7F6C7716A394A07E66D9A7"
++    },
++    {
++      "guardCalls": 2,
++      "nativePath": "F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-unit.exe",
++      "phase": "run",
++      "createNewSites": 3,
++      "parseErrors": [],
++      "nativeCount": 1,
++      "hashCount": 16,
++      "sha256": "D3B378EF4B71D74879A974D1804EF2ABDB83089A1653D8CCE8F8ED7A5D6C0A80"
++    }
++  ],
++  "immutable": [
++    {
++      "sha256": "A1914AD22D864A30FEFEA90801F349F152EB23177E92E75774863F880047FAD4",
++      "name": "expectations.json"
++    },
++    {
++      "sha256": "F5793B16E37A239FB07F6655F16956499A1C19ED3DE7DACB3D04F2D40B1E36FD",
++      "name": "manifest.json"
++    },
++    {
++      "sha256": "17BCA7FAD61F5AE02D9CAC26B1A5C8D6B77E38740E82AB8D5156A23B1F72D835",
++      "name": "old-o1.rs"
++    }
++  ],
++  "compileRoot": "F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/616fa13d-d949-4462-bfc6-0df66c902b6a",
++  "runRoot": "F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/d3a00d97-8a53-4c73-a0d9-cc8f9fa3df7f",
++  "actualCompilerInvocations": 0,
++  "actualUnitRuns": 0,
++  "receiptExecutions": 0,
++  "PSParserRuntime": "7.6.7",
++  "staticCheckerFirstAttempt": "Inspection helper script had a parse error before receipt parsing due to a mismatched parenthesis. No receipt command was executed. Corrected inspection code, not receipt/expectation/unit; evidence above is actual second static inspection.",
++  "timing": "Compile outside case5/suite30 test clock; no timeout extension or hard cancellation claimed. Run enforces O1 elapsed<=5 and local total<=30 before/after. Parent still owns all-case suite30."
++}
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-compile.receipt.beforeStaticFix.json b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-compile.receipt.beforeStaticFix.json
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-compile.receipt.beforeStaticFix.json
+@@ -0,0 +1,8 @@
++{
++  "cmd": "# ACOUSTIC-HISTORY-001 old O1 Compile; fixed capture receipt. No command/source replacement.\n# Compiler is outside the case5/suite30 test clock. No compiler timeout extension is claimed.\n# Run checks case5/total30 before/after; synchronous hard cancellation is not guaranteed.\nSet-StrictMode -Version 3.0\n$ErrorActionPreference = 'Stop'\n$PSNativeCommandUseErrorActionPreference = $false\n$taskOutputRoot = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/616fa13d-d949-4462-bfc6-0df66c902b6a'\n$taskBinary = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-unit.exe'\n$taskPhase = 'Compile'\n$taskExpectedExit = 0\n$taskCompileExecution = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/616fa13d-d949-4462-bfc6-0df66c902b6a/execution.json'\n$taskUtf8 = [Text.UTF8Encoding]::new($false, $true)\n$taskFixed = @(\n    @{ path = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/before/fake.rs'; sha256 = '3482075BF7479E61942978830AE91FDDF5301133E1A2F43EDB9B65DDAA0FA016' },\n    @{ path = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/before/Invoke-CargoGate.ps1'; sha256 = '898C60B1133DB6956090035AF677B4CF7FDE0FE6FDFD5D47E5CD776B00500B71' },\n    @{ path = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1.rs'; sha256 = '17BCA7FAD61F5AE02D9CAC26B1A5C8D6B77E38740E82AB8D5156A23B1F72D835' },\n    @{ path = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-binding.json'; sha256 = '57BDAF5F6154E12B3EB1360A25B197D52375CE54EEA71945D96DCB15F34A6E09' },\n    @{ path = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/baseline-extraction.json'; sha256 = '736A0F5F4042BF9CC2031FC504A4A880261226E31FB27BC32A6265E8E155E4BF' },\n    @{ path = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/expectations.json'; sha256 = 'A1914AD22D864A30FEFEA90801F349F152EB23177E92E75774863F880047FAD4' },\n    @{ path = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/manifest.json'; sha256 = 'F5793B16E37A239FB07F6655F16956499A1C19ED3DE7DACB3D04F2D40B1E36FD' },\n    @{ path = 'F:/Kazuhiro/GitHub/WordWeave5/tasks/ACOUSTIC-HISTORY-001/unknown-descendant-design.md'; sha256 = 'B92FE83EB555829AF2EC111E95C9E0109747CB0FEB31CD5B83977760836C27D7' },\n    @{ path = 'C:/Users/安井　一広/.rustup/toolchains/stable-x86_64-pc-windows-msvc/bin/rustc.exe'; sha256 = 'CA9988AF88B1463F6857FDFE909299FEE50A63260B3E5F7DBCB5B4D3318B27BC' },\n    @{ path = 'C:/Users/安井　一広/.rustup/toolchains/stable-x86_64-pc-windows-msvc/bin/rustc_driver-573e106f78c6e3e0.dll'; sha256 = '50B9168C1D7BF98A7C4417EED0C8098DAAB7033B13EBB0BCA752945708EA9EC7' },\n    @{ path = 'F:/Program Files/PowerShell/7/pwsh.exe'; sha256 = 'FA2C8BB1E35CDD62AD15CD06A1D8F2C5961E9725A9BFA1E7CFD2C322F49E9619' },\n    @{ path = 'F:/Program Files/PowerShell/7/pwsh.dll'; sha256 = 'A583A3721FEEBC4F9552A02358BC81BBDD41E2E18BB3F424226F2B1E0BF07DEB' },\n    @{ path = 'F:/Program Files/PowerShell/7/System.Management.Automation.dll'; sha256 = '70701F20AFBBF4E763924C2BDD0C0E9A20EEC35A0E4EFF439E0CCF77F20D6B26' },\n    @{ path = 'F:/Program Files/PowerShell/7/pwsh.runtimeconfig.json'; sha256 = '8A6363FBA1F89C0688E3594EF4FE7B9036126F04957C5FE56858CBA020B76B33' },\n    @{ path = 'F:/Program Files/PowerShell/7/pwsh.deps.json'; sha256 = 'A01883AEEB2217AEB1D7EC944D649376104E7A874CA4EA71E7F36448C1519DC2' },\n    @{ path = 'F:/Program Files/PowerShell/7/ja/System.Management.Automation.resources.dll'; sha256 = 'F672B902371AD615A7AD211EE387B73C65386E7686610B6DCCA9A91927D8DC94' }\n)\n$taskProblems = [Collections.Generic.List[string]]::new()\n$taskStdoutLines = [Collections.Generic.List[string]]::new()\n$taskStderrLines = [Collections.Generic.List[string]]::new()\n$taskStdout = $null\n$taskStderr = $null\n$taskActualExit = $null\n$taskRootCreated = $false\n$taskClock = [Diagnostics.Stopwatch]::new()\n$taskRecord = [ordered]@{\n    schemaVersion = 1\n    taskId = 'ACOUSTIC-HISTORY-001'\n    receipt = ('OldO1-' + $taskPhase)\n    phase = $taskPhase\n    outputRoot = $taskOutputRoot\n    expectedExit = $taskExpectedExit\n    actualExit = $null\n    nativeAttempted = $false\n    attempts = 0\n    retry = 0\n    nativeCommand = '& ''C:/Users/安井　一広/.rustup/toolchains/stable-x86_64-pc-windows-msvc/bin/rustc.exe'' --edition=2021 ''F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1.rs'' -o ''F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-unit.exe'''\n    outputEncoding = 'PowerShell decoded text, UTF-8 without BOM; not native raw bytes'\n    compilerOutsideTestClock = $true\n    caseLimitSeconds = 5\n    suiteLimitSeconds = 30\n    before = $null\n    after = $null\n    compiledArtifact = $null\n    compileReceiptHashBefore = $null\n    compileReceiptHashAfter = $null\n    testElapsedSeconds = $null\n    expectedBehaviorRedLines = 0\n    observedBehaviorRedLines = 0\n    classification = 'NotRun'\n    accepted = $false\n    streamsSaved = $false\n    beforeSaved = $false\n    problems = $null\n}\nfunction Get-ReceiptGuard {\n    $taskHashes = @(\n        foreach ($taskInput in $taskFixed) {\n            $taskInputHash = (Get-FileHash -LiteralPath $taskInput.path -Algorithm SHA256).Hash\n            if ($taskInputHash -cne $taskInput.sha256) { throw ('Fixed input/runtime drift: ' + $taskInput.path) }\n            @{ path = $taskInput.path; sha256 = $taskInputHash }\n        }\n    )\n    if ($PSVersionTable.PSVersion.ToString() -cne '7.6.7') { throw 'PS runtime version mismatch' }\n    if (-not [string]::Equals([Environment]::ProcessPath, [IO.Path]::GetFullPath('F:/Program Files/PowerShell/7/pwsh.exe'),\n        [StringComparison]::OrdinalIgnoreCase)) { throw 'PS runtime executable path mismatch' }\n    if (-not [string]::Equals([Management.Automation.PSObject].Assembly.Location,\n        [IO.Path]::GetFullPath('F:/Program Files/PowerShell/7/System.Management.Automation.dll'),\n        [StringComparison]::OrdinalIgnoreCase)) { throw 'Loaded SMA path mismatch' }\n    $taskIdentity = [Security.Principal.WindowsIdentity]::GetCurrent()\n    try {\n        if ($null -eq $taskIdentity.User) { throw 'User SID unavailable' }\n        $taskAdmin = [Security.Principal.WindowsPrincipal]::new($taskIdentity).IsInRole(\n            [Security.Principal.WindowsBuiltInRole]::Administrator)\n        if ($taskAdmin -ne $false) { throw 'Non-administrator execution required' }\n        return @{ utc = [DateTimeOffset]::UtcNow.ToString('o'); fixedInputs = $taskHashes\n            psVersion = $PSVersionTable.PSVersion.ToString(); processPath = [Environment]::ProcessPath\n            smaLocation = [Management.Automation.PSObject].Assembly.Location\n            isAdmin = $taskAdmin; userSid = $taskIdentity.User.Value; pid = $PID }\n    }\n    finally { $taskIdentity.Dispose() }\n}\nfunction Write-ReceiptNew {\n    param([string]$Path, [object]$Value)\n    $taskBytes = $taskUtf8.GetBytes((ConvertTo-Json -InputObject $Value -Depth 12))\n    $taskFile = [IO.File]::Open($Path, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::None)\n    try {\n        $taskFile.Write($taskBytes, 0, $taskBytes.Length)\n        $taskFile.Flush($true)\n    }\n    finally { $taskFile.Dispose() }\n}\ntry {\n    if (Test-Path -LiteralPath $taskOutputRoot) { throw 'Fresh results UUID already exists' }\n    $taskAncestor = [IO.DirectoryInfo]::new([IO.Path]::GetDirectoryName($taskOutputRoot))\n    while ($null -ne $taskAncestor) {\n        $taskAncestor.Refresh()\n        if (-not $taskAncestor.Exists) { throw 'Results ancestor missing' }\n        if (($taskAncestor.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {\n            throw 'Results ancestor is a reparse point'\n        }\n        $taskAncestor = $taskAncestor.Parent\n    }\n    $null = New-Item -ItemType Directory -Path $taskOutputRoot -ErrorAction Stop\n    $taskRootCreated = $true\n    $taskStdout = [IO.StreamWriter]::new([IO.File]::Open(\n        (Join-Path $taskOutputRoot 'stdout.txt'), [IO.FileMode]::CreateNew,\n        [IO.FileAccess]::Write, [IO.FileShare]::Read), $taskUtf8)\n    $taskStderr = [IO.StreamWriter]::new([IO.File]::Open(\n        (Join-Path $taskOutputRoot 'stderr.txt'), [IO.FileMode]::CreateNew,\n        [IO.FileAccess]::Write, [IO.FileShare]::Read), $taskUtf8)\n    $taskRecord.before = Get-ReceiptGuard\n    if (Test-Path -LiteralPath $taskBinary) { throw 'Compiler output already exists; never overwrite' }\n    Write-ReceiptNew -Path (Join-Path $taskOutputRoot 'before.json') -Value $taskRecord\n    $taskRecord.beforeSaved = $true\n    $taskRecord.nativeAttempted = $true\n    $taskRecord.attempts = 1\n    & 'C:/Users/安井　一広/.rustup/toolchains/stable-x86_64-pc-windows-msvc/bin/rustc.exe' --edition=2021 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1.rs' -o 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-unit.exe' 2>&1 | ForEach-Object {\n        if ($_ -is [Management.Automation.ErrorRecord]) {\n            $taskStderrLines.Add($_.ToString())\n            $taskStderr.WriteLine($_.ToString())\n        }\n        else {\n            $taskStdoutLines.Add([string]$_)\n            $taskStdout.WriteLine([string]$_)\n        }\n    }\n    $taskActualExit = $LASTEXITCODE\n    $taskRecord.actualExit = $taskActualExit\n    if ($taskActualExit -eq 0) {\n        $taskItem = Get-Item -LiteralPath $taskBinary\n        $taskRecord.compiledArtifact = @{ path = $taskBinary; length = $taskItem.Length\n            sha256 = (Get-FileHash -LiteralPath $taskBinary -Algorithm SHA256).Hash }\n        $taskRecord.classification = 'CompilePASS'\n    }\n    else { $taskRecord.classification = 'AdapterFailure' }\n}\ncatch { $taskProblems.Add($_.ToString()) }\nfinally {\n    if ($taskRootCreated) {\n        try { $taskRecord.after = Get-ReceiptGuard }\n        catch { $taskProblems.Add('PostGuard: ' + $_.ToString()) }\n    }\n    $taskStreamFailures = 0\n    foreach ($taskWriter in @($taskStdout, $taskStderr)) {\n        if ($null -eq $taskWriter) { $taskStreamFailures++ }\n        else {\n            try {\n                $taskWriter.Flush()\n                $taskWriter.BaseStream.Flush($true)\n            }\n            catch {\n                $taskStreamFailures++\n                $taskProblems.Add('StreamSave: ' + $_.ToString())\n            }\n            finally {\n                try { $taskWriter.Dispose() }\n                catch {\n                    $taskStreamFailures++\n                    $taskProblems.Add('StreamClose: ' + $_.ToString())\n                }\n            }\n        }\n    }\n    $taskRecord.streamsSaved = $taskStreamFailures -eq 0\n    $taskRecord.problems = @($taskProblems.ToArray())\n}\n$taskRecord.accepted = $taskProblems.Count -eq 0 -and $taskRecord.beforeSaved -and\n    $taskRecord.streamsSaved -and $null -ne $taskActualExit -and\n    $taskActualExit -eq $taskExpectedExit -and\n    $taskRecord.classification -ceq 'CompilePASS'\nif (-not $taskRootCreated) {\n    Write-Output 'RECEIPT_NOT_STARTED; fresh root guard failed; no prior output modified'\n    exit 2\n}\ntry { Write-ReceiptNew -Path (Join-Path $taskOutputRoot 'execution.json') -Value $taskRecord }\ncatch {\n    Write-Output ('RECEIPT_SAVE_FAILED: ' + $_.ToString())\n    exit 2\n}\n$taskRecord | ConvertTo-Json -Depth 12\nif ($taskProblems.Count -ne 0 -or -not $taskRecord.beforeSaved -or\n    -not $taskRecord.streamsSaved -or $null -eq $taskActualExit) { exit 2 }\n# Preserve actual native0/1/2 exactly. Acceptance is separately recorded, never inferred from exit1 alone.\nexit $taskActualExit\n",
++  "shell": "F:/Program Files/PowerShell/7/pwsh.exe",
++  "login": false,
++  "workdir": "F:/Kazuhiro/GitHub/WordWeave5",
++  "max_output_tokens": 3000,
++  "yield_time_ms": 1000
++}
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-run.receipt.beforeStaticFix.json b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-run.receipt.beforeStaticFix.json
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-run.receipt.beforeStaticFix.json
+@@ -0,0 +1,8 @@
++{
++  "cmd": "# ACOUSTIC-HISTORY-001 old O1 Run; fixed capture receipt. No command/source replacement.\n# Compiler is outside the case5/suite30 test clock. No compiler timeout extension is claimed.\n# Run checks case5/total30 before/after; synchronous hard cancellation is not guaranteed.\nSet-StrictMode -Version 3.0\n$ErrorActionPreference = 'Stop'\n$PSNativeCommandUseErrorActionPreference = $false\n$taskOutputRoot = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/d3a00d97-8a53-4c73-a0d9-cc8f9fa3df7f'\n$taskBinary = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-unit.exe'\n$taskPhase = 'Run'\n$taskExpectedExit = 1\n$taskCompileExecution = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/616fa13d-d949-4462-bfc6-0df66c902b6a/execution.json'\n$taskUtf8 = [Text.UTF8Encoding]::new($false, $true)\n$taskFixed = @(\n    @{ path = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/before/fake.rs'; sha256 = '3482075BF7479E61942978830AE91FDDF5301133E1A2F43EDB9B65DDAA0FA016' },\n    @{ path = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/before/Invoke-CargoGate.ps1'; sha256 = '898C60B1133DB6956090035AF677B4CF7FDE0FE6FDFD5D47E5CD776B00500B71' },\n    @{ path = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1.rs'; sha256 = '17BCA7FAD61F5AE02D9CAC26B1A5C8D6B77E38740E82AB8D5156A23B1F72D835' },\n    @{ path = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-binding.json'; sha256 = '57BDAF5F6154E12B3EB1360A25B197D52375CE54EEA71945D96DCB15F34A6E09' },\n    @{ path = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/baseline-extraction.json'; sha256 = '736A0F5F4042BF9CC2031FC504A4A880261226E31FB27BC32A6265E8E155E4BF' },\n    @{ path = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/expectations.json'; sha256 = 'A1914AD22D864A30FEFEA90801F349F152EB23177E92E75774863F880047FAD4' },\n    @{ path = 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/manifest.json'; sha256 = 'F5793B16E37A239FB07F6655F16956499A1C19ED3DE7DACB3D04F2D40B1E36FD' },\n    @{ path = 'F:/Kazuhiro/GitHub/WordWeave5/tasks/ACOUSTIC-HISTORY-001/unknown-descendant-design.md'; sha256 = 'B92FE83EB555829AF2EC111E95C9E0109747CB0FEB31CD5B83977760836C27D7' },\n    @{ path = 'C:/Users/安井　一広/.rustup/toolchains/stable-x86_64-pc-windows-msvc/bin/rustc.exe'; sha256 = 'CA9988AF88B1463F6857FDFE909299FEE50A63260B3E5F7DBCB5B4D3318B27BC' },\n    @{ path = 'C:/Users/安井　一広/.rustup/toolchains/stable-x86_64-pc-windows-msvc/bin/rustc_driver-573e106f78c6e3e0.dll'; sha256 = '50B9168C1D7BF98A7C4417EED0C8098DAAB7033B13EBB0BCA752945708EA9EC7' },\n    @{ path = 'F:/Program Files/PowerShell/7/pwsh.exe'; sha256 = 'FA2C8BB1E35CDD62AD15CD06A1D8F2C5961E9725A9BFA1E7CFD2C322F49E9619' },\n    @{ path = 'F:/Program Files/PowerShell/7/pwsh.dll'; sha256 = 'A583A3721FEEBC4F9552A02358BC81BBDD41E2E18BB3F424226F2B1E0BF07DEB' },\n    @{ path = 'F:/Program Files/PowerShell/7/System.Management.Automation.dll'; sha256 = '70701F20AFBBF4E763924C2BDD0C0E9A20EEC35A0E4EFF439E0CCF77F20D6B26' },\n    @{ path = 'F:/Program Files/PowerShell/7/pwsh.runtimeconfig.json'; sha256 = '8A6363FBA1F89C0688E3594EF4FE7B9036126F04957C5FE56858CBA020B76B33' },\n    @{ path = 'F:/Program Files/PowerShell/7/pwsh.deps.json'; sha256 = 'A01883AEEB2217AEB1D7EC944D649376104E7A874CA4EA71E7F36448C1519DC2' },\n    @{ path = 'F:/Program Files/PowerShell/7/ja/System.Management.Automation.resources.dll'; sha256 = 'F672B902371AD615A7AD211EE387B73C65386E7686610B6DCCA9A91927D8DC94' }\n)\n$taskProblems = [Collections.Generic.List[string]]::new()\n$taskStdoutLines = [Collections.Generic.List[string]]::new()\n$taskStderrLines = [Collections.Generic.List[string]]::new()\n$taskStdout = $null\n$taskStderr = $null\n$taskActualExit = $null\n$taskRootCreated = $false\n$taskClock = [Diagnostics.Stopwatch]::new()\n$taskRecord = [ordered]@{\n    schemaVersion = 1\n    taskId = 'ACOUSTIC-HISTORY-001'\n    receipt = ('OldO1-' + $taskPhase)\n    phase = $taskPhase\n    outputRoot = $taskOutputRoot\n    expectedExit = $taskExpectedExit\n    actualExit = $null\n    nativeAttempted = $false\n    attempts = 0\n    retry = 0\n    nativeCommand = '& ''F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-unit.exe'''\n    outputEncoding = 'PowerShell decoded text, UTF-8 without BOM; not native raw bytes'\n    compilerOutsideTestClock = $true\n    caseLimitSeconds = 5\n    suiteLimitSeconds = 30\n    before = $null\n    after = $null\n    compiledArtifact = $null\n    compileReceiptHashBefore = $null\n    compileReceiptHashAfter = $null\n    testElapsedSeconds = $null\n    expectedBehaviorRedLines = 3\n    observedBehaviorRedLines = 0\n    classification = 'NotRun'\n    accepted = $false\n    streamsSaved = $false\n    beforeSaved = $false\n    problems = $null\n}\nfunction Get-ReceiptGuard {\n    $taskHashes = @(\n        foreach ($taskInput in $taskFixed) {\n            $taskInputHash = (Get-FileHash -LiteralPath $taskInput.path -Algorithm SHA256).Hash\n            if ($taskInputHash -cne $taskInput.sha256) { throw ('Fixed input/runtime drift: ' + $taskInput.path) }\n            @{ path = $taskInput.path; sha256 = $taskInputHash }\n        }\n    )\n    if ($PSVersionTable.PSVersion.ToString() -cne '7.6.7') { throw 'PS runtime version mismatch' }\n    if (-not [string]::Equals([Environment]::ProcessPath, [IO.Path]::GetFullPath('F:/Program Files/PowerShell/7/pwsh.exe'),\n        [StringComparison]::OrdinalIgnoreCase)) { throw 'PS runtime executable path mismatch' }\n    if (-not [string]::Equals([Management.Automation.PSObject].Assembly.Location,\n        [IO.Path]::GetFullPath('F:/Program Files/PowerShell/7/System.Management.Automation.dll'),\n        [StringComparison]::OrdinalIgnoreCase)) { throw 'Loaded SMA path mismatch' }\n    $taskIdentity = [Security.Principal.WindowsIdentity]::GetCurrent()\n    try {\n        if ($null -eq $taskIdentity.User) { throw 'User SID unavailable' }\n        $taskAdmin = [Security.Principal.WindowsPrincipal]::new($taskIdentity).IsInRole(\n            [Security.Principal.WindowsBuiltInRole]::Administrator)\n        if ($taskAdmin -ne $false) { throw 'Non-administrator execution required' }\n        return @{ utc = [DateTimeOffset]::UtcNow.ToString('o'); fixedInputs = $taskHashes\n            psVersion = $PSVersionTable.PSVersion.ToString(); processPath = [Environment]::ProcessPath\n            smaLocation = [Management.Automation.PSObject].Assembly.Location\n            isAdmin = $taskAdmin; userSid = $taskIdentity.User.Value; pid = $PID }\n    }\n    finally { $taskIdentity.Dispose() }\n}\nfunction Write-ReceiptNew {\n    param([string]$Path, [object]$Value)\n    $taskBytes = $taskUtf8.GetBytes((ConvertTo-Json -InputObject $Value -Depth 12))\n    $taskFile = [IO.File]::Open($Path, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::None)\n    try {\n        $taskFile.Write($taskBytes, 0, $taskBytes.Length)\n        $taskFile.Flush($true)\n    }\n    finally { $taskFile.Dispose() }\n}\ntry {\n    if (Test-Path -LiteralPath $taskOutputRoot) { throw 'Fresh results UUID already exists' }\n    $taskAncestor = [IO.DirectoryInfo]::new([IO.Path]::GetDirectoryName($taskOutputRoot))\n    while ($null -ne $taskAncestor) {\n        $taskAncestor.Refresh()\n        if (-not $taskAncestor.Exists) { throw 'Results ancestor missing' }\n        if (($taskAncestor.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {\n            throw 'Results ancestor is a reparse point'\n        }\n        $taskAncestor = $taskAncestor.Parent\n    }\n    $null = New-Item -ItemType Directory -Path $taskOutputRoot -ErrorAction Stop\n    $taskRootCreated = $true\n    $taskStdout = [IO.StreamWriter]::new([IO.File]::Open(\n        (Join-Path $taskOutputRoot 'stdout.txt'), [IO.FileMode]::CreateNew,\n        [IO.FileAccess]::Write, [IO.FileShare]::Read), $taskUtf8)\n    $taskStderr = [IO.StreamWriter]::new([IO.File]::Open(\n        (Join-Path $taskOutputRoot 'stderr.txt'), [IO.FileMode]::CreateNew,\n        [IO.FileAccess]::Write, [IO.FileShare]::Read), $taskUtf8)\n    $taskRecord.before = Get-ReceiptGuard\n    $taskCompileHash = (Get-FileHash -LiteralPath $taskCompileExecution -Algorithm SHA256).Hash\n    $taskRecord.compileReceiptHashBefore = $taskCompileHash\n    $taskCompile = Get-Content -LiteralPath $taskCompileExecution -Raw -Encoding utf8 | ConvertFrom-Json -AsHashtable\n    if ($taskCompile.receipt -cne 'OldO1-Compile' -or $taskCompile.actualExit -ne 0 -or\n        $taskCompile.accepted -ne $true -or $taskCompile.streamsSaved -ne $true -or\n        $taskCompile.problems.Count -ne 0 -or $null -eq $taskCompile.compiledArtifact) {\n        throw 'Accepted compile receipt required'\n    }\n    if ($taskCompile.compiledArtifact.path -cne $taskBinary -or\n        (Get-FileHash -LiteralPath $taskBinary -Algorithm SHA256).Hash -cne $taskCompile.compiledArtifact.sha256) {\n        throw 'Compiled unit drift'\n    }\n    $taskRecord.compiledArtifact = $taskCompile.compiledArtifact\n    if ($taskClock.Elapsed.TotalSeconds -gt 5 -or $taskClock.Elapsed.TotalSeconds -gt 30) {\n        throw 'Test deadline before run'\n    }\n    Write-ReceiptNew -Path (Join-Path $taskOutputRoot 'before.json') -Value $taskRecord\n    $taskRecord.beforeSaved = $true\n    $taskRecord.nativeAttempted = $true\n    $taskRecord.attempts = 1\n    $taskClock.Start()\n    & 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-unit.exe' 2>&1 | ForEach-Object {\n        if ($_ -is [Management.Automation.ErrorRecord]) {\n            $taskStderrLines.Add($_.ToString())\n            $taskStderr.WriteLine($_.ToString())\n        }\n        else {\n            $taskStdoutLines.Add([string]$_)\n            $taskStdout.WriteLine([string]$_)\n        }\n    }\n    $taskActualExit = $LASTEXITCODE\n    $taskRecord.actualExit = $taskActualExit\n    $taskClock.Stop()\n    $taskRecord.testElapsedSeconds = $taskClock.Elapsed.TotalSeconds\n    if ($taskClock.Elapsed.TotalSeconds -gt 5 -or $taskClock.Elapsed.TotalSeconds -gt 30) {\n        throw 'O1 case5/suite30 deadline exceeded'\n    }\n    $taskCompileHashAfter = (Get-FileHash -LiteralPath $taskCompileExecution -Algorithm SHA256).Hash\n    $taskRecord.compileReceiptHashAfter = $taskCompileHashAfter\n    if ($taskCompileHashAfter -cne $taskRecord.compileReceiptHashBefore -or\n        (Get-FileHash -LiteralPath $taskBinary -Algorithm SHA256).Hash -cne $taskRecord.compiledArtifact.sha256) {\n        throw 'Compile receipt or unit drift after run'\n    }\n    $taskExpectedLines = @(\n        'BehaviorRED:O1-null:missing=ET3_FAKE_ROOT,ET3_FAKE_MODE,ET3_FAKE_EXIT_U32,ET3_FAKE_RELEASE,ET3_FAKE_WAIT_MS,ET3_FAKE_BUILD_RELEASE,ET3_FAKE_INVOCATIONS',\n        'BehaviorRED:O1-empty:missing=ET3_FAKE_ROOT,ET3_FAKE_MODE,ET3_FAKE_EXIT_U32,ET3_FAKE_RELEASE,ET3_FAKE_WAIT_MS,ET3_FAKE_BUILD_RELEASE,ET3_FAKE_INVOCATIONS',\n        'BehaviorRED:O1-wide:missing=ET3_FAKE_ROOT,ET3_FAKE_MODE,ET3_FAKE_EXIT_U32,ET3_FAKE_RELEASE,ET3_FAKE_WAIT_MS,ET3_FAKE_BUILD_RELEASE,ET3_FAKE_INVOCATIONS'\n    )\n    $taskRecord.observedBehaviorRedLines = @($taskStdoutLines | Where-Object { $_ -cmatch '^BehaviorRED:' }).Count\n    $taskExactRed = $taskActualExit -eq 1 -and $taskStdoutLines.Count -eq 3 -and $taskStderrLines.Count -eq 0\n    for ($taskLineIndex = 0; $taskLineIndex -lt 3 -and $taskExactRed; $taskLineIndex++) {\n        $taskExactRed = $taskStdoutLines[$taskLineIndex] -ceq $taskExpectedLines[$taskLineIndex]\n    }\n    if ($taskActualExit -eq 2) { $taskRecord.classification = 'AdapterFailure' }\n    elseif ($taskExactRed) { $taskRecord.classification = 'BehaviorRED' }\n    else { $taskRecord.classification = 'UnexpectedBehavior' }\n}\ncatch { $taskProblems.Add($_.ToString()) }\nfinally {\n    if ($taskRootCreated) {\n        try { $taskRecord.after = Get-ReceiptGuard }\n        catch { $taskProblems.Add('PostGuard: ' + $_.ToString()) }\n    }\n    $taskStreamFailures = 0\n    foreach ($taskWriter in @($taskStdout, $taskStderr)) {\n        if ($null -eq $taskWriter) { $taskStreamFailures++ }\n        else {\n            try {\n                $taskWriter.Flush()\n                $taskWriter.BaseStream.Flush($true)\n            }\n            catch {\n                $taskStreamFailures++\n                $taskProblems.Add('StreamSave: ' + $_.ToString())\n            }\n            finally {\n                try { $taskWriter.Dispose() }\n                catch {\n                    $taskStreamFailures++\n                    $taskProblems.Add('StreamClose: ' + $_.ToString())\n                }\n            }\n        }\n    }\n    $taskRecord.streamsSaved = $taskStreamFailures -eq 0\n    $taskRecord.problems = @($taskProblems.ToArray())\n}\n$taskRecord.accepted = $taskProblems.Count -eq 0 -and $taskRecord.beforeSaved -and\n    $taskRecord.streamsSaved -and $null -ne $taskActualExit -and\n    $taskActualExit -eq $taskExpectedExit -and\n    $taskRecord.classification -ceq 'BehaviorRED'\nif (-not $taskRootCreated) {\n    Write-Output 'RECEIPT_NOT_STARTED; fresh root guard failed; no prior output modified'\n    exit 2\n}\ntry { Write-ReceiptNew -Path (Join-Path $taskOutputRoot 'execution.json') -Value $taskRecord }\ncatch {\n    Write-Output ('RECEIPT_SAVE_FAILED: ' + $_.ToString())\n    exit 2\n}\n$taskRecord | ConvertTo-Json -Depth 12\nif ($taskProblems.Count -ne 0 -or -not $taskRecord.beforeSaved -or\n    -not $taskRecord.streamsSaved -or $null -eq $taskActualExit) { exit 2 }\n# Preserve actual native0/1/2 exactly. Acceptance is separately recorded, never inferred from exit1 alone.\nexit $taskActualExit\n",
++  "shell": "F:/Program Files/PowerShell/7/pwsh.exe",
++  "login": false,
++  "workdir": "F:/Kazuhiro/GitHub/WordWeave5",
++  "max_output_tokens": 3000,
++  "yield_time_ms": 1000
++}
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-receipts-static-fix.json b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-receipts-static-fix.json
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910/old-o1-receipts-static-fix.json
+@@ -0,0 +1,66 @@
++{
++  "schemaVersion": 1,
++  "status": "StaticPASS",
++  "minimalChange": "compile receipt: remove declarations taskCompileExecution and taskClock only. No suppression/rule exclusion added; run receipt unchanged. Earlier static evidence retains pre-fix hashes; this evidence supersedes compile receipt hash only.",
++  "topLevelKeysEqual": true,
++  "onlyTwoDeclarationsRemoved": true,
++  "files": [
++    {
++      "sha256": "86812D051C3AE56B8C047E79938FA52B127015B79F7F6C7716A394A07E66D9A7",
++      "name": "old-o1-compile.receipt.beforeStaticFix.json"
++    },
++    {
++      "sha256": "D3B378EF4B71D74879A974D1804EF2ABDB83089A1653D8CCE8F8ED7A5D6C0A80",
++      "name": "old-o1-run.receipt.beforeStaticFix.json"
++    },
++    {
++      "sha256": "29635D20F81D54177954FF2A6EEDA92E880138E7922CF294E3E7365FDE87ED2C",
++      "name": "old-o1-compile.receipt.json"
++    },
++    {
++      "sha256": "D3B378EF4B71D74879A974D1804EF2ABDB83089A1653D8CCE8F8ED7A5D6C0A80",
++      "name": "old-o1-run.receipt.json"
++    },
++    {
++      "sha256": "1C3D75E9A79588CADBC4AFCD743A55A41BB5D8BE8028EF32A207577DF83DDA9B",
++      "name": "parent-pssa-attempt1.json"
++    },
++    {
++      "sha256": "A1914AD22D864A30FEFEA90801F349F152EB23177E92E75774863F880047FAD4",
++      "name": "expectations.json"
++    },
++    {
++      "sha256": "F5793B16E37A239FB07F6655F16956499A1C19ED3DE7DACB3D04F2D40B1E36FD",
++      "name": "manifest.json"
++    },
++    {
++      "sha256": "17BCA7FAD61F5AE02D9CAC26B1A5C8D6B77E38740E82AB8D5156A23B1F72D835",
++      "name": "old-o1.rs"
++    }
++  ],
++  "otherToolArgumentsEqual": true,
++  "compilerInvocations": 0,
++  "results": [
++    {
++      "sha256": "29635D20F81D54177954FF2A6EEDA92E880138E7922CF294E3E7365FDE87ED2C",
++      "parserCount": 0,
++      "phase": "compile",
++      "pssaDiagnosticCount": 0,
++      "parserErrors": [],
++      "engineError": null,
++      "pssaDiagnostics": []
++    },
++    {
++      "sha256": "D3B378EF4B71D74879A974D1804EF2ABDB83089A1653D8CCE8F8ED7A5D6C0A80",
++      "parserCount": 0,
++      "phase": "run",
++      "pssaDiagnosticCount": 0,
++      "parserErrors": [],
++      "engineError": null,
++      "pssaDiagnostics": []
++    }
++  ],
++  "pssaVersion": "1.25.0",
++  "unitInvocations": 0,
++  "psVersion": "7.6.7"
++}

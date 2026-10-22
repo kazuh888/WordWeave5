@@ -24,6 +24,8 @@ target/
 /tasks/**/*.png
 /tasks/**/*.diff
 /tasks/**/*.patch
+!/tasks/ACOUSTIC-HISTORY-001/unknown-descendant-tests.patch
+!/tasks/ACOUSTIC-HISTORY-001/unknown-descendant-harness.patch
 /tasks/**/*.sha256
 /tasks/**/runner*.txt
 

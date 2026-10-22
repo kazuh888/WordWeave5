@@ -1,0 +1,266 @@
+diff --git a/target/early-trial-build/et3/cargo-gate/fake.rs b/target/early-trial-build/et3/cargo-gate/fake.rs
+index 08a50f6..d64a620 100644
+--- a/target/early-trial-build/et3/cargo-gate/fake.rs
++++ b/target/early-trial-build/et3/cargo-gate/fake.rs
+@@ -58,6 +58,58 @@ fn vector(values: impl Iterator<Item = OsString>) -> String {
+     format!("[{}]", values.map(|v| units(&v)).collect::<Vec<_>>().join(","))
+ }
+ 
++fn encode_environment(keys: &[&str], mut lookup: impl FnMut(&str) -> Option<OsString>) -> String {
++    let records = keys.iter().map(|key| {
++        let value = lookup(key).map(|v| units(&v)).unwrap_or_else(|| "null".into());
++        format!("\"{key}\":{value}")
++    }).collect::<Vec<_>>().join(",");
++    format!("{{{records}}}")
++}
++
++#[derive(Clone, Copy, Debug)]
++enum TargetFailureStage {
++    Observe, WaitRelease, StdoutWrite, StderrWrite, StdoutFlush, StderrFlush,
++    ExitSetting, CompletedWrite, TreeDelegated,
++}
++
++fn encode_target_failure(pid: u32, stage: TargetFailureStage, error: &io::Error) -> Vec<u8> {
++    let message = error.to_string();
++    let allowlisted = [
++        "invalid fixture integer", "invalid fixture environment", "fixture integer out of range",
++        "ET3_FAKE_ROOT required", "fixture root outside ignored boundary", "fixture owner marker mismatch",
++        "invalid fixture release name", "release must be one plain file name", "fixture release timeout",
++        "short argv fixture", "too many fixture args", "fixture arg too long", "argv length overflow",
++        "short UTF16 fixture", "NUL cannot be a Windows argv unit", "trailing argv fixture bytes",
++        "missing exact name", "runner missing", "unexpected runner path",
++        "fixture Cargo deadline; supervisor must audit descendants", "runner exit unavailable",
++        "fixture tree deadline", "fixture child wait incomplete", "unknown fixture mode",
++    ].contains(&message.as_str()) || error.raw_os_error()
++        .is_some_and(|code| io::Error::from_raw_os_error(code).to_string() == message);
++    let message_units: Vec<u16> = message.encode_utf16().collect();
++    let (message_utf16, message_status) = if !allowlisted {
++        ("null".to_owned(), "NotAllowlisted")
++    } else if message_units.len() > 2048 {
++        ("null".to_owned(), "TooLong")
++    } else {
++        (format!("[{}]", message_units.iter().map(|unit| unit.to_string()).collect::<Vec<_>>().join(",")), "Captured")
++    };
++    let raw_os_error = error.raw_os_error().map(|code| code.to_string()).unwrap_or_else(|| "null".into());
++    let serialize = |message_utf16: &str, message_status: &str| {
++        format!("{{\"schemaVersion\":1,\"pid\":{pid},\"stage\":\"{stage:?}\",\"errorKind\":\"{:?}\",\"rawOsError\":{raw_os_error},\"messageUtf16\":{message_utf16},\"messageStatus\":\"{message_status}\"}}", error.kind()).into_bytes()
++    };
++    let mut bytes = serialize(&message_utf16, message_status);
++    if bytes.len() > 8192 {
++        bytes = serialize("null", "TooLong");
++    }
++    bytes
++}
++
++fn try_write_target_failure(root: &Path, pid: u32, stage: TargetFailureStage, error: &io::Error,
++    write_once: impl FnOnce(&Path, &[u8]) -> io::Result<()>) -> io::Result<()> {
++    let bytes = encode_target_failure(pid, stage, error);
++    write_once(&root.join(format!("target-{pid}.failure.json")), &bytes)
++}
++
+ fn number(key: &str, default: u64, maximum: u64) -> io::Result<u64> {
+     let parsed = match env::var(key) {
+         Ok(value) => value.parse::<u64>().map_err(|_| io::Error::other("invalid fixture integer"))?,
+@@ -112,12 +164,10 @@ fn observe(root: &Path, role: &str) -> io::Result<()> {
+     write_new(&root.join(format!("{role}-{pid}.started.json")), record.as_bytes())?;
+     let keys = ["LOCALAPPDATA", "TEMP", "TMP", "PATH", "CARGO_BUILD_JOBS", "CARGO_TARGET_DIR", "CARGO_LOG",
+         "CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_RUNNER", "WW5_CARGO_GATE_RUN_PATH", "WW5_CARGO_GATE_RUN_ID",
+-        "WW5_ET2_CHILD", "WW5_ET2_BASE"];
+-    let records = keys.iter().map(|key| {
+-        let value = env::var_os(key).map(|v| units(&v)).unwrap_or_else(|| "null".into());
+-        format!("\"{key}\":{value}")
+-    }).collect::<Vec<_>>().join(",");
+-    write_new(&root.join(format!("{role}-{pid}.environment.json")), format!("{{{records}}}").as_bytes())
++        "WW5_ET2_CHILD", "WW5_ET2_BASE", "ET3_FAKE_ROOT", "ET3_FAKE_MODE", "ET3_FAKE_EXIT_U32",
++        "ET3_FAKE_RELEASE", "ET3_FAKE_WAIT_MS", "ET3_FAKE_BUILD_RELEASE", "ET3_FAKE_INVOCATIONS"];
++    let record = encode_environment(&keys, |key| env::var_os(key));
++    write_new(&root.join(format!("{role}-{pid}.environment.json")), record.as_bytes())
+ }
+ 
+ // Independent, length-prefixed little-endian UTF-16 input for the synthetic Cargo.
+@@ -149,11 +199,16 @@ fn read_arguments(path: &Path) -> io::Result<Vec<OsString>> {
+ }
+ 
+ fn target(root: &Path) -> io::Result<i32> {
++    let mut stage = TargetFailureStage::Observe;
++    let result = (|| -> io::Result<i32> {
+     observe(root, "target")?;
+     let args: Vec<OsString> = env::args_os().skip(1).collect();
+     let is_list = args.iter().any(|arg| arg == "--list");
+     let is_exact = args.iter().any(|arg| arg == "--exact");
+-    if !is_list && !is_exact && root.join("spawn-descendants.flag").is_file() { return tree(root); }
++    if !is_list && !is_exact && root.join("spawn-descendants.flag").is_file() {
++        stage = TargetFailureStage::TreeDelegated;
++        return tree(root);
++    }
+     let hold_file = if is_list { "hold-list.flag" } else if is_exact { "hold-g0.flag" } else { "hold-full.flag" };
+     if root.join(hold_file).is_file() {
+         let release = if is_list { "release-list" } else if is_exact { "release-g0" } else { "release-full" };
+@@ -162,35 +217,56 @@ fn target(root: &Path) -> io::Result<i32> {
+     if is_exact && args.first().is_some_and(|name| name == "fixture::network") && root.join("hold-network.flag").is_file() {
+         env::set_var("ET3_FAKE_RELEASE", "release-g0");
+     }
++    stage = TargetFailureStage::WaitRelease;
+     wait_release(root, "ET3_FAKE_RELEASE")?;
+     if is_list {
+         if root.join("integration-case.flag").is_file() {
++            stage = TargetFailureStage::StdoutWrite;
+             io::stdout().write_all(b"fixture::recording: test\nfixture::network: test\nfixture::integration: test\n3 tests, 0 benchmarks\n")?;
+         } else {
++            stage = TargetFailureStage::StdoutWrite;
+             io::stdout().write_all(b"fixture::recording: test\nfixture::network: test\n2 tests, 0 benchmarks\n")?;
+         }
+     } else if is_exact {
+         let name = args.first().ok_or_else(|| io::Error::other("missing exact name"))?.to_string_lossy();
+         if root.join("g0-fail.flag").is_file() {
++            stage = TargetFailureStage::StdoutWrite;
+             io::stdout().write_all(format!("running 1 test\ntest {name} ... FAILED\ntest result: FAILED. 0 passed; 1 failed\n").as_bytes())?;
+             return Ok(101);
+         }
++        stage = TargetFailureStage::StdoutWrite;
+         io::stdout().write_all(format!("running 1 test\ntest {name} ... ok\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out\n").as_bytes())?;
+         if !root.join("g0-no-marker.flag").is_file() {
++            stage = TargetFailureStage::StderrWrite;
+             io::stderr().write_all(format!("ET2_CASE_COMPLETE:{name}:Administrator=False\n").as_bytes())?;
+         }
+     } else {
++        stage = TargetFailureStage::StdoutWrite;
+         io::stdout().write_all(STDOUT)?;
++        stage = TargetFailureStage::StderrWrite;
+         io::stderr().write_all(STDERR)?;
+     }
++    stage = TargetFailureStage::StdoutFlush;
+     io::stdout().flush()?;
++    stage = TargetFailureStage::StderrFlush;
+     io::stderr().flush()?;
+     // Exit-bit stimuli apply to the full target only; safety remains a separate
+     // positive prerequisite unless an explicit safety-failure flag is present.
++    stage = TargetFailureStage::ExitSetting;
+     let code = if is_list || is_exact { 0 } else { number("ET3_FAKE_EXIT_U32", 0, u32::MAX as u64)? as u32 };
++    stage = TargetFailureStage::CompletedWrite;
+     write_new(&root.join(format!("target-{}.completed.json", process::id())),
+         format!("{{\"exitU32\":{code}}}").as_bytes())?;
+     Ok(code as i32)
++    })();
++    match result {
++        Ok(code) => Ok(code),
++        Err(error) => {
++            let diagnostic_result = try_write_target_failure(root, process::id(), stage, &error, write_new);
++            let _ = diagnostic_result;
++            Err(error)
++        }
++    }
+ }
+ 
+ fn cargo(root: &Path) -> io::Result<i32> {
+diff --git a/target/early-trial-build/et3/cargo-gate/Invoke-CargoGate.ps1 b/target/early-trial-build/et3/cargo-gate/Invoke-CargoGate.ps1
+index 1346c6e..9b625c9 100644
+--- a/target/early-trial-build/et3/cargo-gate/Invoke-CargoGate.ps1
++++ b/target/early-trial-build/et3/cargo-gate/Invoke-CargoGate.ps1
+@@ -218,6 +218,33 @@ function New-FirstFailureRecord {
+                     $projected.producerFailure.exceptionLine = $producer['exceptionLine']
+                 }
+             }
++            if ($observation['acquisition'] -is [Collections.IDictionary]) {
++                # Optional diagnostic scalars never become ownership evidence.
++                try {
++                    $acquisition = $observation['acquisition']
++                    $acquired = @{ snapshotStartedUtc = $null; snapshotCompletedUtc = $null
++                        attemptUtc = $null; failedUtc = $null; stage = $null; exceptionHResult = $null
++                        innerType = $null; innerHResult = $null; nativeErrorCode = $null }
++                    foreach ($field in @('snapshotStartedUtc', 'snapshotCompletedUtc', 'attemptUtc', 'failedUtc')) {
++                        if (& $utc $acquisition[$field]) { $acquired[$field] = $acquisition[$field] }
++                    }
++                    if ($acquisition['stage'] -is [string] -and
++                        $acquisition['stage'] -cin @('LookupHandle', 'PinHandle', 'ReadIdentity')) {
++                        $acquired.stage = $acquisition['stage']
++                    }
++                    foreach ($field in @('exceptionHResult', 'innerHResult', 'nativeErrorCode')) {
++                        if (& $integer $acquisition[$field] ([int]::MinValue) ([int]::MaxValue)) {
++                            $acquired[$field] = $acquisition[$field]
++                        }
++                    }
++                    $acquired.innerType = & $exceptionType $acquisition['innerType']
++                    $projected.acquisition = $acquired
++                }
++                catch {
++                    # Preserve the original FF projection when optional diagnostics fail.
++                    $null = $projected.Remove('acquisition')
++                }
++            }
+             $failure.osObservation = $projected
+         }
+     }
+@@ -1418,7 +1445,13 @@ function Get-TerminationObservation {
+ function Read-OwnedTree {
+     if ($Mode -ceq 'RunOwner' -and $null -eq $script:Manifest -and
+         [IO.File]::Exists((Join-Path $script:RunDirectory 'manifest.json'))) { Read-Manifest }
++    $snapshotStartedUtc = $null
++    $snapshotCompletedUtc = $null
++    try { $snapshotStartedUtc = [DateTimeOffset]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ss.fffffffZ') }
++    catch { $snapshotStartedUtc = $null }
+     $rows = Get-OsProcess
++    try { $snapshotCompletedUtc = [DateTimeOffset]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ss.fffffffZ') }
++    catch { $snapshotCompletedUtc = $null }
+     foreach ($known in @($script:Known.Values)) {
+         $known.handle.Refresh()
+         if ($known.handle.HasExited -and $null -eq $known.exitUtc) {
+@@ -1431,6 +1464,8 @@ function Read-OwnedTree {
+         foreach ($row in $rows) {
+             if ([int]$row.ProcessId -eq $PID) { continue }
+             $handle = $null
++            $acquisitionAttemptUtc = $null
++            $acquisitionStage = $null
+             try {
+                 # Reuse only a unique generation proved against this original snapshot.
+                 $samePid = @($script:Known.GetEnumerator() | Where-Object { $_.Value.identity.pid -eq [int]$row.ProcessId })
+@@ -1566,8 +1601,13 @@ function Read-OwnedTree {
+                 }
+                 $parents = @($script:Known.Values | Where-Object { $_.identity.pid -eq [int]$row.ParentProcessId })
+                 if ($parents.Count -eq 0) { continue }
++                $acquisitionStage = 'LookupHandle'
++                try { $acquisitionAttemptUtc = [DateTimeOffset]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ss.fffffffZ') }
++                catch { $acquisitionAttemptUtc = $null }
+                 $handle = [Diagnostics.Process]::GetProcessById([int]$row.ProcessId)
++                $acquisitionStage = 'PinHandle'
+                 $null = $handle.SafeHandle
++                $acquisitionStage = 'ReadIdentity'
+                 $identity = Get-Identity $handle $rows
+                 $key = Get-IdentityKey $identity
+                 if ($script:Known.ContainsKey($key)) { throw 'New process identity unexpectedly matches an existing ledger key' }
+@@ -1591,6 +1631,35 @@ function Read-OwnedTree {
+                         rowFilterMatchCount = $null; rowFilterPathPresent = $null; rowFilterCommandPresent = $null
+                         producerFailure = @{ exceptionType = $_.Exception.GetType().FullName; exceptionLine = $_.InvocationInfo.ScriptLineNumber } }
+                 }
++                if ($null -ne $acquisitionStage) {
++                    try {
++                        $acquisition = @{ snapshotStartedUtc = $snapshotStartedUtc; snapshotCompletedUtc = $snapshotCompletedUtc
++                            attemptUtc = $acquisitionAttemptUtc; failedUtc = $null; stage = $acquisitionStage
++                            exceptionHResult = $null; innerType = $null; innerHResult = $null; nativeErrorCode = $null }
++                        try { $acquisition.failedUtc = [DateTimeOffset]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ss.fffffffZ') }
++                        catch { $acquisition.failedUtc = $null }
++                        try { $acquisition.exceptionHResult = $caught.Exception.HResult }
++                        catch { $acquisition.exceptionHResult = $null }
++                        $innerException = $null
++                        try { $innerException = $caught.Exception.InnerException }
++                        catch { $innerException = $null }
++                        if ($null -ne $innerException) {
++                            try { $acquisition.innerType = $innerException.GetType().FullName }
++                            catch { $acquisition.innerType = $null }
++                            try { $acquisition.innerHResult = $innerException.HResult }
++                            catch { $acquisition.innerHResult = $null }
++                            if ($innerException -is [ComponentModel.Win32Exception]) {
++                                try { $acquisition.nativeErrorCode = $innerException.NativeErrorCode }
++                                catch { $acquisition.nativeErrorCode = $null }
++                            }
++                        }
++                        $observation.acquisition = $acquisition
++                    }
++                    catch {
++                        # The retained original error still drives Unprovable and FF.
++                        $null = $observation.Remove('acquisition')
++                    }
++                }
+                 $script:Unprovable.Add(@{ identity = $null; killRequested = $false; waited = $false
+                     hasExited = $null; ownership = 'Unprovable'
+                     error = "Unproved descendant identity; PID=$($row.ProcessId): $($caught.Exception.Message)"

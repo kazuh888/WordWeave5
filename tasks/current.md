@@ -6,6 +6,8 @@
 
 利用者が検証用診断追加と隔離内の純合成6対照を明示承認した。実装前gate（CreateNew公開方式、FF厳密key互換、局所seam、入力hash/完全command）を具体化し、独立テスト作成→実装→局所検証へ進む。開始時にInvoke898C/TestF0C/fake348207と固定pwsh/SMAの6hash一致を確認した。新実OS ENV01一件一回は別承認、旧F3/full/build/製品提供未解除。親モデル変更0、review担当のcapacity失敗は計画者がSol6.1/highへ明示再選定した。実provider/子usage/親子包含は未取得。
 
+進捗：U-D差分PreとU-E期待（6case/51inputs）固定PreがPASS。旧O1は固定receipt/親freeze後、別runnerでcompile一回exit0→run一回exit1/exactRED3/16hash保全を受入れた。候補fake07A47648…／Invoke3B784E9B…はParser/PSSA0・許可span外0・逆bytes一致、元の独立作者が期待A1914…不変で新unitを束縛中である。O5-diagnosticfail一件だけのseam不足をdesignerへ戻し、別所有で独立する残り50入力の準備と限定parallelにした。新compile/6対照実行/Post未完了。初回失敗の証拠を保全し、期待・基準は変更0。[成果物索引](ACOUSTIC-HISTORY-001/unknown-descendant-artifacts.md)へ完全SHAを集約する。利用者が再現2patchのignore個別例外を承認し、親はexact否定rule2行のみ追加、無関係patchは除外維持、force-add0である。
+
 索引：[計画](ACOUSTIC-HISTORY-001/unknown-descendant-resume-plan.md)／[証拠監査](ACOUSTIC-HISTORY-001/unknown-descendant-evidence-audit.md)／[観測設計](ACOUSTIC-HISTORY-001/unknown-descendant-design.md)／[独立Preと承認境界](ACOUSTIC-HISTORY-001/unknown-descendant-review.md)。旧P7-E完了記録は以下を保持する。
 
 ## 最新状態：P7-E／R-ARGV-01限定Closed（2026-10-18）

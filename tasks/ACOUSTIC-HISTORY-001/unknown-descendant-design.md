@@ -107,3 +107,15 @@ Rust targetのfault差込点は既存fallible呼出13箇所だけである：Obs
 oldREDはbaselineにも存在する上記keys片/target body/candidate catch/projectorを動かし、O1の追加7key欠測、O3のErr時sidecar呼出欠測、O5のacquisition欠測を独立のbehavior assertionで検出する。baseline向けadapterは存在しない新helperを要求せず、診断呼出counterの初期0を保持するだけである。O2と旧FF互換はbaseline PASSを期待する。新writer専用O4/追加形O6を旧版で無理に動かさずNotApplicableと別計上する。抽出一意性/逆照合/compile失敗や未実装helper不在はAdapterFailureでありREDではない。入力数をcase数と別記し、5秒/30秒・firstUnexpected停止・残NotRun・retry0を維持する。
 
 handoffはU-D差分Pre→独立作者のoracle/完全command固定→実装者の上記2file局所変更→最終hash/親freeze→別runner/Postである。作者へ追加設計判断を残さない。上限statement抽出等の一意性が成立しなければAdapterFailureで親へ返し、新frameworkやOS試験へ広げない。本追補は文書静的確認だけであり、runtime成立・UNKNOWN閉鎖・旧F3治癒は未検証、他者編集保持・実装/テスト編集/対象実行/再委任/公開0である。
+
+## U-E限定seam追補：O5-diagnosticfail（2026-10-22）
+
+designer指定Sol6.1/highを継続する。追補前設計B92FE83E…をpacket `ef551043-d22a-44a7-903b-1e9540efc910/before/design-B92FE83E.md`へCopy-Item保全し、完全SHA256 `B92FE83EB555829AF2EC111E95C9E0109747CB0FEB31CD5B83977760836C27D7`一致を確認した。
+固定期待`expectations.json` SHA256 `A1914AD22D864A30FEFEA90801F349F152EB23177E92E75774863F880047FAD4`のO5-diagnosticfail（U-R2/U-R4）は「元caught保持後に診断構築がthrow→acquisition省略、元Unprovable/FF保持」のままとする。6case/51入力、旧版の本入力NotApplicableは変更0である。
+現Invoke SHA256 `3B784E9B7CAE98261D0A496C0E229C4E2CB39120962656BF2186049A08CCC4D3`のRead-OwnedTree→candidate catch→`if ($null -ne $acquisitionStage)`→内側tryの先頭`$acquisition = @{ ... }`一文だけを、当該入力の抽出unit内で置換可とする。他入力の追加置換は0である。
+正確なspanはline1636–1638、ASTのUTF-16 offset `[92581,92916)`（335文字）、元file UTF-8 byte offset `[92594,92929)`（BOM3bytesを含む335bytes）であり、元文UTF-8 SHA256は`7985FF6954A18BE9BE2CDE39B7C8D3E633CFC0B53395748890941177A8209493`である。offsetだけで選ばず、上記親AST列・左辺・hashが一致する一意AssignmentStatementAstを必須とする。
+置換文字列は厳密に`throw [InvalidOperationException]::new('SYNTHETIC_ACQUISITION_CONSTRUCTION_FAILURE')`、個数は1である。assignment以外の内側catch（Remove）、既存observation/fallback、元caught保持、Unprovable追加、FF呼出、finallyは元抽出bytesのまま通す。
+作者manifestへsource hash・元文全文・offset単位・length・元文hash・置換全文・適用順・生成unit hashを保存する。既存許可置換と本置換を逆適用し、全抽出原文のbyte一致を必須とする。曖昧一致・個数違反・逆不一致はAdapterFailureであり、behavior RED/PASSへ変換しない。
+lookupで元の合成取得Errを一回発生させ、上記throw後は実catchがkeyを除去すること、元exception型/本文由来のUnprovable・元FF引数が保持されること、lookup1/pin0/identity0/registration0/kill0を独立期待で確認する。診断用throwをlookupの元Errと取り違えない。
+この入力が証明するのは診断構築tryの任意失敗からの非干渉回復だけである。実scalar getterの失敗可能性、OS取得故障、OOM、実行時タイミングや旧UNKNOWN原因を証明しない。通常構築とgetter欠測→nullは他の既存入力に任せる。
+canonical source/期待の編集、新public signature/runtime fault flag/抽象化framework/OS操作は追加0である。純合成6対照の承認範囲内にあるtest-only adapterの明示化であり、新たな利用者判断は不要と判定する。差分Pre受領後だけ作者が当該1入力へ反映し、完全command/hashの再freezeは親が行う。
