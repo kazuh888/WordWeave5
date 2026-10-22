@@ -1,5 +1,15 @@
 # ET3 試用EXE提供の使用量観測
 
+## UNKNOWN-DESCENDANT-OPEN01 保存証拠監査・限定計画（2026-10-22、実行なし）
+
+開始HEAD05e78f5、親snapshot2026-10-22T12:44:33.682Z=input2114163467/cached2069198592/output4726221/reasoning1577879/total2118889688/cache_write0。共有週枠21%/10080分/reset1793097272はアカウント共通で専有量不明。開始snapshot以前、子counter、実provider model/effort、親子包含は未取得で合算しない。今回の境界は保存証拠の読取と必要な再検証計画であり、製品実装・旧試験再実行・EXE更新の成功を計上しない。
+
+plannerは指定Astra/high、限定auditは指定Terra/medium。親が最初のaudit起動にSol5.6を誤指定したため直ちに中断し、不一致報告だけで終了させた。結果credit0、別の新規auditを計画どおりTerra/mediumで起動した。この起動手戻りも使用量評価に含め、黙った代替では扱わない。終了値・成果・検証範囲は区切りで追記する。
+
+終了区切りはU-A監査受領／U-B観測設計／U-C限定Pre PASS、実装・新試験0である。designer指定Astra/high。reviewer初回指定Astra/highがcapacityで作業0となり、plannerがSol6.1/highへ明示再選定し、新fresh reviewerで受入れた。誤起動とcapacityを除く補助は計画→限定scout（補完1回）→設計→独立review、通常同時1役である。子実counterは未取得。親による原因調査の再実行は避け、source逆復元は保存本文欠測への特定未解決確認としてdesignerが担当し、hash/参照の接合だけ親が行った。
+
+親終了snapshot2026-10-22T13:05:34.631Z=input2126219242/cached2081193344/output4741790/reasoning1580803/total2130961032/cache_write0。開始差分はinput12055775/cached11994752/output15569/reasoning2924/total12071344。最終記録・commit/push・最終応答は未反映、着手から開始snapshotまでと子counter/親子包含/実provider metadataは欠測。共有週枠21→24%/10080分/reset1793097272であり、本作業専有の3%消費とは断定しない。誤モデル起動を防ぐ事前照合の改善余地を確認したが、方式比較による節約実績は未判定である。docs-only検証は参照到達性とwhitespaceに限定し、製品build・既成功互換性の反復は0。
+
 ## P7-E隔離外再実行とreceipt復旧（2026-10-18、限定Closed）
 
 終了：U1/U2の6receiptは初回Parser/PSSA通常診断/engine0・実exit0、入口/Phase/root/schema/fullargvと旧argv（root以外）一致、旧誤O02静的拒否。独立Pre→親53入力/13保存先/外側guard固定・静的0・独立接合Pre→fresh runner Sol6.1/medium各一回→独立Post PASS。fresh46Passed/ValidateOnly2PASS、Reused12/C16Reused16は分離、53×13=689入力行と85artifact保全、修正再実行0。R-ARGV-01とP7-Eを限定Closedとし、旧失敗を成功へ改稿していない。共有source/期待/期限/権限変更0。親current冒頭は最新結果と正本索引へ集約し、旧経緯はreview/既存履歴へ保全した。不要なContext追加反復を止めたことは事実だが、方式間の使用量削減効果は未判定である。
