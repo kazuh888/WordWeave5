@@ -1,12 +1,18 @@
 # 現在のタスク要約
 
-## 最新状態：UNKNOWN-DESCENDANT-OPEN01 診断追加・隔離内6対照を再開（2026-10-22）
+## 最新状態：UNKNOWN-DESCENDANT-OPEN01 診断追加・隔離内6対照（2026-10-22）
+
+最新：新候補の固定compile→合成6case/51inputsは別runnerが各一回実行して全PASS、tool/native exit0、27pins前後不変、PS7.6.7/非admin/期限内/retry0である。独立Postは実結果を確認し、再現tests.patchのBOM3bytes欠落1件は作者が当該3bytesだけ修正した。新patch8F0DC52F…の26/26file復元全bytes一致、旧patch/実行時freeze保全を独立再確認して限定Post PASS。本体/unit/期待/receipt/結果変更0、試験再実行0。承認済み診断追加と局所検証は完了した。下段の「作成中」は旧段階の記録である。
+
+次の単一未完了工程：新診断を用いる実OS ENV01一件一回の限定観測は別承認が必要である。旧UNKNOWN原因は未確定/Openのまま、合成PASSで所有判定や回収成功へ読み替えない。旧F3/full/build/製品提供は未解除、通常EXE更新0。次回は既存計画の実OS実行前条件と必要承認だけを接合し、成功済み局所51入力を反復しない。利用者就寝中という指示を権限拡張とは解釈しない。
 
 利用者の「進めてください」を受け、保存証拠監査→最小観測設計→独立限定Pre PASSを完了した。旧runの72/72保全、actor別exit93/known0/取得失敗を整理し、現Invokeの版4出現をメモリ上で戻して旧318E本文の完全SHA一致を確認した。ただし元fixtureエラー／継承値／snapshot世代が欠測で原因は未確定、UNKNOWNはOpenである。P7-Eの既合格を再実行せず、実試験・実装・製品EXE更新0。
 
 利用者が検証用診断追加と隔離内の純合成6対照を明示承認した。実装前gate（CreateNew公開方式、FF厳密key互換、局所seam、入力hash/完全command）を具体化し、独立テスト作成→実装→局所検証へ進む。開始時にInvoke898C/TestF0C/fake348207と固定pwsh/SMAの6hash一致を確認した。新実OS ENV01一件一回は別承認、旧F3/full/build/製品提供未解除。親モデル変更0、review担当のcapacity失敗は計画者がSol6.1/highへ明示再選定した。実provider/子usage/親子包含は未取得。
 
 進捗：U-D差分PreとU-E期待（6case/51inputs）固定PreがPASS。旧O1は固定receipt/親freeze後、別runnerでcompile一回exit0→run一回exit1/exactRED3/16hash保全を受入れた。候補fake07A47648…／Invoke3B784E9B…はParser/PSSA0・許可span外0・逆bytes一致、元の独立作者が期待A1914…不変で新unitを束縛中である。O5-diagnosticfail一件だけのseam不足をdesignerへ戻し、別所有で独立する残り50入力の準備と限定parallelにした。新compile/6対照実行/Post未完了。初回失敗の証拠を保全し、期待・基準は変更0。[成果物索引](ACOUSTIC-HISTORY-001/unknown-descendant-artifacts.md)へ完全SHAを集約する。利用者が再現2patchのignore個別例外を承認し、親はexact否定rule2行のみ追加、無関係patchは除外維持、force-add0である。
+
+最新接合：O5一件seamはBOM offset補正後の設計45A6F473…で独立差分Pre PASS、作者反映可。U-F source限定静的Preも阻害なし、harness.patch全9hunk復元一致。git diff --checkの4件は同patchの正当な空行contextデータと独立分類し、診断0とは称さず設定/trim変更0で保持した。候補の保存点c34d622をpush済みであり、局所受入完了ではない。独立作者が全51入力のunit/receiptを作成中である。
 
 索引：[計画](ACOUSTIC-HISTORY-001/unknown-descendant-resume-plan.md)／[証拠監査](ACOUSTIC-HISTORY-001/unknown-descendant-evidence-audit.md)／[観測設計](ACOUSTIC-HISTORY-001/unknown-descendant-design.md)／[独立Preと承認境界](ACOUSTIC-HISTORY-001/unknown-descendant-review.md)。旧P7-E完了記録は以下を保持する。
 

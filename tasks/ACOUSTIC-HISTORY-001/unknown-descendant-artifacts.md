@@ -24,6 +24,29 @@ R=`F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate`、H=`F
 
 P=`R/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910`。独立作者がP/beforeへ原本2fileをCopy-Itemで保全し、編集0と報告した。親はfake.rs（14443bytes）とInvoke-CargoGate.ps1（154848bytes）の存在を確認した。oracle/新adapterは作成中であり、新candidateの未存在本文位置はPendingのまま、期待値固定後に対応づける。これは期待緩和ではなく、存在しないcandidateのhashを実装前に求める循環gateを避ける順序である。完成物の静的Preと最終freezeを省略しない。
 
+## 新候補6対照の実行証拠（2026-10-22）
+
+Postでtests.patchのnew-ps-unit.ps1先頭のBOM欠落だけを検出した。実行時patch554F…はP/tests-before-bom-remediation-554F.patchへ保全した。作者はbyte offset191230にEF BB BF3bytesだけを挿入し、新patch SHA8F0DC52FD593EF4B37843CD3C855D00052A278E3BB2EDD2BB5C67E085556B7AE、26/26file復元全bytes一致とした。是正報告P/NEW-PATCH-BOM-REMEDIATION.md SHA2C553ED6F61855A3104C64E9B8DE0AACF4CE4303AF911788621830B39F4E9420。下表554F…は実行時固定値の歴史であり、現在の配布patchとは区別する。独立是正Post待ちで、本体/unit/期待/receipt/実結果変更・再実行0。
+
+Pは冒頭のef551043 packetである。旧Pending記録は旧段階の状態として保持し、本節を最新索引とする。
+
+最終：新patch8F0DC52F…の3bytes限定差分と26/26復元一致を独立確認し、限定Post PASS。下記の「Post待ち」は当時の経緯として保持する。診断追加と局所検証の受入完了であり、UNKNOWN原因/実OS/製品の未確認は維持する。
+
+| 成果物 | SHA256 |
+| --- | --- |
+| P/new-binding.json | D2211A88897BF595C4F56B2EC8866FCF30347E2588EC186AE6CA40BE40577E81 |
+| P/new-manifest.json | CE511B7393FE4B25D1B8E5DB95D82CE0B168D30D99652D25A58A28E0B4A6CA17 |
+| P/new-compile.receipt.json | 14AC69BDA4E4AD57A8C26A9D380B957EC6C44D536AEAB378611BE02D275F43A0 |
+| P/new-suite.receipt.json | D674693745D18D74729567FA685AC818F63588BD5EB0E171B0791CC76B3760D3 |
+| P/new-final-static.json | 563FC2C7E942D4B3486C868019DB42C87B222B7F767DD5D87D2EB70552CE9241 |
+| P/NEW-O1-O6-FROZEN.md | AC067D559494E97BFB58EFEDA829A32A2C1AA39B6B2CB8AF3DEE4F2A3B6428D4 |
+| P/NEW-O1-O6-RUNNER-REPORT.md | 4D835838B10B10DEA235A9C1FB8C63C93DE436DB5E585E9D0C081A4B0FF2FFEB |
+| tests restore patch（新unit/receiptを含む） | 554F2E9291334981224F0B95056F50516E42B115C04B6FE35E724301EF36A75C |
+
+compile root=P/720684ef-1dcc-4261-94b3-c1b18955d06b、execution SHA41C1487A8F312FFD8834871B588F4499B64CB229B012CC5EA8576EAC0D04F0C0。suite root=P/77c19c1c-adef-42af-8c6f-e0ecafefb73c、execution SHA BF35FD8C6D386B6F49D6236643080AB457E84CD86D886113BE572713227ED149、suite-result SHA835917AB2CC91623ACAD2339FBCD786E6124E6D3A3BA3BFB536C712EAE8552BC。binary SHA F5FDC64D318D76C6C166E78594C3C633E5BD7D16438839C4D9D87FC60B78F4DF。完全argvと27pinsは固定receiptとexecution、stream別SHAと実runtimeはrunner reportにある。
+
+別runnerはcompile→suite各一回/tool-native exit0/accepted=true、27pins前後一致、6case/51inputs PASS（3/2/9/14/5/18）、failed/skip/retry0を確認した。suite内部5.1353305秒、外側5.617467秒、各case5秒/集合30秒以内。PS実7.6.7/指定exe-SMA/非admin一致。compile未使用変数warning4は保持し、抑制しない。独立Post待ちであり、実OS UNKNOWN原因確定や製品受入とはしない。実OS/旧F3/full/build/製品変更0。
+
 ## U-E独立期待と旧O1実測
 
 expectations.json A1914AD22D864A30FEFEA90801F349F152EB23177E92E75774863F880047FAD4は6case/51inputs（3/2/9/14/5/18）。baseline14spanと旧O1だけ完成し、新candidate/O2–O6 unitはPendingである。manifest F5793B16E37A239FB07F6655F16956499A1C19ED3DE7DACB3D04F2D40B1E36FDはこの未完了を保持する。

@@ -46,3 +46,15 @@ packet ef551043-d22a-44a7-903b-1e9540efc910、expectations A1914AD22D864A30FEFEA
 O5-diagnosticfail一件のtest-only構築失敗seamを設計へ明示したが、初版EC62E726…のUTF-8 byte範囲にBOM3bytes漏れを独立Preが検出し保留した。親はEC62原本をP/before/design-EC62E726.mdへ保全し、範囲だけ[92594,92929)とBOM注記へ修正した。現設計45A6F473368B7A06980DE1FB11E7870A2629EA2F55F1C950B7CA095C10D907D5は335bytes/元文SHAと独立一致して差分Pre PASS、期待A1914…／sourceは不変である。元catchを通す一箇所だけの固定置換・逆bytesを作者へ許可し、OS故障やOOMを発生させない。
 
 通常のgit diff --cached --checkはharness.patch8/79/83/154行の末尾空白4件でexit1となった。独立reviewerは全4行が単一空白の正当なunified diff「空行context」であり、他の末尾空白0と確認した。これを診断0へ改稿せず、raw差分データの文法として分類した。trimすると復元性を壊すため削除せず、検査設定・除外・抑制も変更しない。この判断は083DD2E6…の4行だけに限定し、将来の別診断を無条件受入しない。
+
+## 新6対照のPost：再現patchのBOM欠落1件
+
+是正Postは限定PASSである。旧patch554F…から新8F0DC52F…への変更はoffset191230にEF BB BF3bytesを挿入しただけと独立確認した。26成果物すべての復元length/全bytes/SHA一致、unit/期待/receipt/実結果/runner報告不変、旧patch/実行時freeze保全を確認し、既確認の6case/51inputs PASSへ接合した。再実行不要、実行0。受入は診断追加と隔離内合成検証までであり、旧UNKNOWN閉鎖/実OS検証/製品受入へcreditしない。
+
+独立Postは実測6case/51inputs PASS、native0/accepted=true、27pins前後不変、期限内/retry0を確認した。一方、tests.patchのnew-ps-unit.ps1先頭のUTF-8 BOM3bytes欠落で受入を保留した。26fileメモリ復元の25件は一致し、当該だけ45157bytesに対して実行済み原本45160bytes/SHA73EDB449…で、BOMを除いた全bytesは一致した。実行済みunit・期待・結果を変更せず、作者へpatchだけの最小是正・変更前保全・26file復元再確認を委任した。試験再実行や期待/基準の変更は不要である。compile警告4件はbyte境界adapter内の未使用変数で抑制不要と確認した。
+
+## 新6対照の意味・実行Pre
+
+独立reviewer Sol6.1/highはRust CA0053F9…／PS73EDB449…の28＋23入力について、固定51期待との接続、19env key、診断失敗時の元状態保持、厳密FF型/key、memory境界、最初の失敗で後続停止を確認し、意味Preを限定PASSとした。Add-Memberの例外propertyに関する一時疑義は一次source確認後に撤回され、確認済み欠陥とは扱わない。
+
+最終実行Preも阻害findingなしの限定PASSである。18spanの原文/offset/hash、9adapterの個数/逆bytes/unit出現数、26入力とmanifestを含むreceipt27pins、固定argv、native exit即時保存、stream別CreateNew、compile成果物の前後照合、期限/保存失敗時拒否、後続NotRun/retry0、出力root未作成を独立確認した。実測PASSではない。親freeze AC067D559494E97BFB58EFEDA829A32A2C1AA39B6B2CB8AF3DEE4F2A3B6428D4後、独立runner Sol6.1/mediumへ通常sandboxの固定compile一回→成功時suite一回だけを委任した。実OS/旧F3/full/build/製品は未解除である。

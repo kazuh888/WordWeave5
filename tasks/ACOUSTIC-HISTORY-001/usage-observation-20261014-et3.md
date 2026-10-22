@@ -4,6 +4,12 @@
 
 利用者が検証用診断記録と隔離内の純合成6対照を承認した。開始HEADba7f0e4、tree clean。親開始snapshot2026-10-22T13:14:55.662Z=input2127501789/cached2082464896/output4744033/reasoning1581227/total2132245822/cache_write0。共有週枠24%/10080分/reset1793097272でアカウント共通、専有量不明。開始snapshot前・子counter・実provider model/effort・親子包含は未取得。境界は診断追加と局所6対照/独立検証・レビューであり、新実OS試験・製品buildは0を維持する。
 
+区切りsnapshot2026-10-22T14:48:37.598Z=input2172254118/cached2126963712/output4818135/reasoning1619676/total2177072253/cache_write0。開始との差分input44752329/cached44498816/output74102/reasoning38449/total44826431。最終是正Post・記録・commit/push・最終応答は未反映、開始snapshot前と子counter/実provider/親子包含は欠測で合算しない。共有週枠24→28%/10080分/reset1793097272、アカウント共通で本作業専有の4%とは断定しない。
+
+その後、是正Postも限定PASSとなり、承認済み診断追加・隔離内6対照/独立検証レビューの完了境界に到達した。BOM差分3bytesだけ/26file完全復元/実結果不変を確認し、追加runtime0で受入れた。実OS/製品build/EXE更新/無断の承認範囲拡大0で停止する。上記snapshotは最終是正Post前までという測定境界を変更しない。
+
+完成した作業は独立期待/旧O1 compile成功→3入力REDの実証、本体2fileの診断追加、新51入力の固定compile→6case/51PASS（各一回/再試行0）、独立Pre/Post実結果確認までである。Postの再現patch BOM欠落1件はpatchだけ3bytes是正し、独立再確認へ渡した。本体/期待/実行結果を変えず、成功済み試験の反復は0。作者側のBOM offset/metadata、receipt未使用宣言、照合器/wrapperの静的不備、Post復元欠落を保全し、BehaviorREDとは分離した。モデルは計画者割当のdesigner/author/implementer/reviewer Sol6.1/high、runner Sol6.1/medium、parent変更0。通常補助1役、独立所有の準備と設計・不変unitレビューの間だけ限定parallelを使用した。初回からBOM込み全bytes復元を静的受入へ接続する改善余地があるが、測定対象を増やす新frameworkは導入しない。方式による使用量増減は比較条件不足で未判定である。
+
 ## UNKNOWN-DESCENDANT-OPEN01 保存証拠監査・限定計画（2026-10-22、実行なし）
 
 開始HEAD05e78f5、親snapshot2026-10-22T12:44:33.682Z=input2114163467/cached2069198592/output4726221/reasoning1577879/total2118889688/cache_write0。共有週枠21%/10080分/reset1793097272はアカウント共通で専有量不明。開始snapshot以前、子counter、実provider model/effort、親子包含は未取得で合算しない。今回の境界は保存証拠の読取と必要な再検証計画であり、製品実装・旧試験再実行・EXE更新の成功を計上しない。
