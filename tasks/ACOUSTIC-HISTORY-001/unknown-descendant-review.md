@@ -47,6 +47,10 @@ O5-diagnosticfail一件のtest-only構築失敗seamを設計へ明示したが�
 
 通常のgit diff --cached --checkはharness.patch8/79/83/154行の末尾空白4件でexit1となった。独立reviewerは全4行が単一空白の正当なunified diff「空行context」であり、他の末尾空白0と確認した。これを診断0へ改稿せず、raw差分データの文法として分類した。trimすると復元性を壊すため削除せず、検査設定・除外・抑制も変更しない。この判断は083DD2E6…の4行だけに限定し、将来の別診断を無条件受入しない。
 
+## 実OS観測の静的案Pre（2026-10-24）
+
+designer指定Sol6.1/highの設計追補166F267C71D5DCEE135134A575A6F76D27A0E42AD07B338CB527AA1DE0B84C57を、別reviewer指定Sol6.1/highが限定read-only確認した。承認前準備の停止条件は妥当だが、実行Preは未達、U-H全体完了とは扱わない。未充足はcompile込み外側停止（既存同期version/compileは90秒監視前）、依存/書込先/OS観測とsandbox範囲の固定、同一入口の生成後freeze承認方式の3点である。これらは確認済みの新しい実装欠陥ではなく、実行案の不足である。元oracle/Err/unknown非停止/retry0/期限/診断と元判定の分離には追加矛盾を認めず、既成功51入力は再レビューしなかった。次は不足安全手順の限定設計・必要なsource変更の承認であり、実OS一回枠をそのままdispatchしない。対象実行/ValidateOnly/compile/OS照会/編集/再委任0、provider実値と子usageは未取得。
+
 ## 新6対照のPost：再現patchのBOM欠落1件
 
 是正Postは限定PASSである。旧patch554F…から新8F0DC52F…への変更はoffset191230にEF BB BF3bytesを挿入しただけと独立確認した。26成果物すべての復元length/全bytes/SHA一致、unit/期待/receipt/実結果/runner報告不変、旧patch/実行時freeze保全を確認し、既確認の6case/51inputs PASSへ接合した。再実行不要、実行0。受入は診断追加と隔離内合成検証までであり、旧UNKNOWN閉鎖/実OS検証/製品受入へcreditしない。

@@ -1,5 +1,9 @@
 # 現在のタスク要約
 
+## 最新状態：実OS観測の実行前準備（2026-10-24）
+
+HEAD9e8fffc/tree cleanから続行。完了済み合成51入力は反復せず、planner Astra/highが再開計画末尾U-H～Kを追補、designer Sol6.1/highが静的案を作成した。独立reviewer Sol6.1/highは停止条件妥当/実行Pre未達と確認した。既存probeの旧Invoke/fake固定hashだけでなく、compile込み外側停止、依存/書込先/sandbox範囲、生成後freezeの承認方式が未充足である。次は検証用手順の不足を埋める限定設計と、必要なsource変更/合成検証の承認であり、実OS試験承認だけで開始しない。対象実行/ValidateOnly/compile/OS照会/製品変更0。正本は[再開計画](ACOUSTIC-HISTORY-001/unknown-descendant-resume-plan.md)末尾と[設計](ACOUSTIC-HISTORY-001/unknown-descendant-design.md)末尾、独立結果は[review](ACOUSTIC-HISTORY-001/unknown-descendant-review.md)であり、以下の局所検証PASSは維持する。
+
 ## 最新状態：UNKNOWN-DESCENDANT-OPEN01 診断追加・隔離内6対照（2026-10-22）
 
 最新：新候補の固定compile→合成6case/51inputsは別runnerが各一回実行して全PASS、tool/native exit0、27pins前後不変、PS7.6.7/非admin/期限内/retry0である。独立Postは実結果を確認し、再現tests.patchのBOM3bytes欠落1件は作者が当該3bytesだけ修正した。新patch8F0DC52F…の26/26file復元全bytes一致、旧patch/実行時freeze保全を独立再確認して限定Post PASS。本体/unit/期待/receipt/結果変更0、試験再実行0。承認済み診断追加と局所検証は完了した。下段の「作成中」は旧段階の記録である。

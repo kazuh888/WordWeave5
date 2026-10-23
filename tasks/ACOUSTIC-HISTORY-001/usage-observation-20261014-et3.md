@@ -1,5 +1,13 @@
 # ET3 試用EXE提供の使用量観測
 
+## UNKNOWN実OS観測の実行前条件整理（2026-10-24）
+
+開始HEAD9e8fffc/tree clean。利用者の続行依頼を受け、完了済みの局所51入力は再実行せず、次の限定観測の承認条件を静的に整理する。親モデル変更0、計画担当は指定ww-planner/gpt-6-astra/high、provider実値・子usage・親子包含は未取得。開始共有週枠0%/10080分/reset1793372790はアカウント共通で専有量不明、前回resetを跨ぐ差分は取らない。
+
+親の最初の取得snapshotは2026-10-23T15:07:02.192Z（利用者日付2026-10-24 JST）input2174029646/cached2128597376/output4823357/reasoning1620005/total2178853003/cache_write0。着手後の取得であり、それ以前の準備は欠測。長期session末尾2MiBからusageイベントのみを読み、本文は収集しない。完了境界は実行前blockerと追加承認範囲の明示であり、実OS/コンパイル/製品EXE更新0を維持する。
+
+終了区切りsnapshot2026-10-23T15:17:51.202Z（JST24日）input2176950448/cached2131502720/output4827584/reasoning1620816/total2181778032/cache_write0、差分input2920802/cached2905344/output4227/reasoning811/total2925029。最終planner追補/記録/保存/最終応答は未反映、子counter/provider実値/親子包含は未取得で合算しない。共有週枠0→1%/10080分/reset1793372790は本タスク専有率でない。planner Astra/high→designer Sol6.1/high→独立reviewer Sol6.1/highの通常1補助ずつで準備した。実行Pre未達の3条件を検出して止め、source/試験/OS照会/51入力反復0を維持した。U-Hは全完了でなく阻害条件整理までであり、次の限定変更承認を利用者に求める。docs検証はdiff whitespaceと参照到達性だけで、不要な製品rebuild0である。
+
 ## UNKNOWN-DESCENDANT-OPEN01 診断実装・隔離内6対照（2026-10-22、再開）
 
 利用者が検証用診断記録と隔離内の純合成6対照を承認した。開始HEADba7f0e4、tree clean。親開始snapshot2026-10-22T13:14:55.662Z=input2127501789/cached2082464896/output4744033/reasoning1581227/total2132245822/cache_write0。共有週枠24%/10080分/reset1793097272でアカウント共通、専有量不明。開始snapshot前・子counter・実provider model/effort・親子包含は未取得。境界は診断追加と局所6対照/独立検証・レビューであり、新実OS試験・製品buildは0を維持する。

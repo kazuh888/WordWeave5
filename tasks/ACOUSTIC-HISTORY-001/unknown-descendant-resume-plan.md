@@ -146,3 +146,76 @@ U-D完了後、plannerは確定seam/interfaceとcommandの所在だけ本書へ�
 親は上記exact model/effortで起動する。capacityやSkill欠落はblockerとして戻し、別モデルへ自動fallbackしない。親model・品質gateは変更0。次は **U-D designer1役** へ設計9C45、本追補、review18～20行の3gateだけを渡し、必要Skill `agent-skills:api-and-interface-design` 読了後の限定文書差分を依頼する。設計の追加判断をtest authorへ丸投げしない。以後作者はtest-driven-development、実装/runnerはwordweave-changeの担当工程、reviewerは設計差分にreview-software-design、コード差分にcode-review-and-qualityを適用し、PowerShell既存code変更の必要Skillも担当が確認する。
 
 開始共有週枠24／10080min／reset1793097272、親usage snapshot2026-10-22T13:14:55.662Zを親が保存する。account共通・子包含不明でありtask消費へ換算しない。plannerの今回作業は限定追補と文書検証のみ、source変更・実試験・OS照会・再委任0である。
+
+## U-H～K暫定計画：実OS ENV01の承認前準備（2026-10-24）
+
+開始HEAD `9e8fffc`、編集直前tracked tree clean。今回の完了境界は、新診断による実OS ENV01一件一回について、実行前blocker・静的準備・必要承認を具体化し親へ返すことである。利用者の「進めてください」は、前工程で明示された実OS一回枠の別承認を解除しない。本節は暫定であり、U-Hの設計と必要な仕様判断後にplannerが同節を精緻化する。既存未完了項目と旧FAILは保持する。
+
+入力事実は[current](../current.md)、[設計](unknown-descendant-design.md)の「実行許可へ渡す条件と未解決」、[成果物索引](unknown-descendant-artifacts.md)の新候補6対照節である。合成6case/51inputsとBOM是正の独立Post PASSを再利用する。候補fake `07A47648E47FB57F5D0969650BBCEAF138671A4FC151EF6AA1E33020DCF2DCC4`、Invoke `3B784E9B7CAE98261D0A496C0E229C4E2CB39120962656BF2186049A08CCC4D3`は索引の値であり、今回plannerは重複hash検証をしていない。旧UNKNOWN原因は未確定、旧F3/full/製品build・提供は未解除である。
+
+### 要求と静的に確認したblocker
+
+| ID | 根拠／不足 | 解消に必要な具体物・受入条件 |
+| --- | --- | --- |
+| E-R1 | `R/verification/argv-path01/Invoke-FirstFailureEnv01.ps1:119–131`はInvoke898C…とfake348207…を固定する。現診断候補はそのままでは入口で拒否される | 旧probeを保全し、当該2literalだけのbefore/after差分案、完全SHA、逆差分全bytes一致を用意する。Test F0C57…、native source381F5…/exeFF7C9…、既存main plan/designのpinは独立に一致確認し、現在値への一括置換0。これ以外の差分が必要なら設計へ差戻す |
+| E-R2 | 同probe220–230は`rustc --version`と`rustc --edition=2021 fake.rs -o <OutputRoot>/fake.exe`を実行する。51入力で作った抽出unit binaryは実fakeではない | 「cargo-gate-entry.exe再build禁止」と「診断付きfake.exeの新規compile一回」を区別した承認案にする。元dispatchを維持するなら後者を許可範囲に明記する。事前に存在しないfake.exe SHAはPendingとし、実compile後に同probeが採取するhashをfixtureコピー・frozen-inputs・toolchainへ結ぶ。抽出unit成功をnative fixture成功へ流用0 |
+| E-R3 | 同probe194–207はrustc/pwsh/V2のpathとhashを実行時採取し、probe自身も自己hashするだけである。`ValidateOnly`以前にruntime/token確認・Get-Processがある | 親承認manifestでprobe、両source、Test、native source/exe、主plan/design、固定pwsh一式、rustcの実体と必要toolchain、V2、Pester5.7.1を外側から束縛する。実行時自己採取を事前承認の代用にしない。必要依存の正確な範囲はU-Hで限定確定する。ValidateOnlyを静的確認として実行しない |
+| E-R4 | 同probe240–286はrun側FFを索引するが、fixture側`target-<pid>.failure.json`を索引しない。exit0は元ENV01結果とsourceMatchedで決まり診断充足を含まない | 元oracleを変えず、事後のread-only診断監査の入力と判定表を別文書で固定する。同run/actor/世代、7環境key、target marker/sidecar/stream/exit、FF acquisitionを結ぶ。正常時のsidecar非生成と、Err時の診断欠測を区別する。FF外側12keyは新acquisitionの内側追加とは別であり、12を機械的に13へ変えない |
+| E-R5 | Test653–797のfixtureは新suite/ENV01と別の`R/runs/<動的runId>`へ書く。Test1743の90秒watchdogはfake compileを含まず、同期APIのhard timeout保証でもない | 絶対suite root、fixture root、動的runIdをdescriptorで束縛する規則、全argv、外側実行上限と停止時の保存手順をU-Hで確定する。既存run65秒（実行55＋回収reserve10）、build25秒、watchdog90秒、終了後観測11秒を延長しない。未知PIDの強制停止、再試行、fixture削除を外側timeout対策にしない |
+
+Rは既定の`target/early-trial-build/et3/cargo-gate`である。上表はファイル本文を限定読取して得た事実であり、runtime成立・現在toolchainの一致・OS状態は未確認である。特にE-R2とE-R5が未解決の間は「一回枠のcommandは完成」と報告しない。
+
+### 作業単位・依存・所有・検証
+
+順序はU-H設計→U-I独立Pre→親による具体案の利用者承認確認→U-J束縛準備と独立Pre/親freeze→U-K別runner/独立Postである。通常補助1役ずつであり、親は承認の接合とusage記録を行う。
+
+| 単位／規模 | 所有と依存 | 受入基準（最大3項目）／必要検証 |
+| --- | --- | --- |
+| U-H：静的実行案／S | designerは`unknown-descendant-design.md`末尾のみ。本追補受領後。既存外部仕様G4/G5/FF・ENV01 oracleを再利用し、仕様差分がなければspec作者不起動 | (1) E-R1～5の具体的差分案・dependency・採取表を確定。(2) 既存probeの元case dispatch/oracle/回収を保存し、完全command候補と実行前/生成後hashの二段階を明示。(3) compileを含む有限枠・通常sandbox内可否・承認境界を確定。検証は参照到達性、元dispatchとの静的対応、文書diff。対象script起動0 |
+| U-I：承認案の独立Pre／S | reviewer read-only、親が既存review文書へ報告保存。U-H→planner精緻化後 | (1) E-R1～5、未知非停止、actor混用防止、旧証拠保全を独立照合。(2) 新native fake compileとENV01一回を明示し、OS照会/既知handle回収/書込root/失敗停止が承認案に収まる。(3) 残る未確定command/SHA/期限を列記し、未解決ならrunner dispatch不可。設計・仕様review Skillの必要工程を適用し、実行0 |
+| U-J：承認済み束縛／S | U-Iと具体承認後。test authorは新UUID packetの固定receipt/manifest/診断判定表、implementerは既存probeの承認済み2literalだけ。作者・実装者を分離。fake/Invoke/Test/既成功51期待は編集0 | (1) before保全・許可2literal外0・逆bytes一致と全外部pinが揃う。(2) 完全argv/UUID/起動環境/保存先を固定、動的fake hash取得点を記録。(3) 独立差分Preと親freezeがPASS。変更PSにParser/PSSA1.25通常診断0・engine0、適用差分の静的確認を行う。新wrapperが必要なら本単位で発明せず設計へ戻す。runtime/ValidateOnly/compile0 |
+| U-K：限定実観測／S・承認待ち | U-J freezeと実行承認後。別runnerは新packet/runの生成物・ログだけ、reviewerはread-only。親が成果物索引・review/currentへ接合 | (1) 診断fake compile一回、既存ENV01 dispatch一回以下、全前後pin・実runtime・実exit・期限・回収証拠を保存。(2) firstUnexpected/drift/compile失敗/超過/回収不明で停止、retry/次case0、診断欠測は欠測として保存。(3) ENV01判定と診断の得られた範囲を独立Postで分離。新PASSから旧UNKNOWN Closed/旧F3治癒/製品受入を推定0 |
+
+チェックポイントとtask-listは本節に集約する。
+
+- [ ] U-H：静的案の受領。未存在command・未生成SHAを確定値として記さない。
+- [ ] U-I：独立Pre、planner精緻化、親へ具体的承認案を引渡す。本準備工程の停止点である。
+- [ ] U-J：限定変更と実行範囲の承認を確認してから束縛差分を作り、独立Pre／親freezeを得る。
+- [ ] U-K：別承認の一回枠だけ実施し、独立Post後に得た観測・未確定・未解除gateを報告する。
+
+本書のplanner所有は末尾追補のみである。設計・review・packetへの将来所有は親のdispatch指定で成立する。他者の編集を戻さない。未解決の外部期待判断（target正常性oracle強化等）が必要ならU-Hを停止し、external-spec author→仕様review→利用者判断→planner精緻化とする。元のENV01期待を診断観測に合わせて変更しない。
+
+### 各単位のexact model/effort
+
+U-H/I/J/Kそれぞれに下表を適用する。非該当役は責任を識別するための割当であり、起動しない。親提示の利用可能集合は`gpt-6-astra/high`、`gpt-6.1-sol/high・medium`、`gpt-5.6-terra/medium`である。
+
+| 役割 | exact model / effort | 適用と難度・リスク／選定理由 |
+| --- | --- | --- |
+| planner | `gpt-6-astra` / `high` | U-H後の精緻化と指摘差戻し。高／既承認と新権限の境界判断、固定指定 |
+| external-spec author | `gpt-6-astra` / `high` | U-Hで外部契約変更が必要な場合のみ。高／oracleと原因観測の区別、固定指定。現案は既存仕様再利用 |
+| designer | `gpt-6.1-sol` / `high` | U-H担当、I/J/Kは設計差戻し時のみ。高／既存入口に限った依存・時間・生成hash・診断監査の整合 |
+| implementer | `gpt-6.1-sol` / `high` | U-Jの承認済みbinding差分のみ、H/I/K非該当。中～高／2literalでも誤pinが安全境界を崩すため厳密な逆差分確認を行う |
+| test author | `gpt-6.1-sol` / `high` | U-Jの独立receipt/期待表のみ、H/I/K非該当。高／実行結果と診断不明の独立判定、元oracle不変、生成前hash循環の回避 |
+| test runner | `gpt-6.1-sol` / `medium` | U-Kのみ、H/I/J非該当。中／凍結commandと有限停止の実施に限定し、期待/設計の変更を行わない |
+| reviewer | `gpt-6.1-sol` / `high` | U-I、U-J差分Pre、U-K Postを各作者/実装者/runnerとは別fresh agentで実施。高／実OS所有・異actor証拠・欠測・権限を横断する独立確認 |
+
+起動担当はexact model/effort/役検出と対応Skillを確認する。設計はapi-and-interface-design、作者はtest-driven-developmentの担当工程、実装/runnerはwordweave-changeの担当工程、reviewはreview-software-designまたはcode-review-and-qualityを使う。PowerShell既存codeへの変更/レビューは対応powershell skillも解決して全文を読む。モデル/Skill利用不能はblockerであり、自動fallback0。親modelと品質gate不変、起動指定と実provider metadataを区別し、未取得値を推定しない。
+
+### 承認境界・残る判断・次handoff
+
+追加の実行承認なしで進められるのは、既存ファイルの限定read/hash、文書での差分案・command案・収集/停止手順の具体化、独立read-only Pre、planner精緻化までである。本時点でsource/期待/既存probeを編集する承認は新たに生成しない。実行可能性確認を理由にValidateOnly、rustc version/compile、対象scriptのdot-source/import、CIM/Get-Process、process試験を開始しない。
+
+親が利用者へ示す承認対象は、U-H/Iで具体化した **既存probeの限定binding変更、診断fake.exe compile一回を含む実OS ENV01一件一回、通常ユーザーAdmin=False・Hidden、固定runtime/toolchain、指定新suiteと動的runRootへの証拠保存、元dispatchに内在するOS照会と既知handleだけの回収、既存期限内停止・retry0** である。原probe内のcompileを維持する案を第一候補とし、事前別buildを暗黙に追加しない。隔離外実行が必要ならその事実と境界を承認案に加え、承認なしの切替0とする。cargo-gate-entry再build、製品build、full/focused10/80/P7/51入力反復、未知停止、admin、実data/API、OS/ACL/PATH/設定変更、公開を含めない。
+
+主なリスクは、古いpinの機械更新、新規fake compileの隠れた追加権限、無期限compile/同期I/O、exit0と診断充足の混同、観測追加による時機変化である。静的PreではOS成功を証明できず、承認後の一回実観測でも旧障害の再現や原因一意化を保証しない。sidecar欠測・非Published・世代不一致を不明として保持することが受入の一部である。
+
+次の親handoffは **U-H designer / `gpt-6.1-sol` / `high`** である。本節、設計の実OS候補節、現probe、上表のTest依存位置だけをfresh contextへ渡す。期待出力はE-R1～5を満たす限定設計差分と未解決事項であり、runtime/compile/OS照会/再委任/公開0である。plannerは設計受領後にのみ未確定事項を確定へ進める。今回は文書の限定追補とdiff検証だけを行い、子usage開始/終了counter・実provider model/effort・親子包含は未取得である。親がKPIに従い取得可能な記録を接合する。
+
+### U-H受領後の状態確定（2026-10-24）
+
+親から設計SHA先頭`166F267C…`と独立Preを受領した。完全SHAの現物再照合は今回行っていない。独立Preの結論は「承認前停止条件は妥当」であり、U-H完了・実行Pre PASSではない。確認範囲では元oracle/Err・unknown非停止・retry0・期限・診断分離に追加矛盾なしである。
+U-Hは阻害条件の整理までで未完了、U-Iの実行案受入・U-J/Kの解除は0である。未決は次の3点である。
+1. compile込み外側停止：同期version/compileは既存90秒監視外であり、停止可能handle、保存reserve、host上限を確定する。
+2. toolchain/linker/TEMP/runtime/Pesterの依存と書込・OS操作範囲、sandbox内で成立するかを確定する。
+3. 生成後freezeを同一入口の事前承認方式で扱うか、中間停止方式とするかを確定する。
+次は不足安全手順の限定設計である。次designer `gpt-6.1-sol/high`を含む既存役割当を維持し、source編集前に利用者承認を要する。親が限定修正・合成検証の具体的承認を求め、承認と設計/独立Preの成立前に編集・検証を開始しない。実OS一回枠は引き続き別承認である。本追補は状態記録のみで、設計・実装・実行・再調査0である。
