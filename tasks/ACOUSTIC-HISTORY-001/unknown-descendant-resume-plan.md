@@ -219,3 +219,45 @@ U-Hは阻害条件の整理までで未完了、U-Iの実行案受入・U-J/Kの
 2. toolchain/linker/TEMP/runtime/Pesterの依存と書込・OS操作範囲、sandbox内で成立するかを確定する。
 3. 生成後freezeを同一入口の事前承認方式で扱うか、中間停止方式とするかを確定する。
 次は不足安全手順の限定設計である。次designer `gpt-6.1-sol/high`を含む既存役割当を維持し、source編集前に利用者承認を要する。親が限定修正・合成検証の具体的承認を求め、承認と設計/独立Preの成立前に編集・検証を開始しない。実OS一回枠は引き続き別承認である。本追補は状態記録のみで、設計・実装・実行・再調査0である。
+
+### U-L～P：承認済み安全手順の限定修正・純合成検証（2026-10-24）
+
+開始HEAD `b85c6eb`／tracked tree clean。親提示の「不足3点を補う検証用手順の限定設計・修正・合成検証、実環境試験は含めない」に対する利用者の続行指示を受領した。本節は直前のsource編集承認待ちをこの範囲だけ解除し、U-Hの未完とU-K実OS一回枠の別承認は維持する。就寝指示は同一入口での生成hash自動承認を意味しない。
+要求はE-R1～5と既存G4/G5/FFである。今回経路は生成hash取得・保存後に必ずAwaitingApproval／元exit1／dispatch0で停止する。公開param・再開/token関数は追加せず、将来再開は未実装として別の設計・明示承認を要する。元ENV01 oracle/Err/unknown非停止/retry0/既存期限を変更せず、旧同一入口案を黙って採用しない。
+除外：製品/entry/診断fakeのcompile、ENV01実OS、ValidateOnly、対象scriptのtop-level起動、実OS所有判定、対象子processの起動/照会/停止、管理者/隔離外/OS設定/実data/API、既成功51入力/P7の反復、公開。純合成unit用の通常sandbox内PowerShellホスト・静的検査は許可範囲である。実子processが不可欠なら、必要性・対象・一回枠を親へ返し承認前停止する。
+
+| 単位／依存・規模 | 所有・最小change set | 受入と必要検証 |
+| --- | --- | --- |
+| U-L／本追補、S | designerは既存design末尾のみ。元probeの有限version/compile待機、限定dependency/書込境界、生成後停止の3点を設計する | 秒数/monotonic時計/保存reserve/直接handleと未知の扱い、生成後の承認待ち停止・生成drift拒否、OS/FS/clock/processの合成seamを確定する。原則変更本体は既存probe1本、不可欠なprivate helper追加は1本までとし、正確なpath/spanを設計で確定して独立差分Pre。外部期待は再利用、変更が必要ならspec作者へ戻す |
+| U-M／U-L差分Pre・planner精緻化、S | 独立test authorは新UUID packet内の期待表・抽出adapter・合成test・receipt/manifestのみ。本体を編集しない | 下記6群の入力数・期待・停止・完全commandを先に固定する。一意抽出/許可置換/逆bytes一致と対象top-level・実OS到達0を証明し、作者独立Pre後に実装へ渡す。未存在候補hashはPending、抽出失敗をbehavior REDへ変換0 |
+| U-N／U-M期待固定、S | implementerはU-Lで固定したprobe/helperの許可spanとその再現差分だけ。旧版と全bytes/SHAを新packetへ保全する | 3点を実装し、許可外逆bytes一致、元dispatch/oracle/回収と既存native/Test/fake/Invoke不変を確認する。変更PSはParser0/PSSA1.25通常診断0・engine0、純合成対象の静的到達検査を行う。期待変更0。候補hashを作者が既固定期待へ束縛する |
+| U-O／最終差分Pre・親freeze、S | 作者/実装者とは別runnerが新packetのログ・結果のみ所有 | 固定された新合成入力を各一回、通常sandbox内で実行する。前後pin・実PS・全argv・実exit・保存を記録し、firstUnexpected/adapter failure/drift/超過で停止、残NotRun/retry0。既成功51入力を含めず、本体top-level/compile/実子process0 |
+| U-P／U-O、S | reviewer read-only、親が既存review/artifacts/currentへ接合。指摘は所有役へ返す | 設計→独立期待→候補→実結果の対応と原本保全、停止/未知保持/生成後承認待ちを独立Postで確認。必要な変更に影響する検証だけ再実行する。合成PASSはOS停止可能性・toolchain実依存・sandbox許可・実ENV01を証明しない |
+
+新合成検証の6群は、(1) version/compile成功・非zero・開始失敗、(2)期限境界/遅延返却/保存reserve枯渇、(3)直接handleと未知子の分離・停止不能/回収不明・起動後stream設定失敗/StartTime失敗、(4)dependency/path/hash/TEMP等の欠測・drift・境界拒否、(5)今回経路の生成後停止・生成drift拒否によるdispatch0、(6)保存失敗でも元error保持・retry0である。入力数は順に5/6/7/6/4/5、合計33とし、未実装の再開をテストしない。memory・疑似clock・疑似process・疑似FSを用い、実装から期待を生成しない。新case上限5秒/集合30秒を設計の出発点とし、実行commandはU-Mで固定する。元OS APIのhard timeout証明とは区別する。
+完了条件は、上記新差分の静的検査と独立合成試験/独立PostのPASS、生成後停止を含む次の実OS承認前条件の明文化である。hostの強制上限/実toolchain依存/sandbox可否を合成結果で確認済みにせず、実測が必要な残項目をblockerとして残す。実環境の不足まで解消済みと報告しない。
+task-list/checkpoint： [x] U-L設計差分Pre→planner精緻化、[ ] U-M期待固定Pre、[ ] U-N最終候補Pre/親freeze、[ ] U-O一回実施、[ ] U-P独立Postと残る実OS承認条件。U-L完了前にU-Mへ内部設計判断を渡さず、未完了の旧作業リストも保持する。
+
+| 各U-L/M/N/O/P共通の役 | exact model / effort | 適用／難度・リスクと選定理由 |
+| --- | --- | --- |
+| planner／external-spec author | `gpt-6-astra` / `high` | 高／固定。plannerはU-L後精緻化、specは外部契約差分時のみ。現行期待再利用ならspec不起動 |
+| designer | `gpt-6.1-sol` / `high` | U-L、他単位は差戻し時のみ。高／時間・handle・生成承認の遷移設計 |
+| test author | `gpt-6.1-sol` / `high` | U-MとU-N後binding、他単位は非該当。高／合成seamの非循環期待と実OS到達防止 |
+| implementer | `gpt-6.1-sol` / `high` | U-Nのみ。高／限定spanでも停止責任・失敗保存への影響が大きい |
+| test runner | `gpt-6.1-sol` / `medium` | U-Oのみ。中／固定command・入力・停止規則の独立実施 |
+| reviewer | `gpt-6.1-sol` / `high` | U-L/M/Nの必要差分PreとU-P。高／作者・実装者・runnerとは別fresh agentで安全境界と証拠を照合 |
+
+親は通常1補助ずつ上記exact指定でdispatchする。Skillは既存役別指定を継続し、PowerShell修正/レビューの対応Skillも全文読了する。未対応model/effort/Skillはblocker、親model/品質gate変更・silent fallback・再委任0。今回利用可能集合はAstra/high、Sol6.1/high・medium、Terra/mediumであり、限定lookupが必要な場合だけTerra/mediumを使い設計判断を委ねない。
+次handoffはU-L designer `gpt-6.1-sol/high`である。前設計の不足3点と本節だけを渡し、新規frameworkや全履歴調査へ広げない。親提示の開始週枠1%/10080分/reset1793372790を親がusageへ保存する。子usage/実provider値/親子包含は未取得。planner今回の実行範囲は文書追補とdiff検査だけである。
+
+### U-L是正設計の接合（2026-10-24、最終Pre PASS受領）
+
+親から設計SHA256 `FB0F6359848A881726B693BF79AC072768EF78F6D26C044DC892CD09F34B5E15`と旧ECD3版before保全を受領した。今回plannerは設計の再調査・現物hash再照合をしていない。
+親から別reviewerの最終是正Pre PASSを受領した。初回唯一P1のStart部分成功後のhandle喪失契約は解消、差分限定・新旧SHA一致・追加阻害0であり、U-L設計Pre完了としてU-Mへ進める。設計PreだけでU-N実装/U-O試験の各依存gateや実OS承認を解除しない。
+設計の40秒/35秒/3＋2秒/version2秒/compile25秒は準備専用budgetであり、元ENV01の期限緩和ではない。合成実行のcase/集合上限とも別である。G3の2入力追加とG5の今回停止経路限定を上記33入力へ接合した。
+次役はU-M test author `gpt-6.1-sol/high`である。承認scope・通常補助1役・全役割当・実OS別承認を維持し、本接合は文書差分のみ、実装・対象実行・再委任0である。
+
+### U-M旧REDのAdapterFailureと停止gate（2026-10-24）
+Q=`R/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23`の`OLD-VERSION-RUNNER-REPORT.md`と保存stdoutを読取確認した。一回実測はexit2/AdapterFailure/accepted=false、TestRegistryの`HKCU\Software\Pester`初期化権限拒否でcontainer failed1、特定assertion RED未成立である。18pins前後不変、保存正常、2.6680518秒、retry0を保持する。
+追加の限定harness設定承認が必要と判定する。`Invoke-OldVersionRed.ps1:25–33`のPester設定にTestRegistry/TestDrive無効化はなく、その追加はAGENTSの「Seek approval before changing harness/settings」に該当する。未使用fixtureの無効化は最小対案だが、一般的な純合成検証承認だけから設定変更を承認済みとしない。作者が未使用性と変更spanを確認して親へ返す。
+33期待・旧REDの特定assertion・期限・判定を変更せず、旧失敗証拠/一回枠を保全する。設定差分と新一回枠の明示承認→独立差分Pre→再freezeまで修正・再実行を停止する。レジストリ権限引上げ/隔離外/admin/品質緩和での回避0、本追補は文書のみで実装・設定変更・対象実行・再委任0である。
