@@ -5236,3 +5236,1136 @@ new file mode 100644
 +
 +復元はtasks/ACOUSTIC-HISTORY-001/unknown-descendant-tests.patchへ新作者text artifact全内容を追補した。親のfreeze自身とreceipt/patchの最終SHAは外側索引で照合し、循環するhashを埋め込まない。既承認harness.patchのcontext空白や.gitignoreは編集していない。
 +
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/author-report.md b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/author-report.md
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/author-report.md
+@@ -0,0 +1,19 @@
++# U-M 独立期待・baseline RED準備（前半）
++
++計画者指定 `gpt-6.1-sol/high`。AGENTS、development-team、KPI、TDD、PowerShell automationと対象参照を全文確認した。実provider metadata・子usage・親子包含は未取得である。所有は本UUID packetと既存tests.patchの新規差分追補だけである。
++
++承認済み設計 `FB0F6359848A881726B693BF79AC072768EF78F6D26C044DC892CD09F34B5E15` に基づき期待33行（G1=5/G2=6/G3=7/G4=6/G5=4/G6=5）を固定した。期待は候補出力から生成していない。起動前入力拒否は累積Start0、起動後異常は以降追加Start0と同じ返却handleの回収である。StopのPID一致をhandle一致へ置き換えない。G5の元NotRun/AwaitingApproval/exit1は候補L4と保持outerの静的検査対象であり、top-levelを実行して証明しない。
++
++原probeはbeforeへ全bytesを保全し、SHA `0B6C78196FD5DB0CB5AE99364BC26720C99E2214467A71FC32156E2A12E91951`、19920bytes、BOM EF-BB-BFが一致した。L1の2literal、L2の2anchor、L3、L4、旧version2statementの7spanを、元AST親・一意原文・UTF8 byte offset/hashで固定した。7/7で元全bytesへの逆照合を確認した。L1/L2/L3/L4の原文保全は抽出adapterの安全性だけの証拠であり、候補実装の非所有逆diff検査は別に必要である。
++
++`Old-VersionBoundary.Tests.ps1` は旧version2statement（変更・置換0）だけを実行する準備である。`$rustc` をmemory scriptblockへ束縛し、monotonic値が2000msへ進んでexit0の成功値を返す。旧spanには期限検査がないため、deadlineErrorがnullのままという一つのbehavior assertionをRED期待とした。未実装private関数欠落・fixture不良・parse不良はREDではない。このsubsetは実OSでの同期blockや当時のUNKNOWN原因を再現するものではない。作者はbehavior実行0であり、RED実測済みとは報告しない。
++
++静的生成だけを通常sandbox内PS7.6.7ホストで実行し、exit0、7span/逆bytes7/7、6群33入力を確認した。PS4fileはParser0、PSSA1.25既定診断0/engine0である。初回PSSA command引数の誤りと修正前の2＋2診断はstatic-checks.jsonへ区別して残した。テスト・production ports・元top-level・ValidateOnly・compile・OS所有照会・実子process操作・公開・再委任はすべて0である。
++
++protocol最終SHA `9106C34AB0715B89023AB9AE359EAC35ABA64C9B48694894B85774BEE3A9EEFC` の独立是正Pre PASSと親dispatchを受領した。33ケースの意味は維持し、null未生成SHAとStart回数区分をexact protocolへ接合した。今回の実装前subsetは33期待・旧RED・固定receiptまでを完了境界とする。候補関数が未存在のため、候補関数の一意原文抽出・禁止到達検査、8portsのmemory FS/process/clock fixture、33入力の実行unitと候補receiptはPendingである。欠落をREDに変換しない。
++
++旧REDの固定入口は `Old-VersionReceipt.tool.json`（変更せずexec_commandへ渡すtool object）である。`Invoke-OldVersionRed.ps1` は実行1test/失敗1件/fixture失敗0と、PesterAssertionFailedの元file・assertion原文をすべて確認した場合だけnative1BehaviorMismatchを返す。他の失敗はnative2AdapterFailureである。外側 `Invoke-OldVersionReceipt.ps1` は実native exitを直後のexit.jsonへCreateNew保存し、18前後pin、別stdout/stderr、native結果marker、5秒/30秒、retry0を確認する。期待REDならaccepted=trueでも実receipt/tool exit1を保持する。出力UUID `8eac74a4-a484-41df-a1ff-08cfdf25aa28` は未生成である。作者artifactの独立Preと親freeze前は起動不可である。合成実測は未実施であり、固定receiptのruntime証明ではない。
++
++独立PreのP1一件を是正した。Pester.psm1のInvoke-InNewScriptScopeが実行するPester.ps1を、同じ前後pin配列へ追加した。固定SHAは`01B03D7CA5F727DE93B65D8A2B172D1F06EF306A62915893333302AACA57BCA7`、pin件数は17→18である。旧artifactとpatch986A版はbeforeへ保全した。33期待・元span・RED assertion・tool objectのcommand・判定基準は不変、実行0である。powershell-reviewはpinと隣接metadataの是正確認に限定し、構造変更・settings変更・依存探索拡大は行っていない。
++
++Git保存は親の既承認方針に従い `unknown-descendant-tests.patch` の旧prefixへ新packet text artifactを追補する。旧patchをbeforeへ保全しSHA `8F0DC52FD593EF4B37843CD3C855D00052A278E3BB2EDD2BB5C67E085556B7AE`/445885bytesと26復元物のSHA/BOMを固定した。新patch例外・force-add・設定変更は0である。追補後のprefix/26file/新text復元一致は保存検査へ分ける。before原本、binary、runtimeログをtracked patchへ含めない。
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/baseline-binding.json b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/baseline-binding.json
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/baseline-binding.json
+@@ -0,0 +1,103 @@
++{
++  "sha256": "0B6C78196FD5DB0CB5AE99364BC26720C99E2214467A71FC32156E2A12E91951",
++  "sourcePath": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\Invoke-FirstFailureEnv01.ps1",
++  "substitutions": [],
++  "bom": "EF-BB-BF",
++  "candidateSha256": "Pending",
++  "spans": [
++    {
++      "original": "'898C60B1133DB6956090035AF677B4CF7FDE0FE6FDFD5D47E5CD776B00500B71'",
++      "id": "L1-Invoke",
++      "end": 6049,
++      "sha256": "F3FE27B793BF331701580963CCBD640602119E50C73937E66F7D92F45AA38717",
++      "start": 5983,
++      "byteOffset": 5986,
++      "byteLength": 66,
++      "allowedSubstitutions": [],
++      "inverseFullBytes": true,
++      "parent": "ScriptBlockAst; literal/statement anchor"
++    },
++    {
++      "original": "'3482075BF7479E61942978830AE91FDDF5301133E1A2F43EDB9B65DDAA0FA016'",
++      "id": "L1-Fake",
++      "end": 6243,
++      "sha256": "9AB408C5190A53D2ADA12B0AFD5DEF5DC28443811BC859C567E218DEE18AFC9B",
++      "start": 6177,
++      "byteOffset": 6180,
++      "byteLength": 66,
++      "allowedSubstitutions": [],
++      "inverseFullBytes": true,
++      "parent": "ScriptBlockAst; literal/statement anchor"
++    },
++    {
++      "original": "$ErrorActionPreference = 'Stop'",
++      "id": "L2-StartClockAnchor",
++      "end": 1661,
++      "sha256": "A6FF9ACE77F1623D434A131B94C045EA59228CA4C1AFAFFE3900356C386BB1A5",
++      "start": 1630,
++      "byteOffset": 1633,
++      "byteLength": 31,
++      "allowedSubstitutions": [],
++      "inverseFullBytes": true,
++      "parent": "ScriptBlockAst; literal/statement anchor"
++    },
++    {
++      "original": "$packetRoot = $PSScriptRoot",
++      "id": "L2-FunctionAnchor",
++      "end": 5336,
++      "sha256": "31077D801E52D979503E42B538B332E5CB8583D00147CEC6CC41AE9B4083CA3D",
++      "start": 5309,
++      "byteOffset": 5312,
++      "byteLength": 27,
++      "allowedSubstitutions": [],
++      "inverseFullBytes": true,
++      "parent": "ScriptBlockAst; literal/statement anchor"
++    },
++    {
++      "sha256": "1904BCF91F66ADC3AFE2960E2F1C8299672E8899287CD6C5D93B70D51C5765B4",
++      "allowedSubstitutions": [],
++      "end": 11639,
++      "firstAst": "AssignmentStatementAst",
++      "lastAst": "ForEachStatementAst",
++      "original": "$rustc = (Get-Command rustc.exe -CommandType Application).Source\n        $pwsh = [IO.Path]::GetFullPath('F:/Program Files/PowerShell/7/pwsh.exe')\n        $v2 = [IO.Path]::GetFullPath((Join-Path $root '../../et2-egress-runner/Invoke-V2Case.ps1'))\n        foreach ($path in @($rustc, $pwsh, $v2)) {\n            if (-not [IO.Path]::IsPathFullyQualified($path) -or -not (Test-Path -LiteralPath $path -PathType Leaf) -or\n                $fixed.ContainsKey($path)) { throw 'Required distinct tool path unavailable' }\n            $fixed.Add($path, (Get-PathHash -Path $path).sha256)\n        }",
++      "byteLength": 585,
++      "start": 11054,
++      "byteOffset": 11057,
++      "parent": "Assignment $env01Body / ScriptBlockExpressionAst / EndBlock.Statements",
++      "id": "L3",
++      "inverseFullBytes": true
++    },
++    {
++      "sha256": "07CA411497422840792DF7620B3853F2391862140863BEC750172276C5CFFB23",
++      "allowedSubstitutions": [],
++      "end": 13888,
++      "firstAst": "PipelineAst",
++      "lastAst": "PipelineAst",
++      "original": "Import-Module Pester -RequiredVersion 5.7.1\n        $version = & $rustc --version\n        if ($LASTEXITCODE -ne 0) { throw 'Rust toolchain query failed' }\n        $fakeExe = Join-Path $OutputRoot 'fake.exe'\n        & $rustc --edition=2021 (Join-Path $root 'fake.rs') -o $fakeExe 2> (Join-Path $OutputRoot 'fake-build.stderr')\n        if ($LASTEXITCODE -ne 0) { throw 'Fake fixture compilation failure' }\n        $fixed.Add($fakeExe, (Get-PathHash -Path $fakeExe).sha256)\n        Write-NewEvidence -Path (Join-Path $OutputRoot 'toolchain.json') -Value @{\n            rustc = $rustc; version = [string]$version; rustcSha256 = $fixed[$rustc]; pwsh = $pwsh\n            pwshSha256 = $fixed[$pwsh]; pwshVersion = $PSVersionTable.PSVersion.ToString(); administrator = $false\n            v2 = $v2; v2Sha256 = $fixed[$v2]; fakeExeSha256 = $fixed[$fakeExe]\n            fakeSourceSha256 = $fixed[(Join-Path $root 'fake.rs')] }",
++      "byteLength": 915,
++      "start": 12973,
++      "byteOffset": 12976,
++      "parent": "Assignment $env01Body / ScriptBlockExpressionAst / EndBlock.Statements",
++      "id": "L4",
++      "inverseFullBytes": true
++    },
++    {
++      "sha256": "5E1944806A6A9E3FFF667DE432C6CAB584C01E771E65BE23B981F876C7639ECD",
++      "allowedSubstitutions": [],
++      "end": 13127,
++      "firstAst": "AssignmentStatementAst",
++      "lastAst": "IfStatementAst",
++      "original": "$version = & $rustc --version\n        if ($LASTEXITCODE -ne 0) { throw 'Rust toolchain query failed' }",
++      "byteLength": 102,
++      "start": 13025,
++      "byteOffset": 13028,
++      "parent": "Assignment $env01Body / ScriptBlockExpressionAst / EndBlock.Statements",
++      "id": "BaselineVersion",
++      "inverseFullBytes": true
++    }
++  ],
++  "length": 19920,
++  "sourceInvocationCount": 0,
++  "productionPortInvocationCount": 0,
++  "candidateFunction": "Pending"
++}
+\ No newline at end of file
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/expectations.json b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/expectations.json
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/expectations.json
+@@ -0,0 +1,84 @@
++{
++  "schemaVersion": 1,
++  "taskId": "ACOUSTIC-HISTORY-001",
++  "unit": "U-M",
++  "normativeDesignSha256": "FB0F6359848A881726B693BF79AC072768EF78F6D26C044DC892CD09F34B5E15",
++  "approvedProtocolDesignSha256": "9106C34AB0715B89023AB9AE359EAC35ABA64C9B48694894B85774BEE3A9EEFC",
++  "origin": "Approved U-L design and planner 33-input table; no candidate output was used",
++  "counts": { "groups": 6, "inputs": 33, "perGroup": [5, 6, 7, 6, 4, 5] },
++  "execution": {
++    "groupLimitSeconds": 5, "collectionLimitSeconds": 30,
++    "inputAttempts": 1, "retryCount": 0, "firstUnexpected": "Stop; later rows NotRun",
++    "nativeExit0": "All behavior assertions matched",
++    "nativeExit1": "BehaviorMismatch only after valid adapter and normal completion",
++    "nativeExit2": "AdapterFailure, parse/binding/drift/deadline/fixture failure; never behavior RED",
++    "currentAuthorization": "Preparation and static checks only; execution pending independent Pre and parent freeze"
++  },
++  "universal": {
++    "dispatchCount": 0, "retryCount": 0, "unknownDescendants": "NotObserved",
++    "unknownHandleStopCount": 0, "stopPerStartedHandleMaximum": 1,
++    "startPerPhaseMaximum": 1, "savePerEvidencePathMaximum": 1,
++    "deleteExistingFiles": 0, "modifyParentEnvironment": 0,
++    "resumeOrTokenFunction": "Not implemented; never required to pass these tests",
++    "resultKeys": ["state", "dispatchCount", "retryCount", "fakeSha256", "primaryError", "secondaryErrors", "directRecovery", "unknownDescendants", "evidence"],
++    "states": ["Failed", "RecoveryUnknown", "EvidenceFailed", "AwaitingApproval"],
++    "successOrder": ["dependency-before", "version", "compile", "dependency-after", "generated-hash", "toolchain.json", "frozen-inputs.json", "generated-rehash", "preparation.json"],
++    "limitsMilliseconds": { "absolute": 40000, "work": 35000, "version": 2000, "compile": 25000, "recovery": 3000, "save": 2000, "waitMaximum": 50 },
++    "deadlineComparison": "equal is expired; compare Now before and after every port",
++    "primaryIdentity": "Preserve the first returned/thrown ErrorRecord or exception object; secondary failures do not replace it",
++    "preservation": "Existing logs, partial evidence and generated bytes remain exactly present; never delete/rewrite on failure",
++    "processBoundary": "Only handle returned by Start; no PID reopen/name lookup/child enumeration/Kill(true)",
++    "generationPending": "Before successful compile, closed streams and generated file hash, returned fakeSha256 is null; external manifest label is PendingGeneration",
++    "portProtocol": "Final approved design exact R<T>/Inputs/8ports/evidence/result table; no extra port; ReadState read-only; Save CreateTemp/Record",
++    "startRejectionCounts": "Input rejection before any start means cumulative Start0; a port error after start means no further Start and recovery of the same retained handle"
++  },
++  "inputs": [
++    { "id": "G1-01", "acceptance": ["E-R2", "E-R3", "E-R5"], "stimulus": "Valid manifest; version and compile exit 0; both streams closed; stable hashes", "expect": { "state": "AwaitingApproval", "versionStarts": 1, "compileStarts": 1, "stopCount": 0, "primaryError": null, "evidence": ["toolchain.json", "frozen-inputs.json", "preparation.json"], "fakeSha256": "generated-byte digest; not source digest" } },
++    { "id": "G1-02", "acceptance": ["E-R2", "FF"], "stimulus": "Version exit 17 with closed streams", "expect": { "state": "Failed", "versionStarts": 1, "compileStarts": 0, "primary": "version exit 17", "stopCount": 0, "generatedHashCount": 0 } },
++    { "id": "G1-03", "acceptance": ["E-R2", "FF"], "stimulus": "Version succeeds; compile exit 23 with closed streams", "expect": { "state": "Failed", "versionStarts": 1, "compileStarts": 1, "primary": "compile exit 23", "stopCount": 0, "generatedHashCount": 0 } },
++    { "id": "G1-04", "acceptance": ["E-R2", "FF"], "stimulus": "Version Start returns started=false, handle=null, error EVStart", "expect": { "state": "Failed", "versionStarts": 1, "compileStarts": 0, "primaryIdentity": "EVStart", "stopCount": 0 } },
++    { "id": "G1-05", "acceptance": ["E-R2", "FF"], "stimulus": "Version succeeds; compile Start returns started=false, handle=null, error ECStart", "expect": { "state": "Failed", "versionStarts": 1, "compileStarts": 1, "primaryIdentity": "ECStart", "stopCount": 0 } },
++
++    { "id": "G2-01", "acceptance": ["E-R2", "G5"], "stimulus": "Version Poll reports exit0/closed streams at exactly phase-start+2000ms", "expect": { "state": "Failed", "compileStarts": 0, "primary": "version deadline", "acceptLateSuccess": false } },
++    { "id": "G2-02", "acceptance": ["E-R2", "G5"], "stimulus": "Compile Poll reports exit0/closed streams at exactly phase-start+25000ms before work deadline", "expect": { "state": "Failed", "primary": "compile deadline", "generatedHashCount": 0, "acceptLateSuccess": false } },
++    { "id": "G2-03", "acceptance": ["E-R2", "G5"], "stimulus": "Version Start returns a live direct handle after its phase deadline", "expect": { "state": "Failed", "compileStarts": 0, "stopCount": 1, "stopHandle": "exact returned handle", "primary": "version deadline", "nextWorkPortCount": 0 } },
++    { "id": "G2-04", "acceptance": ["E-R2", "G5"], "stimulus": "Compile Poll starts in time and returns exit0/closed streams after deadline", "expect": { "state": "Failed", "primary": "compile deadline", "generatedHashCount": 0, "acceptLateSuccess": false } },
++    { "id": "G2-05", "acceptance": ["E-R2", "E-R5"], "stimulus": "Now is exactly startedTick+35000ms before next work operation", "expect": { "state": "Failed", "newStartCount": 0, "newWorkHashCount": 0, "primary": "work deadline", "recoveryAndSave": "Only within individual reserve and absolute deadline" } },
++    { "id": "G2-06", "acceptance": ["E-R2", "E-R5", "FF"], "stimulus": "Save returns at exactly startedTick+40000ms", "expect": { "state": "EvidenceFailed", "newSaveAfterReturn": 0, "acceptLateSuccess": false, "partialPreserved": true } },
++
++    { "id": "G3-01", "acceptance": ["E-R2", "G5"], "stimulus": "Version timeout; live direct handle H1; unknown descendant U; Stop(H1) then Poll proves exit", "expect": { "state": "Failed", "stopHandles": ["H1"], "directRecovery": "exit proven", "unknownStopCount": 0, "allChildrenReapedClaim": false } },
++    { "id": "G3-02", "acceptance": ["E-R2", "G5", "FF"], "stimulus": "Version timeout; Stop(H1) throws EStop; exit remains unproven", "expect": { "state": "RecoveryUnknown", "primary": "version deadline", "secondaryIdentity": "EStop", "stopHandles": ["H1"], "stopRetryCount": 0 } },
++    { "id": "G3-03", "acceptance": ["E-R2", "G5"], "stimulus": "Stop(H1) returns normally but Poll cannot prove exit within 3000ms", "expect": { "state": "RecoveryUnknown", "stopHandles": ["H1"], "stopRetryCount": 0, "directRecovery": "unknown" } },
++    { "id": "G3-04", "acceptance": ["E-R2", "G5"], "stimulus": "Version exits nonzero before failure handling; direct handle already ended", "expect": { "state": "Failed", "stopCount": 0, "directRecovery": "exit proven" } },
++    { "id": "G3-05", "acceptance": ["E-R2", "G5"], "stimulus": "H1 and unrelated H2 have same numeric PID; only H1 returned by Start; H1 timeout", "expect": { "state": "Failed", "stopHandles": ["H1"], "H2StopCount": 0, "pidReopenCount": 0 } },
++    { "id": "G3-06", "acceptance": ["E-R2", "G5", "FF"], "stimulus": "Start succeeds then stream setup fails: started=true, handle=H1, outTask=null, errTask=null, startError=EStream; recovery proves exit", "expect": { "state": "Failed", "primaryIdentity": "EStream", "compileStarts": 0, "stopHandles": ["H1"], "disposeBeforeRecovery": 0, "handleLoss": false } },
++    { "id": "G3-07", "acceptance": ["E-R2", "G5", "FF"], "stimulus": "Start succeeds then StartTime acquisition fails: started=true, handle=H1, startError=EStartTime; recovery cannot prove exit", "expect": { "state": "RecoveryUnknown", "primaryIdentity": "EStartTime", "compileStarts": 0, "stopHandles": ["H1"], "disposeBeforeRecovery": 0, "handleLoss": false } },
++
++    { "id": "G4-01", "acceptance": ["E-R3"], "stimulus": "One required dependency missing; other entries valid", "expect": { "state": "Failed", "startCount": 0, "primary": "missing dependency", "generatedHashCount": 0 } },
++    { "id": "G4-02", "acceptance": ["E-R3"], "stimulus": "One required dependency hash differs before start", "expect": { "state": "Failed", "startCount": 0, "primary": "dependency drift" } },
++    { "id": "G4-03", "acceptance": ["E-R3"], "stimulus": "Writable path is suiteRoot-suffix/file with matching string prefix but different path segment", "expect": { "state": "Failed", "startCount": 0, "outsideWriteCount": 0, "primary": "path boundary" } },
++    { "id": "G4-04", "acceptance": ["E-R3"], "stimulus": "One dependency canonical leaf has a reparse ancestor", "expect": { "state": "Failed", "startCount": 0, "primary": "reparse boundary" } },
++    { "id": "G4-05", "acceptance": ["E-R3"], "stimulus": "Manifest TEMP points outside suite/temp; TMP otherwise correct", "expect": { "state": "Failed", "startCount": 0, "outsideWriteCount": 0, "primary": "child TEMP boundary" } },
++    { "id": "G4-06", "acceptance": ["E-R3"], "stimulus": "Manifest contains extra root key tokenApproval (strict shape violation); all required keys valid", "expect": { "state": "Failed", "startCount": 0, "primary": "manifest shape" } },
++
++    { "id": "G5-01", "acceptance": ["E-R5"], "stimulus": "All success evidence durably saved, including final preparation marker", "expect": { "state": "AwaitingApproval", "primaryError": null, "dispatchCount": 0, "originalOutcomeStatus": "NotRun", "originalOutcomeErrorCode": "AwaitingApproval", "originalExit": 1, "originalOutcomeCheck": "Static L4 and retained outer exit only; top-level never executed" } },
++    { "id": "G5-02", "acceptance": ["E-R5"], "stimulus": "Valid success input plus memory file approval.token containing approval-like data", "expect": { "state": "AwaitingApproval", "approvalFileReadCount": 0, "resumeCount": 0, "dispatchCount": 0 } },
++    { "id": "G5-03", "acceptance": ["E-R3", "E-R5"], "stimulus": "Generated exe first hash A; rehash after toolchain/frozen evidence B", "expect": { "state": "Failed", "primary": "generated drift", "finalSuccessMarkerCount": 0, "dispatchCount": 0, "existingEvidencePreserved": true } },
++    { "id": "G5-04", "acceptance": ["E-R3", "E-R5"], "stimulus": "Source hash changes in dependency-after pass following successful compile", "expect": { "state": "Failed", "primary": "dependency drift", "generatedHashCount": 0, "dispatchCount": 0, "generatedExePreserved": true } },
++
++    { "id": "G6-01", "acceptance": ["E-R5", "FF"], "stimulus": "Version Start returns EVStart; first error Save throws ESave", "expect": { "state": "EvidenceFailed", "primaryIdentity": "EVStart", "secondaryIdentity": "ESave", "samePathSaveRetryCount": 0, "compileStarts": 0 } },
++    { "id": "G6-02", "acceptance": ["E-R5", "FF"], "stimulus": "Compile Start returns ECStart; first error Save throws ESave", "expect": { "state": "EvidenceFailed", "primaryIdentity": "ECStart", "secondaryIdentity": "ESave", "samePathSaveRetryCount": 0 } },
++    { "id": "G6-03", "acceptance": ["E-R5", "FF"], "stimulus": "Successful version/compile and first two evidence saves; preparation.json CreateNew fails EMarker", "expect": { "state": "EvidenceFailed", "primaryIdentity": "EMarker", "stateMustNotBe": "AwaitingApproval", "samePathSaveRetryCount": 0, "priorEvidencePreserved": true } },
++    { "id": "G6-04", "acceptance": ["E-R5", "FF"], "stimulus": "Version Start error EVStart; error evidence Save creates partial bytes then throws EPartial", "expect": { "state": "EvidenceFailed", "primaryIdentity": "EVStart", "secondaryIdentity": "EPartial", "samePathSaveRetryCount": 0, "partialBytes": "exact original prefix remains" } },
++    { "id": "G6-05", "acceptance": ["E-R2", "E-R5", "FF"], "stimulus": "Version Start error EVStart; recovery/boundary consumes entire save reserve before first Save", "expect": { "state": "EvidenceFailed", "primaryIdentity": "EVStart", "saveCount": 0, "evidence": "missing explicitly recorded in returned result; no new I/O", "existingBytesPreserved": true } }
++  ],
++  "fixtureRules": {
++    "clock": "Integer monotonic ticks; frequency 1000; startedTick 0; exact deadlines are deterministic",
++    "fs": "Fresh per-input memory map with ordinal paths, bytes and CreateNew semantics; no real learner data",
++    "process": "Fresh per-input opaque H1/H2 objects; same numeric PID is not identity; no actual processes",
++    "hashes": "A/B literal synthetic byte digests differ from source digest; only memory hash boundary returns them",
++    "argv": "Version exactly --version; compile exactly --edition=2021 sourcePath -o suiteRoot/fake.exe; dedicated child TEMP/TMP; fixed cwd and executable",
++    "environment": "Explicit unset marker distinct from empty; parent snapshot unchanged after each input",
++    "protocolStatus": "Approved design 9106C34A; candidate binding Pending until implementation exists"
++  }
++}
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/Invoke-OldVersionReceipt.ps1 b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/Invoke-OldVersionReceipt.ps1
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/Invoke-OldVersionReceipt.ps1
+@@ -0,0 +1,179 @@
++﻿<#
++.SYNOPSIS
++    Records one fixed baseline memory test with separate streams and immediate exit evidence
++.DESCRIPTION
++    Requires independent Pre and parent freeze. Retains the actual native exit even for expected RED.
++    Every output uses CreateNew in a single fresh fixed UUID; no retry or fallback path exists.
++    The only native child is the approved ordinary sandbox PowerShell unit host.
++.EXAMPLE
++    ./Invoke-OldVersionReceipt.ps1
++.NOTES
++    Author: Codex U-M test author. Created: 2026-10-24.
++    Requires: PowerShell 7.6.7 (ps7), ordinary sandbox. No probe main or real toolchain.
++    Exit 1 expected BehaviorMismatch; 0 unexpected behavior pass; 2 adapter/receipt failure.
++#>
++#Requires -Version 7.6
++[CmdletBinding()]
++param()
++Set-StrictMode -Version 3.0
++$ErrorActionPreference = 'Stop'
++$PSNativeCommandUseErrorActionPreference = $false
++$taskOutputRoot = Join-Path $PSScriptRoot '8eac74a4-a484-41df-a1ff-08cfdf25aa28'
++$taskFixed = @(
++    @{ path = (Join-Path $PSScriptRoot 'expectations.json'); hash = 'CAA26281E5EF932156118720997491AE1E3EB55ED9DF0365F32197C6F8979353' },
++    @{ path = 'F:/Kazuhiro/GitHub/WordWeave5/tasks/ACOUSTIC-HISTORY-001/unknown-descendant-design.md'; hash = '9106C34AB0715B89023AB9AE359EAC35ABA64C9B48694894B85774BEE3A9EEFC' },
++    @{ path = (Join-Path $PSScriptRoot 'before/Invoke-FirstFailureEnv01.ps1'); hash = '0B6C78196FD5DB0CB5AE99364BC26720C99E2214467A71FC32156E2A12E91951' },
++    @{ path = (Join-Path $PSScriptRoot '../Invoke-FirstFailureEnv01.ps1'); hash = '0B6C78196FD5DB0CB5AE99364BC26720C99E2214467A71FC32156E2A12E91951' },
++    @{ path = (Join-Path $PSScriptRoot 'baseline-binding.json'); hash = '0A60E068050ACA3B20A2D93B9635D0F86CD28B595F69725BA1FF7D425D60E977' },
++    @{ path = (Join-Path $PSScriptRoot 'Old-VersionBoundary.Tests.ps1'); hash = 'FA27000AFE7ED4F882328DF355BFA42F86DF3C3A875BCE545C7F34608C37D95D' },
++    @{ path = (Join-Path $PSScriptRoot 'Invoke-OldVersionRed.ps1'); hash = '6CC45C0A4EA4E94459264CDC0509293922A52792008883FB33794C1F48121552' },
++    @{ path = 'F:/Program Files/PowerShell/7/pwsh.exe'; hash = 'FA2C8BB1E35CDD62AD15CD06A1D8F2C5961E9725A9BFA1E7CFD2C322F49E9619' },
++    @{ path = 'F:/Program Files/PowerShell/7/pwsh.dll'; hash = 'A583A3721FEEBC4F9552A02358BC81BBDD41E2E18BB3F424226F2B1E0BF07DEB' },
++    @{ path = 'F:/Program Files/PowerShell/7/System.Management.Automation.dll'; hash = '70701F20AFBBF4E763924C2BDD0C0E9A20EEC35A0E4EFF439E0CCF77F20D6B26' },
++    @{ path = 'F:/Program Files/PowerShell/7/pwsh.runtimeconfig.json'; hash = '8A6363FBA1F89C0688E3594EF4FE7B9036126F04957C5FE56858CBA020B76B33' },
++    @{ path = 'F:/Program Files/PowerShell/7/pwsh.deps.json'; hash = 'A01883AEEB2217AEB1D7EC944D649376104E7A874CA4EA71E7F36448C1519DC2' },
++    @{ path = 'C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/Pester/5.7.1/Pester.psd1'; hash = 'C6DCE1CDD85A9236A9A628DCAAF3E6F07B0AC4173FB25F620FA466F4402EC341' },
++    @{ path = 'C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/Pester/5.7.1/Pester.psm1'; hash = '49E9E839447703F7B6A6A320A3C65A6DD5A17F4E33372FE02C7D32AD26A2D3CA' },
++    @{ path = 'C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/Pester/5.7.1/Pester.ps1'; hash = '01B03D7CA5F727DE93B65D8A2B172D1F06EF306A62915893333302AACA57BCA7' },
++    @{ path = 'C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/Pester/5.7.1/Pester.Format.ps1xml'; hash = '94C598F75CC09B8905E2B1C9C2C72AB000D589A317770DC6D65BC4A8DF376CAE' },
++    @{ path = 'C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/Pester/5.7.1/PesterConfiguration.Format.ps1xml'; hash = 'C270400765FE97E9933F1554AC2D78A57BBA685DB0BF1884869286C88034F316' },
++    @{ path = 'C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/Pester/5.7.1/bin/netstandard2.0/Pester.dll'; hash = 'FB994A81040741CA9D1F4E5B74CBAD563A61F65F5AF43602958BE1DBAE9C851F' }
++)
++$taskUtf8 = [Text.UTF8Encoding]::new($false, $true)
++$taskProblems = [Collections.Generic.List[string]]::new()
++$taskLines = [Collections.Generic.List[string]]::new()
++$taskClock = [Diagnostics.Stopwatch]::new()
++$taskOut = $null
++$taskErr = $null
++$taskRootCreated = $false
++$taskActualExit = $null
++$taskRecord = [ordered]@{
++    schemaVersion = 1; receipt = 'OldVersionBoundaryRED'; expectedExit = 1; actualExit = $null
++    attempts = 0; retry = 0; classification = 'NotRun'; accepted = $false
++    nativeCommand = "& 'F:/Program Files/PowerShell/7/pwsh.exe' -NoLogo -NoProfile -NonInteractive -File 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/Invoke-OldVersionRed.ps1'"
++    before = $null; after = $null; exitSaved = $false; streamsSaved = $false
++    outputEncoding = 'PowerShell-decoded text, separate stdout/stderr UTF8 no BOM; not raw native bytes'
++    groupLimitSeconds = 5; collectionLimitSeconds = 30; elapsedSeconds = $null; problems = @()
++}
++function Write-ReceiptEvidence {
++    <# .SYNOPSIS
++        Creates one fixed evidence file
++    .PARAMETER Name
++        Direct-child filename.
++    .PARAMETER Value
++        JSON evidence payload.
++    .EXAMPLE
++        Write-ReceiptEvidence -Name 'exit.json' -Value $exitRecord
++    .NOTES
++        Private receipt helper; PowerShell 7.6.7.
++    #>
++    [CmdletBinding()]
++    param([string]$Name, [object]$Value)
++    $bytes = $taskUtf8.GetBytes((ConvertTo-Json -InputObject $Value -Depth 15))
++    $stream = [IO.File]::Open((Join-Path $taskOutputRoot $Name), 'CreateNew', 'Write', 'None')
++    try {
++        $stream.Write($bytes, 0, $bytes.Length)
++        $stream.Flush($true)
++    }
++    finally { $stream.Dispose() }
++}
++function Get-ReceiptPin {
++    <# .SYNOPSIS
++        Checks fixed sources and loaded host paths without process queries
++    .EXAMPLE
++        Get-ReceiptPin
++    .NOTES
++        Private receipt helper; PowerShell 7.6.7.
++    #>
++    [CmdletBinding()]
++    [OutputType([hashtable])]
++    param()
++    if ($PSVersionTable.PSVersion.ToString() -cne '7.6.7' -or
++        [IO.Path]::GetFullPath([Environment]::ProcessPath) -cne 'F:\Program Files\PowerShell\7\pwsh.exe' -or
++        [Management.Automation.PSObject].Assembly.Location -cne 'F:\Program Files\PowerShell\7\System.Management.Automation.dll') {
++        throw 'Loaded runtime mismatch'
++    }
++    foreach ($pin in $taskFixed) {
++        $actual = (Get-FileHash -LiteralPath $pin.path).Hash
++        if ($actual -cne $pin.hash) { throw ('Input drift: ' + $pin.path) }
++        @{ path = [IO.Path]::GetFullPath($pin.path); sha256 = $actual }
++    }
++}
++try {
++    if (Test-Path -LiteralPath $taskOutputRoot) { throw 'Fresh output UUID already exists' }
++    $ancestor = [IO.DirectoryInfo]::new($PSScriptRoot)
++    while ($null -ne $ancestor) {
++        if (-not $ancestor.Exists -or ($ancestor.Attributes -band [IO.FileAttributes]::ReparsePoint)) {
++            throw 'Output ancestor missing or reparse'
++        }
++        $ancestor = $ancestor.Parent
++    }
++    $taskRecord.before = @(Get-ReceiptPin)
++    $null = New-Item -ItemType Directory -Path $taskOutputRoot -ErrorAction Stop
++    $taskRootCreated = $true
++    $taskOut = [IO.StreamWriter]::new([IO.File]::Open((Join-Path $taskOutputRoot 'stdout.txt'), 'CreateNew'), $taskUtf8)
++    $taskErr = [IO.StreamWriter]::new([IO.File]::Open((Join-Path $taskOutputRoot 'stderr.txt'), 'CreateNew'), $taskUtf8)
++    $taskOut.AutoFlush = $true
++    $taskErr.AutoFlush = $true
++    Write-ReceiptEvidence -Name 'before.json' -Value $taskRecord
++    $taskRecord.attempts = 1
++    $taskClock.Start()
++    & 'F:/Program Files/PowerShell/7/pwsh.exe' -NoLogo -NoProfile -NonInteractive -File 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/Invoke-OldVersionRed.ps1' 2>&1 | ForEach-Object {
++        if ($_ -is [Management.Automation.ErrorRecord]) { $taskErr.WriteLine($_.ToString()) }
++        else {
++            $taskLines.Add([string]$_)
++            $taskOut.WriteLine([string]$_)
++        }
++    }
++    $taskActualExit = $LASTEXITCODE
++    $taskRecord.actualExit = $taskActualExit
++    Write-ReceiptEvidence -Name 'exit.json' -Value @{ actualExit = $taskActualExit; attempts = 1; retry = 0 }
++    $taskRecord.exitSaved = $true
++    $taskClock.Stop()
++    $taskRecord.elapsedSeconds = $taskClock.Elapsed.TotalSeconds
++    if ($taskClock.Elapsed.TotalSeconds -ge 5 -or $taskClock.Elapsed.TotalSeconds -ge 30) {
++        throw 'Group/collection elapsed limit; not a hard OS cancellation proof'
++    }
++    $summary = @($taskLines | Where-Object { $_.StartsWith('BASELINE_RESULT:', [StringComparison]::Ordinal) })
++    if ($taskActualExit -eq 1 -and $summary.Count -eq 1 -and
++        $summary[0] -ceq 'BASELINE_RESULT:1;BehaviorMismatch;input=G2-03;attempts=1;retry=0') {
++        $taskRecord.classification = 'BehaviorMismatch'
++    }
++    elseif ($taskActualExit -eq 0) { $taskRecord.classification = 'BehaviorMatched' }
++    else { $taskRecord.classification = 'AdapterFailure' }
++}
++catch { $taskProblems.Add($_.ToString()) }
++finally {
++    try { $taskRecord.after = @(Get-ReceiptPin) }
++    catch { $taskProblems.Add('AfterPins: ' + $_.ToString()) }
++    $streamFailures = 0
++    foreach ($writer in @($taskOut, $taskErr)) {
++        if ($null -eq $writer) { $streamFailures++ }
++        else {
++            try {
++                $writer.Flush()
++                $writer.BaseStream.Flush($true)
++            }
++            catch {
++                $streamFailures++
++                $taskProblems.Add('StreamSave: ' + $_.ToString())
++            }
++            finally { $writer.Dispose() }
++        }
++    }
++    $taskRecord.streamsSaved = $streamFailures -eq 0
++    $taskRecord.problems = @($taskProblems)
++}
++$taskRecord.accepted = $taskProblems.Count -eq 0 -and $taskRecord.exitSaved -and $taskRecord.streamsSaved -and
++    $taskActualExit -eq 1 -and $taskRecord.classification -ceq 'BehaviorMismatch'
++if (-not $taskRootCreated) { exit 2 }
++try { Write-ReceiptEvidence -Name 'execution.json' -Value $taskRecord }
++catch {
++    [Console]::Error.WriteLine(('ReceiptSaveFailed: ' + $_.ToString()))
++    exit 2
++}
++Write-Output ('RECEIPT_RESULT:actualExit=' + $taskActualExit + ';accepted=' + $taskRecord.accepted +
++    ';classification=' + $taskRecord.classification)
++if ($taskProblems.Count -ne 0 -or -not $taskRecord.exitSaved -or -not $taskRecord.streamsSaved) { exit 2 }
++if ($taskRecord.classification -ceq 'AdapterFailure') { exit 2 }
++exit $taskActualExit
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/Invoke-OldVersionRed.ps1 b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/Invoke-OldVersionRed.ps1
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/Invoke-OldVersionRed.ps1
+@@ -0,0 +1,58 @@
++﻿<#
++.SYNOPSIS
++    Classifies the one source-bound baseline deadline assertion
++.DESCRIPTION
++    Uses installed Pester 5.7.1 only. A single specific assertion failure returns 1.
++    Discovery, fixture, parser, extraction, timeout and any other failure return 2.
++    No target main, production port, native toolchain or real child operation is used.
++.EXAMPLE
++    ./Invoke-OldVersionRed.ps1
++.NOTES
++    Author: Codex U-M test author. Created: 2026-10-24.
++    Requires: PowerShell 7.6.7 (ps7), existing Pester 5.7.1, ordinary sandbox.
++    Exit 0 behavior matched; 1 BehaviorMismatch; 2 AdapterFailure. No retry.
++#>
++#Requires -Version 7.6
++[CmdletBinding()]
++param()
++Set-StrictMode -Version 3.0
++$ErrorActionPreference = 'Stop'
++$unitClock = [Diagnostics.Stopwatch]::StartNew()
++try {
++    if ($PSVersionTable.PSVersion.ToString() -cne '7.6.7') { throw 'AdapterFailure: runtime version' }
++    $modulePath = 'C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/Pester/5.7.1/Pester.psd1'
++    Import-Module -Name $modulePath -RequiredVersion 5.7.1 -ErrorAction Stop
++    $config = New-PesterConfiguration
++    $config.Run.Path = Join-Path $PSScriptRoot 'Old-VersionBoundary.Tests.ps1'
++    $config.Run.PassThru = $true
++    $config.Run.Exit = $false
++    $config.Run.Throw = $false
++    $config.Output.Verbosity = 'Detailed'
++    $config.TestResult.Enabled = $false
++    $config.CodeCoverage.Enabled = $false
++    $result = Invoke-Pester -Configuration $config
++    if ($unitClock.Elapsed.TotalSeconds -ge 5 -or $result.TotalCount -ne 1 -or
++        $result.FailedBlocksCount -ne 0 -or $result.FailedContainersCount -ne 0 -or
++        $result.SkippedCount -ne 0 -or $result.NotRunCount -ne 0 -or $result.InconclusiveCount -ne 0) {
++        throw 'AdapterFailure: result count, fixture failure or group deadline'
++    }
++    if ($result.PassedCount -eq 1 -and $result.FailedCount -eq 0) {
++        Write-Output 'BASELINE_RESULT:0;BehaviorMatched;input=G2-03;attempts=1;retry=0'
++        exit 0
++    }
++    if ($result.FailedCount -ne 1 -or @($result.Failed).Count -ne 1) { throw 'AdapterFailure: failed count' }
++    $failure = @($result.Failed[0].ErrorRecord)
++    $expectedAssertion = '$deadlineError | Should -Not -BeNullOrEmpty -Because ''deadline equality is expired under approved U-L contract'''
++    if ($failure.Count -ne 1 -or $failure[0].FullyQualifiedErrorId -cne 'PesterAssertionFailed' -or
++        $failure[0].TargetObject.LineText.Trim() -cne $expectedAssertion -or
++        [IO.Path]::GetFullPath($failure[0].TargetObject.File) -cne
++            [IO.Path]::GetFullPath((Join-Path $PSScriptRoot 'Old-VersionBoundary.Tests.ps1'))) {
++        throw 'AdapterFailure: failure is not the fixed deadline behavior assertion'
++    }
++    Write-Output 'BASELINE_RESULT:1;BehaviorMismatch;input=G2-03;attempts=1;retry=0'
++    exit 1
++}
++catch {
++    [Console]::Error.WriteLine(('BASELINE_RESULT:2;AdapterFailure;' + $_.Exception.Message))
++    exit 2
++}
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/manifest.json b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/manifest.json
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/manifest.json
+@@ -0,0 +1,46 @@
++{
++  "schemaVersion": 1,
++  "taskId": "ACOUSTIC-HISTORY-001",
++  "unit": "U-M",
++  "authorAssignment": { "model": "gpt-6.1-sol", "effort": "high", "actualProviderMetadata": "Unavailable", "usageStart": "Unavailable", "usageEnd": "Unavailable", "parentInclusion": "Unknown" },
++  "root": "F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23",
++  "status": "U-M pre-implementation subset complete: independent 33-input oracle, baseline RED and fixed receipt ready for Pre; candidate binding Pending",
++  "approvedNormativeDesignSha256": "FB0F6359848A881726B693BF79AC072768EF78F6D26C044DC892CD09F34B5E15",
++  "protocolDesignStatus": "9106C34AB0715B89023AB9AE359EAC35ABA64C9B48694894B85774BEE3A9EEFC independently Pre PASS and parent author dispatch received; 33-case behavior unchanged",
++  "baseline": { "name": "Invoke-FirstFailureEnv01.ps1", "sha256": "0B6C78196FD5DB0CB5AE99364BC26720C99E2214467A71FC32156E2A12E91951", "length": 19920, "bom": "EF-BB-BF" },
++  "pins": [
++    { "name": "expectations.json", "sha256": "CAA26281E5EF932156118720997491AE1E3EB55ED9DF0365F32197C6F8979353" },
++    { "name": "baseline-binding.json", "sha256": "0A60E068050ACA3B20A2D93B9635D0F86CD28B595F69725BA1FF7D425D60E977" },
++    { "name": "Old-VersionBoundary.Tests.ps1", "sha256": "FA27000AFE7ED4F882328DF355BFA42F86DF3C3A875BCE545C7F34608C37D95D" },
++    { "name": "New-PreparationStaticEvidence.ps1", "sha256": "B7359925BDDFEC5F51B646D29BBB1A131159C9CE2842B7E1B5D2102E18C2D4C4" },
++    { "name": "receipt-plan.json", "sha256": "7A88BF1AE0DD524B64979CF1349F3BC5F1B2FB88980554C597BAC9C6B0393CD8" },
++    { "name": "Invoke-OldVersionRed.ps1", "sha256": "6CC45C0A4EA4E94459264CDC0509293922A52792008883FB33794C1F48121552" },
++    { "name": "Invoke-OldVersionReceipt.ps1", "sha256": "B354B474C91DE6B9536C83751D1EA8A4F232C03338DCC613EBF1DEC505507A31" },
++    { "name": "Old-VersionReceipt.tool.json", "sha256": "8B132CCC60B5CD4AE5687CF20EEF469B863B905AE0CC648E560AB373ACD3BCEE" },
++    { "name": "preservation-before.json", "sha256": "F28456C33004FF0FDE1D02AB44F956C91889318311FC6A1D4BC4D9D741B20ED4" },
++    { "name": "static-evidence.json", "sha256": "CE262F7B3C2411CDAECF290337E860E54F948147EFB1687006846CA8A0EC4879" },
++    { "path": "F:/Program Files/PowerShell/7/pwsh.exe", "sha256": "FA2C8BB1E35CDD62AD15CD06A1D8F2C5961E9725A9BFA1E7CFD2C322F49E9619" },
++    { "path": "F:/Program Files/PowerShell/7/pwsh.dll", "sha256": "A583A3721FEEBC4F9552A02358BC81BBDD41E2E18BB3F424226F2B1E0BF07DEB" },
++    { "path": "F:/Program Files/PowerShell/7/System.Management.Automation.dll", "sha256": "70701F20AFBBF4E763924C2BDD0C0E9A20EEC35A0E4EFF439E0CCF77F20D6B26" },
++    { "path": "C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/Pester/5.7.1/Pester.ps1", "sha256": "01B03D7CA5F727DE93B65D8A2B172D1F06EF306A62915893333302AACA57BCA7" }
++  ],
++  "restore": {
++    "patch": "tasks/ACOUSTIC-HISTORY-001/unknown-descendant-tests.patch",
++    "oldPrefixSha256": "8F0DC52FD593EF4B37843CD3C855D00052A278E3BB2EDD2BB5C67E085556B7AE",
++    "oldPrefixLength": 445885,
++    "oldRestoredFiles": 26,
++    "strategy": "Append new packet text files only; retain old prefix bytes and 26 restored files; before raw/binary/log data remain ignored",
++    "gitignoreChange": 0, "forceAdd": 0
++  },
++  "candidateSha256": "Pending",
++  "candidateBinding": "Protocol fixed; candidate original function, substitution0 and inverse bytes Pending after implementation",
++  "baselineBehavior": "Prepared G2-03 memory subset, not executed. Expected missing deadline error is a behavior failure only after source/parser/fixture checks pass.",
++  "commands": {
++    "completedStatic": "& 'F:/Program Files/PowerShell/7/pwsh.exe' -NoLogo -NoProfile -NonInteractive -File 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/New-PreparationStaticEvidence.ps1'",
++    "completedStaticExit": 0,
++    "baselineNativeReceipt": "Old-VersionReceipt.tool.json (fixed exact exec_command payload); Invoke-OldVersionReceipt.ps1; expected actual native/receipt/tool exit1 only for fixed BehaviorMismatch, native/receipt/tool exit2 for AdapterFailure",
++    "candidate33InputReceipt": null,
++    "reason": "Baseline fixed command, 18 before/after pins including executed Pester.ps1 and fresh result UUID are ready; candidate receipt waits for existing candidate. Every behavior run requires independent artifact Pre and parent freeze"
++  },
++  "scopeLimits": ["No probe top-level or ValidateOnly", "No production ports or OS process queries", "No real version query or compiler", "No old 51-input repeat", "No token/resume implementation", "No publication/delegation/model/gate change"]
++}
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/New-PreparationStaticEvidence.ps1 b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/New-PreparationStaticEvidence.ps1
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/New-PreparationStaticEvidence.ps1
+@@ -0,0 +1,198 @@
++﻿<#
++.SYNOPSIS
++    Captures preparation baseline AST boundaries without running the probe
++.DESCRIPTION
++    Reads only fixed baseline bytes and author artifacts. Saves fresh metadata in this packet.
++    No target script import, toolchain query, compilation, OS ownership or process operation occurs.
++.EXAMPLE
++    ./New-PreparationStaticEvidence.ps1
++.NOTES
++    Author: Codex U-M test author. Created: 2026-10-24.
++    Requires: PowerShell 7.6.7 (ps7), ordinary sandbox; no module installation.
++    Exit 0: static evidence saved; 2: adapter/static failure. Not a behavior execution.
++#>
++#Requires -Version 7.6
++[CmdletBinding()]
++param()
++Set-StrictMode -Version 3.0
++$ErrorActionPreference = 'Stop'
++
++function Write-PacketJson {
++    <# .SYNOPSIS
++        Saves fresh static metadata with CreateNew
++    .PARAMETER Name
++        Fixed filename directly in this author packet.
++    .PARAMETER Value
++        Metadata to serialize.
++    .EXAMPLE
++        Write-PacketJson -Name 'static-evidence.json' -Value $record
++    .NOTES
++        Private test helper; PowerShell 7.6.7.
++    #>
++    [CmdletBinding()]
++    param([string]$Name, [object]$Value)
++    $bytes = [Text.UTF8Encoding]::new($false, $true).GetBytes(($Value | ConvertTo-Json -Depth 30))
++    $stream = [IO.File]::Open((Join-Path $PSScriptRoot $Name), 'CreateNew', 'Write', 'None')
++    try {
++        $stream.Write($bytes, 0, $bytes.Length)
++        $stream.Flush($true)
++    }
++    finally { $stream.Dispose() }
++}
++
++function Get-ByteDigest {
++    <# .SYNOPSIS
++        Hashes isolated bytes without filesystem access
++    .PARAMETER Bytes
++        Exact bytes whose SHA256 is required.
++    .EXAMPLE
++        Get-ByteDigest -Bytes $raw
++    .NOTES
++        Private static helper; PowerShell 7.6.7.
++    #>
++    [CmdletBinding()]
++    [OutputType([string])]
++    param([byte[]]$Bytes)
++    [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($Bytes))
++}
++
++function Get-UniqueText {
++    <# .SYNOPSIS
++        Requires one exact ordinal occurrence
++    .PARAMETER Text
++        Parent source text.
++    .PARAMETER Needle
++        Fixed original fragment.
++    .EXAMPLE
++        Get-UniqueText -Text $text -Needle '$packetRoot = $PSScriptRoot'
++    .NOTES
++        Private static helper; PowerShell 7.6.7.
++    #>
++    [CmdletBinding()]
++    param([string]$Text, [string]$Needle)
++    $position = $Text.IndexOf($Needle, [StringComparison]::Ordinal)
++    if ($position -lt 0 -or $Text.IndexOf($Needle, $position + 1, [StringComparison]::Ordinal) -ge 0) {
++        throw 'AdapterFailure: original fragment is not unique'
++    }
++    return $position
++}
++
++try {
++    $beforePath = Join-Path $PSScriptRoot 'before/Invoke-FirstFailureEnv01.ps1'
++    $sourcePath = Join-Path $PSScriptRoot '../Invoke-FirstFailureEnv01.ps1'
++    $bytes = [IO.File]::ReadAllBytes($beforePath)
++    $expectedHash = '0B6C78196FD5DB0CB5AE99364BC26720C99E2214467A71FC32156E2A12E91951'
++    if ((Get-ByteDigest -Bytes $bytes) -cne $expectedHash -or $bytes.Length -ne 19920 -or
++        [Convert]::ToHexString($bytes[0..2]) -cne 'EFBBBF' -or
++        (Get-FileHash -LiteralPath $sourcePath).Hash -cne $expectedHash) { throw 'Baseline drift' }
++    $utf8 = [Text.UTF8Encoding]::new($false, $true)
++    $text = $utf8.GetString($bytes, 3, $bytes.Length - 3)
++    $tokens = $null
++    $parseErrors = $null
++    $ast = [Management.Automation.Language.Parser]::ParseInput($text, [ref]$tokens, [ref]$parseErrors)
++    if ($parseErrors.Count -ne 0) { throw 'AdapterFailure: baseline parser errors' }
++    $bodyAssignment = @($ast.FindAll({
++        param($node)
++        $node -is [Management.Automation.Language.AssignmentStatementAst] -and
++        $node.Left.Extent.Text -ceq '$env01Body'
++    }, $true))
++    if ($bodyAssignment.Count -ne 1) { throw 'AdapterFailure: env01Body parent not unique' }
++    $body = @($bodyAssignment[0].FindAll({
++        param($node)
++        $node -is [Management.Automation.Language.ScriptBlockExpressionAst]
++    }, $false))
++    if ($body.Count -ne 1) { throw 'AdapterFailure: source-bound body not unique' }
++    $statements = @($body[0].ScriptBlock.EndBlock.Statements)
++    $spans = [Collections.Generic.List[object]]::new()
++    $descriptors = @(
++        @{ id = 'L1-Invoke'; exact = "'898C60B1133DB6956090035AF677B4CF7FDE0FE6FDFD5D47E5CD776B00500B71'" },
++        @{ id = 'L1-Fake'; exact = "'3482075BF7479E61942978830AE91FDDF5301133E1A2F43EDB9B65DDAA0FA016'" },
++        @{ id = 'L2-StartClockAnchor'; exact = "`$ErrorActionPreference = 'Stop'" },
++        @{ id = 'L2-FunctionAnchor'; exact = '$packetRoot = $PSScriptRoot' }
++    )
++    foreach ($descriptor in $descriptors) {
++        $offset = Get-UniqueText -Text $text -Needle $descriptor.exact
++        $spans.Add(@{ id = $descriptor.id; start = $offset; end = $offset + $descriptor.exact.Length
++            parent = 'ScriptBlockAst; literal/statement anchor'; original = $descriptor.exact })
++    }
++    $boundaries = @(
++        @{ id = 'L3'; first = '$rustc = (Get-Command rustc.exe -CommandType Application).Source'
++            lastPrefix = 'foreach ($path in @($rustc, $pwsh, $v2))' },
++        @{ id = 'L4'; first = 'Import-Module Pester -RequiredVersion 5.7.1'
++            lastPrefix = "Write-NewEvidence -Path (Join-Path `$OutputRoot 'toolchain.json')" },
++        @{ id = 'BaselineVersion'; first = '$version = & $rustc --version'
++            lastPrefix = "if (`$LASTEXITCODE -ne 0) { throw 'Rust toolchain query failed' }" }
++    )
++    foreach ($boundary in $boundaries) {
++        $first = @($statements | Where-Object { $_.Extent.Text -ceq $boundary.first })
++        $last = @($statements | Where-Object { $_.Extent.Text.StartsWith($boundary.lastPrefix, [StringComparison]::Ordinal) })
++        if ($first.Count -ne 1 -or $last.Count -ne 1 -or $first[0].Extent.StartOffset -ge $last[0].Extent.StartOffset) {
++            throw ('AdapterFailure: statement pair ' + $boundary.id)
++        }
++        $start = $first[0].Extent.StartOffset
++        $end = $last[0].Extent.EndOffset
++        $original = $text.Substring($start, $end - $start)
++        $null = Get-UniqueText -Text $text -Needle $original
++        $spans.Add(@{ id = $boundary.id; start = $start; end = $end
++            parent = 'Assignment $env01Body / ScriptBlockExpressionAst / EndBlock.Statements'
++            firstAst = $first[0].GetType().Name; lastAst = $last[0].GetType().Name; original = $original })
++    }
++    foreach ($span in $spans) {
++        $span.byteOffset = 3 + $utf8.GetByteCount($text.Substring(0, $span.start))
++        $originalBytes = $utf8.GetBytes($span.original)
++        $span.byteLength = $originalBytes.Length
++        $span.sha256 = Get-ByteDigest -Bytes $originalBytes
++        $span.allowedSubstitutions = @()
++        $rawSpan = $bytes[$span.byteOffset..($span.byteOffset + $span.byteLength - 1)]
++        if ((Get-ByteDigest -Bytes $rawSpan) -cne $span.sha256) { throw 'AdapterFailure: raw byte span differs' }
++        $restored = $text.Remove($span.start, $span.end - $span.start).Insert($span.start, $span.original)
++        $restoredBytes = [byte[]](@(0xEF, 0xBB, 0xBF) + $utf8.GetBytes($restored))
++        if ((Get-ByteDigest -Bytes $restoredBytes) -cne $expectedHash) { throw 'AdapterFailure: inverse bytes differ' }
++        $span.inverseFullBytes = $true
++    }
++    $oldPatchPath = Join-Path $PSScriptRoot 'before/unknown-descendant-tests.patch'
++    $oldPatchBytes = [IO.File]::ReadAllBytes($oldPatchPath)
++    $oldPatchText = [IO.File]::ReadAllText($oldPatchPath)
++    $patchPaths = @([regex]::Matches($oldPatchText, '(?m)^\+\+\+ b/(.+)\r?$') | ForEach-Object {
++        $_.Groups[1].Value.TrimEnd("`r")
++    })
++    if ($patchPaths.Count -ne 26) { throw 'Old patch restored file count differs' }
++    $oldFilePins = @(foreach ($path in $patchPaths) {
++        $fileBytes = [IO.File]::ReadAllBytes([IO.Path]::GetFullPath($path))
++        @{ path = [IO.Path]::GetFullPath($path); length = $fileBytes.Length
++            sha256 = Get-ByteDigest -Bytes $fileBytes
++            bom = [Convert]::ToHexString($fileBytes[0..([Math]::Min(2, $fileBytes.Length - 1))]) }
++    })
++    $expectations = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'expectations.json') -Raw -Encoding utf8 |
++        ConvertFrom-Json -AsHashtable
++    $actualCounts = @(1..6 | ForEach-Object {
++        $group = 'G' + $_ + '-'
++        @($expectations.inputs | Where-Object { $_.id.StartsWith($group, [StringComparison]::Ordinal) }).Count
++    })
++    if ($expectations.inputs.Count -ne 33 -or ($actualCounts -join ',') -cne '5,6,7,6,4,5' -or
++        @($expectations.inputs.id | Sort-Object -Unique).Count -ne 33) { throw 'Independent input count invalid' }
++    Write-PacketJson -Name 'baseline-binding.json' -Value @{
++        sourcePath = [IO.Path]::GetFullPath($sourcePath); sha256 = $expectedHash; length = 19920; bom = 'EF-BB-BF'
++        spans = @($spans); sourceInvocationCount = 0; productionPortInvocationCount = 0
++        substitutions = @(); candidateFunction = 'Pending'; candidateSha256 = 'Pending'
++    }
++    Write-PacketJson -Name 'preservation-before.json' -Value @{
++        oldPatchSha256 = Get-ByteDigest -Bytes $oldPatchBytes; oldPatchLength = $oldPatchBytes.Length
++        oldPatchPrefixMustRemainByteExact = $true; restoredFiles = $oldFilePins
++        sourceSha256 = $expectedHash; sourceLength = 19920; sourceBom = 'EF-BB-BF'
++    }
++    Write-PacketJson -Name 'static-evidence.json' -Value @{
++        classification = 'StaticPASS'; baselineParserErrors = 0; spans = $spans.Count
++        inverseByteChecks = $spans.Count; groups = 6; inputCounts = $actualCounts; inputs = 33
++        candidate = 'Pending'; behaviorRuns = 0; baselineRedRuns = 0; targetTopLevelRuns = 0
++        versionQueries = 0; compilations = 0; osOwnershipQueries = 0; realChildOperations = 0
++        privateProtocol = 'Pending designer specification and independent Pre; no guessed binding'
++        runtimeVersion = $PSVersionTable.PSVersion.ToString(); usageCounters = 'Unavailable'
++    }
++    Write-Output 'StaticPASS: 7 unique spans, 7 inverse byte checks; 6 groups/33 inputs; runtime 0'
++    exit 0
++}
++catch {
++    Write-Error -ErrorRecord $_ -ErrorAction Continue
++    exit 2
++}
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/Old-VersionBoundary.Tests.ps1 b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/Old-VersionBoundary.Tests.ps1
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/Old-VersionBoundary.Tests.ps1
+@@ -0,0 +1,89 @@
++﻿<#
++.SYNOPSIS
++    Reproduces the old preparation version deadline behavior in memory
++.DESCRIPTION
++    Executes exactly two uniquely pinned baseline statements, not the source script.
++    The executable variable is a memory-only scriptblock. No native tool, probe main,
++    production port, OS ownership, compilation or real child process is reached.
++    This is one baseline subset of G2-03, not an additional candidate input.
++.EXAMPLE
++    Import-Module Pester -RequiredVersion 5.7.1
++    Invoke-Pester -Path ./Old-VersionBoundary.Tests.ps1 -Output Detailed
++.NOTES
++    Author: Codex U-M test author. Created: 2026-10-24.
++    Requires: PowerShell 7.6.7 (ps7), installed Pester 5.7.1 only; ordinary sandbox.
++    Not executed by author. The expected RED is a missing deadline error after a valid adapter.
++    Parser/extraction/fixture failure is AdapterFailure and must never count as RED.
++#>
++#Requires -Version 7.6
++[CmdletBinding()]
++param()
++
++BeforeAll {
++    Set-StrictMode -Version 3.0
++    $ErrorActionPreference = 'Stop'
++    $script:Binding = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'baseline-binding.json') -Raw -Encoding utf8 |
++        ConvertFrom-Json -AsHashtable
++    $sourcePath = Join-Path $PSScriptRoot 'before/Invoke-FirstFailureEnv01.ps1'
++    if ((Get-FileHash -LiteralPath $sourcePath).Hash -cne $script:Binding.sha256) {
++        throw 'AdapterFailure: baseline hash'
++    }
++    $span = @($script:Binding.spans | Where-Object id -CEQ 'BaselineVersion')
++    if ($span.Count -ne 1 -or $span[0].allowedSubstitutions.Count -ne 0 -or -not $span[0].inverseFullBytes) {
++        throw 'AdapterFailure: baseline version span metadata'
++    }
++    $bytes = [IO.File]::ReadAllBytes($sourcePath)
++    $raw = $bytes[$span[0].byteOffset..($span[0].byteOffset + $span[0].byteLength - 1)]
++    if ([Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($raw)) -cne $span[0].sha256) {
++        throw 'AdapterFailure: baseline raw span'
++    }
++    $sourceText = [Text.UTF8Encoding]::new($false, $true).GetString($raw)
++    if ($sourceText -cne $span[0].original) { throw 'AdapterFailure: original text' }
++    $tokens = $null
++    $errors = $null
++    $ast = [Management.Automation.Language.Parser]::ParseInput($sourceText, [ref]$tokens, [ref]$errors)
++    if ($errors.Count -ne 0 -or $ast.EndBlock.Statements.Count -ne 2) {
++        throw 'AdapterFailure: extracted parser/statement count'
++    }
++    $commands = @($ast.FindAll({
++        param($node)
++        $node -is [Management.Automation.Language.CommandAst]
++    }, $true))
++    if ($commands.Count -ne 1 -or $commands[0].Extent.Text -cne '& $rustc --version' -or
++        $commands[0].InvocationOperator -cne 'Ampersand') {
++        throw 'AdapterFailure: extracted command boundary'
++    }
++    if (@($ast.FindAll({
++        param($node)
++        $node -is [Management.Automation.Language.InvokeMemberExpressionAst] -or
++        $node -is [Management.Automation.Language.FileRedirectionAst]
++    }, $true)).Count -ne 0) { throw 'AdapterFailure: external boundary in extracted source' }
++    $script:VersionStatements = [scriptblock]::Create($sourceText)
++}
++
++Describe 'G2-03 baseline version delayed return' {
++    It 'rejects success returned at the 2000ms version deadline' {
++        $memory = @{ now = 0L; phaseDeadline = 2000L; calls = 0; argv = @(); productionCalls = 0 }
++        # This is the entire unsafe boundary. It cannot reference any external executable.
++        $rustc = {
++            param([string]$VersionArgument)
++            $memory.calls++
++            $memory.argv = @($VersionArgument)
++            $memory.now = 2000L
++            return 'memory rustc version'
++        }.GetNewClosure()
++        if ($rustc -isnot [scriptblock]) { throw 'AdapterFailure: executable is not a memory scriptblock' }
++        $LASTEXITCODE = 0
++        $deadlineError = $null
++        $clock = [Diagnostics.Stopwatch]::StartNew()
++        try { . $script:VersionStatements }
++        catch { $deadlineError = $_ }
++        if ($memory.calls -ne 1 -or ($memory.argv -join ',') -cne '--version' -or
++            $memory.now -ne 2000 -or $memory.productionCalls -ne 0 -or $clock.Elapsed.TotalSeconds -ge 5) {
++            throw 'AdapterFailure: memory boundary or group budget'
++        }
++        # The source accepted the delayed exit0. This null is the expected behavior failure.
++        # No missing future helper is involved; the original two statements parsed and completed.
++        $deadlineError | Should -Not -BeNullOrEmpty -Because 'deadline equality is expired under approved U-L contract'
++    }
++}
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/Old-VersionReceipt.tool.json b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/Old-VersionReceipt.tool.json
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/Old-VersionReceipt.tool.json
+@@ -0,0 +1,9 @@
++{
++  "cmd": "& 'F:/Program Files/PowerShell/7/pwsh.exe' -NoLogo -NoProfile -NonInteractive -File 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/Invoke-OldVersionReceipt.ps1'\nexit $LASTEXITCODE",
++  "workdir": "F:/Kazuhiro/GitHub/WordWeave5",
++  "shell": "F:/Program Files/PowerShell/7/pwsh.exe",
++  "login": false,
++  "sandbox_permissions": "use_default",
++  "max_output_tokens": 2000,
++  "yield_time_ms": 10000
++}
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/preservation-before.json b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/preservation-before.json
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/preservation-before.json
+@@ -0,0 +1,166 @@
++{
++  "oldPatchSha256": "8F0DC52FD593EF4B37843CD3C855D00052A278E3BB2EDD2BB5C67E085556B7AE",
++  "oldPatchPrefixMustRemainByteExact": true,
++  "sourceSha256": "0B6C78196FD5DB0CB5AE99364BC26720C99E2214467A71FC32156E2A12E91951",
++  "sourceBom": "EF-BB-BF",
++  "oldPatchLength": 445885,
++  "sourceLength": 19920,
++  "restoredFiles": [
++    {
++      "length": 4665,
++      "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\ef551043-d22a-44a7-903b-1e9540efc910\\author-report.md",
++      "sha256": "0E0A4738AF4A8400B1EEDFD23CD6C4F517D5D1AC6E545C18EDF99762F5201BFE",
++      "bom": "232041"
++    },
++    {
++      "length": 41833,
++      "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\ef551043-d22a-44a7-903b-1e9540efc910\\baseline-extraction.json",
++      "sha256": "736A0F5F4042BF9CC2031FC504A4A880261226E31FB27BC32A6265E8E155E4BF",
++      "bom": "7B0A20"
++    },
++    {
++      "length": 23180,
++      "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\ef551043-d22a-44a7-903b-1e9540efc910\\expectations.json",
++      "sha256": "A1914AD22D864A30FEFEA90801F349F152EB23177E92E75774863F880047FAD4",
++      "bom": "7B0A20"
++    },
++    {
++      "length": 5958,
++      "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\ef551043-d22a-44a7-903b-1e9540efc910\\manifest.json",
++      "sha256": "F5793B16E37A239FB07F6655F16956499A1C19ED3DE7DACB3D04F2D40B1E36FD",
++      "bom": "7B0A20"
++    },
++    {
++      "length": 1504,
++      "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\ef551043-d22a-44a7-903b-1e9540efc910\\old-o1-binding.json",
++      "sha256": "57BDAF5F6154E12B3EB1360A25B197D52375CE54EEA71945D96DCB15F34A6E09",
++      "bom": "7B0A20"
++    },
++    {
++      "length": 3634,
++      "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\ef551043-d22a-44a7-903b-1e9540efc910\\old-o1.rs",
++      "sha256": "17BCA7FAD61F5AE02D9CAC26B1A5C8D6B77E38740E82AB8D5156A23B1F72D835",
++      "bom": "2F2F20"
++    },
++    {
++      "length": 3901,
++      "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\ef551043-d22a-44a7-903b-1e9540efc910\\static-evidence-attempt1.json",
++      "sha256": "D2A53B4B87640CC247968DDD5E91FF4CB8A501AF87498C18711E13C6C46E6D30",
++      "bom": "7B0A20"
++    },
++    {
++      "length": 3614,
++      "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\ef551043-d22a-44a7-903b-1e9540efc910\\static-evidence.json",
++      "sha256": "BC971194D79A1DB19AB8DE3F32F3E8A5D8BD4D6657496647100D52A3F89F6576",
++      "bom": "7B0A20"
++    },
++    {
++      "length": 12568,
++      "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\ef551043-d22a-44a7-903b-1e9540efc910\\old-o1-compile.receipt.json",
++      "sha256": "29635D20F81D54177954FF2A6EEDA92E880138E7922CF294E3E7365FDE87ED2C",
++      "bom": "7B0A20"
++    },
++    {
++      "length": 14717,
++      "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\ef551043-d22a-44a7-903b-1e9540efc910\\old-o1-run.receipt.json",
++      "sha256": "D3B378EF4B71D74879A974D1804EF2ABDB83089A1653D8CCE8F8ED7A5D6C0A80",
++      "bom": "7B0A20"
++    },
++    {
++      "length": 4700,
++      "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\ef551043-d22a-44a7-903b-1e9540efc910\\old-o1-receipts-static.json",
++      "sha256": "AFC199AA4A5CF1C678EAB5E6307FDB57B44F21B5FD388742A3B86A263751B7B3",
++      "bom": "7B0A20"
++    },
++    {
++      "length": 12824,
++      "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\ef551043-d22a-44a7-903b-1e9540efc910\\old-o1-compile.receipt.beforeStaticFix.json",
++      "sha256": "86812D051C3AE56B8C047E79938FA52B127015B79F7F6C7716A394A07E66D9A7",
++      "bom": "7B0A20"
++    },
++    {
++      "length": 14717,
++      "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\ef551043-d22a-44a7-903b-1e9540efc910\\old-o1-run.receipt.beforeStaticFix.json",
++      "sha256": "D3B378EF4B71D74879A974D1804EF2ABDB83089A1653D8CCE8F8ED7A5D6C0A80",
++      "bom": "7B0A20"
++    },
++    {
++      "length": 2176,
++      "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\ef551043-d22a-44a7-903b-1e9540efc910\\old-o1-receipts-static-fix.json",
++      "sha256": "758052F341EF0B8AE60E1F48C14A28588C2B62D3AE76DB17B7B645834F45A86E",
++      "bom": "7B0A20"
++    },
++    {
++      "length": 31658,
++      "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\ef551043-d22a-44a7-903b-1e9540efc910\\new-rust-unit.rs",
++      "sha256": "CA0053F9D5421421069529DE826E566ED190930A5ADBAD514BC8C5171C905F03",
++      "bom": "2F2F20"
++    },
++    {
++      "length": 45160,
++      "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\ef551043-d22a-44a7-903b-1e9540efc910\\new-ps-unit.ps1",
++      "sha256": "73EDB449D2610871C9D19CE306E2AF483A39CEC441BBCB663E569F430F97AD17",
++      "bom": "EFBBBF"
++    },
++    {
++      "length": 18447,
++      "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\ef551043-d22a-44a7-903b-1e9540efc910\\new-suite.ps1",
++      "sha256": "4327BD0AE5C0F850151C6F388BCC096FA44622F265A294B9C8AD5F4F8BB842E8",
++      "bom": "3C230A"
++    },
++    {
++      "length": 1729,
++      "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\ef551043-d22a-44a7-903b-1e9540efc910\\new-static-attempt1.json",
++      "sha256": "BF40BC670B22FC374866AA9CCCF06F69C3345E1FE2F96EE4A1C48CF1AD8A1EFA",
++      "bom": "7B0A20"
++    },
++    {
++      "length": 107393,
++      "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\ef551043-d22a-44a7-903b-1e9540efc910\\new-binding.json",
++      "sha256": "D2211A88897BF595C4F56B2EC8866FCF30347E2588EC186AE6CA40BE40577E81",
++      "bom": "7B0A20"
++    },
++    {
++      "length": 5780,
++      "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\ef551043-d22a-44a7-903b-1e9540efc910\\new-binding-static-attempt1.json",
++      "sha256": "9BA0ACE03AC26ECD4CAC08D775EFEB7C542D099F9567A8A30F0B441B248EECC5",
++      "bom": "7B0A20"
++    },
++    {
++      "length": 6115,
++      "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\ef551043-d22a-44a7-903b-1e9540efc910\\new-binding-static.json",
++      "sha256": "14ACDC83768772052819B0A395D43E88B65E7608154BDA7290AACC092E596916",
++      "bom": "7B0A20"
++    },
++    {
++      "length": 17271,
++      "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\ef551043-d22a-44a7-903b-1e9540efc910\\new-manifest.json",
++      "sha256": "CE511B7393FE4B25D1B8E5DB95D82CE0B168D30D99652D25A58A28E0B4A6CA17",
++      "bom": "7B0A20"
++    },
++    {
++      "length": 14471,
++      "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\ef551043-d22a-44a7-903b-1e9540efc910\\new-compile.receipt.json",
++      "sha256": "14AC69BDA4E4AD57A8C26A9D380B957EC6C44D536AEAB378611BE02D275F43A0",
++      "bom": "7B0A20"
++    },
++    {
++      "length": 16311,
++      "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\ef551043-d22a-44a7-903b-1e9540efc910\\new-suite.receipt.json",
++      "sha256": "D674693745D18D74729567FA685AC818F63588BD5EB0E171B0791CC76B3760D3",
++      "bom": "7B0A20"
++    },
++    {
++      "length": 9483,
++      "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\ef551043-d22a-44a7-903b-1e9540efc910\\new-final-static.json",
++      "sha256": "563FC2C7E942D4B3486C868019DB42C87B222B7F767DD5D87D2EB70552CE9241",
++      "bom": "7B0A20"
++    },
++    {
++      "length": 5288,
++      "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\ef551043-d22a-44a7-903b-1e9540efc910\\new-author-report.md",
++      "sha256": "9659853EA60073A9EC32F317CDC367A84C09A8395B1C8072B43B4343217568E7",
++      "bom": "232055"
++    }
++  ]
++}
+\ No newline at end of file
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/receipt-plan.json b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/receipt-plan.json
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/receipt-plan.json
+@@ -0,0 +1,61 @@
++{
++  "schemaVersion": 1,
++  "taskId": "ACOUSTIC-HISTORY-001",
++  "packet": "F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23",
++  "status": "Baseline fixed receipt prepared for independent Pre; no execution authorized by this file; candidate binding Pending",
++  "approvedProtocolDesignSha256": "9106C34AB0715B89023AB9AE359EAC35ABA64C9B48694894B85774BEE3A9EEFC",
++  "currentSourceSha256": "0B6C78196FD5DB0CB5AE99364BC26720C99E2214467A71FC32156E2A12E91951",
++  "candidateSourceSha256": "Pending",
++  "generatedExeSha256": "PendingGeneration; never fill with unit/source digest",
++  "runtime": {
++    "path": "F:/Program Files/PowerShell/7/pwsh.exe",
++    "version": "7.6.7",
++    "requiredPins": ["pwsh.exe", "pwsh.dll", "System.Management.Automation.dll", "pwsh.runtimeconfig.json", "pwsh.deps.json", "installed Pester 5.7.1 manifest/load files including Pester.ps1 invoked by Pester.psm1 Invoke-InNewScriptScope"],
++    "receiptBeforeAfterPinCount": 18,
++    "pesterScriptSha256": "01B03D7CA5F727DE93B65D8A2B172D1F06EF306A62915893333302AACA57BCA7",
++    "loadedRuntimeEvidence": "Actual version, processPath and SMA assembly path at runner time; no OS ownership query"
++  },
++  "baseline": {
++    "testPath": "Old-VersionBoundary.Tests.ps1",
++    "acceptance": ["G2-03", "E-R2"],
++    "expectedTestCount": 1,
++    "expectedFailureCount": 1,
++    "expectedFailure": "Should -Not -BeNullOrEmpty at the deadlineError assertion, after memory boundary checks pass",
++    "notRed": ["BeforeAll failure", "AdapterFailure", "Pester discovery failure", "parser failure", "missing source/helper", "module unavailable", "no test executed"],
++    "nativeCommand": "& 'F:/Program Files/PowerShell/7/pwsh.exe' -NoLogo -NoProfile -NonInteractive -File 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/Invoke-OldVersionRed.ps1'",
++    "receiptCommand": "& 'F:/Program Files/PowerShell/7/pwsh.exe' -NoLogo -NoProfile -NonInteractive -File 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/Invoke-OldVersionReceipt.ps1'",
++    "resultUuid": "8eac74a4-a484-41df-a1ff-08cfdf25aa28",
++    "expectedNativeExit": 1,
++    "nativeCommandStatus": "Fixed original command and receipt; execution pending author artifact Pre and parent freeze"
++  },
++  "candidate": {
++    "nativeCommand": null,
++    "expectedExit": 0,
++    "inputs": 33,
++    "inputCounts": [5, 6, 7, 6, 4, 5],
++    "function": "Invoke-Env01Preparation",
++    "ports": ["Now", "ReadState", "Hash", "Start", "Poll", "Stop", "Wait", "Save"],
++    "replacementCount": 0,
++    "bindingStatus": "Protocol Pre PASS; candidate not present, exact original function extraction Pending",
++    "productionPortsExecuted": 0,
++    "sourceMainExecuted": 0
++  },
++  "fixedReceiptRequirements": {
++    "reuse": "Existing new-suite.receipt.json shape for before/after pins, streamsSaved, actualExit, attempts, retry, accepted and problems; write a new fixed command, never replace strings dynamically",
++    "saveMode": "Separate stdout.txt/stderr.txt/exit.json/before.json/execution.json with CreateNew and no same-path retry",
++    "actualExit": "Capture LASTEXITCODE immediately after native return, persist exit.json before classification or after-pins",
++    "nativeExit1": "BehaviorMismatch",
++    "nativeExit2": "AdapterFailure; never accepted as behavior RED",
++    "stop": ["firstUnexpected", "binding/adapter failure", "input or source drift", "group>=5s", "collection>=30s", "evidence save failure"],
++    "afterStop": "Later input rows NotRun; retry0; preserve partial streams and generated bytes",
++    "clockLimit": "Pre/post elapsed checks do not prove forced cancellation of a blocking host/OS API",
++    "evidenceBoundary": "No raw runtime output or generated binary in tracked patch"
++  },
++  "pending": [
++    "Candidate function presence, original text/hash and command/member/type allowlist",
++    "Memory fixture implementation bound to protocol, 33-input executable unit and separate failure classes",
++    "Candidate author binding and implementation non-owned inverse-byte/BOM proof",
++    "Fixed native runner receipt commands with all runtime/artifact before+after pins and fresh UUID result roots",
++    "Independent author artifact Pre and parent freeze before any baseline/candidate behavior run"
++  ]
++}
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/static-checks.json b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/static-checks.json
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/static-checks.json
+@@ -0,0 +1,26 @@
++{
++  "schemaVersion": 1,
++  "scope": "U-M preparation subset; no behavior test run",
++  "runtime": "PowerShell 7.6.7",
++  "analyzer": "PSScriptAnalyzer 1.25.0 default rules; no suppression/exclusion",
++  "files": [
++    { "name": "New-PreparationStaticEvidence.ps1", "parserErrors": 0, "ordinaryDiagnostics": 0, "engineErrors": 0 },
++    { "name": "Old-VersionBoundary.Tests.ps1", "parserErrors": 0, "ordinaryDiagnostics": 0, "engineErrors": 0 },
++    { "name": "Invoke-OldVersionRed.ps1", "parserErrors": 0, "ordinaryDiagnostics": 0, "engineErrors": 0 },
++    { "name": "Invoke-OldVersionReceipt.ps1", "parserErrors": 0, "ordinaryDiagnostics": 0, "engineErrors": 0 }
++  ],
++  "earlierAttempts": [
++    { "kind": "CommandFailure", "detail": "Author first used nonexistent Invoke-ScriptAnalyzer -LiteralPath. Both analyses did not run; no clean engine claim is derived from that attempt." },
++    { "kind": "StaticDiagnostics", "count": 2, "detail": "Missing OutputType string on byte digest helper; rustc variable appeared unused to static analysis. Added OutputType and explicit scriptblock boundary assertion; no suppressions or expectation changes." },
++    { "kind": "ReceiptStaticDiagnostics", "count": 2, "detail": "Get-ReceiptPins plural noun and missing Hashtable OutputType. Renamed Get-ReceiptPin and declared OutputType; no suppressions or gate change." }
++  ],
++  "counts": { "groups": 6, "inputs": 33, "uniqueBaselineSpans": 7, "inverseBytes": 7, "oldPatchFilesPinned": 26 },
++  "behaviorRuns": 0,
++  "preRemediation": {
++    "finding": "P1 missing executed Pester.ps1 before/after pin",
++    "pinCountBefore": 17, "pinCountAfter": 18,
++    "pesterScriptSha256": "01B03D7CA5F727DE93B65D8A2B172D1F06EF306A62915893333302AACA57BCA7",
++    "scope": "One receipt pin and adjacent metadata only; ps7; no settings, thresholds or dependency-search expansion"
++  },
++  "meaning": "Static/fixture preparation only; no observed BehaviorRED, no candidate PASS, no OS guarantee"
++}
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/static-evidence.json b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/static-evidence.json
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23/static-evidence.json
+@@ -0,0 +1,27 @@
++{
++  "classification": "StaticPASS",
++  "candidate": "Pending",
++  "inputCounts": [
++    5,
++    6,
++    7,
++    6,
++    4,
++    5
++  ],
++  "behaviorRuns": 0,
++  "spans": 7,
++  "groups": 6,
++  "versionQueries": 0,
++  "privateProtocol": "Pending designer specification and independent Pre; no guessed binding",
++  "targetTopLevelRuns": 0,
++  "runtimeVersion": "7.6.7",
++  "realChildOperations": 0,
++  "inverseByteChecks": 7,
++  "compilations": 0,
++  "baselineRedRuns": 0,
++  "inputs": 33,
++  "baselineParserErrors": 0,
++  "usageCounters": "Unavailable",
++  "osOwnershipQueries": 0
++}
+\ No newline at end of file

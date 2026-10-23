@@ -1,5 +1,15 @@
 # ET3 試用EXE提供の使用量観測
 
+## 検証用安全手順の限定修正・合成検証（2026-10-24）
+
+利用者が直前提示の「3点を補う検証用手順の限定設計・修正・合成検証、実環境試験は含めない」に続行を指示した。開始HEADb85c6eb/tree clean、共有週枠1%/10080分/reset1793372790はアカウント共通で専有量不明。親開始snapshot2026-10-23T15:19:57.933Z（JST24日）input2178159905/cached2132699392/output4831174/reasoning1621068/total2182991079/cache_write0。着手から最初の取得まで・子usage/provider実値/親子包含は未取得で合算しない。親モデル変更0、planner指定Astra/highが既存未達3点に対する有限change setを追補する。完了境界は安全手順の限定変更・独立合成検証・レビューであり、実OS ENV01/本物診断fake compile/製品build/admin/隔離外/設定/実data/APIは解除しない。
+
+終了区切りsnapshot2026-10-23T16:07:48.168Z（JST24日）input2200797190/cached2155234432/output4859560/reasoning1630202/total2205656750/cache_write0。差分input22637285/cached22535040/output28386/reasoning9134/total22665671。最終記録/commit/push/最終応答は未反映、着手から開始snapshot前と子counter/親子包含/provider実値は欠測で合算しない。共有週枠1→5%/10080分/reset1793372790はアカウント共通で当該作業専有4%とは断定しない。
+
+到達点はU-L設計と8ports exact protocolの独立是正Pre、33期待/元7span/旧REDreceipt/39file復元の独立Pre、別runnerによる旧版確認一回までである。最後はPester標準registry fixtureの権限拒否でAdapterFailure2となりRED未成立。本体実装と候補33GREENは未着手であり、実装完了や試験PASSとは称さない。設定変更と再実行は追加承認を質問して停止し、旧失敗・一回消費・18pin保全/保存正常を保持した。直接OS設定変更/admin/隔離外/実data/API/製品変更/既成功51反復0、frameworkのregistry作成試行拒否と残留未確認は別記した。
+
+役割指定はplanner Astra/high、designer/author/reviewer Sol6.1/high、runner Sol6.1/medium、親変更0。通常1補助、独立所有のoracle準備と不足protocol設計・計画接合と固定設計Preの間だけ限定並行した。設計Start部分成功/portshape/Start0区分、Pester実load pin、patchのBOM/CRLF/NoNewline再現不足を実装前に是正したが手戻りが生じた。改善候補は、テスト作者handoff前のexact portprotocol、既存testframeworkの未使用自動fixtureと副作用の静的確認、原本bytesからの標準diff生成による改行metadata保全である。新framework/設定変更や品質低下を自動導入せず、方式比較の使用量削減実績は未判定とする。
+
 ## UNKNOWN実OS観測の実行前条件整理（2026-10-24）
 
 開始HEAD9e8fffc/tree clean。利用者の続行依頼を受け、完了済みの局所51入力は再実行せず、次の限定観測の承認条件を静的に整理する。親モデル変更0、計画担当は指定ww-planner/gpt-6-astra/high、provider実値・子usage・親子包含は未取得。開始共有週枠0%/10080分/reset1793372790はアカウント共通で専有量不明、前回resetを跨ぐ差分は取らない。

@@ -1,5 +1,11 @@
 # 現在のタスク要約
 
+## 最新状態：検証用安全手順の限定修正を開始（2026-10-24）
+
+最新停止点：設計9106C34A…と独立33期待/旧RED実行PreはPASS後、親freeze C70B911F…で旧version合成確認を一回実行した。しかしPesterのTestRegistry標準初期化がHKCU権限拒否となり、native/receipt/tool exit2・AdapterFailure・accepted=falseで停止した。RED未成立、33候補GREEN/本体修正は未着手である。18pins前後不変/正常保存/2.6680518秒/retry0。不要plugin参照0を作者が静的確認し、config.TestRegistry.Enabled=falseとTestDrive.Enabled=falseの2行案を作成したが未適用。harness設定変更と新一回枠の追加承認を質問済みで、返答まで変更/再実行しない。frameworkのレジストリ作成試行は拒否されたが成功・残留/後片付けは未確認、親やrunnerによる直接操作/権限昇格/OS設定変更は0である。
+
+HEADb85c6eb/tree cleanから、利用者が直前提示の限定設計・修正・合成検証への続行を指示した。planner指定Astra/highがU-L～Pを追補、designer指定Sol6.1/highが内部設計を作成中。完了境界は検証用の時間制限・照合・生成後明示停止の限定変更、独立合成試験とレビューまでである。実OS ENV01/本物fake compile/製品EXE/admin/隔離外/OS設定/実data/API/既成功51入力反復は対象外。公開param変更や実再開入口の追加は無断で行わず、生成後AwaitingApprovalで止める今回経路と、別承認が必要な将来再開を区別する。正本は再開計画U-L～Pと設計の最新追補、usage記録である。
+
 ## 最新状態：実OS観測の実行前準備（2026-10-24）
 
 HEAD9e8fffc/tree cleanから続行。完了済み合成51入力は反復せず、planner Astra/highが再開計画末尾U-H～Kを追補、designer Sol6.1/highが静的案を作成した。独立reviewer Sol6.1/highは停止条件妥当/実行Pre未達と確認した。既存probeの旧Invoke/fake固定hashだけでなく、compile込み外側停止、依存/書込先/sandbox範囲、生成後freezeの承認方式が未充足である。次は検証用手順の不足を埋める限定設計と、必要なsource変更/合成検証の承認であり、実OS試験承認だけで開始しない。対象実行/ValidateOnly/compile/OS照会/製品変更0。正本は[再開計画](ACOUSTIC-HISTORY-001/unknown-descendant-resume-plan.md)末尾と[設計](ACOUSTIC-HISTORY-001/unknown-descendant-design.md)末尾、独立結果は[review](ACOUSTIC-HISTORY-001/unknown-descendant-review.md)であり、以下の局所検証PASSは維持する。

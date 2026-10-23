@@ -47,6 +47,28 @@ O5-diagnosticfail一件のtest-only構築失敗seamを設計へ明示したが�
 
 通常のgit diff --cached --checkはharness.patch8/79/83/154行の末尾空白4件でexit1となった。独立reviewerは全4行が単一空白の正当なunified diff「空行context」であり、他の末尾空白0と確認した。これを診断0へ改稿せず、raw差分データの文法として分類した。trimすると復元性を壊すため削除せず、検査設定・除外・抑制も変更しない。この判断は083DD2E6…の4行だけに限定し、将来の別診断を無条件受入しない。
 
+## U-L準備経路の設計Pre（2026-10-24）
+
+利用者が検証用手順の限定設計・修正・純合成検証への続行を承認した。designer Sol6.1/highは公開param/既存function signatureを変更せず、private準備関数と8境界、L1～L4の許可span、生成保存後AwaitingApproval/元exit1/dispatch0を固定した。再開/token機能は今回未実装である。実OS/fakecompile/製品/admin/隔離外等は引き続き除外する。
+
+初回設計ECD3C7FA…の独立Preは、子起動後にstream設定やStartTime取得が失敗すると所有handleを渡せない契約の欠落1件で差戻した。元設計はpacket 0b99d098-c2e7-49ae-8296-a354a72c543b/before/design-ECD3.mdへ保全し、designerが起動後も同一handleと元errorを共通回収へ渡す契約とG3の独立2入力を追加した。現設計FB0F6359848A881726B693BF79AC072768EF78F6D26C044DC892CD09F34B5E15は当該限定是正Pre PASS、追加阻害0。Stop最大1/unknown Stop0/primary保持/未回収RecoveryUnknown、変更範囲と旧原本SHA一致を独立確認した。期待は6群33入力（5/6/7/6/4/5）に接合し、U-M独立作者へ渡した。33入力合格や実OS許可ではない。
+
+plannerによる別文書の状態接合と、不変designの限定是正Preのみ、所有/入力が独立するため一時的に並行した。通常は1補助ずつである。親model/effort変更0、実provider値/子usageは未取得。
+
+U-M作者は8portsの引数/返却shape未定義を検出し、独立33期待/元span準備だけを継続して設計へ差戻した。designerはReadState読取専用/Save.CreateTempの書込分離、ErrorRecord同一参照、Inputs/evidence/resultのexactshapeを追補した。F2C44080…の独立差分Preは、末尾のStart0が起動後異常にも累積0を要求すると読める矛盾1件で保留した。F2原本を保全し、起動前=累積Start0/起動後=追加Start0と保持handle回収に一文だけ補正した。現設計9106C34AB0715B89023AB9AE359EAC35ABA64C9B48694894B85774BEE3A9EEFCは限定是正Pre PASS、追加指摘0でU-M接合へ渡した。33期待/本体/実行は変更0であり実装・試験PASSではない。独立所有の期待準備とprotocol設計だけを限定並行した。
+
+## U-M前半の旧RED実行Pre（2026-10-24）
+
+独立reviewer Sol6.1/highはpacket6201d237…の7span/逆bytes7、33期待、固定assertion限定RED分類、別stream/即exit保存、UUID未作成/retry0を確認した。patch986A9866…は39/39memory復元一致/旧445885bytes prefix不変である。diff-check警告293件は原本CRLFのdataで、新たな末尾空白/tab0と独立分類した。診断0とは報告せず、当該SHAに限定し設定/抑制/trim変更0。
+
+PreはPesterの実load file Pester.ps1が17pinsに含まれない1件で差戻した。現Pester.psm1のInvoke-InNewScriptScopeから実行され、実file SHA01B03D7CA5F727DE93B65D8A2B172D1F06EF306A62915893333302AACA57BCA7が前後固定対象に必要である。作者へ当該file追加とmanifest/receipt/件数/patchだけの接合を委任し、33期待と元assertionを変更しない。候補GREEN33は未実装Pending、RED実測もまだ未実施である。
+
+是正PreはPASS。Pester.ps1を含む18/18pin一致、manifest参照不一致0、33期待/tool不変、39/39復元一致/旧prefix維持を独立確認した。patch931FA727…のCRLF293行も原本由来のdataであり不要末尾空白/tab0と確認し、設定/抑制/trimは変更0である。
+
+親freeze C70B911F…後の一回実行はnative/receipt/tool2・AdapterFailure・accepted=falseで停止した。独立read-only事後確認は、Pester TestRegistry初期化のHKCUアクセス拒否/containerfailed1と、18pin差分0/保存正常/2.668秒/retry0に整合し、特定deadline assertionのBehaviorRED未成立と確認した。元エラーを成功へ書き換えず、旧一回枠は消費済みである。
+
+同梱Pester5.7.1 help202–210とplugin登録条件を限定読取し、対象testがTestRegistry/TestDriveを参照しないことを確認した。config生成後のTestRegistry.Enabled=false/TestDrive.Enabled=falseの2行案は未使用registry/temp初期化だけを外し、assertion/33期待/期限/分類を維持する案として独立静的妥当性を確認した。設定変更の承認/実際の編集/新pin freeze/独立差分Pre/新一回実行は未成立、実行許可とはしない。plannerも追加harness設定承認が必要と判定し、親がasync質問済みである。frameworkのregistry作成試行は拒否され、成功や残留/後片付けは未確認。直接registry操作・昇格・OS設定変更・再試行0。
+
 ## 実OS観測の静的案Pre（2026-10-24）
 
 designer指定Sol6.1/highの設計追補166F267C71D5DCEE135134A575A6F76D27A0E42AD07B338CB527AA1DE0B84C57を、別reviewer指定Sol6.1/highが限定read-only確認した。承認前準備の停止条件は妥当だが、実行Preは未達、U-H全体完了とは扱わない。未充足はcompile込み外側停止（既存同期version/compileは90秒監視前）、依存/書込先/OS観測とsandbox範囲の固定、同一入口の生成後freeze承認方式の3点である。これらは確認済みの新しい実装欠陥ではなく、実行案の不足である。元oracle/Err/unknown非停止/retry0/期限/診断と元判定の分離には追加矛盾を認めず、既成功51入力は再レビューしなかった。次は不足安全手順の限定設計・必要なsource変更の承認であり、実OS一回枠をそのままdispatchしない。対象実行/ValidateOnly/compile/OS照会/編集/再委任0、provider実値と子usageは未取得。
