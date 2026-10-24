@@ -263,3 +263,57 @@ task-list/checkpoint： [x] U-L設計差分Pre→planner精緻化、[ ] U-M期�
 Q=`R/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23`の`OLD-VERSION-RUNNER-REPORT.md`と保存stdoutを読取確認した。一回実測はexit2/AdapterFailure/accepted=false、TestRegistryの`HKCU\Software\Pester`初期化権限拒否でcontainer failed1、特定assertion RED未成立である。18pins前後不変、保存正常、2.6680518秒、retry0を保持する。
 追加の限定harness設定承認が必要と判定する。`Invoke-OldVersionRed.ps1:25–33`のPester設定にTestRegistry/TestDrive無効化はなく、その追加はAGENTSの「Seek approval before changing harness/settings」に該当する。未使用fixtureの無効化は最小対案だが、一般的な純合成検証承認だけから設定変更を承認済みとしない。作者が未使用性と変更spanを確認して親へ返す。
 33期待・旧REDの特定assertion・期限・判定を変更せず、旧失敗証拠/一回枠を保全する。設定差分と新一回枠の明示承認→独立差分Pre→再freezeまで修正・再実行を停止する。レジストリ権限引上げ/隔離外/admin/品質緩和での回避0、本追補は文書のみで実装・設定変更・対象実行・再委任0である。
+
+## PSSA-CAP：エラー採取方式の承認済み限定見直し（2026-10-24、暫定計画）
+
+開始HEAD `96a6ace`／tracked tree clean。利用者がエラー採取方式の限定見直しを承認した。完了境界は限定設計→独立Pre→必要な採取手順修正→独立局所検証→Postであり、元NullReferenceの原因確定や33候補実行の解除を先取りしない。planner所有は本書末尾のみ、未完了の旧計画を保持する。U-L～Pの設計/33期待/元error/期限/所有安全契約は再利用する。
+T=`target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d`。読取比較の正本はT/g6-evidence-static-blocker.json（索引SHA `21B00027783A0F1FE2DE7D247584A5EC5DE24DCA183F4D9BA645A51F7DBE38E1`）、T/g6-evidence-cause-diagnostic.json（`3D7D833A7C20A78EFDAF7D417327AE2AA1A20C20ABEF8DFCCEA99C66EB794137`）の保存request/toolreturnである。今回その値を現物hash照合し直したとはしない。
+
+| 保存実行 | 同一Assertions `AFA82E807179DF852ECCB05D5A8C8F3919B9B1C4C9D981CFA0CD6F368FE824F4`に対する事実 | 限界 |
+| --- | --- | --- |
+| 通常初回／承認済みretry | PSSA1.25、ErrorAction Stop＋ErrorVariable＋catch、各exit2/ordinary0/engine2。tool wall time1.1868995／1.0906703秒 | engine2は同一失敗のErrorVariable記録とcaught wrapperであり独立障害2件ではない。戻ったstackはPowerShell側だけでrule/AST位置は未特定。途中停止のordinary0を全規則完走としない |
+| 詳細診断一回 | PS7.6.7/PSSA1.25、ErrorAction Continue＋Verbose＋全stream統合、exit0、engine0、87件すべてVerboseRecord、採取1.8949785秒、前後hash一致 | preference・Verbose・stream経路を同時変更しており未再現理由を一意化できない。元失敗を解消済みにせず、診断をgatePASSへ転用0 |
+
+CAP-R1：規則選択・設定・PSSA1.25/PS7.6.7を維持し、全severityの通常診断とengine errorを分離して採取する。いずれも1件以上、terminating例外、実行不完了、未知record、採取/保存失敗、drift、期限超過は非PASSとする。CAP-R2：ErrorVariableとcatchの重複を根拠付きで関連付けてもraw記録を捨てず、元errorを後段保存errorで置換しない。CAP-R3：入力/モジュール/command/規則・severity条件/前後hash/実exit/完了状態を固定記録し、取得不能は欠測とする。捕捉方式の変更を規則除外・依存更新・抑制追加・severity filterで代用しない。
+対象は採取器とその独立局所対照だけである。PreparationAssertionsの期待/本文、準備sourceF91C、33候補receiptの実行、元ENVprobe/ValidateOnly、実OS/compile/製品、OS設定/admin/隔離外/実data/API、既成功51/P7反復、commit/pushは対象外。tests.patch31CEF…/108復元とsave-only-state/index/旧prefixは保全し、保存成功を実行freezeに読み替えない。
+
+| 単位／依存・規模 | 所有と作業 | 受入・必要検証 |
+| --- | --- | --- |
+| CAP-D／本節受領、S | designerは既存unknown-descendant-design.md末尾のみ。既存3記録から採取/完了/判定/保存契約を定義し、変更点・合成seam・完全command案を固定 | CAP-R1～3、同一規則・全severity・engine必敗、元期限、重複関連付け/欠測/部分結果の扱いを独立設計Preで確認。原因仮説検証のための追加反復0。plannerは設計受領後に本節の未確定を精緻化 |
+| CAP-T／CAP-D差分Pre、S | 独立test authorはT/pssa-capture/のTest-PssaCapture.ps1、expectations.json、局所receipt/manifestのみ（予定path、未作成） | 正常完了、全severity診断、nonterminating error、terminating errorとwrapper重複、部分出力後失敗、module/capture/save失敗、drift/期限境界、未知recordの独立期待を固定。入力数・command・試行数をPre前に確定し、既存33期待へ追加/流用しない |
+| CAP-I／CAP-T期待Pre、S | implementerはT/pssa-capture/Invoke-PssaCapture.ps1の採取器1本だけ（予定path）。既存commandの採取責務を局所化し、新汎用framework/moduleや製品port変更を作らない | 必要な最小実装、Parser、許可範囲/旧入力不変を確認。期待作者は候補hashを固定期待へ束縛し、実装者が期待を変えない。独立差分Preと親freezeまで新対象PSSA実行0 |
+| CAP-V／最終Pre・親freeze、S | 別runnerは新局所output/logだけ、reviewer read-only、親が既存review/artifacts/currentへ接合 | 新合成対照を各入力一回。その成功後、採取器自身と固定Assertionsを各一回までのPSSA静的対象として順序/完全commandをPreで固定し実施する。firstUnexpected/engine failure/通常診断/保存不全/drift/超過で停止・後続NotRun・retry0。独立Postで採取の妥当性とAssertionsの今回gate結果を別判定する |
+
+新局所対照はmemory上の疑似record/例外/clock/保存sinkを基本とし、対象をdot-source/importして33動作を走らせない。通常sandbox内のPowerShell/PSSAによる静的解析だけを許可する。PSSA採取の入力10秒/集合30秒、既存合成case5秒/集合30秒をそれぞれ維持し、yieldや遅延返却を期限保証へ換算しない。ホスト上限・同期処理の中断限界は設計で明示し、無断のtimeout延長・外実行で救済しない。変更後の正常値が出るまで反復する方式は採らない。
+最大リスクはContinue採取中のengine errorを通常output/Verboseに混ぜて捨てる偽PASS、Stopによる部分結果を完走とする偽PASS、同一errorの二重計上を別障害とする誤診である。typed/raw記録・独立失敗対照・完了flagを設計で対応させる。新方式で未再現でも元原因は未確定のままであり、再度内部例外なら保存された範囲でblockerを返す。
+
+| 全CAP単位の役割割当 | exact model / effort | 適用・難度/リスク・理由 |
+| --- | --- | --- |
+| planner | `gpt-6-astra` / `high` | 固定、CAP-D後精緻化。中～高／採取変更と品質gateの境界を管理 |
+| external-spec author | `gpt-6-astra` / `high` | 固定、今回は非該当。既存all-severity/engine必敗/期限/外部期待を再利用する。変更が必要なら本計画を止め仕様工程へ戻す |
+| designer | `gpt-6.1-sol` / `high` | CAP-D、後は設計差戻しのみ。高／PowerShellの複数error経路と不完了状態の設計 |
+| test author | `gpt-6.1-sol` / `high` | CAP-Tと候補binding、他は非該当。高／偽PASSを見抜く独立期待と失敗対照 |
+| implementer | `gpt-6.1-sol` / `medium` | CAP-Iのみ。中／独立設計で固定した局所採取1本へ限定し、設計判断を追加しない |
+| test runner | `gpt-6.1-sol` / `medium` | CAP-Vのみ。中／固定入力・試行数・前後hashと停止条件の独立実施 |
+| reviewer | `gpt-6.1-sol` / `high` | 設計/期待/候補の必要差分PreとCAP-V Post。高／採取成功とgate成功を区別し品質条件の保持を独立確認 |
+
+上記は親提示の現在利用可能なexact ID/effortから選定した。非該当役は起動0、各単位に同割当を適用する。親modelは変更せず、通常補助1役ずつfresh context、作者/実装者/runner/reviewerを分離する。利用不能はblockerとしてplannerへ戻し、silent fallback/再委任0。役別既存Skillを再利用し、設計はapi-and-interface-design、作者はtest-driven-developmentの担当工程、実装/runnerはwordweave-changeの担当工程、reviewはreview-software-design/code-review-and-quality、PowerShell変更/レビュー時は対応powershell Skillを全文読了する。
+task-list：[ ] CAP-D設計/独立Pre→planner精緻化、[ ] CAP-T独立期待Pre、[ ] CAP-I候補/独立Pre→親freeze、[ ] CAP-V局所検証/Post。成功した場合も33候補の再binding/実行Preは別工程であり今回解除0。停止時は未達gateと必要な追加判断だけを返す。実provider model/effort・子usage・親子包含は未取得であり親がKPIの取得可能範囲を記録する。
+次handoffはCAP-D designer `gpt-6.1-sol/high`。本節と上記2JSONのrequest/toolreturn、現Assertions hashと旧保存索引だけを渡す。残る設計判断はStop/Continue等の採取方式、完了/未知recordの判定、重複の関連付け、有限な保存形式と合成入力数である。公開や他targetへ広げず、まず文書設計だけを行う。本planner工程のコード/期待編集・対象実行・新診断・再委任は0である。
+
+### CAP-D是正Pre受領後の有限精緻化（2026-10-24）
+
+親から設計SHA256 `8295FF7BDCF1AB56CA465A0B6BB1FD86263BD77D9C8B478371D98A7E338CA3A8`の独立限定再Pre PASSを受領した。初版20244…の実pipeline/EV/catch/finallyがseam外・最小shape未確定の2阻害は解消した。CAP-D設計/Preと本精緻化を完了とし、CAP-Tへ進める。これは実行Pre/freezeの完了ではない。
+採用契約はStop維持、実pipeline/逐次sink/EV/catch/finallyの原文抽出、producerだけmemory、固定state/flags/counts/返却shapeである。独立C01～C20の20期待を設計の照合先へ固定する。G6-05等の既存33期待/AssertionsAFA82E/準備sourceF91C/原NullReference2FAILは変更0である。
+
+| 精緻化単位／依存 | 所有・受入・停止 |
+| --- | --- |
+| CAP-T固定20／設計Pre済み | test author `gpt-6.1-sol/high`は固定20期待/試験/adapterを作成する。今回plannerとの並行は文書と試験の独立所有に限る。最終receipt/command/hashは本精緻化後に接合し、未存在候補hashを埋めない。候補実pipelineを手動record投入/完了flag代入で代用0 |
+| CAP-B旧方式焦点RED／独立期待・adapter Pre→親freeze | 同authorが保存staticRequests.pssaの旧`$diagnostics=@(...)`代入statementを特定し、元statement/hash/許可置換/逆bytes一致を固定する。producerだけをC07相当の実DiagnosticRecord出力→同一ErrorRecordのterminating throwへ結び、代入/catchは元方式を通す。「先行ordinaryを保持する」という焦点assertion1件の不成立を期待REDとする。原NullReference再現・missing helper・parse/adapter/module失敗をREDに数えない。別runner `gpt-6.1-sol/medium`が固定一回、特定assertion失敗のみexit1/accepted=true、その他失敗はexit2、予想外exit0も停止。実PSSA/候補20/33/実OSは0 |
+| CAP-I／CAP-T期待Pre＋CAP-B特定REDの独立受入 | implementer `gpt-6.1-sol/medium`はC=`T/pssa-capture/Invoke-PssaCapture.ps1`一つだけを実装する。作者が独立固定期待を変えず候補へ束縛し、C/Test Parser0・許可差分・全pin・外側責任を独立Preへ渡す。新PSSAはCAP-Vまで実行0 |
+| CAP-V／最終独立Pre→親freeze | 別runner `gpt-6.1-sol/medium`は固定20を各一回→C自身のPSSA一回→固定AssertionsのPSSA一回の順で実施する。firstUnexpectedで後続NotRun/retry0。20のexpected FAIL正検出はunit PASSであり、実PSSAの通常診断/engine error/不完了/保存不全/drift/超過は非PASSとして停止。reviewer `gpt-6.1-sol/high`のPostは20対照・self・Assertionsを別計上し、旧焦点RED1件も混算しない |
+
+時間枠は旧焦点RED1件の5秒/合成集合30秒、候補20の各5秒/合成集合30秒、実PSSA各10秒（work9＋save1）/2対象共通集合30秒を別々に固定する。PSSAのCollectionStartTickはself前に一回設定しAssertionsで更新0、境界一致は超過である。外側中断責任者・host上限・中断後欠測/保存の扱いは実行Preに未接合であり、yieldを保証とせず、未接合のまま旧RED/新対照/新PSSAをdispatchしない。既存設計command案を実行許可済みと扱わない。
+復元所有は、implementerがCの全内容/差分を既存`unknown-descendant-harness.patch`へ、test authorが試験/期待/adapter/receipt/bindingとrunnerから受領した未加工証跡の復元情報を既存`unknown-descendant-tests.patch`へ追加する。旧prefix/履歴/108復元対象を保全し、独立に全bytes/hash復元確認する。runnerは原ログ/報告のみ、reviewerはread-only、親は索引/受領接合のみで、同じpatchへ同時書込0。新.gitignore例外・target直管理・旧patchの黙示置換0であり既存2例外を維持する。
+全役model/effortはCAP表のまま、再選定なし。planner/必要時spec作者Astra/high、designer/作者/reviewer Sol6.1/high、implementer/runner Sol6.1/mediumをexact指定する。通常補助1役ずつ、実装/期待/実施/レビューの独立性を保持する。親の適時checkpoint commit/pushは利用者の既存standing authorizationに基づく別担当であり、本節の公開禁止は子に適用し、子commit/push/再委任0である。
+更新task-list：[x] CAP-D設計Pre/精緻化、[ ] CAP-T固定20/焦点RED期待Pre、[ ] CAP-B実行Pre/freeze/一回/独立受入、[ ] CAP-I候補Pre/freeze、[ ] CAP-V20→self→Assertions/Post。次handoffは既担当authorへ本節を渡し、旧焦点REDの正確なstatement対応・完全command・新output UUID・receiptを固定してreviewerへ返す。計画だけによる新実行許可は0、33候補の最終binding/実行Preは引き続き未解除である。

@@ -1,5 +1,9 @@
 # ET3 試用EXE提供の使用量観測
 
+## PSSAエラー採取方式の限定見直し（2026-10-24）
+
+利用者が検査規則・失敗判定を維持した限定設計/独立レビュー/必要な検証手順修正を承認した。開始HEAD96a6ace/tree clean、共有週枠6%/10080分/reset1793406166はアカウント共通で専有量不明。親開始snapshot2026-10-24T02:30:07.761Z=input2240414588/cached2194327168/output4934967/reasoning1658754/total2245349555/cache_write0。着手からsnapshot前・子counter/provider実値/親子包含は欠測で合算しない。親モデル不変、planner指定Astra/highが既存計画へ有限追補する。完了境界はエラー採取方式の限定変更と独立局所検証までであり、33候補実行/元sourceF91C変更/実OS/compile/製品EXE/admin/隔離外/OS設定/実data/APIは解除しない。
+
 ## Pester未使用fixture無効化・承認済み一回確認（2026-10-24）
 
 利用者が設定2行と独立レビュー後の修正版旧版確認1回を承認した。開始HEADaa8d10d/tree clean、共有週枠0%/10080分/reset1793406166はアカウント共通で専有量不明。前回reset1793372790からの週枠差分は算出しない。親開始snapshot2026-10-24T00:24:15.234Z=input2203898184/cached2158070272/output4866180/reasoning1632294/total2208764364/cache_write0。着手～開始snapshot前・子counter/provider実値/親子包含は欠測で合算しない。既割当author/reviewer Sol6.1/high、runner Sol6.1/medium、親変更0。今回境界は設定差分Pre→新freeze→一回確認/独立事後確認であり、旧失敗を保全し33期待/期限/分類を変更しない。

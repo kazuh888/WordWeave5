@@ -1,12 +1,14 @@
 # 現在のタスク要約
 
-## 最新状態：準備処理は実装Pre済み、静的解析の内部例外で停止（2026-10-24）
+## 最新状態：承認済みPSSAエラー採取方式の限定見直し（2026-10-24）
+
+利用者が検査規則・失敗判定を維持するエラー採取方式の限定設計/独立レビュー/必要修正を承認した。HEAD96a6ace/tree cleanから、是正設計8295FF7B…の独立限定Preと計画A8E1C248…の精緻化を完了した。Stopを維持し、実pipeline/EV/catch/finallyの逐次採取と原文抽出/producerだけmemory束縛、最小shapeと20期待を固定した。author Sol6.1/highが固定20期待と旧@代入方式の焦点RED1件を準備中で、コードC/新対象実行は0。以下の元PSSA未解消・現33receipt実行禁止は維持する。
 
 目標はET3安全手順の限定修正・独立合成検証までである。承認された未使用Pester自動fixture無効化と旧版確認1回は、特定assertionの旧RED成立・18pins保全・独立Post PASSで完了し、b46f5c6へpushした。準備処理sourceF91C6B04…/59886bytes・設計B45A3201…・Controller期限guardは独立Pre PASS、元port error/33期待/期限/許可範囲を維持し、復元情報をe7d5a88へpush済みである。
 
-停止点はAssertionsAFA82E80…のPSSA1.25内部NullReferenceである。同hashの通常検査2回がengine失敗となり、詳細採取1回では再現しなかった。原因・失敗ruleは未特定、診断成功をgatePASSへ転用しない。G6-05の欠測assertion追加は静的意味だけ独立妥当、最終receipt/manifest・33入力runtime・Postは未完である。エラー採取方式の限定見直しを追加承認待ちとする。保存patch31CEF53E…は108/108復元・旧66履歴/旧prefix保持と実行禁止/Pending表示を独立確認済みである。追加反復・規則除外・依存更新は行わない。
+未解決はAssertionsAFA82E80…のPSSA1.25内部NullReferenceである。同hashの通常検査2回がengine失敗となり、詳細採取1回では再現しなかった。原因・失敗ruleは未特定、診断成功をgatePASSへ転用しない。G6-05の欠測assertion追加は静的意味だけ独立妥当、最終receipt/manifest・33入力runtime・Postは未完である。保存patch31CEF53E…は108/108復元・旧66履歴/旧prefix保持と実行禁止/Pending表示を独立確認済みである。新しい限定設計のPre前に追加反復・規則除外・依存更新は行わない。
 
-次は承認後の限定設計/独立レビュー→必要な検証手順修正→最終binding/Pre→親freeze→別runner→Postである。実OS ENV01/本物compile/製品EXE/admin/隔離外/OS設定/実data/API/既成功51入力反復は未解除。詳細・完全hash・失敗履歴は[review](ACOUSTIC-HISTORY-001/unknown-descendant-review.md)、[成果物索引](ACOUSTIC-HISTORY-001/unknown-descendant-artifacts.md)、[設計](ACOUSTIC-HISTORY-001/unknown-descendant-design.md)、[計画](ACOUSTIC-HISTORY-001/unknown-descendant-resume-plan.md)、[使用量](ACOUSTIC-HISTORY-001/usage-observation-20261014-et3.md)を正本とする。親モデル不変、担当モデルは計画者の既割当を維持する。
+今回の順序はCAP限定設計/独立レビュー→必要な検証手順修正→局所binding/Pre→親freeze→別runner→Postである。準備処理33入力の再binding/実行Preはその後の別工程であり今回解除0。実OS ENV01/本物compile/製品EXE/admin/隔離外/OS設定/実data/API/既成功51入力反復は未解除。詳細・完全hash・失敗履歴は[review](ACOUSTIC-HISTORY-001/unknown-descendant-review.md)、[成果物索引](ACOUSTIC-HISTORY-001/unknown-descendant-artifacts.md)、[設計](ACOUSTIC-HISTORY-001/unknown-descendant-design.md)、[計画](ACOUSTIC-HISTORY-001/unknown-descendant-resume-plan.md)、[使用量](ACOUSTIC-HISTORY-001/usage-observation-20261014-et3.md)を正本とする。親モデル不変、担当モデルは計画者の割当を維持する。
 
 ## 最新状態：実OS観測の実行前準備（2026-10-24）
 

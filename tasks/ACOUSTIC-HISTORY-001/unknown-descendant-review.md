@@ -1,5 +1,11 @@
 # UNKNOWN-DESCENDANT-OPEN01：限定設計Pre受入
 
+## PSSA-CAP限定設計Pre（2026-10-24）
+
+是正8295FF7BDCF1AB56CA465A0B6BB1FD86263BD77D9C8B478371D98A7E338CA3A8の独立限定再PreはPASS、2阻害を解消した。実pipeline/EV/catch/finallyを原文抽出し、C07は実ordinary→throw・採取側flag更新で検証する。state/raw/result/各関数返却と更新責任・20期待の照合先を固定し、隣接矛盾なし。before20244 hash一致を確認した。外側中断責任は実行Preの未接合事項であり、設計PASSを実行許可としない。plannerが既存計画を精緻化し、別所有authorは固定20期待/試験のみ準備する限定並行とした。コード/新対象実行0。
+
+利用者承認後の初版CAP-D設計20244CD9928264BAF527572FB0551D37D05C504189B8FF958124B181E6DB0B8Eは、独立Preで2blockingを認め差戻した。(1)Add/Completeだけの合成seamでは、変更対象の逐次pipeline/EV/catch/finallyが対象外となり、C07を手動record/flagで通せる。(2)state/返却shapeが未定義で作者と実装者が別々に発明する。実採取blockの原文抽出とproducerだけのmemory束縛、最小key/type/更新責任/20期待の照合先を設計者へ限定差戻した。規則・全severity・Stop・engine必敗/期限は不変、外側中断責任は実行Preで未接合のまま解除しない。コード/新診断/対象実行0。
+
 ## U-N最終fixture Preの差戻し（2026-10-24）
 
 未完状態の保存checkpointは独立確認で阻害0。tests.patch31CEF53E…の108/108成果物hash・旧66履歴length/hash・旧704378bytes prefix・旧patch4prefix復元が一致し、主要変更/before/実失敗/診断/state/indexを復元対象として確認した。PSSA2失敗/Continue診断非gate/receipt1CAF→AFA未接合・実行禁止/manifest-freeze-33runtime未完を明示する。これはGitバックアップ用の保存確認であり、全体Pre PASSではない。FS復元write/追加対象実行/PSSA/edit0である。

@@ -1,5 +1,9 @@
 # UNKNOWN-DESCENDANT-OPEN01 診断追加・局所試験の成果物索引
 
+## PSSA-CAP限定見直し：設計受入（2026-10-24、実行0）
+
+精緻化計画`unknown-descendant-resume-plan.md`のSHA256はA8E1C248CD7DF19ADA805E72D11EBB6141A7E83B50AC521BEA0CCD4C74A686FD、独立是正Pre済み設計`unknown-descendant-design.md`は8295FF7BDCF1AB56CA465A0B6BB1FD86263BD77D9C8B478371D98A7E338CA3A8である。元Stop/全規則/全severity/engine必敗を維持する。初版20244の2阻害とbefore保全はreview正本にあり、実採取経路の原文抽出・最小shape/20照合先を補って受入れた。CAP-TはT/pssa-captureへ固定20期待と実装前の旧方式RED1件を準備する予定であり、生成済み/実行済みとは扱わない。外側中断責任/最終receipt/候補bindingは実行Preで未接合、33候補実行・元NullReference解消・製品提供は未解除である。
+
 ## U-N未完状態の保存点（2026-10-24、実行禁止）
 
 T=`R/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d`。これはGitからの復元用であり、実行freeze/全体Pre/最終受入manifestではない。sourceF91C/AssertionsAFA/Controller8FAE/oracleCAA、before/diff・PSSA失敗2回・非gate診断1回を保存する。現receiptは旧Assertions1CAFpinで未接合、現manifest/reportは旧4Cの履歴であり**実行禁止**。最終binding/Pre/freeze/33実行/Postは未完である。
