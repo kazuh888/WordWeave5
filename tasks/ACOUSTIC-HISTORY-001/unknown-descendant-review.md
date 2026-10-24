@@ -2,6 +2,14 @@
 
 ## PSSA-CAP限定Pre/Post（2026-10-24）
 
+新generationの最終復元PreもPASS。tests.patch4A5E46FA…/4078990bytesの新16＋Modify2全18節、旧prefix3742741bytes、新suffix336249bytes、before3aliases/range2を独立メモリ復元して全bytes/SHA一致・循環埋込0である。親freezeはNEW/PARENT-FROZEN.md D5A13633BDA589B6A87761138CA18994F695F63B466DE298064A9D2C9C170284。候補実行前の保存点であり、runtime受入はまだない。
+
+Save一行是正は独立source Pre PASS。新Test C357FCEDA8B05B9DFDA1EAB0D944FF205CE6D65F59533F2C49ABBE5379ADC287（54369bytes）の逆置換で旧6DDの54315bytes/BOM全一致、512行の式は元helperと同じbyte[]→SHA256大文字hex、receipt型/処理順不変である。新canonical B E0009557…／R E9AB3F0F…の限定delta PreもPASS。19keys/17pins/Settings/C39B5metadata維持、新Testpin/3UUID/対応argv/caller原文hash/spanだけを再束縛、実caller4文・role各1・adapterFF76…・逆bytesが一致した。cmd ACE936FF…は4path置換以外不変、同host/停止/期限/retry0を維持する。旧B/Rはbeforeへ全bytes保全。候補runtimeは未受入、最終保存Pre/親freeze/直前照合待ちである。
+
+C01診断の限定Postは原因採取範囲で受入可能。freeze02F28653…後の唯一requestはexit0/tool2.3206289秒/outer1.9753394秒/retry0、OriginalFailureReproduced。core10/pins24/元17/freeze前後一致。helper199行のmemory SaveでGet-CapHashが解決できないCommandNotFoundExceptionをprimaryError/位置/stackから確定した。ただし旧CAP-Vの未保存内部状態まで遡及証明しない。memory.files[0].pathは診断136行のnameがgetterのNameに遮蔽され無効、別getterのprimary/位置/stackには影響せず、完全観測PASSとはしない。元C01/CAP-V FAILと元NRE未解決を維持する。
+
+親はTest Save一箇所のhelper呼出しを同helper35–37行と同義BCL SHA256式へ直接置換する限定是正を承認した。新Testコピーの逆置換6DD全bytes一致、C39B5/oracle/規則/期限不変を必要とする。Cはcanonical Bpath固定のため、旧B CE594/R6B03の全bytes保全後に新世代metadataを既pathへ接合することも明示承認、hardcodedpath回避のC変更は禁止。新候補は独立diff/binding/復元Pre→親freeze→新slot一回まで未実行である。診断や旧R再実行0。
+
 CAP-V一回の独立PostはFAIL分類・停止・保全を確認した。freeze B6A345…後のR6B03唯一requestはexit2／tool3.0039223秒／unit outer2.6474299秒、C01 Unexpected1／PASS0／残19NotRun、実PSSAの両roleはNotRun、retry0である。unit-result SHA3069F10D65A6B37565783E33B001C1091B7DE622B92FF3AE3785E30AEBD89E3AはC01 id/status/errorのみで、actual値・内部理由・個別elapsedは欠測。core14＋pins17の31行/settings23/freeze前後一致、runner9filesも独立SHA一致。原因はgateStatus期待不一致以上に確定できず、C16や元NREの改善を意味しない。証拠はCAP/cap-v-runner-evidence-20261024-053234/report.md D75301E9…と同saved-indexを正とする。新規C01限定診断は設計・実行Pre待ち、元request再実行0である。
 
 直前準備のallPass=falseは保存rawの個別14/17/23/3全true・正確8request keysと矛盾し、補助集計不備と独立判断した。Countの実値・型は未採取のため具体機構は推論に限定する。原false/停止記録を保全し、既存rawだけのaggregate-addendumを追補して親受領後に初回対象を実行した。追加照合・入力/freeze/基準変更・試行再利用は0である。
