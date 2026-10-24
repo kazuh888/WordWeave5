@@ -243,3 +243,26 @@ U-Mは8ports以外を置換せず、production portsと元ENV01/top-levelは実�
 | result／優先順 | 既定9keyのみ、state:string、dispatchCount/retryCount:Int32=0、fakeSha256:string\|null（未取得null）、primaryError:ErrorRecord\|null、secondaryErrors:ErrorRecord[]、directRecovery:NotStarted\|Exited\|Recovered\|Unknown、unknownDescendants:string=NotObserved、evidence:上記配列。version/compileのいずれか未回収ならdirectRecovery=Unknown、stateはRecoveryUnknown優先、次に必要Record保存未完了EvidenceFailed（入力拒否で保存未許可の場合は除く）、その他primaryありFailed、全成功AwaitingApproval。出力JSONはerror参照だけ上記scalarへ射影し、生参照は返却result内へ保持する |
 
 ReadState/Hash/Saveの型不正・未知action・path逸脱は、起動前拒否なら累積Start0、起動後拒否なら以降の追加Start0とし、既存の同じhandle回収を優先する。Save/CreateTempの責務追加は既存8ports内の指定path新規保存であり9portや汎用FS APIを導入しない。manifest/実toolchain/実path保護の成立、実再開、実process停止は本追補でも未検証である。
+
+### U-M最終Pre差戻し：合成primaryの原因識別
+
+既定原因を観測可能にするL2内のprivate契約だけを追加する。固定oracle SHA256 `CAA26281E5EF932156118720997491AE1E3EB55ED9DF0365F32197C6F8979353`の33入力・expect.primary16件は変更しない。設計beforeは`R/verification/argv-path01/b80899de-9c23-47b3-99dc-865e91730957/before/design-9106.md`へ保存しSHA一致済みである。8ports/公開param/result9key・期限・元error同一参照・primary/secondary順序は不変である。
+L2自身がvalidation/期限/非zeroexitを検出した場合だけ、最初に一回`ErrorRecord::new(exception,id,category,$null)`を生成し、その同一参照をprimary/secondaryへ保持する。idは厳密に`WW5.ENV01.Preparation.`＋下表suffixであり、FullyQualifiedErrorIdを直接照合する。Messageは自由な診断文で判定に使用しない。非zeroexitはInt32値のInvariantCulture十進表記をsuffixへ含める。deadlineはTimeoutException/OperationTimeout、exitはInvalidOperationException/InvalidResult、Dependency.MissingはInvalidOperationException/ResourceUnavailable、その他validationはInvalidOperationException/InvalidDataとする。元port ErrorRecordの再生成・Exception/Data/FQID変更・合成id付替えは禁止し、既存のprimaryIdentity/secondaryIdentity照合を維持する。
+
+| 既存expect.primary／全16入力 | 固定suffixと識別する既存事実 |
+| --- | --- |
+| version exit 17／G1-02 | `NonzeroExit.Version.17`：Versionの終了観測exitCode=17。一般形は`NonzeroExit.Version.<Int32>` |
+| compile exit 23／G1-03 | `NonzeroExit.Compile.23`：Compileの終了観測exitCode=23。一般形は`NonzeroExit.Compile.<Int32>` |
+| version deadline／G2-01,G2-03,G3-02 | `Deadline.Version`：Versionのphase期限到達。遅延Start/Poll返却も含む |
+| compile deadline／G2-02,G2-04 | `Deadline.Compile`：Compileのphase期限到達。遅延Poll返却も含む |
+| work deadline／G2-05 | `Deadline.Work`：次の作業前に全作業期限到達。phase上限をwork期限が切り詰めた場合もWorkとする |
+| missing dependency／G4-01 | `Dependency.Missing`：必要fileのexists=false又は必要pathが依存集合に存在しない |
+| dependency drift／G4-02,G5-04 | `Dependency.Drift`：既定dependency/manifest/sourceの期待hashと観測hash不一致。前後どちらのpassでも同じ識別子 |
+| path boundary／G4-03 | `Boundary.Path`：正規絶対path・期待path・許可segment境界の違反 |
+| reparse boundary／G4-04 | `Boundary.Reparse`：ancestorReparse=true。単なるpath不一致へ合算しない |
+| child TEMP boundary／G4-05 | `Boundary.ChildTemp`：子TEMP/TMPがsuiteRoot/tempへ一致しない |
+| manifest shape／G4-06 | `Manifest.Shape`：manifest自身のparse/厳密key集合/field型/値の契約違反。port応答shape不正のAdapterFailureとは区別する |
+| generated drift／G5-03 | `Generated.Drift`：取得済みfakeSha256と保存後生成exe再hashが不一致。dependency用hash不一致へ合算しない |
+
+判定位置は原因を検出した元分岐であり、catch後のMessage文字列分類は行わない。生成元ErrorRecord参照を保持してから制御を短絡し、throw/catchで得たwrapperをcanonical errorへ取り直したり同じ原因のsecondaryへ重複追加したりしない。path観測はport元errorを先に保持し、正常応答に対するexists=false／reparse／path違反を個別に識別する。時刻境界一致・先行primary保持は従前どおり、先行port元errorを後続timeoutで置換しない。AdapterFailureを上表idに変換しない。上表外の障害のoracleや汎用error体系を増やさない。
+作者handoffは独立assertion内で固定expect.primaryの各値を上表suffixへ明示対応させ、actual.primaryErrorがErrorRecordかつFullyQualifiedErrorIdが完全一致することを確認することである。16件すべてにこのassertionが適用された数を静的に示し、期待本文・33入力は不変とする。idは候補Message/実結果/ソース抽出から生成しない。既存保存射影のfullyQualifiedErrorIdにも同じidが残るため、resultやwireへ新keyは不要である。実装者はL2の原因検出分岐だけを修正し、source/adapterの候補hash再束縛と独立Preは親が接合する。本工程は設計差分・read/hash確認だけでruntime/OS/source編集0である。

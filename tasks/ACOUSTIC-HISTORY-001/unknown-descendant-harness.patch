@@ -266,10 +266,10 @@ index 1346c6e..9b625c9 100644
                      error = "Unproved descendant identity; PID=$($row.ProcessId): $($caught.Exception.Message)"
 diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/Invoke-FirstFailureEnv01.ps1 b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/Invoke-FirstFailureEnv01.ps1
 new file mode 100644
-index 0000000..be7ff88
+index 0000000..1861edf
 --- /dev/null
 +++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/Invoke-FirstFailureEnv01.ps1
-@@ -0,0 +1,949 @@
+@@ -0,0 +1,1025 @@
 +﻿<#
 +.SYNOPSIS
 +    Runs the unchanged synthetic ENV01 once for first-failure observation
@@ -399,7 +399,8 @@ index 0000000..be7ff88
 +        unknownDescendants = 'NotObserved'; evidence = @() }
 +    $control = @{ lastTick = $null; handle = $null; released = $false; exited = $false
 +        recovered = $false; unknown = $false; evidenceFailed = $false; saveAllowed = $false
-+        saveDeadline = $null; version = $null; phases = @(); manifestPath = $null }
++        saveDeadline = $null; version = $null; phases = @(); manifestPath = $null
++        syntheticErrors = [Collections.Generic.List[object]]::new(); inWork = $true; currentPhase = $null }
 +    $shape = {
 +        param($value, [string[]]$keys)
 +        if ($value -isnot [hashtable] -or $value.Count -ne $keys.Count) { throw 'AdapterFailure: shape' }
@@ -410,9 +411,57 @@ index 0000000..be7ff88
 +    $remember = {
 +        param($failure)
 +        if ($null -ne $failure) {
++            foreach ($canonical in $control.syntheticErrors) {
++                if ([object]::ReferenceEquals($failure, $canonical) -or
++                    [object]::ReferenceEquals($failure.Exception, $canonical.Exception)) {
++                    if ([object]::ReferenceEquals($result.primaryError, $canonical)) { return }
++                    foreach ($secondary in $result.secondaryErrors) {
++                        if ([object]::ReferenceEquals($secondary, $canonical)) { return }
++                    }
++                    $failure = $canonical
++                    break
++                }
++            }
 +            if ($null -eq $result.primaryError) { $result.primaryError = $failure }
 +            else { $result.secondaryErrors += ,$failure }
 +        }
++    }
++    $fail = {
++        param([string]$suffix, [string]$message)
++        $category = [Management.Automation.ErrorCategory]::InvalidData
++        if ($suffix.StartsWith('Deadline.', [StringComparison]::Ordinal)) {
++            $exception = [TimeoutException]::new($message)
++            $category = [Management.Automation.ErrorCategory]::OperationTimeout
++        }
++        else {
++            $exception = [InvalidOperationException]::new($message)
++            if ($suffix.StartsWith('NonzeroExit.', [StringComparison]::Ordinal)) {
++                $category = [Management.Automation.ErrorCategory]::InvalidResult
++            }
++            elseif ($suffix -ceq 'Dependency.Missing') {
++                $category = [Management.Automation.ErrorCategory]::ResourceUnavailable
++            }
++        }
++        $failure = [Management.Automation.ErrorRecord]::new(
++            $exception, ('WW5.ENV01.Preparation.' + $suffix), $category, $null)
++        $control.syntheticErrors.Add($failure)
++        & $remember $failure
++        throw $failure
++    }
++    $deadlineFailure = {
++        param([long]$deadline)
++        if ($control.inWork -and $deadline -eq $workDeadline) {
++            & $fail 'Deadline.Work' 'Preparation work deadline'
++        }
++        if ($control.inWork -and $null -ne $control.currentPhase) {
++            & $fail ('Deadline.' + $control.currentPhase) 'Preparation phase deadline'
++        }
++        throw 'Preparation deadline'
++    }
++    $manifestShape = {
++        param($value, [string[]]$keys)
++        try { & $shape $value $keys }
++        catch { & $fail 'Manifest.Shape' 'Preparation manifest shape' }
 +    }
 +    $now = {
 +        $tick = & $Ports.Now
@@ -424,7 +473,7 @@ index 0000000..be7ff88
 +    }
 +    $invoke = {
 +        param([string]$name, [object[]]$arguments, [long]$deadline)
-+        if ((& $now) -ge $deadline) { throw 'Preparation deadline' }
++        if ((& $now) -ge $deadline) { & $deadlineFailure $deadline }
 +        try { $response = & $Ports[$name] @arguments }
 +        catch { & $remember $_; throw }
 +        & $shape $response @('value', 'error')
@@ -433,14 +482,14 @@ index 0000000..be7ff88
 +            & $remember $response.error
 +            throw $response.error
 +        }
-+        if ($returnedTick -ge $deadline) { throw 'Preparation deadline' }
++        if ($returnedTick -ge $deadline) { & $deadlineFailure $deadline }
 +        return ,$response.value
 +    }
 +    $canonical = {
 +        param($path)
 +        if ($path -isnot [string] -or -not [IO.Path]::IsPathFullyQualified($path) -or
 +            -not [string]::Equals($path, [IO.Path]::GetFullPath($path), [StringComparison]::Ordinal)) {
-+            throw 'Path boundary'
++            & $fail 'Boundary.Path' 'Preparation canonical path boundary'
 +        }
 +    }
 +    $pathState = {
@@ -448,24 +497,35 @@ index 0000000..be7ff88
 +        & $canonical $path
 +        $value = & $invoke 'ReadState' @('Path', @{ path = $path }) $deadline
 +        & $shape $value @('fullPath', 'exists', 'kind', 'length', 'ancestorReparse')
-+        if ($value.fullPath -cne $path -or $value.exists -isnot [bool] -or
-+            $value.ancestorReparse -isnot [bool] -or $value.ancestorReparse -or $value.kind -cne $kind -or
-+            ($kind -ceq 'Missing' -and $value.exists) -or ($kind -cne 'Missing' -and -not $value.exists) -or
-+            ($kind -ceq 'File' -and ($value.length -isnot [long] -or $value.length -lt 0))) {
-+            throw 'Dependency path/reparse boundary'
++        if ($value.fullPath -isnot [string] -or $value.exists -isnot [bool] -or
++            $value.ancestorReparse -isnot [bool] -or $value.kind -isnot [string] -or
++            ($value.kind -ceq 'File' -and ($value.length -isnot [long] -or $value.length -lt 0))) {
++            throw 'AdapterFailure: path state shape'
++        }
++        if ($value.ancestorReparse) { & $fail 'Boundary.Reparse' 'Preparation reparse boundary' }
++        if ($value.fullPath -cne $path) { & $fail 'Boundary.Path' 'Preparation observed path boundary' }
++        if ($kind -ceq 'File' -and -not $value.exists) {
++            & $fail 'Dependency.Missing' 'Preparation required file missing'
++        }
++        if ($value.kind -cne $kind -or ($kind -ceq 'Missing' -and $value.exists) -or
++            ($kind -cne 'Missing' -and -not $value.exists)) {
++            & $fail 'Boundary.Path' 'Preparation file kind boundary'
 +        }
 +        return $value
 +    }
 +    $hash = {
-+        param([string]$path, [object]$expected, [long]$deadline)
++        param([string]$path, [object]$expected, [long]$deadline, [string]$driftSuffix = 'Dependency.Drift')
 +        if ($null -ne $expected -and ($expected -isnot [string] -or $expected -cnotmatch '^[A-F0-9]{64}$')) {
 +            throw 'AdapterFailure: expected hash shape'
 +        }
 +        $value = & $invoke 'Hash' @($path) $deadline
 +        & $shape $value @('path', 'sha256')
-+        if ($value.path -cne $path -or $value.sha256 -isnot [string] -or
-+            $value.sha256 -cnotmatch '^[A-F0-9]{64}$' -or
-+            ($null -ne $expected -and $value.sha256 -cne $expected)) { throw 'Dependency hash drift' }
++        if ($value.path -isnot [string] -or $value.sha256 -isnot [string] -or
++            $value.sha256 -cnotmatch '^[A-F0-9]{64}$') { throw 'AdapterFailure: hash shape' }
++        if ($value.path -cne $path) { & $fail 'Boundary.Path' 'Preparation hash path boundary' }
++        if ($null -ne $expected -and $value.sha256 -cne $expected) {
++            & $fail $driftSuffix 'Preparation observed hash differs'
++        }
 +        return $value.sha256
 +    }
 +    $save = {
@@ -513,7 +573,7 @@ index 0000000..be7ff88
 +    }
 +    $poll = {
 +        param([long]$deadline)
-+        if ((& $now) -ge $deadline) { throw 'Preparation deadline' }
++        if ((& $now) -ge $deadline) { & $deadlineFailure $deadline }
 +        try { $response = & $Ports.Poll $control.handle }
 +        catch { & $remember $_; throw }
 +        & $shape $response @('value', 'error')
@@ -535,21 +595,22 @@ index 0000000..be7ff88
 +        $control.exited = $value.exited
 +        $control.released = $value.released
 +        if ($value.released) { $result.directRecovery = 'Exited' }
-+        if ((& $now) -ge $deadline) { throw 'Preparation deadline' }
++        if ((& $now) -ge $deadline) { & $deadlineFailure $deadline }
 +        return $value
 +    }
 +    $pause = {
 +        param([long]$deadline)
 +        $remaining = $deadline - (& $now)
 +        $milliseconds = [int][Math]::Min(50, [Math]::Floor($remaining * 1000.0 / $Inputs.frequency))
-+        if ($milliseconds -lt 1) { throw 'Preparation deadline' }
++        if ($milliseconds -lt 1) { & $deadlineFailure $deadline }
 +        $null = & $invoke 'Wait' @($milliseconds) $deadline
 +    }
 +    $runPhase = {
 +        param([string]$phase, [int]$seconds, [string[]]$argv, [string]$log)
 +        $begin = & $now
 +        $deadline = [Math]::Min($begin + $seconds * $Inputs.frequency, $workDeadline)
-+        if ($begin -ge $deadline) { throw "$phase deadline" }
++        $control.currentPhase = $phase
++        if ($begin -ge $deadline) { & $deadlineFailure $deadline }
 +        $spec = @{ phase = $phase; exe = $Inputs.dependencies.tools.rustc; argv = $argv
 +            cwd = $Inputs.suiteRoot; environment = $Inputs.dependencies.environment.Clone()
 +            stdoutPath = [IO.Path]::Combine($Inputs.suiteRoot, "$log.stdout")
@@ -570,32 +631,28 @@ index 0000000..be7ff88
 +            (-not $started.started -and ($null -ne $started.handle -or $null -ne $started.startedTick))) {
 +            throw 'AdapterFailure: start state'
 +        }
-+        if ((& $now) -ge $deadline) { throw "$phase deadline" }
++        if ((& $now) -ge $deadline) { & $deadlineFailure $deadline }
 +        if ($null -ne $started.startError) { throw $started.startError }
 +        if (-not $started.started) { throw "$phase start failed" }
 +        while ($true) {
-+            try { $observation = & $poll $deadline }
-+            catch {
-+                if ((& $now) -ge $deadline) { throw "$phase deadline" }
-+                throw
-+            }
++            $observation = & $poll $deadline
 +            if ($observation.exited -and $observation.outClosed -and $observation.errClosed) {
 +                if (-not $observation.released) { throw 'AdapterFailure: unreleased completion' }
 +                $control.phases += ,(@{ phase = $phase; startedTick = $started.startedTick
 +                    exitCode = $observation.exitCode; outClosed = $true; errClosed = $true })
 +                $result.directRecovery = 'Exited'
-+                if ($observation.exitCode -ne 0) { throw "$phase exit $($observation.exitCode)" }
++                if ($observation.exitCode -ne 0) {
++                    $exitText = $observation.exitCode.ToString([Globalization.CultureInfo]::InvariantCulture)
++                    & $fail ('NonzeroExit.' + $phase + '.' + $exitText) 'Preparation phase returned nonzero exit'
++                }
 +                if ($phase -ceq 'Version') {
 +                    if ($observation.stdoutText -isnot [string]) { throw 'AdapterFailure: version text' }
 +                    $control.version = $observation.stdoutText
 +                }
++                $control.currentPhase = $null
 +                return
 +            }
-+            try { & $pause $deadline }
-+            catch {
-+                if ((& $now) -ge $deadline) { throw "$phase deadline" }
-+                throw
-+            }
++            & $pause $deadline
 +        }
 +    }
 +    $checkDependencies = {
@@ -623,39 +680,54 @@ index 0000000..be7ff88
 +        if (-not [guid]::TryParseExact([IO.Path]::GetFileName($Inputs.suiteRoot), 'D', [ref]$suiteGuid) -or
 +            $Inputs.fakePath -cne [IO.Path]::Combine($Inputs.suiteRoot, 'fake.exe') -or
 +            $Inputs.sourcePath -cne [IO.Path]::Combine([IO.Path]::GetDirectoryName(
-+                [IO.Path]::GetDirectoryName($Inputs.suiteRoot)), 'fake.rs')) { throw 'Path boundary' }
++                [IO.Path]::GetDirectoryName($Inputs.suiteRoot)), 'fake.rs')) {
++            & $fail 'Boundary.Path' 'Preparation fixed path boundary'
++        }
 +        $control.manifestPath = [IO.Path]::Combine([IO.Path]::GetDirectoryName($Inputs.suiteRoot),
 +            'argv-path01', [IO.Path]::GetFileName($Inputs.suiteRoot), 'prepare-inputs.json')
 +        $manifestState = & $pathState $control.manifestPath 'File' $workDeadline
-+        if ($manifestState.length -gt 65536) { throw 'Manifest length' }
++        if ($manifestState.length -gt 65536) { & $fail 'Manifest.Shape' 'Preparation manifest length' }
 +        $raw = & $invoke 'ReadState' @('Manifest', @{ path = $control.manifestPath }) $workDeadline
-+        if ($raw -isnot [byte[]] -or $raw.Length -gt 65536 -or
-+            [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($raw)) -cne $Inputs.manifestSha256) {
-+            throw 'Manifest drift'
++        if ($raw -isnot [byte[]]) { throw 'AdapterFailure: manifest response type' }
++        if ($raw.Length -gt 65536) { & $fail 'Manifest.Shape' 'Preparation manifest length' }
++        if ([Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($raw)) -cne $Inputs.manifestSha256) {
++            & $fail 'Dependency.Drift' 'Preparation manifest digest differs'
 +        }
-+        $manifest = [Text.UTF8Encoding]::new($false, $true).GetString($raw) |
-+            ConvertFrom-Json -AsHashtable -DateKind String
-+        & $shape $manifest @('schemaVersion', 'scope', 'suiteRoot', 'files', 'tools', 'environment')
++        try {
++            $manifest = [Text.UTF8Encoding]::new($false, $true).GetString($raw) |
++                ConvertFrom-Json -AsHashtable -DateKind String
++        }
++        catch { & $fail 'Manifest.Shape' 'Preparation manifest parse' }
++        & $manifestShape $manifest @('schemaVersion', 'scope', 'suiteRoot', 'files', 'tools', 'environment')
 +        if (($manifest | ConvertTo-Json -Depth 20 -Compress) -cne
-+            ($Inputs.dependencies | ConvertTo-Json -Depth 20 -Compress)) { throw 'Manifest input drift' }
++            ($Inputs.dependencies | ConvertTo-Json -Depth 20 -Compress)) {
++            & $fail 'Dependency.Drift' 'Preparation manifest input differs'
++        }
 +        if ($manifest.schemaVersion -isnot [long] -or $manifest.schemaVersion -ne 1 -or
 +            $manifest.scope -isnot [string] -or $manifest.suiteRoot -isnot [string] -or
 +            $manifest.scope -cne 'PrepareOnly' -or $manifest.suiteRoot -cne $Inputs.suiteRoot -or
-+            $manifest.files -isnot [array] -or $manifest.files.Count -eq 0) { throw 'Manifest shape' }
-+        & $shape $manifest.tools @('rustc', 'pwsh', 'v2')
-+        & $shape $manifest.environment @('TEMP', 'TMP', 'PATH', 'RUSTUP_HOME', 'RUSTUP_TOOLCHAIN', 'CARGO_HOME')
++            $manifest.files -isnot [array] -or $manifest.files.Count -eq 0) {
++            & $fail 'Manifest.Shape' 'Preparation manifest field type/value'
++        }
++        & $manifestShape $manifest.tools @('rustc', 'pwsh', 'v2')
++        & $manifestShape $manifest.environment @('TEMP', 'TMP', 'PATH', 'RUSTUP_HOME', 'RUSTUP_TOOLCHAIN', 'CARGO_HOME')
++        foreach ($value in $manifest.environment.Values) {
++            if ($null -ne $value -and $value -isnot [string]) {
++                & $fail 'Manifest.Shape' 'Preparation manifest environment type'
++            }
++        }
 +        $temp = [IO.Path]::Combine($Inputs.suiteRoot, 'temp')
 +        if ($manifest.environment.TEMP -cne $temp -or $manifest.environment.TMP -cne $temp) {
-+            throw 'Child TEMP boundary'
-+        }
-+        foreach ($value in $manifest.environment.Values) {
-+            if ($null -ne $value -and $value -isnot [string]) { throw 'Manifest environment shape' }
++            & $fail 'Boundary.ChildTemp' 'Preparation child TEMP/TMP boundary'
 +        }
 +        $context = & $invoke 'ReadState' @('Context', @{}) $workDeadline
 +        & $shape $context @('tools', 'environment')
 +        & $shape $context.tools @('rustc', 'pwsh', 'v2')
 +        & $shape $context.environment @('PATH', 'RUSTUP_HOME', 'RUSTUP_TOOLCHAIN', 'CARGO_HOME')
 +        foreach ($key in $manifest.tools.Keys) {
++            if ($manifest.tools[$key] -isnot [string]) {
++                & $fail 'Manifest.Shape' 'Preparation manifest tool path type'
++            }
 +            & $canonical $manifest.tools[$key]
 +            if ($manifest.tools[$key] -cne $context.tools[$key]) { throw 'Tool resolution drift' }
 +        }
@@ -667,10 +739,11 @@ index 0000000..be7ff88
 +        $dependencyHashes = [Collections.Generic.Dictionary[string,string]]::new([StringComparer]::Ordinal)
 +        $seen = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
 +        foreach ($file in $manifest.files) {
-+            & $shape $file @('path', 'sha256')
++            & $manifestShape $file @('path', 'sha256')
++            if ($file.path -isnot [string]) { & $fail 'Manifest.Shape' 'Preparation manifest file path type' }
 +            & $canonical $file.path
 +            if ($file.sha256 -isnot [string] -or $file.sha256 -cnotmatch '^[A-F0-9]{64}$' -or
-+                -not $seen.Add($file.path)) { throw 'Manifest file shape/duplicate' }
++                -not $seen.Add($file.path)) { & $fail 'Manifest.Shape' 'Preparation manifest file shape/duplicate' }
 +            $dependencyHashes.Add($file.path, $file.sha256)
 +        }
 +        foreach ($path in $Inputs.fixed.Keys) {
@@ -682,7 +755,9 @@ index 0000000..be7ff88
 +            if (-not $dependencyHashes.ContainsKey($path)) { $dependencyHashes.Add($path, $Inputs.fixed[$path]) }
 +        }
 +        foreach ($required in @($Inputs.sourcePath) + @($manifest.tools.Values)) {
-+            if (-not $dependencyHashes.ContainsKey($required)) { throw 'Missing dependency' }
++            if (-not $dependencyHashes.ContainsKey($required)) {
++                & $fail 'Dependency.Missing' 'Preparation required dependency absent from union'
++            }
 +        }
 +        $dependencyPaths = [string[]]@($dependencyHashes.Keys)
 +        [Array]::Sort($dependencyPaths, [StringComparer]::Ordinal)
@@ -715,13 +790,14 @@ index 0000000..be7ff88
 +            fakeExeSha256 = $result.fakeSha256; fakeSourceSha256 = $dependencyHashes[$Inputs.sourcePath] }
 +        & $record 'toolchain.json' 'Toolchain' $toolchain
 +        & $record 'frozen-inputs.json' 'FrozenInputs' $frozen
-+        $null = & $hash $Inputs.fakePath $result.fakeSha256 $workDeadline
++        $null = & $hash $Inputs.fakePath $result.fakeSha256 $workDeadline 'Generated.Drift'
 +    }
 +    catch {
 +        if ($null -eq $result.primaryError) { & $remember $_ }
 +        elseif (-not [object]::ReferenceEquals($result.primaryError, $_) -and
 +            -not [object]::ReferenceEquals($result.primaryError.Exception, $_.Exception)) { & $remember $_ }
 +    }
++    $control.inWork = $false
 +    if ($null -ne $control.handle -and -not $control.released) {
 +        try {
 +            $recoveryDeadline = [Math]::Min((& $now) + 3 * $Inputs.frequency, $totalDeadline - 2 * $Inputs.frequency)

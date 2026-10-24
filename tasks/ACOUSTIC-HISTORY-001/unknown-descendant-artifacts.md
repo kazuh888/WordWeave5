@@ -1,5 +1,37 @@
 # UNKNOWN-DESCENDANT-OPEN01 診断追加・局所試験の成果物索引
 
+## U-N合成原因識別の限定候補（2026-10-24、runtime0）
+
+設計B45A320172B6158B39D92F8EB02917A46BB56FCA72B5DC1DD8B634E7CE9B13CEの独立Pre後、L2だけを修正した。最終packetは`R/verification/argv-path01/1c67fb6f-7f72-4394-a719-ab65188838af/static-3150fb42-d2b4-42cc-b48e-19655a502698`。source独立Pre/fixture再bindingは別確認であり、以下を実測GREENとは扱わない。
+
+| 成果物 | SHA256 |
+| --- | --- |
+| canonical Invoke-FirstFailureEnv01.ps1（59886bytes/BOM） | F91C6B0453942EB13B5840D216A9547DA28394427F9F3F194AB8CD3324053F88 |
+| core原文（25748bytes） | 6665470AF42C48015B1E01D85F9C9C706FBD4250ACF285828EE1AF5AA954CE21 |
+| corrections-from-rejected.patch | CCA428FCE82F59CBAFF43A1A7E8138882FA67D46F961EBD1C38448DB386FF812 |
+| implementation-report.json | F19C7455DC818E9DA886CA4DC2D557BB7A924AAB2FDAA95DE052CE528646B61F |
+| inverse-4C-evidence.json | 9E652F756D2D526925D030C24EB973F129A05C295D773FFCD7DF370CE8B91791 |
+| inverse-evidence.json | 4E0FB7208A625D937EA39B4CE15127D92B2C665FBF851597F5FEC110DD7A3BE1 |
+| restore-evidence.json | 6297784CC71B327005C6F4300D7FB6452E2A1D39D85579F87D1A6A67948E1C1B |
+| static-evidence.json | 2AD978D2A0211979FFC4A9893C608A2BDF4C2BBDA8E0AE80013EFDFACE4087F1 |
+| harness.patch | CF62D0B20C30BE6F33836BC0C04F060469BACA64DA61475667DB0A6B08F34FC9 |
+
+core offsetはBOM除去後ParseInputで5380～31128。旧4C全55809bytes/元19920bytesの逆一致・非L2差分0・Parser/PSSA通常0engine0・完全候補復元・旧harnessprefix保持は実装者静的証拠であり、独立レビューとruntimeを区別する。
+
+## U-N最終fixture初回Pre差戻し（2026-10-24、実行0）
+
+packetは`R/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d`である。以下は修正前の静的候補であり、実行承認・GREENの証拠ではない。期限確認とprimary原因接続の2blockingにより凍結を保留した。修正版は別hashで記録する。
+
+| 成果物 | SHA256 |
+| --- | --- |
+| PreparationReceipt.tool.json | 88C19D0677C4651580F34CC9885C443D4E33676FF65A343FBB0F89D6D4DF3AE3 |
+| Invoke-PreparationReceipt.ps1 | 19BDF700ADF871C1214D5865C5DD6A3AE2277B618CA363524826A6D3AE2A5A66 |
+| manifest.json | 7F1F72B687E5905C6F732DF5D7E747D756785DC7A934E1BB0CA2AD5C3573E187 |
+| preservation-bound-final.json | DA7449545264FDB0188CCB9CD9D47F6BAC54DEC9BDFDF8544FBE1C93B867C017 |
+| tests.patch（初回最終Pre時点） | AAE7FEE9EED89B178FEDE64755E37E0711375339A7A661EBDC266D22EE582C12 |
+
+core4C1612F8…/21671bytesは原文一致・置換0、18pins一致、66file復元一致、出力UUID57e30fae-cd20-4dcc-babf-a9e8521178c8は未使用であった。`final-static.json`は初回PSSA内部例外を含むため、別hostの最終Parser/PSSA通常0・engine0と区別して参照する。
+
 2026-10-22／開始HEADba7f0e4。利用者承認は検証用診断追加と通常隔離内の純合成O1–O6である。新実OS ENV01/F3/native/full/製品buildは対象外である。実装・新試験の成果物は完成後に追記し、予定pathを生成済みとは扱わない。
 
 ## 開始baseline

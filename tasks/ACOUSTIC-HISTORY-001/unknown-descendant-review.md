@@ -1,5 +1,15 @@
 # UNKNOWN-DESCENDANT-OPEN01：限定設計Pre受入
 
+## U-N最終fixture Preの差戻し（2026-10-24）
+
+合成原因識別のsourceF91C6B0453942EB13B5840D216A9547DA28394427F9F3F194AB8CD3324053F88は、別code reviewerによる限定実装Pre PASS/阻害0。原因検出位置の12FQID/InvariantCulture exit、Workで切り詰めたphase期限、合成errorだけcanonical参照保持/元port不変、Stop/handle/保存/dispatch隣接不変を確認した。非L2差分0・逆4C全bytes一致・旧harnessprefix保全/候補patch単独接合を独立確認し、static/元19920bytes逆一致/復元証拠と接合した。Assertions1CAF949E…も16原因全接続/Message非依存/1278bytes一挿入逆一致で別Pre PASS。これらはreceiptや33実測結果の受入ではない。
+
+原因ラベルの独立識別は既存契約だけでは成立せず、designerがL2限定の安定FQID追補B45A320172B6158B39D92F8EB02917A46BB56FCA72B5DC1DD8B634E7CE9B13CEを作成した。独立Preは16原因→12FQIDの過不足0、Message非依存、元port error再生成禁止/参照保持、先行primary/Work期限優先/path-reparse-shape分離を確認してPASS。wrapper重複抑止は今回生成する合成ErrorRecordだけに適用し、元port secondaryをexact1へ戻さない。result9key/8ports/公開param/33期待/期限不変である。assertion後guard3行の限定是正も旧Controller全bytes逆一致でPASS、実装後のsource/16接続/再binding/receiptは別Preとする。
+
+T05685244…の最終33入力receiptは未実行である。独立Preは、(1)候補call後/assertion前だけの期限確認ではassertion中の5秒/30秒超過後にPASSや次groupへ進める、(2)expected.primaryの16原因ラベルを検証せず任意ErrorRecordを通せる、の2blockingを認めた。authorへassertion後の期限確認と固定oracleに基づく独立原因照合だけを差戻した。期待・期限・source・権限は不変、現receiptの実行は0である。原因の契約が不足する場合は設計へ戻し、候補文言に期待を合わせない。
+
+先行是正のG5-03成功markerはAwaitingApprovalだけを数え、invalidJSON/欠落/型不正は拒否する。G3-02 secondaryIdentityは元契約どおり参照が1件以上存在すればよく、未規定exact1を除去した。ErrorRecord型・primary/secondary分離・Stop最大1・retry0・unknownStop0は保持する。最終staticは別hostでParser/PSSA通常0/engine0だが、初回同hostのPSSA内部NullReferenceExceptionは証跡に残し原因未確定とする。
+
 2026-10-22。U-A読取監査、U-B最小観測案、U-C独立Preを完了した。原因修正・実測・UNKNOWNのClosedではない。
 
 ## 固定入力と独立性
