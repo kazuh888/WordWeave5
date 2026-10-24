@@ -1,5 +1,13 @@
 # UNKNOWN-DESCENDANT-OPEN01 診断追加・局所試験の成果物索引
 
+## 最新：CAP-BD一回診断・独立Post（2026-10-24）
+
+CAP=`F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture`、BD=`CAP/bd-176ada9b-8956-467d-95f3-a9c385170a52`。BD新Test99305111…/receipt13840C9E…は設計・source・実行Pre済み、freeze D50BA652…とpath補足ECE3326C…後に一回診断を実施した。元exit2/Unexpected/accepted=false/0.9038672秒/前後84照合不変、診断Partialの独立Post PASSである。元REDや元PSSA NREの解消ではない。
+
+原結果はBD/out/old-red-diag-0ece0ee8-bdd3-437f-9c59-827f1ec319bd/unit-result.json（4CEF4CE13746F9C9039EAF8E05A97460C3F9F85389B939371F3C5797CEC87CA2）、実request/toolreturn・前後pins・評価はBDのrunner PREP/RAWTOOLRETURN/EVIDENCE/ASSESSMENT/REPORTにある。完全hashは各原本とreview正本を参照する。位置194:34/stack195/PropertyNotFoundExceptionを保存し、failedEntryはUnidentifiedを維持した。
+
+復元patchは`unknown-descendant-tests.patch` SHA A3C20E463574EEA4750036B33073C3F6A3F970156EEC730E907A3729BC300371（1949428bytes）。旧A574 prefix1748073bytesを保全し、BD/recovery-post-713abdc3-4427-4063-8725-83448f534586/result-recovery-index.json（BFB3A39CD387EC53ADD483FEEA74EEB6A8D6FA5743BBA4B0E2D1570394178C3C）が原証拠8件＋新索引1件への接合を記す。下記の旧hash/未実行表記は当時の保存点であり、現在の実行許可には使わない。次CAP-BF設計とC16/20/C/33は別の未完工程である。
+
 ## PSSA-CAP限定見直し：設計受入（2026-10-24、実行0）
 
 精緻化計画`unknown-descendant-resume-plan.md`のSHA256はA8E1C248CD7DF19ADA805E72D11EBB6141A7E83B50AC521BEA0CCD4C74A686FD、独立是正Pre済み設計`unknown-descendant-design.md`は8295FF7BDCF1AB56CA465A0B6BB1FD86263BD77D9C8B478371D98A7E338CA3A8である。元Stop/全規則/全severity/engine必敗を維持する。初版20244の2阻害とbefore保全はreview正本にあり、実採取経路の原文抽出・最小shape/20照合先を補って受入れた。CAP-TはT/pssa-captureへ固定20期待と実装前の旧方式RED1件を準備する予定であり、生成済み/実行済みとは扱わない。外側中断責任/最終receipt/候補bindingは実行Preで未接合、33候補実行・元NullReference解消・製品提供は未解除である。

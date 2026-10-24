@@ -2,6 +2,10 @@
 
 ## PSSAエラー採取方式の限定見直し（2026-10-24）
 
+CAP-BD独立Post後の中間snapshot2026-10-24T03:54:14.966Z=input2277725895/cached2231345664/output5009475/reasoning1692356/total2282735370/cache_write0。開始差分input37311307/cached37018496/output74508/reasoning33602/total37385815。共有週枠6→12%/10080分/reset1793406166、ordinaryUsageAllowed=true。アカウント共通のため当工程専有6%とは扱わない。子counter/親子包含/provider実値は未取得、合算0。この値は完了総量ではなく、後続BF設計・復元追記/独立確認・commit/push・最終応答を含まない中間区切りである。
+
+到達点はCAP設計/Pre、旧RED一回のfixture側exit2停止・独立Post、outer catch診断追加の設計/Pre/一回/独立Postである。BDは0.9038672秒/前後84照合一致/診断Partial、元REDと元PSSA NREの解消は未成立。手戻りはC16の初期値による偽の後続停止証明、無型エラー要素へのException仮定、例外時argv/PS保存未接合、復元CRLF、freeze内designパス省略、runner集計TextEncoder未定義を別記する。対象再試行で補わず、旧失敗と新診断を分離した。改善は完全pathをfreezeへ固定すること、型付き観測契約を実装前に確認すること、成功経路だけでなく例外経路にも診断保存を接続することである。小さい是正の文書/照合往復は実費を伴っており、使用量削減の実績とは扱わない。次は追加診断反復ではなくCLR型契約の最小是正である。
+
 利用者が検査規則・失敗判定を維持した限定設計/独立レビュー/必要な検証手順修正を承認した。開始HEAD96a6ace/tree clean、共有週枠6%/10080分/reset1793406166はアカウント共通で専有量不明。親開始snapshot2026-10-24T02:30:07.761Z=input2240414588/cached2194327168/output4934967/reasoning1658754/total2245349555/cache_write0。着手からsnapshot前・子counter/provider実値/親子包含は欠測で合算しない。親モデル不変、planner指定Astra/highが既存計画へ有限追補する。完了境界はエラー採取方式の限定変更と独立局所検証までであり、33候補実行/元sourceF91C変更/実OS/compile/製品EXE/admin/隔離外/OS設定/実data/APIは解除しない。
 
 ## Pester未使用fixture無効化・承認済み一回確認（2026-10-24）

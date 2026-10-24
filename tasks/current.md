@@ -2,7 +2,7 @@
 
 ## 最新状態：承認済みPSSAエラー採取方式の限定見直し（2026-10-24）
 
-利用者が検査規則・失敗判定を維持するエラー採取方式の限定設計/独立レビュー/必要修正を承認した。HEAD96a6ace/tree cleanから、是正設計8295FF7B…の独立限定Preと計画A8E1C248…の精緻化を完了した。Stopを維持し、実pipeline/EV/catch/finallyの逐次採取と原文抽出/producerだけmemory束縛、最小shapeと20期待を固定した。author Sol6.1/highが固定20期待と旧@代入方式の焦点RED1件を準備中で、コードC/新対象実行は0。以下の元PSSA未解消・現33receipt実行禁止は維持する。
+PSSA採取方式の承認済み限定見直しを継続中である。HEAD9ccc6a2。旧REDはexit2/Unexpected/accepted=falseで特定RED未成立、旧slot消費1/retry0と証拠を保持した。CAP-BD新診断は設計/source/receipt/復元Pre→freeze D50BA652…→別runner一回→独立Post PASSを完了した。実exit2/0.9038672秒/PS7.6.7/前後84照合一致/診断Partial（TargetObject型だけNull）/位置194:34 Where-Object・stack195/PropertyNotFoundExceptionを観測した。失敗entry型と元PSSA NRE原因は未確定、元RED受入へ転用しない。正本BD artifactはT/pssa-capture/bd-176ada9b-8956-467d-95f3-a9c385170a52、Tは下記索引参照。次はplanner承認CAP-BF：追加診断反復ではなく、型未確認の.Exception参照をCLR契約で是正する最小設計→独立Pre→新artifact焦点6入力＋旧RED1件→Postである。現在designer文書作成とBD原証拠の復元追記だけ、BFコード/新対象実行0。C16現物接合/20期待受入/C実装/20GREEN/新PSSA/33は未解除である。
 
 目標はET3安全手順の限定修正・独立合成検証までである。承認された未使用Pester自動fixture無効化と旧版確認1回は、特定assertionの旧RED成立・18pins保全・独立Post PASSで完了し、b46f5c6へpushした。準備処理sourceF91C6B04…/59886bytes・設計B45A3201…・Controller期限guardは独立Pre PASS、元port error/33期待/期限/許可範囲を維持し、復元情報をe7d5a88へpush済みである。
 

@@ -303,7 +303,7 @@ task-list：[ ] CAP-D設計/独立Pre→planner精緻化、[ ] CAP-T独立期待
 
 ### CAP-D是正Pre受領後の有限精緻化（2026-10-24）
 
-親から設計SHA256 `8295FF7BDCF1AB56CA465A0B6BB1FD86263BD77D9C8B478371D98A7E338CA3A8`の独立限定再Pre PASSを受領した。初版20244…の実pipeline/EV/catch/finallyがseam外・最小shape未確定の2阻害は解消した。CAP-D設計/Preと本精緻化を完了とし、CAP-Tへ進める。これは実行Pre/freezeの完了ではない。
+親から設計SHA256 `8295FF7BDCF1AB56CA465A0B6BB1FD86263BD77D9C8B478371D98A7E338CA3A8`の独立限定再Pre PASSを受領した。初版20244…の実pipeline/EV/catch/finallyがseam外・最小shape未確定の2阻害は解消した。外側責任補足後の最新設計SHA256は`2704B28DA82AF4E79E44056DD6490DED2BA842649800E8363E6EE5A1D1CA42D1`であり、独立補足Pre PASSも受領した。CAP-D設計/Preと本精緻化を完了とし、CAP-Tへ進める。これは実行Pre/freezeの完了ではない。
 採用契約はStop維持、実pipeline/逐次sink/EV/catch/finallyの原文抽出、producerだけmemory、固定state/flags/counts/返却shapeである。独立C01～C20の20期待を設計の照合先へ固定する。G6-05等の既存33期待/AssertionsAFA82E/準備sourceF91C/原NullReference2FAILは変更0である。
 
 | 精緻化単位／依存 | 所有・受入・停止 |
@@ -313,7 +313,43 @@ task-list：[ ] CAP-D設計/独立Pre→planner精緻化、[ ] CAP-T独立期待
 | CAP-I／CAP-T期待Pre＋CAP-B特定REDの独立受入 | implementer `gpt-6.1-sol/medium`はC=`T/pssa-capture/Invoke-PssaCapture.ps1`一つだけを実装する。作者が独立固定期待を変えず候補へ束縛し、C/Test Parser0・許可差分・全pin・外側責任を独立Preへ渡す。新PSSAはCAP-Vまで実行0 |
 | CAP-V／最終独立Pre→親freeze | 別runner `gpt-6.1-sol/medium`は固定20を各一回→C自身のPSSA一回→固定AssertionsのPSSA一回の順で実施する。firstUnexpectedで後続NotRun/retry0。20のexpected FAIL正検出はunit PASSであり、実PSSAの通常診断/engine error/不完了/保存不全/drift/超過は非PASSとして停止。reviewer `gpt-6.1-sol/high`のPostは20対照・self・Assertionsを別計上し、旧焦点RED1件も混算しない |
 
-時間枠は旧焦点RED1件の5秒/合成集合30秒、候補20の各5秒/合成集合30秒、実PSSA各10秒（work9＋save1）/2対象共通集合30秒を別々に固定する。PSSAのCollectionStartTickはself前に一回設定しAssertionsで更新0、境界一致は超過である。外側中断責任者・host上限・中断後欠測/保存の扱いは実行Preに未接合であり、yieldを保証とせず、未接合のまま旧RED/新対照/新PSSAをdispatchしない。既存設計command案を実行許可済みと扱わない。
+時間枠は旧焦点RED1件の5秒/合成集合30秒、候補20の各5秒/合成集合30秒、実PSSA各10秒（work9＋save1）/2対象共通集合30秒を別々に固定する。PSSAのCollectionStartTickはself前に一回設定しAssertionsで更新0、境界一致は超過である。外側責任は旧Invoke-PreparationReceipt.ps1:116–130/既R3と同じ受入期限であり、10/30秒のhard切断保証ではない。実行Preに親監視担当・時計・実host取消能力の有無（未提供なら未提供）・超過非PASS/後続NotRun/証拠保全を必須記録とし、未接合のまま旧RED/新対照/新PSSAをdispatchしない。yieldを保証とせず、新監督process/OS/compile側有限停止の解除や基準緩和は0である。既存設計command案を実行許可済みと扱わない。
 復元所有は、implementerがCの全内容/差分を既存`unknown-descendant-harness.patch`へ、test authorが試験/期待/adapter/receipt/bindingとrunnerから受領した未加工証跡の復元情報を既存`unknown-descendant-tests.patch`へ追加する。旧prefix/履歴/108復元対象を保全し、独立に全bytes/hash復元確認する。runnerは原ログ/報告のみ、reviewerはread-only、親は索引/受領接合のみで、同じpatchへ同時書込0。新.gitignore例外・target直管理・旧patchの黙示置換0であり既存2例外を維持する。
 全役model/effortはCAP表のまま、再選定なし。planner/必要時spec作者Astra/high、designer/作者/reviewer Sol6.1/high、implementer/runner Sol6.1/mediumをexact指定する。通常補助1役ずつ、実装/期待/実施/レビューの独立性を保持する。親の適時checkpoint commit/pushは利用者の既存standing authorizationに基づく別担当であり、本節の公開禁止は子に適用し、子commit/push/再委任0である。
 更新task-list：[x] CAP-D設計Pre/精緻化、[ ] CAP-T固定20/焦点RED期待Pre、[ ] CAP-B実行Pre/freeze/一回/独立受入、[ ] CAP-I候補Pre/freeze、[ ] CAP-V20→self→Assertions/Post。次handoffは既担当authorへ本節を渡し、旧焦点REDの正確なstatement対応・完全command・新output UUID・receiptを固定してreviewerへ返す。計画だけによる新実行許可は0、33候補の最終binding/実行Preは引き続き未解除である。
+
+### CAP-B分離Pre成立時の順序調整
+
+親からCAP-T PreのC16（memory.followup初期値比較では後続停止未実証）差戻しと、旧RED固有adapter/receipt/18pins/監視/保存には追加阻害なしとの独立報告を受領した。20対照の受入とCAP-I実装は未解除である。
+同一artifactのOldRed phaseがC16・候補C・20候補実行へ到達せず、旧REDの独立期待/adapter/全pin/完全command/監視/保存が単独で成立することをreviewerが限定実行Pre PASSとした場合だけ、親freeze後の旧RED1件先行を認める。根拠は旧代入方式の焦点assertionがC16の後続停止oracleにも未実装Cにも依存せず、両者の受入を変更しないことである。分離未証明・共通初期化からの到達・共有入力driftがあれば先行不可、実行0で止める。
+順序は旧RED限定Pre→親freeze→別runner固定一回→独立受入→C16是正/20全期待Pre→CAP-Iとする。旧RED消費と証拠保全までpinned Test/expected/binding/receipt/patchの変更停止を維持し、是正後は新hash/Preへ接合する。実装開始にはCAP-Bの特定RED受入とC16を含むCAP-T全受入の両方を必須とし、片方だけで解除しない。
+旧REDの特定assertion/exit分類/一回枠/期限/firstUnexpected/retry0、20期待・全severity・engine必敗、役割割当は不変である。これは条件付きの依存順調整であり、分離Pre未受領の現時点で実行を許可しない。本追補は文書のみ、コード/期待編集・対象実行0である。
+
+### CAP-BD：旧RED失敗の限定採取診断
+
+親から旧RED target1の固定request一回/exit2 Unexpected/accepted=false、Exceptionプロパティ不存在、18pins保全/保存正常、限定Postの記録整合確認を受領した。旧slot消費1/retry0/後続0、特定RED未成立を維持する。Test196–198の無型engineErrors要素にExceptionを仮定する箇所は候補であり、実entry型/stack/位置が欠測のため原因未確定である。C16設計87AD4D30…は限定Pre PASSだが現Testへの接合未完、CAP-IのCは未作成である。
+本案は利用者承認済みCAPエラー採取限定見直しの通常の是正・関連検証の範囲内と判定する。追加するのは同じ純合成OldRed経路のbounded観測と新診断一件であり、対象/権限/規則/期待/品質gateを増減しないため追加authorityは不要である。ただし消費済み旧slotの再利用ではなく、以下の別設計・独立Pre・新freezeを要する。元Exception参照の失敗経路を直すこと、収集目的で実PSSA/OS等を使うことは本案に含めない。
+
+| 有限単位／依存 | 所有・受入・停止 |
+| --- | --- |
+| BD-D／本追補 | designerは既存design末尾のみ。outer catchの元ErrorRecord固定scalar、ScriptStackTrace/位置、失敗entryと証明できる範囲のCLR型名（null/識別不能は別記）を限定採取する案を固定する。型で分岐して元Exception参照を救済せず、規則/期待/代入/producer/catch分類/元exitを保つ。上限bytes/文字数・取得失敗時の非干渉・保存位置と期限内記録を独立Preへ出す。任意object/環境/entry本文の全dump0 |
+| BD-T／設計Pre | test authorは新UUID配下の診断用Testコピー・診断期待/adapter/receipt/bindingとtests.patch復元情報のみ。旧4DF版Test/旧expected/binding/receipt/patch/実失敗を全bytes/hashで保全し、変更は承認された採取spanと新path/hash接合だけに限定する。C16是正・20期待変更を混在させない。原経路との差分/逆一致とC/C16/20/33/PSSA未到達、診断型/位置の欠測規則、完全commandと新一回枠を独立実行Preで確認し親freezeする |
+| BD-V／実行Pre・親freeze | 別runnerが通常sandboxで純合成診断一件を一回のみ行う。元の失敗/exit分類と別欄に診断取得の成否を保存し、診断が取れても旧RED/C受入を成立させない。前後pin/実exit/時計/新output/保存hashを記録し、unexpected/drift/超過/採取・保存失敗で停止・後続0/retry0。reviewerは元経路不変・新観測・旧失敗保全を独立Postで確認し、次の原因修正可否は別の限定判断へ返す |
+
+BD-D/T/V共通割当はplannerと必要時external-spec author=`gpt-6-astra/high`、designer/test author/reviewer=`gpt-6.1-sol/high`、test runner=`gpt-6.1-sol/medium`、implementer=`gpt-6.1-sol/medium`とする。plannerは境界管理、designerは元失敗非干渉の設計、作者は独立診断期待/試験harness、reviewerは証拠とgate分離を担うため高、runnerは固定一回実施のため中である。implementerは今回は非該当でC未作成のまま、外部仕様も既契約再利用で不起動。通常補助1役・fresh context・各独立性/Skill/利用不能停止/親model不変を維持する。
+旧焦点REDと同じ一件5秒/合成集合30秒を維持し、外側親監視担当/時計/実host取消能力有無/超過非PASS・証拠保全を新実行Preにも必須記録する。新監督process/admin/隔離外/OS/compile/実data/API/PSSA/20/33実行0。採取追加で元失敗を観測できなければ未再現/欠測とし、繰返して埋めない。
+task-list：[ ] BD-D限定設計/Pre、[ ] BD-T新artifact/期待/実行Pre/freeze、[ ] BD-V一回/独立Post。次はdesigner `gpt-6.1-sol/high`へ本節と作者の限定read-only報告・旧失敗保存証拠だけを渡す。失敗entryを特定できる根拠が設計できなければ推定で補わず不明を保存する。CAP-B特定RED受入/C16現物接合/20Pre/C実装のgateは未解除、本planner追補のsource/期待編集・対象実行・再委任0である。
+
+### CAP-BF：CLR型契約による参照照合の最小是正順
+
+BDの保存unit-result.jsonを読取確認した。元exit2/Unexpected/accepted=false、PropertyNotFoundException、FQID=`PropertyNotFoundStrict,Microsoft.PowerShell.Commands.WhereObjectCommand`、位置194:34/stack195、failedEntryはUnidentifiedである。同Test194–198は無型engineErrorsの各entryへ`.Exception`を無条件に参照しており、型によって安全な参照照合を定義していないことは静的に確認できる。実際の失敗entry型・原NullReference原因はなお未確定、BDのposthash/保存完了・独立Postは親から未受領である。
+追加診断の反復を前提にせず、型契約の不正仮定を直す限定設計へ進めてよいと判定する。CAP採取方式の承認内のtest harness是正であり、同じ純合成対象・元参照照合・特定RED期待を保ち、対象/権限/品質gateを広げないため追加authorityは不要である。BDで禁止した元経路修正は診断一件の非干渉条件であり、本是正単位とは分ける。実entry型未特定を修正成功の根拠にはせず、新artifactで型契約と実producer経路の両方を検証する。
+
+| 最小順序 | 所有・受入・停止 |
+| --- | --- |
+| BF-D限定設計→独立Pre | designer `gpt-6.1-sol/high`はdesign末尾のみ。ErrorRecordは既存Exception参照、Exceptionは自己参照、Stop wrapperは既定の直接ErrorRecord参照だけを型確認後に照合する契約を固定する。unknown/nullは明示AdapterFailure、文字列一致/skip/dedup/再帰探索0。元entry/exception参照を置換せず、同文別参照は不一致を維持する。変更span・型別焦点6入力・旧RED1件との接続をreviewer `gpt-6.1-sol/high`が独立確認する |
+| BF-T最小是正→独立実行Pre/freeze | BDの保存/posthash・独立Post受領とBF-D Pre後だけ、test author `gpt-6.1-sol/high`が新artifactのTest参照照合span、型別焦点試験/receipt/binding/tests.patchを所有する。6入力は同一ErrorRecord/同一Exception/直接wrapper/同文別参照/null/未知型に限定し、期待を候補結果から作らない。旧4DF/99305111版・BD原本/失敗/診断/slot履歴・旧patchを保全する。旧adapterの代入・producer出力→throw・旧prefix期待・特定assertion/exit分類を不変確認、C16混在0。期待と許可spanを先に独立確認し、修正版はParser/限定静的差分/復元一致→実行Pre→親freezeの順とする |
+| BF-V別runner→独立Post | runner `gpt-6.1-sol/medium`が型別6入力を各一回、成功後に実producer出力→throwを通る旧RED一件を新枠で固定一回実施する。型別正検出と特定RED成立を別計上し、旧REDは特定assertionのみexit1/accepted=true、unknown/null・adapter等はexit2、予想外成功も停止。前後pin/保存/元参照をreviewerが独立Post確認する。欠測/不一致/超過で後続NotRun/retry0、消費済みslotは再利用0 |
+
+一入力5秒/合成集合30秒、既定の親監視担当/時計/host取消能力有無/超過非PASS・証拠保全を維持し、新hard timeout・監督process・巨大matrix/framework・規則変更を導入しない。PSSA/20/33/実OS/compile/admin/隔離外/実data/API0。plannerは`gpt-6-astra/high`固定、外部仕様作者も同指定だが既契約再利用で非該当、CAP-I implementer `gpt-6.1-sol/medium`はC未作成のまま非該当とし、他役は上表のexact指定・通常補助1役・独立性を維持する。
+次はBF-D文書設計だけである。BD独立Post未受領の現在はコード修正/実行へ進めず、CAP-I開始には修正版旧RED特定受入とC16現物接合を含む20全期待Preの両方が引き続き必要である。本判断は旧RED/C成功や実障害原因の確定ではなく、型契約是正の可否と順序だけを定める。plannerのsource/期待編集・対象実行・再委任0である。
