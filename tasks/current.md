@@ -2,6 +2,10 @@
 
 ## 最新状態：承認済みPSSAエラー採取方式の限定見直し（2026-10-24）
 
+caseobs世代はsource/binding/caller/復元PreすべてPASS、tests.patch D0569E19…/4450474bytesの新8節/before3aliases/range2を独立全bytes一致確認済み。親freeze21E4C3AA…を作成し、次は別runnerの直前照合→canonical新R F0DCA8B9…唯一request一回である。旧C01PASS/C02FAILと実PSSA未実行を維持、候補runtimeは未受入である。
+
+現在：新Test CAP/caseobs-31d3adba-c9fc-4674-a8a8-ad64c34d2b3e/Test-PssaCapture.ps1 AB7EAFC5…/97269bytes/1440行は独立code Pre PASS。init4/正常flag2/catch496行だけを逆適用しC357全bytes/BOM一致、設計6ADA12E8に適合する。canonical旧E000/E9AB保全後、新generationのTestpin/3UUID/対応caller/argvだけ再束縛を承認し作者が接合中。次は限定binding/復元Pre→親freeze→新slot一回、実行はまだ0。最新push32fa78b、最新保存済patch611AC7…、C01PASS/C02FAIL・元NRE未解決は維持する。
+
 共通casecatch観測は[限定設計](ACOUSTIC-HISTORY-001/pssa-cap-case-observation-design.md)6ADA12E8…で独立Pre PASS、作者へ新Testコピーの限定実装を依頼済みである。Deadline時の64KiB閉包と最初の観測エラー保持を是正した。許可diffの逆適用C357全bytes一致→独立code Preが次であり、新binding/実行は未解除。失敗9原証拠の復元patch611AC7…は独立Pre PASS、最新pushはe22d2c8である。
 
 最新実行結果：候補保存点ae6e529をpush後、新slot一回はexit2／outer1.3656537秒。C01は固定11期待を通過してPASS、C02 ordinary期待不一致で停止し残18件・実PSSA両roleはNotRun。独立Postは入力core14/pins17/settings23/freeze保全と停止を確認した。C02実値/primaryError/個別elapsedは再び欠測で原因未判定。次は失敗case共通のbounded診断記録の最小案確認であり、推測fix/同slot再実行/基準変更は行わない。以下の「候補runtime未実施」は旧段階である。

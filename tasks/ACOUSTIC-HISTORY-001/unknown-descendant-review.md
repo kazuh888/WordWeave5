@@ -2,6 +2,14 @@
 
 ## PSSA-CAP限定Pre/Post（2026-10-24）
 
+caseobs最終復元Pre PASS。patchD0569E19…/4450474bytesは旧611AC7prefix4176974bytes＋新273500bytes、新6＋Modify2/aliases3/range2が独立メモリ復元全bytes/SHA一致。循環/draft埋込/削除0。親freezeはNEW/PARENT-FROZEN.md 21E4C3AA01DD17F25B6DF4BC4EDE4511591B4C87BC7BE6199035B53580D13506。次は直前照合後の新R唯一一回であり、runtimeは未受入である。
+
+caseobs世代のbinding/caller限定PreもPASS。B797539B2…/R F0DCA8B9…/cmd9BFAA85D…はTestpinAB7E/新3UUID/対応argv・callerだけのdeltaであり、19keys/17pins/Settings/C39B5metadata・実caller4文・adapterFF76・逆bytes・唯一8field同host/停止/期限/retry0を維持する。固定補助proofのSHA受領後に接合を確認、3leaf不存在/reparse0。復元保存Pre/親freeze/直前照合は別、対象実行0。
+
+共通casecatch観測の新Test AB7EAFC5152C53A78D89EBA3933D40E3311BBCFC5F16D45E27F5D544140BBA26（97269bytes/1440行）は独立code Pre PASS。許可init4行/取得flag2/catch496行を逆適用してC357全54369bytes/SHA/BOM一致。Parser0、catch内commandはConvertTo-Jsonのみ、callback/helper0。元ErrorRecord先行保持/前case混入0/actual-state分離/scalar上限/64KiB順序退避/Deadline短形・first captureFailure保持は6ADA設計に適合し、固定5block外膨張0・元停止保存exit不変。新binding/実行Preは別であり、対象実行0。
+
+親の補助言語probe一回（CAP対象/source/fixture/PSSA呼出0）：PS7.6.7で合成PSCustomObject一個を`@(Write-Output -NoEnumerate $obj)`へ渡すとCount1/firstType=System.Collections.Generic.List<System.Object>/元objectとのReferenceEquals=falseだった。C02 producerのNoEnumerateにも同型の包装が生じる仮説を支持するが、実DiagnosticRecord/C02実値は未観測であり原因確定や型正規化の根拠にはしない。期待・source変更0、次は共通観測でraw.typeとrecordRefs.firstTypeを採取する。
+
 共通casecatch観測の限定設計はpssa-cap-case-observation-design.md SHA6ADA12E8BE35843F0203A38FD446F4B7FD7578DABCB1FCB1157962579287AC30で独立Pre PASS。初版58C3のDeadline時64KiB閉包不足をC9607で短形退避へ閉じ、隣接する最初のcaptureFailure保持との矛盾を6ADAで是正した。各是正は28行のみ逆適用して前SHA一致、他diff0。元ErrorRecord先行保持/case初期化/actual-state分離/明示getter/64KiB/既保存・停止・期限維持に追加阻害0。実装へ渡したが実行許可ではない。新Testの許可diff逆適用C357一致とcode Preが必須である。
 
 新slot失敗証拠の保存Pre PASS。tests.patch611AC7B6…/4176974bytesは旧4A5Eprefix4078990bytes＋新97984bytesの9節を独立メモリ復元し、全bytes/SHA一致、range2一致、自己循環/重複path0である。manifest原7＋unit-result＋freezeを保全し、FAIL判断は変更しない。次は既casecatch内の実値欠測を共通で補う限定設計である。
