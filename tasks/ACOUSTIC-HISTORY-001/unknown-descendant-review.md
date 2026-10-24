@@ -2,6 +2,8 @@
 
 ## PSSA-CAP限定Pre/Post（2026-10-24）
 
+共通casecatch観測の限定設計はpssa-cap-case-observation-design.md SHA6ADA12E8BE35843F0203A38FD446F4B7FD7578DABCB1FCB1157962579287AC30で独立Pre PASS。初版58C3のDeadline時64KiB閉包不足をC9607で短形退避へ閉じ、隣接する最初のcaptureFailure保持との矛盾を6ADAで是正した。各是正は28行のみ逆適用して前SHA一致、他diff0。元ErrorRecord先行保持/case初期化/actual-state分離/明示getter/64KiB/既保存・停止・期限維持に追加阻害0。実装へ渡したが実行許可ではない。新Testの許可diff逆適用C357一致とcode Preが必須である。
+
 新slot失敗証拠の保存Pre PASS。tests.patch611AC7B6…/4176974bytesは旧4A5Eprefix4078990bytes＋新97984bytesの9節を独立メモリ復元し、全bytes/SHA一致、range2一致、自己循環/重複path0である。manifest原7＋unit-result＋freezeを保全し、FAIL判断は変更しない。次は既casecatch内の実値欠測を共通で補う限定設計である。
 
 Save修正新generationのruntimeはFAIL。独立Postは一回/exit2/retry0/tool1.6883228秒/unit outer1.3656537秒と保全を確認した。C01は固定11期待を通過してPASS（gatePASS/Complete/全6flags true/counts0）、C02 expected ordinary不一致でUnexpected1、残18と実PSSA2roleはNotRun。core14＋pins17/settings23/freeze前後一致、runner保存8件もSHA一致。unit-result F2D945FE8DD2AEB2332A1E3E996BDEDA60CC8AA8F2743975D6EA9EF6E993C64E（13261bytes）。C02実値/primaryError/個別elapsedは欠測で原因を判定できない。元PSSA NRE未解決・旧FAIL/診断Partial維持、同slot再実行0。新runner正本はCAP/cap-v-savehash-runner-evidence-9e6f2a75-6f15-4e8f-92f1-42e638b7ebcc/report.md（781E5938A5FD6E2023CBCB3B5341DE267E8D253094F0247AA2963797B11D5F8D）。次はcase内失敗観測の共通不足を限定検討する。

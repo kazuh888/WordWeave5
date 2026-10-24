@@ -2,6 +2,8 @@
 
 ## 最新状態：承認済みPSSAエラー採取方式の限定見直し（2026-10-24）
 
+共通casecatch観測は[限定設計](ACOUSTIC-HISTORY-001/pssa-cap-case-observation-design.md)6ADA12E8…で独立Pre PASS、作者へ新Testコピーの限定実装を依頼済みである。Deadline時の64KiB閉包と最初の観測エラー保持を是正した。許可diffの逆適用C357全bytes一致→独立code Preが次であり、新binding/実行は未解除。失敗9原証拠の復元patch611AC7…は独立Pre PASS、最新pushはe22d2c8である。
+
 最新実行結果：候補保存点ae6e529をpush後、新slot一回はexit2／outer1.3656537秒。C01は固定11期待を通過してPASS、C02 ordinary期待不一致で停止し残18件・実PSSA両roleはNotRun。独立Postは入力core14/pins17/settings23/freeze保全と停止を確認した。C02実値/primaryError/個別elapsedは再び欠測で原因未判定。次は失敗case共通のbounded診断記録の最小案確認であり、推測fix/同slot再実行/基準変更は行わない。以下の「候補runtime未実施」は旧段階である。
 
 現在の次工程：Save一行是正Test C357／canonical B E000／R E9ABは独立source・binding Pre PASS、C39B5/oracle/基準不変である。復元patch4A5E…は新18節/旧3aliases/range2の独立全bytes照合もPASS。親freeze D5A13633…後、新slotの同host Unit20→条件付きPSSA二件を一回実行する。候補runtimeは未実施、旧FAIL/診断Partial/無効fieldは維持する。
