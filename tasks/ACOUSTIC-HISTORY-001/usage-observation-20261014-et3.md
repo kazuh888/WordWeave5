@@ -2,6 +2,12 @@
 
 ## PSSAエラー採取方式の限定見直し（2026-10-24）
 
+typed-output新slot後の中間snapshot2026-10-24T07:16:08.904Zはinput2381294940/cached2334312704/output5199634/reasoning1771621/total2386494574/cache_write0。共有週枠27%/10080分/reset1793406166/ordinaryUsageAllowed=true。開始6%との差21ptを当工程専有消費とはしない。親子包含・子counter・provider返却model/effortは欠測、合算0。この後のPost/復元追補/記録/push/最終応答は未反映である。
+
+開始値との差はinput140880352/cached139985536/output264667/reasoning112867/total141145019。cached/reasoningは内数で再加算しない。
+
+今回の14span是正後はC01–C05 PASS、C06 primaryIdentity不一致、残14NotRun、PSSA0/retry0。根拠不足の期待修正はせず、既存の観測で原因の切分けを独立確認する。親のindex追記で見出しを推測したapply_patchが一回不適用となり、実見出し確認後に訂正した（source/対象実行変更0）。復元・束縛の往復を含むため効率改善は未判定である。
+
 context-engineeringを現在要約に限定適用し、重複した旧「最新状態」を正本索引へ集約した。tasks/current.mdは229行→48行、相対リンク14件の欠落0、根拠資料/原証拠/Git履歴削除0、規則/モデル/検査bar変更0である。これは取得可能なファイル行数とリンク検証の改善であり、tokenや週枠削減の実測結果ではない。型付き比較の別合成API一回はscript2.1822017秒/17pins前後不変/analyzer・CAP対象0とし、gate再実行に混同しない。
 
 06:13:48中間値とCAP開始値の差分はinput110747010/cached110106368/output199930/reasoning83518/total110946940であり、cached/reasoningは内数で再加算しない。

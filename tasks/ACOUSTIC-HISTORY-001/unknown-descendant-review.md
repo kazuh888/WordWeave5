@@ -2,6 +2,20 @@
 
 ## PSSA-CAP限定Pre/Post（2026-10-24）
 
+参照観測候補の限定binding Preと最終復元PreもPASS。B/Rは旧版19/5leaf差分、cmd逆一致、C16実span1549–2296/4文/各role一箇所、17pins/settings23/新leaf3不存在/reparse0を確認。patch416E9F3E…の最終9件・before B/R2・3rangesを独立メモリ復元し全bytes/SHA一致、重複/循環0。親freeze03090FD0…を作成し、新request一回の直前照合へ渡す。元C06FAIL/Partialと未観測4値は保持する。
+
+参照観測コピー3D635611…の独立code Pre PASS。83行/11143bytesの1挿入を除くと旧688FED全97363bytes/BOM一致。四値の型・非null確認後の原参照直接比較、false/欠測null、親nullのgetter0、各field独立取得、最初のobsFault保持と元64上限/期限/短形/FAIL/停止/保存/exitを確認した。runtime・新bindingは未評価、実行解除ではない。
+
+実装前seamを検出し一旦copy/編集0で設計へ差戻した。限定改訂E18B30FF…の3段落は独立是正Pre PASS。親recordRefs=null時は既nullを保持しgetter0/4field不在、専用missing一項目だけを既64件/Overflow内へ追加する。親hashtable時だけ4null→各独立取得、Count0/firstType故障でもmemoryContextの取得可能性を保つ。短形null/固定missing不変。実装適合・runtimeは未検証である。
+
+参照境界設計1A741723CE199214F4E3B5FAB5F7D3AEEF9785FBE3DD54F914E6135187C583E6の独立設計Pre PASS。四nullable比較は入力／初保持／state・result境界を分離し、falseと欠測null、期限・短形・元FAIL・一回保存を維持する。観測点はAdd引数binding後であり、Write-Errorやbinding前参照の原因確定は不可。新コピーへの観測実装は別Pre、runtime解除ではない。
+
+原証拠追補794B42EA…の独立復元Pre PASS。旧prefix4874464bytes、新9節、ranges全bytes/SHA一致、重複・自己循環0、元FAIL/Partial保持。diff --check exit2の561警告は全件が原unit-result.jsonのCRLFのCRに一致し、新しい末尾space/tab・他issue0。原証拠を正規化せず保持し、全体書式PASSとは呼ばない。純文書差分の書式検査はPASSである。
+
+型出力slotの独立Postは全体FAIL／観測Partial。一回exit2/tool2.1436989秒/unitouter1.7469127秒、C01–C05 PASS/C06 primaryIdentity Unexpected/残14＋実PSSA両role NotRun、retry0。core17/pins17/settings23/freeze前後一致、原8成果物SHA不一致0。C06はErrorRecord2受信/engineGroups1、missing既知2件、truncated=[]へ回復した。primaryIdentityはfixture入力memory.error↔primaryであり、sameErrorReference通過は受信record同士の比較にすぎない。C60/465の直接保持・返却と合わせても、入力↔初受信／初受信↔primaryの実測が不足しており、collector欠陥・fixture仮定のどちらも未確定。期待修正や原因確定をせず、限定設計へ戻す。
+
+型出力是正の最終code／binding／復元PreはPASS。14span以外0、逆適用AB7E全bytes/BOM一致、C39B5・oracle・規則・期限・停止・exit不変。新7＋canonical Modify2の9節と旧before alias3件は全bytes/SHA一致、旧8450prefix4591517bytesと追加282947bytesを保全、循環埋込0。NEWの親freeze60043B77を作成し、別runner Sol6.1/mediumへR259BAEA7の単一条件付きrequest一回を委任した。補助9配列回帰は情報証拠のみで、Unit20受入へ代用しない。
+
 caseobs原証拠と型付きAPI比較の保存Pre PASS。patch8450E36C…/4591517bytesは旧D056prefix4450474bytes＋追加141043bytesの新10節を独立メモリ復元し全bytes/SHA一致、range一致、自己循環/重複path0である。freeze＋manifest原7＋unit＋情報比較を保持、比較をCAP/analyzer実行へ混同しない。typed-output設計7ED8371B…の独立PreもPASS、次は新Test14箇所の実装Preであり、対象実行0。
 
 caseobs唯一runはexit2/tool1.9017946秒/unit outer1.5396801秒、C01PASS/C02Unexpected/18NotRun/実PSSA0/retry0。独立PostはPartial受入。actual ordinary0/unknown1/他0、Pipeline UnknownのList<Object>1件とrecordRefs実型が一致、primaryErrorは取得済みnull、元caseError message/位置/stackを保持した。stateに本来ないgateStatus/captureStatusの既知欠測2に加えtruncated=nullがstring[]契約不適合、1173行のif空配列出力に接合する。core15+pins17/settings23/freeze保全・保存8件SHA一致。unit-result D2ACC1C90BCACCE9384247DE2F0C11B14F7B8D7D2630C8DFFA7486841A618670（21329bytes）、runner正本はCAP/cap-v-caseobs-runner-evidence-80303d8e-07f9-4f94-89fc-ced8d989a5db/saved-index.json（B46CEE17…）。旧内部状態への遡及証明/元NRE解消/完全観測PASSにはしない。
