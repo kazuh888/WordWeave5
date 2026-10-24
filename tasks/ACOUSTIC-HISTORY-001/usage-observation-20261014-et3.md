@@ -2,6 +2,8 @@
 
 ## PSSAエラー採取方式の限定見直し（2026-10-24）
 
+context-engineeringを現在要約に限定適用し、重複した旧「最新状態」を正本索引へ集約した。tasks/current.mdは229行→48行、相対リンク14件の欠落0、根拠資料/原証拠/Git履歴削除0、規則/モデル/検査bar変更0である。これは取得可能なファイル行数とリンク検証の改善であり、tokenや週枠削減の実測結果ではない。型付き比較の別合成API一回はscript2.1822017秒/17pins前後不変/analyzer・CAP対象0とし、gate再実行に混同しない。
+
 06:13:48中間値とCAP開始値の差分はinput110747010/cached110106368/output199930/reasoning83518/total110946940であり、cached/reasoningは内数で再加算しない。
 
 新slot停止後の中間snapshot2026-10-24T06:13:48.913Z=input2351161598/cached2304433536/output5134897/reasoning1742272/total2356296495/cache_write0。共有週枠22%/10080分/reset1793406166/ordinaryUsageAllowed=true、開始6%との差16ptは本工程専有消費ではない。子counter/provider実値/親子包含は欠測・合算0。最終応答・以降のcase共通観測設計/保存/commit/pushは未反映である。

@@ -2,6 +2,12 @@
 
 ## PSSA-CAP限定Pre/Post（2026-10-24）
 
+caseobs原証拠と型付きAPI比較の保存Pre PASS。patch8450E36C…/4591517bytesは旧D056prefix4450474bytes＋追加141043bytesの新10節を独立メモリ復元し全bytes/SHA一致、range一致、自己循環/重複path0である。freeze＋manifest原7＋unit＋情報比較を保持、比較をCAP/analyzer実行へ混同しない。typed-output設計7ED8371B…の独立PreもPASS、次は新Test14箇所の実装Preであり、対象実行0。
+
+caseobs唯一runはexit2/tool1.9017946秒/unit outer1.5396801秒、C01PASS/C02Unexpected/18NotRun/実PSSA0/retry0。独立PostはPartial受入。actual ordinary0/unknown1/他0、Pipeline UnknownのList<Object>1件とrecordRefs実型が一致、primaryErrorは取得済みnull、元caseError message/位置/stackを保持した。stateに本来ないgateStatus/captureStatusの既知欠測2に加えtruncated=nullがstring[]契約不適合、1173行のif空配列出力に接合する。core15+pins17/settings23/freeze保全・保存8件SHA一致。unit-result D2ACC1C90BCACCE9384247DE2F0C11B14F7B8D7D2630C8DFFA7486841A618670（21329bytes）、runner正本はCAP/cap-v-caseobs-runner-evidence-80303d8e-07f9-4f94-89fc-ced8d989a5db/saved-index.json（B46CEE17…）。旧内部状態への遡及証明/元NRE解消/完全観測PASSにはしない。
+
+補助の型付きAPI比較一回はCAP/typed-output-comparison-20261024.jsonを正とする。固定PSSA1.25の合成DiagnosticRecord一個に対し、NoEnumerateはList/ref非同一、同advanced scriptblockのWriteObject(false)はDiagnosticRecord/ref同一だった。17pins/B7975前後不変、script2.1822017秒/tool4.6160333秒、CAPtarget0/analyzer0/retry0。公式APIは[Cmdlet.WriteObject](https://learn.microsoft.com/en-us/dotnet/api/system.management.automation.cmdlet.writeobject?view=powershellsdk-7.4.0)で列挙フラグを確認し、現SMAの両overloadもメタデータ読取で確認した。次の候補はfixture正出力11箇所の同一object API置換＋root配列保持3箇所のみであり、元C/期待/型正規化は変更しない。現時点は設計中で未実装・未実行である。
+
 caseobs最終復元Pre PASS。patchD0569E19…/4450474bytesは旧611AC7prefix4176974bytes＋新273500bytes、新6＋Modify2/aliases3/range2が独立メモリ復元全bytes/SHA一致。循環/draft埋込/削除0。親freezeはNEW/PARENT-FROZEN.md 21E4C3AA01DD17F25B6DF4BC4EDE4511591B4C87BC7BE6199035B53580D13506。次は直前照合後の新R唯一一回であり、runtimeは未受入である。
 
 caseobs世代のbinding/caller限定PreもPASS。B797539B2…/R F0DCA8B9…/cmd9BFAA85D…はTestpinAB7E/新3UUID/対応argv・callerだけのdeltaであり、19keys/17pins/Settings/C39B5metadata・実caller4文・adapterFF76・逆bytes・唯一8field同host/停止/期限/retry0を維持する。固定補助proofのSHA受領後に接合を確認、3leaf不存在/reparse0。復元保存Pre/親freeze/直前照合は別、対象実行0。

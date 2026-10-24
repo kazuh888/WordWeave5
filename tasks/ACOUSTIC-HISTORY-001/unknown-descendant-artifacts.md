@@ -1,5 +1,11 @@
 # UNKNOWN-DESCENDANT-OPEN01 診断追加・局所試験の成果物索引
 
+## 最新：caseobs部分観測・型出力14箇所是正（2026-10-24）
+
+caseobs結果はCAP/cap-v-caseobs-runner-evidence-80303d8e-07f9-4f94-89fc-ced8d989a5db/saved-index.json B46CEE17B689CA76711AAB7FC121945A480E9579CEA9B963B38C2403EAA92C2Aを正本とする。unit-result D2ACC1C90BCACCE9384247DE2F0C11B14F7B8D7D2630C8DFFA7486841A618670（21329bytes）。C01PASS/C02FAIL/18NotRun、C02 ordinary0/unknown1・実型List<Object>・primarynullを採取、truncated=null契約不適合を含むPartial。元NRE未解決を維持する。
+
+CAP/typed-output-comparison-20261024.jsonは別合成API比較（CAP/analyzer0）であり、元20合格ではない。新設計[型出力是正](pssa-cap-typed-output-design.md)7ED8371B…は独立Pre PASS、producer11＋配列保持3だけの新Testを作成中である。復元patch8450E36C763F9EDB789DDD9DB3CB5A145032EB897598954060089D12DD1C1D1D（4591517bytes）は旧D056prefix保全、新10節全bytes/SHAの独立復元Pre PASS。外部復元indexはcaseobs/recovery-post/recovery-index.json10491B2D…、verificationF7C0B03D…である。
+
 ## 最新：共通case観測の実行前候補（2026-10-24）
 
 CAP/caseobs-31d3adba-c9fc-4674-a8a8-ad64c34d2b3e/Test-PssaCapture.ps1はAB7EAFC5152C53A78D89EBA3933D40E3311BBCFC5F16D45E27F5D544140BBA26（97269bytes/1440行）。source-edit-proof C9D49132…、設計pssa-cap-case-observation-design.md 6ADA12E8…に対する独立code Pre PASS、逆適用C357全bytes/BOM一致である。同rootのbinding-delta B2DA565D…/caller-adapter-proof49EDAFBE…/static-binding-proofBD0DC519…/candidate-notes3C2632B9…を正本補助資料とし、-draft.jsonは非実行準備資料である。
