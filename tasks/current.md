@@ -2,6 +2,8 @@
 
 ## 最新状態：検証用安全手順の限定修正を開始（2026-10-24）
 
+候補更新：U-N source4C1612F8…/55809bytes/BOMは独立静的是正Pre PASS。初回811Eのnull変換/依存和集合参照/manifest scalar型の3blockingだけ修正し、原本逆全bytes一致・許可外0・Parser/PSSA通常0engine0・完全復元一致を確認した。sourceは固定し、独立T05685244…の33入力へ接合中でruntime0。作者側の成功marker集計/secondaryIdentity exact1の過剰制約2点は、契約不変の最小是正と独立判断しbeforeを保全する。最終fixture Pre→親freeze→別runner→Postが未完、実OS/製品等の未承認は維持する。完全hashは成果物索引にある。
+
 最新：承認済み設定2行版の旧REDは新packet7f7369e7…/run e43f88b5…で特定assertionのBehaviorMismatch・native/receipt/tool1・accepted=true、18pins前後不変/保存正常/2.5646826秒/retry0となり、独立Post PASS。旧Qのregistry AdapterFailureは不変で保全した。既承認U-L～Pの前提が成立したため、U-N implementer Sol6.1/highが元probeL1～L4の準備処理を実装中。別所有の独立33入力memoryfixture準備だけをauthor Sol6.1/highと限定並行する。候補SHA/実行unit/33GREENはPending、実OS/compile/製品等は依然対象外である。以下は開始・停止時の経緯を保持する。
 
 再開：利用者が未使用TestRegistry/TestDrive自動準備の無効化と、レビュー後の修正版旧版確認1回を明示承認した。旧失敗を保全し、既選定author Sol6.1/highが新packetへ設定2行とpath/hash接合だけを準備中。33期待/期限/失敗分類は不変、独立差分Pre→親freeze→別runner Sol6.1/medium一回→独立確認へ進む。以下の承認待ちは更新前の停止記録であり、実OS/compile/製品等の未承認は維持する。

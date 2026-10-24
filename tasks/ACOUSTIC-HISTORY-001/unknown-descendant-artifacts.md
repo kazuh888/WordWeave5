@@ -24,6 +24,24 @@ R=`F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate`、H=`F
 
 P=`R/verification/argv-path01/ef551043-d22a-44a7-903b-1e9540efc910`。独立作者がP/beforeへ原本2fileをCopy-Itemで保全し、編集0と報告した。親はfake.rs（14443bytes）とInvoke-CargoGate.ps1（154848bytes）の存在を確認した。oracle/新adapterは作成中であり、新candidateの未存在本文位置はPendingのまま、期待値固定後に対応づける。これは期待緩和ではなく、存在しないcandidateのhashを実装前に求める循環gateを避ける順序である。完成物の静的Preと最終freezeを省略しない。
 
+## U-N準備probe候補・独立静的是正Pre（2026-10-24）
+
+現source R/verification/argv-path01/Invoke-FirstFailureEnv01.ps1 SHA4C1612F8731DA936F32B69455694AE5129527D7143F5BD52797B7F8BEFB978BC/55809bytes/BOM保持。最終packet I=`R/verification/argv-path01/0f64870f-9da0-4c69-95fb-f139f911afe3`、証拠はI/static-4e27a260-717e-42a9-a358-c14ace045986/に限定する。元19920bytesへの許可6span逆一致/許可外diff0/PS7.6.7Parser0/PSSA1.25通常0engine0/完全候補newfilediff復元一致を確認した。
+
+| I最終証拠 | SHA256 |
+| --- | --- |
+| inverse-evidence.json | E9F6EE1DF6CD59FB376C1596DC337CFA8A266D89583B0DB252BB225FCDD830F7 |
+| static-evidence.json | 3B0B678EC43DF0772ADC861FACCE4699B2FE8A2D1715B21888415ED908391A6A |
+| restore-evidence.json | 1EAF1DAA694B7844C2585D6605344C6FA88B2950FC64BF92520BA60017E2E6EE |
+| candidate-full.patch | A5945CBE49892C6E4D588B6951EA3A9B4854D402C637998BDF19F1510A9AA6E1 |
+| implementation-report.json | A27F1086372EEFECF5DFB5C6DCB5B1528AEBA7A53CC18BC583C0F8C816D2BF44 |
+
+tracked harness.patch SHA473C3CC1746D350511C91D20790FC831974BF8EF9B18109AF84D0DADB7DFD3F4、preU-N083DD…prefix15734bytes不変、新candidate完全newfilediff1個だけである。旧811E/55505bytes候補と証拠はI/rejected/beforeへ保全し、3hunk差分corrections-from-rejected.patch SHA5A7884A54C92D33926DDD94874D7780B2420888A93C618AB3A817339DDD12F76を逆変換すると旧811E全bytes一致する。独立code reviewerは3blockingの解消/隣接境界追加指摘0として限定是正Pre PASS、33GREEN/実OS成功とは区別した。
+
+初回実装packet ffcfb3e1-cee2-4d30-8dff-e52a2bd462a0/HANDOFF.mdとstatic-853c5a04…は旧候補811Eの証拠であり現物へ混用しない。Git解決先/不要async出力/サブdir filtering/longpathの静的補助失敗は保全した。復元時のcore.longpaths=true/core.autocrlf=falseは当該Gitコマンド引数だけで、永続Git/OS設定変更0。親は新packetにHANDOFF.mdがあると誤って一度読取失敗したが、正しいstatic dirの証拠を指定し直してhashを取得した。source/runtimeの再実行ではない。
+
+33fixture packet T=`R/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d`。候補受領前の独立fixture固定証拠pre-candidate-static.json SHA990018786281A5B3ED0E80AE538F9729052A12B5C4831E78FD442ECE80B8EF4Bと旧811Ebinding53B7454E…を保全し、新4C16接合中。oracleCAA26281…不変、最終fixture Pre/固定receipt/実行/PostはPendingである。
+
 ## 承認済み自動fixture無効化版の旧RED成立（2026-10-24）
 
 S=`R/verification/argv-path01/7f7369e7-0e52-4915-9d92-40cae9c941ab`。unit SHA A35FEB5ECEDDEEDC0B12697FFEB4534319D254927856B8375888A0DD177C86F0、receipt964B800F3F4A445501635E94644EDADE59232EC58882DB27C097A74D8F93335E、toolC1A5296C5E60172B0974C2770D4C35AF955A4657E8C860143FAC9130C21C2FB4、manifestBE39D039478D7BFD044199F9E6EF3FC1ED302D14C5BF7AA8B64C726A7CFA04E2。設定2行以外はpath/outputUUID/hashmetadataのみ、旧33期待CAA26281…とassertion/期限/分類は不変である。
