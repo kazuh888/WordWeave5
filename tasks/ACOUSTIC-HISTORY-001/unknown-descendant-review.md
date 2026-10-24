@@ -69,6 +69,14 @@ PreはPesterの実load file Pester.ps1が17pinsに含まれない1件で差戻�
 
 同梱Pester5.7.1 help202–210とplugin登録条件を限定読取し、対象testがTestRegistry/TestDriveを参照しないことを確認した。config生成後のTestRegistry.Enabled=false/TestDrive.Enabled=falseの2行案は未使用registry/temp初期化だけを外し、assertion/33期待/期限/分類を維持する案として独立静的妥当性を確認した。設定変更の承認/実際の編集/新pin freeze/独立差分Pre/新一回実行は未成立、実行許可とはしない。plannerも追加harness設定承認が必要と判定し、親がasync質問済みである。frameworkのregistry作成試行は拒否され、成功や残留/後片付けは未確認。直接registry操作・昇格・OS設定変更・再試行0。
 
+## 承認済みPester自動fixture無効化の差分Pre/Post（2026-10-24）
+
+利用者が未使用TestRegistry/TestDrive無効化と独立レビュー後の修正版旧版確認1回を明示承認した。新packetS=7f7369e7-0e52-4915-9d92-40cae9c941abの2設定はconfig生成後/Invoke-Pester前であり、削除すると旧unitにBOM込み全bytes一致した。ほかのpath/outputUUID/hashmetadata、33期待/固定assertion/期限/native1-adapter2分類/18pins不変を独立確認して差分Pre PASS。patch4189475A…は49/49復元一致/旧prefix525147bytes維持、追加CRLF124行は原本由来/不要末尾空白tab0と分類し、設定緩和・trim変更0。
+
+親freeze BF13B9478C40BF9D38F8D40003D0E355FB6D56086375A7831B4E21FC60AB699D後、別runnerがS/e43f88b5-b204-45ee-82fb-a8a1e09f8445へ一回実行した。特定deadline assertionだけが失敗しBehaviorMismatch/native1/accepted=true、18pin前後差分0/正常保存/2.5646826秒/retry0が整合し、限定Post PASS。旧QのAdapterFailure証拠はhash不変。これは旧版合成RED成立までであり、候補33GREEN/実OS解消/製品受入ではない。実行・再実行を伴う独立reviewは0である。
+
+既承認U-L～PのU-Nへ進める前提が成立したため、親は既選定implementer Sol6.1/highへ元probe準備処理だけを委任した。旧33期待とexactprotocolが不変の独立memoryfixture準備をauthor Sol6.1/highが別所有で並行する。この具体的独立作業以外は通常1補助を維持し、期待の候補合わせやsource未固定の実行は行わない。
+
 ## 実OS観測の静的案Pre（2026-10-24）
 
 designer指定Sol6.1/highの設計追補166F267C71D5DCEE135134A575A6F76D27A0E42AD07B338CB527AA1DE0B84C57を、別reviewer指定Sol6.1/highが限定read-only確認した。承認前準備の停止条件は妥当だが、実行Preは未達、U-H全体完了とは扱わない。未充足はcompile込み外側停止（既存同期version/compileは90秒監視前）、依存/書込先/OS観測とsandbox範囲の固定、同一入口の生成後freeze承認方式の3点である。これらは確認済みの新しい実装欠陥ではなく、実行案の不足である。元oracle/Err/unknown非停止/retry0/期限/診断と元判定の分離には追加矛盾を認めず、既成功51入力は再レビューしなかった。次は不足安全手順の限定設計・必要なsource変更の承認であり、実OS一回枠をそのままdispatchしない。対象実行/ValidateOnly/compile/OS照会/編集/再委任0、provider実値と子usageは未取得。

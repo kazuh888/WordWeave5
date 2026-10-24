@@ -258,6 +258,8 @@ task-list/checkpoint： [x] U-L設計差分Pre→planner精緻化、[ ] U-M期�
 次役はU-M test author `gpt-6.1-sol/high`である。承認scope・通常補助1役・全役割当・実OS別承認を維持し、本接合は文書差分のみ、実装・対象実行・再委任0である。
 
 ### U-M旧REDのAdapterFailureと停止gate（2026-10-24）
+
+承認更新：利用者が未使用TestRegistry/TestDrive自動準備の無効化と、独立レビュー後の修正版旧版確認1回を明示承認した。旧失敗/一回枠は保全し、新packet/新output UUIDへ設定2行と必要なpath/hash metadataだけを接合する。33期待/元assertion/期限/判定/通常sandbox/非adminを維持し、実OS/本体compile/製品/OS設定/registry直接操作は解除しない。担当は既選定author/reviewer Sol6.1/high、runner Sol6.1/mediumを継続し、別モデル再選定や親変更は行わない。以下の承認待ちは更新前の経緯である。
 Q=`R/verification/argv-path01/6201d237-1221-492b-8858-5c8f4c5f7d23`の`OLD-VERSION-RUNNER-REPORT.md`と保存stdoutを読取確認した。一回実測はexit2/AdapterFailure/accepted=false、TestRegistryの`HKCU\Software\Pester`初期化権限拒否でcontainer failed1、特定assertion RED未成立である。18pins前後不変、保存正常、2.6680518秒、retry0を保持する。
 追加の限定harness設定承認が必要と判定する。`Invoke-OldVersionRed.ps1:25–33`のPester設定にTestRegistry/TestDrive無効化はなく、その追加はAGENTSの「Seek approval before changing harness/settings」に該当する。未使用fixtureの無効化は最小対案だが、一般的な純合成検証承認だけから設定変更を承認済みとしない。作者が未使用性と変更spanを確認して親へ返す。
 33期待・旧REDの特定assertion・期限・判定を変更せず、旧失敗証拠/一回枠を保全する。設定差分と新一回枠の明示承認→独立差分Pre→再freezeまで修正・再実行を停止する。レジストリ権限引上げ/隔離外/admin/品質緩和での回避0、本追補は文書のみで実装・設定変更・対象実行・再委任0である。

@@ -2,6 +2,10 @@
 
 ## 最新状態：検証用安全手順の限定修正を開始（2026-10-24）
 
+最新：承認済み設定2行版の旧REDは新packet7f7369e7…/run e43f88b5…で特定assertionのBehaviorMismatch・native/receipt/tool1・accepted=true、18pins前後不変/保存正常/2.5646826秒/retry0となり、独立Post PASS。旧Qのregistry AdapterFailureは不変で保全した。既承認U-L～Pの前提が成立したため、U-N implementer Sol6.1/highが元probeL1～L4の準備処理を実装中。別所有の独立33入力memoryfixture準備だけをauthor Sol6.1/highと限定並行する。候補SHA/実行unit/33GREENはPending、実OS/compile/製品等は依然対象外である。以下は開始・停止時の経緯を保持する。
+
+再開：利用者が未使用TestRegistry/TestDrive自動準備の無効化と、レビュー後の修正版旧版確認1回を明示承認した。旧失敗を保全し、既選定author Sol6.1/highが新packetへ設定2行とpath/hash接合だけを準備中。33期待/期限/失敗分類は不変、独立差分Pre→親freeze→別runner Sol6.1/medium一回→独立確認へ進む。以下の承認待ちは更新前の停止記録であり、実OS/compile/製品等の未承認は維持する。
+
 最新停止点：設計9106C34A…と独立33期待/旧RED実行PreはPASS後、親freeze C70B911F…で旧version合成確認を一回実行した。しかしPesterのTestRegistry標準初期化がHKCU権限拒否となり、native/receipt/tool exit2・AdapterFailure・accepted=falseで停止した。RED未成立、33候補GREEN/本体修正は未着手である。18pins前後不変/正常保存/2.6680518秒/retry0。不要plugin参照0を作者が静的確認し、config.TestRegistry.Enabled=falseとTestDrive.Enabled=falseの2行案を作成したが未適用。harness設定変更と新一回枠の追加承認を質問済みで、返答まで変更/再実行しない。frameworkのレジストリ作成試行は拒否されたが成功・残留/後片付けは未確認、親やrunnerによる直接操作/権限昇格/OS設定変更は0である。
 
 HEADb85c6eb/tree cleanから、利用者が直前提示の限定設計・修正・合成検証への続行を指示した。planner指定Astra/highがU-L～Pを追補、designer指定Sol6.1/highが内部設計を作成中。完了境界は検証用の時間制限・照合・生成後明示停止の限定変更、独立合成試験とレビューまでである。実OS ENV01/本物fake compile/製品EXE/admin/隔離外/OS設定/実data/API/既成功51入力反復は対象外。公開param変更や実再開入口の追加は無断で行わず、生成後AwaitingApprovalで止める今回経路と、別承認が必要な将来再開を区別する。正本は再開計画U-L～Pと設計の最新追補、usage記録である。

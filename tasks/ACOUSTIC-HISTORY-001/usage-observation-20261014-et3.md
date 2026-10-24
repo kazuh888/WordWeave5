@@ -1,5 +1,9 @@
 # ET3 試用EXE提供の使用量観測
 
+## Pester未使用fixture無効化・承認済み一回確認（2026-10-24）
+
+利用者が設定2行と独立レビュー後の修正版旧版確認1回を承認した。開始HEADaa8d10d/tree clean、共有週枠0%/10080分/reset1793406166はアカウント共通で専有量不明。前回reset1793372790からの週枠差分は算出しない。親開始snapshot2026-10-24T00:24:15.234Z=input2203898184/cached2158070272/output4866180/reasoning1632294/total2208764364/cache_write0。着手～開始snapshot前・子counter/provider実値/親子包含は欠測で合算しない。既割当author/reviewer Sol6.1/high、runner Sol6.1/medium、親変更0。今回境界は設定差分Pre→新freeze→一回確認/独立事後確認であり、旧失敗を保全し33期待/期限/分類を変更しない。
+
 ## 検証用安全手順の限定修正・合成検証（2026-10-24）
 
 利用者が直前提示の「3点を補う検証用手順の限定設計・修正・合成検証、実環境試験は含めない」に続行を指示した。開始HEADb85c6eb/tree clean、共有週枠1%/10080分/reset1793372790はアカウント共通で専有量不明。親開始snapshot2026-10-23T15:19:57.933Z（JST24日）input2178159905/cached2132699392/output4831174/reasoning1621068/total2182991079/cache_write0。着手から最初の取得まで・子usage/provider実値/親子包含は未取得で合算しない。親モデル変更0、planner指定Astra/highが既存未達3点に対する有限change setを追補する。完了境界は安全手順の限定変更・独立合成検証・レビューであり、実OS ENV01/本物診断fake compile/製品build/admin/隔離外/設定/実data/APIは解除しない。
