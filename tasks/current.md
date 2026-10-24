@@ -2,6 +2,8 @@
 
 ## 最新状態：承認済みPSSAエラー採取方式の限定見直し（2026-10-24）
 
+最新実行結果：候補保存点ae6e529をpush後、新slot一回はexit2／outer1.3656537秒。C01は固定11期待を通過してPASS、C02 ordinary期待不一致で停止し残18件・実PSSA両roleはNotRun。独立Postは入力core14/pins17/settings23/freeze保全と停止を確認した。C02実値/primaryError/個別elapsedは再び欠測で原因未判定。次は失敗case共通のbounded診断記録の最小案確認であり、推測fix/同slot再実行/基準変更は行わない。以下の「候補runtime未実施」は旧段階である。
+
 現在の次工程：Save一行是正Test C357／canonical B E000／R E9ABは独立source・binding Pre PASS、C39B5/oracle/基準不変である。復元patch4A5E…は新18節/旧3aliases/range2の独立全bytes照合もPASS。親freeze D5A13633…後、新slotの同host Unit20→条件付きPSSA二件を一回実行する。候補runtimeは未実施、旧FAIL/診断Partial/無効fieldは維持する。
 
 最新：失敗証拠保存点99a9e2eまでpush済み。CAP-V一回はC01 gateStatus期待不一致でexit2／0PASS・1Unexpected・19NotRun、実PSSA両roleはNotRun。新C01診断一回（outer1.9753394秒）は同失敗を再現し、memory Save内Get-CapHash解決失敗をprimaryError/位置/stackから確認、独立Postは原因採取範囲で受入れた。memory.files[0].pathだけは診断getterのName遮蔽で無効、完全観測PASSとはしない。元C01/CAP-V FAIL・元PSSA NRE未解決を維持する。次は新TestのSave式一箇所を既helperと同義のBCL SHA式へ置換し、旧canonical B/R全bytes保全後に新世代を接合→限定独立Pre/復元→親freeze→新slot一回である。C39B5/oracle/基準は不変、候補はまだ未実行。元33・実OS・compile・製品EXE更新は未解除。以下の「最終binding中」は旧段階である。

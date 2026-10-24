@@ -2,6 +2,10 @@
 
 ## PSSA-CAP限定Pre/Post（2026-10-24）
 
+新slot失敗証拠の保存Pre PASS。tests.patch611AC7B6…/4176974bytesは旧4A5Eprefix4078990bytes＋新97984bytesの9節を独立メモリ復元し、全bytes/SHA一致、range2一致、自己循環/重複path0である。manifest原7＋unit-result＋freezeを保全し、FAIL判断は変更しない。次は既casecatch内の実値欠測を共通で補う限定設計である。
+
+Save修正新generationのruntimeはFAIL。独立Postは一回/exit2/retry0/tool1.6883228秒/unit outer1.3656537秒と保全を確認した。C01は固定11期待を通過してPASS（gatePASS/Complete/全6flags true/counts0）、C02 expected ordinary不一致でUnexpected1、残18と実PSSA2roleはNotRun。core14＋pins17/settings23/freeze前後一致、runner保存8件もSHA一致。unit-result F2D945FE8DD2AEB2332A1E3E996BDEDA60CC8AA8F2743975D6EA9EF6E993C64E（13261bytes）。C02実値/primaryError/個別elapsedは欠測で原因を判定できない。元PSSA NRE未解決・旧FAIL/診断Partial維持、同slot再実行0。新runner正本はCAP/cap-v-savehash-runner-evidence-9e6f2a75-6f15-4e8f-92f1-42e638b7ebcc/report.md（781E5938A5FD6E2023CBCB3B5341DE267E8D253094F0247AA2963797B11D5F8D）。次はcase内失敗観測の共通不足を限定検討する。
+
 新generationの最終復元PreもPASS。tests.patch4A5E46FA…/4078990bytesの新16＋Modify2全18節、旧prefix3742741bytes、新suffix336249bytes、before3aliases/range2を独立メモリ復元して全bytes/SHA一致・循環埋込0である。親freezeはNEW/PARENT-FROZEN.md D5A13633BDA589B6A87761138CA18994F695F63B466DE298064A9D2C9C170284。候補実行前の保存点であり、runtime受入はまだない。
 
 Save一行是正は独立source Pre PASS。新Test C357FCEDA8B05B9DFDA1EAB0D944FF205CE6D65F59533F2C49ABBE5379ADC287（54369bytes）の逆置換で旧6DDの54315bytes/BOM全一致、512行の式は元helperと同じbyte[]→SHA256大文字hex、receipt型/処理順不変である。新canonical B E0009557…／R E9AB3F0F…の限定delta PreもPASS。19keys/17pins/Settings/C39B5metadata維持、新Testpin/3UUID/対応argv/caller原文hash/spanだけを再束縛、実caller4文・role各1・adapterFF76…・逆bytesが一致した。cmd ACE936FF…は4path置換以外不変、同host/停止/期限/retry0を維持する。旧B/Rはbeforeへ全bytes保全。候補runtimeは未受入、最終保存Pre/親freeze/直前照合待ちである。

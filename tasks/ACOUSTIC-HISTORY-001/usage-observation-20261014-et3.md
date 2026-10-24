@@ -2,6 +2,12 @@
 
 ## PSSAエラー採取方式の限定見直し（2026-10-24）
 
+06:13:48中間値とCAP開始値の差分はinput110747010/cached110106368/output199930/reasoning83518/total110946940であり、cached/reasoningは内数で再加算しない。
+
+新slot停止後の中間snapshot2026-10-24T06:13:48.913Z=input2351161598/cached2304433536/output5134897/reasoning1742272/total2356296495/cache_write0。共有週枠22%/10080分/reset1793406166/ordinaryUsageAllowed=true、開始6%との差16ptは本工程専有消費ではない。子counter/provider実値/親子包含は欠測・合算0。最終応答・以降のcase共通観測設計/保存/commit/pushは未反映である。
+
+今回の手戻りは、個別C01診断で原因を採取しSave一行だけを修正したため、C02でもcasecatchの実値欠測が残ったことである。C01修正は新slotで固定11期待PASSにより実証されたが、C02原因は未判定。改善は個別CLIの再作成ではなく既casecatchの共通bounded観測であり、元期待・停止・期限・exitを維持する限定設計を既designer Sol6.1/highへ戻した。親handoff中の説明語を実在filenameと誤認した読取1件、保存file数の親推測をmanifest基準へ訂正した件も対象実行とは分離する。復元/束縛の往復に実費があるため、使用量削減を達成したとは扱わない。
+
 05:38:49中間値と開始値との差分はinput92995493/cached92428288/output166395/reasoning71475/total93161888である。cachedはinput、reasoningはoutputの内数で再加算しない。
 
 CAP-V停止後の中間snapshot2026-10-24T05:38:49.646Z=input2333410081/cached2286755456/output5101362/reasoning1730229/total2338511443/cache_write0。共有週枠20%/10080分/reset1793406166/ordinaryUsageAllowed=true、開始6%との差はアカウント共通で本工程専有消費ではない。子counter/provider実値/親子包含は欠測、合算しない。C16期待・閉じたproduction schema・C39B5の限定是正・binding/保存Pre・CAP-V一回までを含み、その後の診断案/保存/commit/push/応答は未反映である。
