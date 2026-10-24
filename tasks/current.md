@@ -14,18 +14,18 @@ ACOUSTIC-HISTORY-001：原音・固定例文・音響解析・Qwen助言を保�
 - 最新caseobs一回はC01 PASS／C02 Unexpected／残18 NotRun、実PSSA両roleはNotRun、exit2／retry0である。C02はordinary0／unknown1、PipelineとrecordRefs実型はList<Object>、primaryErrorは取得済みnullだった。観測全体はPartialであり、state固有欠測2とtruncated=null契約不適合を保持する。
 - 別の合成API比較では、実DiagnosticRecordがWrite-Output -NoEnumerateでList・別参照、WriteObject(false)で同型・同参照となった。これはCAP対象／analyzer呼出0の補助証拠であり、元20合格や元PSSA NRE解消ではない。
 - 元Assertions AFA82E80…のPSSA1.25内部NullReference、旧UNKNOWN-DESCENDANT／旧cancel原因は未解決である。過去の診断成功・局所PASSを別gateへ転用しない。
-- 最新pushはc98147d、ブランチはcodex/development-agent-team。原caseobs証拠の復元追補と次の限定候補は作業中である。実際のdirty状態は必ずgit status --shortで確認する。
+- 証拠保存点f8cec4eまでGitHubへ反映済み、ブランチはcodex/development-agent-team。原caseobs証拠＋情報比較の復元patch8450E36C…は独立Pre PASS、次候補は作業中である。実際のHEADとdirty状態は必ずgitで確認する。
 
 ## 次のアクション
 
-1. caseobs原証拠と合成API比較の復元保存・独立確認を完了する。
-2. 独立Pre済み設計7ED8371B…に従い、新Testコピーのproducer正出力11箇所とroot配列保持3箇所だけを是正する。逆適用AB7E全bytes/BOM一致→独立code Pre。作者へ実装依頼済み、対象実行はまだ0である。
-3. 新B/R・3出力UUID・caller/argvを限定再束縛→独立binding／復元Pre→親freeze→別runnerの新slot一回。Unit20成功時だけ同hostでCollector-self、固定AssertionsのPSSAへ進む。最初の異常で後続NotRun、retry0を維持する。
+1. 原証拠保存は完了。設計7ED8371B…の14箇所だけを是正した新Test（CAP/typed-output-7c98c831-f8e8-42d3-91b9-60b54c1d11a2、688FED51…/97363bytes）は独立code Pre PASS、逆適用AB7E全bytes/BOM一致。3配列式の空/1/65入力の別9回帰もPASS、CAP対象実行0である。
+2. canonical新B727443AE…／R259BAEA7…（cmd1BDBAFED…）は独立binding Pre PASS。復元patch02C62D34…は新9節と旧alias3件の全bytes/SHA一致、独立復元Pre PASS。親freeze60043B77…を作成済みである。
+3. 固定した新requestを別runnerの新slotで一回実行する。Unit20成功時だけ同hostでCollector-self、固定AssertionsのPSSAへ進む。最初の異常で後続NotRun、retry0を維持する。新runtimeはまだ実行していない。
 
 ## 主要な決定・制約
 
 - C39B5採取本体、oracle0E20118Bの20期待、全規則／severities／閾値、旧RED、C06 WriteError、C07順序・ThrowTerminatingErrorを維持する。未知型の自動展開・期待後付けは禁止である。
-- caseobs基準TestはAB7EAFC5…、canonical B797539B2…／RF0DCA8B9…。現在の次候補は未受入であり、古いfreeze／消費済みslotで再実行しない。既原本・FAIL・Partial・無効fieldは保存する。
+- 実行済みcaseobs基準はTest AB7EAFC5…／B797539B2…／RF0DCA8B9…。新688FED/B7274/R259Bのruntimeは未受入であり、古いfreeze／消費済みslotで再実行しない。既原本・FAIL・Partial・無効fieldは保存する。
 - 通常sandbox／通常ユーザー／合成データのみ。新しい昇格・隔離外実行・OS設定・依存更新・実データ・API送信は行わない。過去の個別試験承認を流用しない。hard cancellationはUnavailableであり、yield／事後時間測定を強制停止保証にしない。
 - 資源契約は子メモリ512MiB・同時1件・60秒。音響値を発音の優劣・総合点へ直結させない。原音・教材・学習記録を保全し、完全削除は今回含めない。
 - 親モデルは利用者選択のまま。既担当はdesigner／test-author／reviewer=gpt-6.1-sol/high、runner=gpt-6.1-sol/medium。子の指定と実provider返却値を混同しない。
