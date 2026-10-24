@@ -2,6 +2,12 @@
 
 ## PSSA-CAP限定Pre/Post（2026-10-24）
 
+CAP-V一回の独立PostはFAIL分類・停止・保全を確認した。freeze B6A345…後のR6B03唯一requestはexit2／tool3.0039223秒／unit outer2.6474299秒、C01 Unexpected1／PASS0／残19NotRun、実PSSAの両roleはNotRun、retry0である。unit-result SHA3069F10D65A6B37565783E33B001C1091B7DE622B92FF3AE3785E30AEBD89E3AはC01 id/status/errorのみで、actual値・内部理由・個別elapsedは欠測。core14＋pins17の31行/settings23/freeze前後一致、runner9filesも独立SHA一致。原因はgateStatus期待不一致以上に確定できず、C16や元NREの改善を意味しない。証拠はCAP/cap-v-runner-evidence-20261024-053234/report.md D75301E9…と同saved-indexを正とする。新規C01限定診断は設計・実行Pre待ち、元request再実行0である。
+
+直前準備のallPass=falseは保存rawの個別14/17/23/3全true・正確8request keysと矛盾し、補助集計不備と独立判断した。Countの実値・型は未採取のため具体機構は推論に限定する。原false/停止記録を保全し、既存rawだけのaggregate-addendumを追補して親受領後に初回対象を実行した。追加照合・入力/freeze/基準変更・試行再利用は0である。
+
+CAP-V actual binding/receiptの限定静的Pre PASS/追加阻害0。B CE594BB3…は19root/17pins/4slice/C16実driver3・caller4文/adapterhash逆bytes一致、R6B03FD1A…は単一request一回/command18A4C3E2…で同一host Unit20→Collector→Assertionsを停止if・別collection時計付きで接合する。unit20-receiptは受入参照で別commandではない。親の当初handoff『unit20receipt.request→R.request』はrunnerのread-only準備で食違いを検出し、target0のまま撤回、実契約の単一Rへ訂正した。B/R/期待/回数は変更0。Settings12/11件・3leaf不存在・既存祖先reparse0、通常sandbox/retry0/親監視とhard取消Unavailableを確認した。残りは新資料復元Preと親freeze、実loadedmodule/argv/C07/C16/20runtimeは未受入である。
+
 CAP-I是正C39B5BC40…/43796bytes/816行は独立限定再Pre PASS/追加阻害0。失敗射影だけ独立64KiB/truncation/missing/FAILへ接続し元参照/rawprefix/linksを維持、driver祖先Directory/Reparse検査と保存直前時計を確認した。閾値/公開4param/3functions/state/C16tail/期待は不変。harness.patch0AC98BD1…/126141bytesも独立保存確認PASS、旧CF775prefix117942bytes一致、新1節6hunkをメモリ適用してC39B5全bytes/BOM/LFが一致した。actual binding/caller/20runtimeは未受入のまま、authorへ現物接合だけを進める。
 
 CAP-I初回C D862B77D…/39659bytes/747行の独立code Preは確定2blockingで未達。出力親path/leaf不存在だけでは祖先junctionを拒否できず、saveContext.allowed前の既Test同等reparse拒否が不足した。Completeのprimary/secondary/missing失敗射影は全document2MiB+64KiBだけで独立64KiB上限がなく、元error参照/raw prefix/linksを維持したbounded縮退とFAILが必要である。実装者へこの2件だけを限定差戻し、既20oracle/公開params/state/C16tail/規則・期限は不変。C07のEV実型/Unknown0期待はruntime待ち仮説のまま、期待変更根拠にしない。独立Parser0/3functions/state1/tail3stmtは確認済み、runtime0。authorの候補B4160B086…/receiptC341E0DC…とD862原本は全bytes保全され、新hash待ちでPendingFinalPre、実行解除0である。

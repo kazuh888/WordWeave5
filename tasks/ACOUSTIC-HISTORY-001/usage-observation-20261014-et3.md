@@ -2,6 +2,12 @@
 
 ## PSSAエラー採取方式の限定見直し（2026-10-24）
 
+05:38:49中間値と開始値との差分はinput92995493/cached92428288/output166395/reasoning71475/total93161888である。cachedはinput、reasoningはoutputの内数で再加算しない。
+
+CAP-V停止後の中間snapshot2026-10-24T05:38:49.646Z=input2333410081/cached2286755456/output5101362/reasoning1730229/total2338511443/cache_write0。共有週枠20%/10080分/reset1793406166/ordinaryUsageAllowed=true、開始6%との差はアカウント共通で本工程専有消費ではない。子counter/provider実値/親子包含は欠測、合算しない。C16期待・閉じたproduction schema・C39B5の限定是正・binding/保存Pre・CAP-V一回までを含み、その後の診断案/保存/commit/push/応答は未反映である。
+
+CAP-VはC01 gateStatus期待不一致で停止し、実原因の保存不足が判明した。case内catchがMessageだけを保存しouter診断に達しないため、次の最小改善は失敗caseのactual/primaryError/位置/stackをbounded保存することである。対象再実行で欠測を隠さない。準備allPassの集計不備は既存rawの独立確認で限定訂正し、元falseを保全して対象0のまま解除した。completed agentへのsend_messageでは再開しない引継ぎ遅延をfollowup_taskで是正した。親の当初「別Unit20 request」記述もfresh runnerが実行前に検出し、実契約の同一host単一requestを維持した。これらの追加往復を効率改善として計上せず、条件を落とさずに使用量を減らす候補は失敗経路の観測契約とhandoff commandの早期固定である。
+
 CAP-BF独立Post後snapshot2026-10-24T04:28:39.709Z=input2298210582/cached2251767040/output5034037/reasoning1699093/total2303244619/cache_write0。CAP開始差分input57795994/cached57439872/output99070/reasoning40339/total57895064。共有週枠15%/10080分/reset1793406166/ordinaryUsageAllowed=true、CAP開始6%との差9ptを当工程専有消費とはしない。子counter/親子包含/provider実値は未取得で合算しない。BF復元最終追記/以降C16工程/記録/commit/push/応答は未反映である。BFでは型別6焦点を6PASS、特定旧RED1件も受入、全1.170437秒/前後123照合不変/独立Post PASSまで到達した。F3公開API fixture生成未定義と最初5秒時計へのmetadata未包含を実装/実行前に是正した。次C16の未生成C/callerとの依存循環は、既設計どおり期待・adapter code Preと現物binding/実行Preを分ける計画補足で解消し、品質gate自体は維持する。
 
 CAP-BD独立Post後の中間snapshot2026-10-24T03:54:14.966Z=input2277725895/cached2231345664/output5009475/reasoning1692356/total2282735370/cache_write0。開始差分input37311307/cached37018496/output74508/reasoning33602/total37385815。共有週枠6→12%/10080分/reset1793406166、ordinaryUsageAllowed=true。アカウント共通のため当工程専有6%とは扱わない。子counter/親子包含/provider実値は未取得、合算0。この値は完了総量ではなく、後続BF設計・復元追記/独立確認・commit/push・最終応答を含まない中間区切りである。

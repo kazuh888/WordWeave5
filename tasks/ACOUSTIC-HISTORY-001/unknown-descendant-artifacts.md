@@ -1,5 +1,13 @@
 # UNKNOWN-DESCENDANT-OPEN01 診断追加・局所試験の成果物索引
 
+## 最新：CAP-V一回失敗・証拠保全（2026-10-24）
+
+復元保存tests.patchはB27F7A3F20DB24DD8398E0853F52E859B1857791DB8CED9B76DE6620BDB706C1（3660782bytes）。旧0089E6D7 prefix3573659bytesを保持し、追加87123bytesにfreeze1＋runner9＋unit-result1の11原証拠を収めた。外部index/reportはCAP/recovery-cap-v-result-5dd0a416-9208-4443-858c-3357fc2b066bである。作者11/11復元一致、独立メモリ復元も11/11全bytes/SHA一致・循環埋込/重複path0でPre PASS。
+
+最終Pre後のfreezeはCAP/CAP-V-FROZEN.md（B6A345CA6D2851B2F87B49C3959CE57A735BC9F6703EE5BDE779618540CA02CB）、B CE594BB3…／R6B03FD1A…である。CAP/cap-v-runner-evidence-20261024-053234/saved-index.jsonがrunner9filesとunit-result参照を索引化する。report.md SHA D75301E98877F005B5834872E0ABDB4B436CEC7F9CBEA2FEF3387E3866732198、assessment.json SHA FEBE0C78A0D93821ACF396255F135F4939E14532F5F46028F7444A66E3ADA6B3。C16/out/unit-c155bc1b-bbbf-4076-8b3d-6a88c0a5a7af/unit-result.json SHA3069F10D65A6B37565783E33B001C1091B7DE622B92FF3AE3785E30AEBD89E3A（12482bytes）。
+
+C01 gateStatus期待不一致／exit2／0PASS・1Unexpected・19NotRun、実PSSA2roleはNotRun、独立PostはFAIL分類・停止・保全を受入れた。actual値・内部理由・個別elapsedは欠測である。元request再実行0。次は新規C01限定診断の設計／Preであり、下段の「最終接合中」は旧段階である。復元patch追補は進行中。
+
 ## 最新：CAP-I採取本体の静的受入（2026-10-24）
 
 C=`CAP/Invoke-PssaCapture.ps1` SHA39B5BC40CA83F5E088873B67047243182EF806D96BE8BC5D3372235808187613（43796bytes/816行/Parser0）。初回D862の出力祖先reparse拒否と独立64KiB失敗射影の不足を限定是正し、保存直前時計を接合した。独立code再Pre PASSである。beforeはCAP/before-cap-i-review-3a4bdc57-f7de-4f60-b698-c87d884be268にあり、harness.patch SHA0AC98BD1E95D9D970886A93DB0AC99835F55E3BF35E4309B0E639AE4E1418496（126141bytes）が旧CF775prefix117942bytesを保全し追加deltaから新Cを全bytes復元する。独立保存確認もPASS。
