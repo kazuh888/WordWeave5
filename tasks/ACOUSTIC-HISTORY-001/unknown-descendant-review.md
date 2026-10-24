@@ -2,6 +2,16 @@
 
 ## PSSA-CAP限定Pre/Post（2026-10-24）
 
+BF結果の保存追記B7E87C5F…/2947347bytesは独立確認PASS/阻害0。旧55ACprefix2373431bytesとsuffix573916bytes/97B05179…が完全一致、新9diffのメモリ復元はfreeze/runner原5件/両結果/indexの全現物bytes一致、core既Prehash不変を確認した。旧179件の再検証と次C16評価は行わず、新実行許可には転用しない。
+
+CAP-BF限定PostはPASS/阻害0。固定request一回・1.170437秒で焦点6件6PASS、その後の特定旧RED1件は実Diagnostic→Throw後actualPrefix0/expectedPrefix1の特定assertionだけによりexit1/accepted=trueで受入れた。実F3前提/直接record照合、F4別参照拒否/F5,F6明示失敗/元参照保全を確認した。前後123hash/内側focus24旧RED22pins不変、rawと両保存JSON/原5報告SHAが一致した。focused-result81E9FD62…/unit0AD30E33…、retry0/後続NotRun。過去の失敗entry型は未同定のまま、元PSSA NRE解消/C16/20/C/33の受入とは区別する。
+
+BFコードDDAD638F…/42099bytesは独立source Pre PASS、related一箇所だけの置換を逆適用して旧993の41444bytes/BOM完全一致を確認した。焦点harness DFB4はmetadata/抽出が最初の5秒時計に入らない1阻害で差戻し、F1開始をCollectionStartTickへ接合する一statement版5EFC0D6A…で独立再Pre PASSとなった。他の意味契約は再利用した。bindingDBB71801…/oldbinding1D29A087…/receiptCE121B8C…の限定PreはPASS、8field/同shell実argvPS/時計/出力不存在/6成功後旧RED1回/分類・権限・期限不変を確認した。最終復元55AC33F7…/2373431bytesの独立PreもPASS、旧A3C20prefix1949428bytesとappendix424003bytes全一致、新19diff全現物一致。freeze5BC7619B…後に別runnerへ一回だけdispatchした。
+
+CAP-BF期待PreはPASS/阻害0。新BF artifact bf-44ec0b7c-a636-4d7f-996c-bc14cd616f55の期待302586DC…/草案binding6FE093B1…はF1/F2/F3=true、F4=false、F5/F6=AdapterFailure、F3前提未成立=FixtureFailureを固定し、6成功後だけ旧RED一回/各5秒共通30秒/境界一致拒否/retry0を維持する。旧993before全bytes、一意assignment char10440–10789/349bytes/SHA4891ACB8…を独立確認した。future source/spanはPendingのまま、最終binding/実行Preではない。作者へBF限定コード是正と焦点試験準備だけを解除、fixture/対象実行0。
+
+CAP-BF初版BB664B4F…はF3の実ActionPreferenceStopException生成法未定義1件で設計Pre未達だった。固定SMAの公開ctorにErrorRecord版はなく、内部ctor呼出しを採用しない。F3追補863C8FA6…の限定再PreはPASS：公開ctor→実getterでoriginalを束縛し、SameException=false/直接ErrorRecord=true/再読参照不変を前提とする。前提未成立はFixtureFailureとして停止し別fixtureへ救済しない。型分岐/nullを通すforeach/元参照限定/6焦点の他契約は既確認を再利用する。固定PS7.6.7でのfixture実行成功や実行Preではない。旧BB66全bytes保全、fixture/対象実行0である。
+
 BD結果保存の新patch A3C20E46…/1949428bytesは独立確認PASS/阻害0である。旧A574prefix1748073bytes不変、新9diffのメモリ復元はfreeze/path補足/runner原5files/unit/indexの全bytes一致、suffix201355bytesは保存addendumと一致した。旧151件の再検証は行わず、元source/receipt/期待/旧manifest不変を維持する。保存確認を新たな対象実行の許可や元RED成立に転用しない。
 
 CAP-BD限定PostはPASS/阻害0。固定8field一回、実exit2/0.9038672秒/実PS7.6.7・実argv保存、前後84照合/現物hash一致、rawと保存JSON一致を確認した。diagnosticはPartial、TargetObject型Nullだけ欠測、truncation0/captureFailure=null、位置194:34/stack195/PropertyNotFoundExceptionを取得した。failedEntry型と196–198到達は未確定、元RED/元PSSA NRE解消とは別である。unit-result SHA4CEF4CE13746F9C9039EAF8E05A97460C3F9F85389B939371F3C5797CEC87CA2。TextEncoder未定義はrunner集計段階だけで、対象再実行0、独立UTF-8再計算2014bytesで上限内を確認した。path補足ECE3326C…は固定入力/request/回数変更0。次のCAP-BF設計は別単位、現時点でコード/実行未解除。

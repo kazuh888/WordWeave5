@@ -353,3 +353,10 @@ BDの保存unit-result.jsonを読取確認した。元exit2/Unexpected/accepted=
 
 一入力5秒/合成集合30秒、既定の親監視担当/時計/host取消能力有無/超過非PASS・証拠保全を維持し、新hard timeout・監督process・巨大matrix/framework・規則変更を導入しない。PSSA/20/33/実OS/compile/admin/隔離外/実data/API0。plannerは`gpt-6-astra/high`固定、外部仕様作者も同指定だが既契約再利用で非該当、CAP-I implementer `gpt-6.1-sol/medium`はC未作成のまま非該当とし、他役は上表のexact指定・通常補助1役・独立性を維持する。
 次はBF-D文書設計だけである。BD独立Post未受領の現在はコード修正/実行へ進めず、CAP-I開始には修正版旧RED特定受入とC16現物接合を含む20全期待Preの両方が引き続き必要である。本判断は旧RED/C成功や実障害原因の確定ではなく、型契約是正の可否と順序だけを定める。plannerのsource/期待編集・対象実行・再委任0である。
+
+### C16の期待Preと現物binding Preの依存分離
+
+親からBF一回のfocus6 PASS＋特定旧RED1成立、exit1/1.170437秒/前後123照合一致を受領したが、独立Postは確認中であり、その受領前のコード変更・実行解除は0である。設計C16節338/342/344は未生成C/callerをPendingBindingとし、実装前は選択/置換/観測規則の期待Preだけを要求するため、以下の順序は既承認設計に沿う。
+先行記述の「CAP-I開始前にC16現物接合を含む20全期待Pre」を本節で訂正する。BF独立Post受入→作者がC16の偽初期値比較を実span抽出/driver/caller境界へ改修→20独立期待とadapter codeのPre（C/callerの未存在hash/spanはPendingBinding）→CAP-IのC実装→作者がactual C/実callerを束縛→独立最終binding/実行Pre・親freeze→別runnerの20実行、の順とする。
+実装開始にはBF特定REDの独立受入と20期待/adapter code Preを必須とし、C16の意味充足・runtime PASSは現物接合後の一回観測までPendingのままである。sourcehash/span推測、代用品if、初期値NotRunによるPASS、未束縛C16合格/20実行は禁止を維持する。実行gateを後退させず、入力未存在の段階に実装後の証拠を要求する循環だけを除く。
+担当は作者`gpt-6.1-sol/high`→実装`gpt-6.1-sol/medium`→作者binding→独立reviewer`gpt-6.1-sol/high`→別runner`gpt-6.1-sol/medium`を維持する。20→self→Assertionsの実行順、回数、期限、全品質/権限条件は不変。本補足は文書のみ、コード/期待編集・対象実行・再委任0である。

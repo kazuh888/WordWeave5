@@ -1,5 +1,13 @@
 # UNKNOWN-DESCENDANT-OPEN01 診断追加・局所試験の成果物索引
 
+## 最新：CAP-BF型別是正・6焦点＋旧RED受入（2026-10-24）
+
+BF=`CAP/bf-44ec0b7c-a636-4d7f-996c-bc14cd616f55`、CAP完全pathは次節に記す。sourceDDAD638F…/harness5EFC0D6A…/receiptCE121B8C…を独立Preし、freeze5BC7619B…後に別runnerが固定request一回を実行した。焦点6件6PASSと特定旧RED1件の受入を独立Post PASS、1.170437秒/前後123照合不変/retry0である。元PSSA NRE解消とは区別する。
+
+原結果はBF/out配下のfocused-result.json SHA81E9FD620BF325172E1C47CE86E60577326933FBB42E1C04283DF85EB195F1D0、unit-result.json SHA0AD30E33646031C83F53A258E6A66A0AA2481A796849BC43031D8160D2C620B6。BFのCAP-BF-RUNNER-*原5filesがrequest/toolreturn/実6件/元producer/特定assertion/前後hashを保持する。
+
+結果追記patchはSHA B7E87C5FC6A41C2DBBEBC587DFC0AB0E012416C3E25ADE8DB75DEC65949AC080（2947347bytes）、旧55ACprefix2373431bytesを保全。BF/recovery-post-c2f44717-53ef-4fef-bcf8-1671b52014c8/result-recovery-index.json（09C253ACA0C1C41367B30F86778695A157B3BDCB1E8E7357323E4EAAEB99A1AF）が新原証拠8＋索引1を接合する。過去BD/旧REDの失敗を上書きせず、次C16期待・adapter是正は別artifactで行う。C/C16実動作/20GREEN/新PSSA/33/製品は未受入である。
+
 ## 最新：CAP-BD一回診断・独立Post（2026-10-24）
 
 CAP=`F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture`、BD=`CAP/bd-176ada9b-8956-467d-95f3-a9c385170a52`。BD新Test99305111…/receipt13840C9E…は設計・source・実行Pre済み、freeze D50BA652…とpath補足ECE3326C…後に一回診断を実施した。元exit2/Unexpected/accepted=false/0.9038672秒/前後84照合不変、診断Partialの独立Post PASSである。元REDや元PSSA NREの解消ではない。

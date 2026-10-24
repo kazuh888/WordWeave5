@@ -2,6 +2,8 @@
 
 ## PSSAエラー採取方式の限定見直し（2026-10-24）
 
+CAP-BF独立Post後snapshot2026-10-24T04:28:39.709Z=input2298210582/cached2251767040/output5034037/reasoning1699093/total2303244619/cache_write0。CAP開始差分input57795994/cached57439872/output99070/reasoning40339/total57895064。共有週枠15%/10080分/reset1793406166/ordinaryUsageAllowed=true、CAP開始6%との差9ptを当工程専有消費とはしない。子counter/親子包含/provider実値は未取得で合算しない。BF復元最終追記/以降C16工程/記録/commit/push/応答は未反映である。BFでは型別6焦点を6PASS、特定旧RED1件も受入、全1.170437秒/前後123照合不変/独立Post PASSまで到達した。F3公開API fixture生成未定義と最初5秒時計へのmetadata未包含を実装/実行前に是正した。次C16の未生成C/callerとの依存循環は、既設計どおり期待・adapter code Preと現物binding/実行Preを分ける計画補足で解消し、品質gate自体は維持する。
+
 CAP-BD独立Post後の中間snapshot2026-10-24T03:54:14.966Z=input2277725895/cached2231345664/output5009475/reasoning1692356/total2282735370/cache_write0。開始差分input37311307/cached37018496/output74508/reasoning33602/total37385815。共有週枠6→12%/10080分/reset1793406166、ordinaryUsageAllowed=true。アカウント共通のため当工程専有6%とは扱わない。子counter/親子包含/provider実値は未取得、合算0。この値は完了総量ではなく、後続BF設計・復元追記/独立確認・commit/push・最終応答を含まない中間区切りである。
 
 到達点はCAP設計/Pre、旧RED一回のfixture側exit2停止・独立Post、outer catch診断追加の設計/Pre/一回/独立Postである。BDは0.9038672秒/前後84照合一致/診断Partial、元REDと元PSSA NREの解消は未成立。手戻りはC16の初期値による偽の後続停止証明、無型エラー要素へのException仮定、例外時argv/PS保存未接合、復元CRLF、freeze内designパス省略、runner集計TextEncoder未定義を別記する。対象再試行で補わず、旧失敗と新診断を分離した。改善は完全pathをfreezeへ固定すること、型付き観測契約を実装前に確認すること、成功経路だけでなく例外経路にも診断保存を接続することである。小さい是正の文書/照合往復は実費を伴っており、使用量削減の実績とは扱わない。次は追加診断反復ではなくCLR型契約の最小是正である。
