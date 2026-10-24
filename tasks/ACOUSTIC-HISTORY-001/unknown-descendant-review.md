@@ -2,6 +2,10 @@
 
 ## PSSA-CAP限定Pre/Post（2026-10-24）
 
+identity原証拠の最終保存PreもPASS。B44BCDC9…の新9節、旧416E prefix/suffix/rangesの全bytes/SHA一致・重複/循環0、source/B/R/C/oracle固定を確認した。元FAIL/Partialと四値を改変せず保存。今回diff --check exit2の567件は全件が新原unit-result.jsonのCRLFのCRであり、追加末尾space/tab・他issue0。正規化/設定変更0、純文書書式PASS。後続の解除はせず利用者判断を求める。
+
+identity一回の限定Post成立。ただしCAP-VはFAILのまま。exit2/tool2.2378618秒/unitouter1.8661505秒、PASS5/C06 primaryIdentity Unexpected/残14NotRun、実PSSA0/retry0。core16/pins17/settings23/freeze/argv前後一致、原8件SHA不一致0。四boolはmemoryContext=true/contextFirstRetained=false/firstRetainedStatePrimary=true/firstRetainedResultPrimary=true、追加missing0。既state欠測2のため全観測Partial、期限・64KiB内/truncated[]/captureFailure null。初保持=statePrimary=resultPrimaryであり、Add binding後の保持違反は示されない。入力→Write-Error→pipeline→bindingの内訳は分離できず原因断定不可。固定oracleのfixture入力同一性は未達、受信identityへ読み替える期待修正は未承認なので後続解除不可。元NREは未解決である。
+
 参照観測候補の限定binding Preと最終復元PreもPASS。B/Rは旧版19/5leaf差分、cmd逆一致、C16実span1549–2296/4文/各role一箇所、17pins/settings23/新leaf3不存在/reparse0を確認。patch416E9F3E…の最終9件・before B/R2・3rangesを独立メモリ復元し全bytes/SHA一致、重複/循環0。親freeze03090FD0…を作成し、新request一回の直前照合へ渡す。元C06FAIL/Partialと未観測4値は保持する。
 
 参照観測コピー3D635611…の独立code Pre PASS。83行/11143bytesの1挿入を除くと旧688FED全97363bytes/BOM一致。四値の型・非null確認後の原参照直接比較、false/欠測null、親nullのgetter0、各field独立取得、最初のobsFault保持と元64上限/期限/短形/FAIL/停止/保存/exitを確認した。runtime・新bindingは未評価、実行解除ではない。

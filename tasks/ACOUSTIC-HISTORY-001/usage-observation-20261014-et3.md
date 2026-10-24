@@ -2,6 +2,14 @@
 
 ## PSSAエラー採取方式の限定見直し（2026-10-24）
 
+identity世代のPost境界snapshot2026-10-24T07:43:36.316Zはinput2397235473/cached2349893632/output5223809/reasoning1776890/total2402459282/cache_write0。共有週枠29%/10080分/reset1793406166/ordinaryUsageAllowed=true。開始6%との差23ptを当工程専有消費としない。子counter/provider実値/親子包含欠測、合算0。最終復元追補・記録・commit/push・応答は未反映である。
+
+開始値との差はinput156820885/cached155566464/output288842/reasoning118136/total157109727である。cached/reasoningは内数で再加算しない。
+
+追加観測の設計は初回Pre後、実装前に旧recordRefs=nullとの整合不足を作者が検出しcopy/編集0で差戻した。3段落の限定是正E18Bを独立Pre後、83行1挿入を実装し逆688FED全bytes/BOM一致・独立code/binding/保存Preを経た。新一回はPASS5/C06FAIL/14NotRun/analyzer0、入力↔context true/context↔初保持 false/初保持↔state・result primary trueを欠測0で取得した。元oracleはfixture入力同一性を求めており、受信後保持だけと異なる。期待を黙って変更せず判定を止める。
+
+通常開発での改善候補は、エラーの「生成元／受信境界／保存後表現」を最初の契約で分離し、同値内容・参照同一性・取得不能を混同しないことである。今回の失敗・保存往復・役割間引継ぎを節約実績とは呼ばない。同条件対照がなく使用量増減は未判定である。
+
 typed-output新slot後の中間snapshot2026-10-24T07:16:08.904Zはinput2381294940/cached2334312704/output5199634/reasoning1771621/total2386494574/cache_write0。共有週枠27%/10080分/reset1793406166/ordinaryUsageAllowed=true。開始6%との差21ptを当工程専有消費とはしない。親子包含・子counter・provider返却model/effortは欠測、合算0。この後のPost/復元追補/記録/push/最終応答は未反映である。
 
 開始値との差はinput140880352/cached139985536/output264667/reasoning112867/total141145019。cached/reasoningは内数で再加算しない。

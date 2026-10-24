@@ -56846,3 +56846,927 @@ diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05
 +  "testCorrection": "New Test only: memory Save Get-CapHash call replaced once with the exact same built-in SHA256/ToHexString expression. Original C39B5/oracle/rules/deadlines unchanged.",
 +  "testObservation": "Only authorized per-case init/obtained flags/casecatch bounded failureObservation added to SaveHash-corrected Test. Independent source code Pre PASS reported by parent for AB7E. Collector/oracle/producer/C07/expectations/clock/stop/save/exit unchanged. New binding/recovery execution Pre and parent freeze remain Pending."
 +}
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/PARENT-FROZEN.md b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/PARENT-FROZEN.md
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/PARENT-FROZEN.md
+@@ -0,0 +1,38 @@
++# CAP-V identity boundary: parent freeze
++
++Root /root accepts independent design E18B30FF, code, binding and final recovery Pre PASS. Prior FAIL/Partial evidence and consumed slots remain immutable. One NEW conditional request only is authorized.
++
++CAP is F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture.
++NEW is CAP/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da.
++
++## Fixed SHA256
++
++- CAP/Invoke-PssaCapture.ps1: 39B5BC40CA83F5E088873B67047243182EF806D96BE8BC5D3372235808187613
++- CAP/expectations.json: 0E20118B8C11714B21DEDE0A1AEC66EAA928FAFF1D845B83DB04847EAB7062C0
++- NEW/Test-PssaCapture.ps1: 3D6356119F9062A8494BF78C42B604AEB9EFE3BD18CD1D40D87E2661047E55D4
++- CAP/capture-binding.json: BCF399B86EC11EDE26AF817DBB6CC93258B50C2BE5A413C038124DE8BAB022B8
++- CAP/CAP-V-receipt.json: 4E1BE222D7297322859A07FC5D24F0EC15BA5E36E285BB205FF3E914F06F90B6
++- receipt request.cmd UTF8: 5B736D434A0D764129CD93945439FE1C03AFA7AC759F3EDD60374DB7130F701B
++- NEW/source-edit-proof.json: E6C6239044C4B83AA9B4C56E93BA32881ACD897835B7DCF888A31E577FBD8687
++- NEW/candidate-notes.json: 9340F9F7E772088EEF658756613797737F3BEED6D9582AEC09F3684989F67ABA
++- NEW/binding-delta.json: BCD79B4FA4ED6222C3213B77232776CA529409BFD55B22397F83CB970EB77CF6
++- NEW/caller-adapter-proof.json: 1FD0094B4F0636B710A2F2471392B374199176EC36F71171FB1E402E2C6CFA7D
++- NEW/static-binding-proof.json: CE1C9CB95CD83BC9365FC2DD18C3F6CAF10EA37C1848C754360BAF6EE8F6629F
++- NEW/binding-candidate-notes.json: 8F7566D8C022FBE2A37E6E97ACB12389F1271C43836672FC1311001385A3F603
++- NEW/recovery-binding/recovery-index.json: D4242FEF32B1727A3FDF5941E2A09E7E6B93CDD0BAE45EC8DAFEFC062658EA16
++- NEW/recovery-binding/recovery-verification.json: 2A0AD784B3F63D5ADBB20B765366BDD1E273CCAECE4EC8C9D0FF7F8D86DC149F
++- tasks/ACOUSTIC-HISTORY-001/pssa-cap-identity-boundary-design.md: E18B30FF0909C38E7C814D46A3D2224D8DCDCFD1988CE9C649C1E928DEF6CF14
++- tasks/ACOUSTIC-HISTORY-001/unknown-descendant-tests.patch: 416E9F3E86BCAB480FE38981B9FAE2954BA4C3B952B284B2D988C700302D223F
++- tasks/ACOUSTIC-HISTORY-001/unknown-descendant-harness.patch: 0AC98BD1E95D9D970886A93DB0AC99835F55E3BF35E4309B0E639AE4E1418496
++
++The only source change from 688FED is one 83-line insertion for four nullable identity observations. Reverse bytes/BOM match. C/oracle/producer/assertions/settings/thresholds/clock/stop/save/exit remain unchanged. Parent recordRefs=null and deadline/byte-limit short forms remain unchanged. Observation is after Add parameter binding, not proof of the binding-before pipeline identity or a Write-Error root cause.
++
++## One NEW request and stopping
++
++Assigned runner /root/cap_final_runner (gpt-6.1-sol/medium) must directly verify this freeze, all core proofs, B pins17/settings23, exact host/argv and three NEW leaves absent with no ancestor reparse. Execute only canonical CAP/CAP-V-receipt.json.request exactly once, all eight fields unchanged; never reconstruct, split, reuse old slots or invoke Unit20 separately.
++
++One pwsh host runs Unit20 then only on actual all20 PASS/native0 self PSSA then only on actual success fixed Assertions PSSA. Keep one PSSA collection tick shared by both roles. Each unit case below5sec, unit collection including preparation below30sec; each PSSA role below10sec(work9/save1), PSSA collection below30sec; equality expires. Require actual returned flags/native exits, not disk gateCandidate. First unexpected, diagnostic, incomplete/missing/drift/deadline/save failure stops later stages NotRun; retry0.
++
++Preserve original request/tool return before interpretation. For failure report original case FAIL separately from observation Complete/Partial and identity true/false/null/missing. Do not alter expectations or infer unavailable identity. Core/B/R/source/patch remain immutable through post-hash capture. New evidence ownership is CAP/cap-v-identity-runner-evidence-17e2b23d-a0ea-43aa-b32e-e49bc83d5c22 only.
++
++Root /root monitors. Hard interruption is Unavailable; yield/elapsed is not cancellation guarantee. Normal sandbox/normal user/synthetic only. No elevation, outside-sandbox execution, OS/settings change, dependency change, real data/API, original33, actual OS ENV01, compile or product EXE/build. No production target dot-source or new probe. Freeze/results recovery append only after post-hash capture.
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/cap-v-identity-runner-evidence-17e2b23d-a0ea-43aa-b32e-e49bc83d5c22/assessment.json b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/cap-v-identity-runner-evidence-17e2b23d-a0ea-43aa-b32e-e49bc83d5c22/assessment.json
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/cap-v-identity-runner-evidence-17e2b23d-a0ea-43aa-b32e-e49bc83d5c22/assessment.json
+@@ -0,0 +1,213 @@
++{
++  "status": "FAIL",
++  "observationAssessment": "Partial: known state status missing2; all4 identity fields acquired",
++  "actualExit": 2,
++  "toolElapsedSeconds": 2.2378618,
++  "outerElapsedSeconds": 1.8661505,
++  "targetAttempts": 1,
++  "retry": 0,
++  "unit": {
++    "pass": 5,
++    "Unexpected": 1,
++    "NotRun": 14,
++    "failed": {
++      "error": "BehaviorMismatch: C06: expected primaryIdentity",
++      "id": "C06",
++      "status": "Unexpected",
++      "failureObservation": {
++        "save": {
++          "files": [
++            {
++              "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\out\\memory-C06\\raw.json",
++              "exists": true,
++              "length": 3725
++            },
++            {
++              "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\out\\memory-C06\\result.json",
++              "exists": true,
++              "length": 2454
++            }
++          ],
++          "partialLength": null,
++          "filesCount": 2,
++          "calls": [
++            {
++              "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\out\\memory-C06\\raw.json",
++              "byteLength": 3725,
++              "tick": 0
++            },
++            {
++              "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\out\\memory-C06\\result.json",
++              "byteLength": 2454,
++              "tick": 0
++            }
++          ],
++          "callsCount": 2
++        },
++        "fixtureObtained": true,
++        "truncated": [],
++        "captureFailure": null,
++        "caseError": {
++          "category": "OperationStopped",
++          "position": "位置 F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\Test-PssaCapture.ps1:32 文字:28\r\n+     if (-not $Condition) { throw ($Category + ': ' + $Message) }\r\n+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
++          "message": "BehaviorMismatch: C06: expected primaryIdentity",
++          "scriptStack": "Assert-CapCondition、F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\Test-PssaCapture.ps1: 行 32 で\r\nTest-CapResult、F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\Test-PssaCapture.ps1: 行 632 で\r\nInvoke-CapUnit20、F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\Test-PssaCapture.ps1: 行 727 で\r\n<ScriptBlock>、F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\Test-PssaCapture.ps1: 行 1371 で\r\n<ScriptBlock>、<No file>: 行 7 で",
++          "hResult": -2146233087,
++          "fullyQualifiedErrorId": "BehaviorMismatch: C06: expected primaryIdentity",
++          "exceptionType": "System.Management.Automation.RuntimeException",
++          "recordType": "System.Management.Automation.ErrorRecord"
++        },
++        "actualObtained": true,
++        "missing": [
++          "state.gateStatus:Missing",
++          "state.captureStatus:Missing"
++        ],
++        "actualCount": 1,
++        "actual": {
++          "type": "System.Collections.Hashtable",
++          "firstRaw": {
++            "origin": "Pipeline",
++            "type": "System.Management.Automation.ErrorRecord",
++            "kind": "Engine"
++          },
++          "missing": [],
++          "captureStatus": "Complete",
++          "primaryError": {
++            "category": "InvalidOperation",
++            "position": "位置 行:202 文字:9\r\n+         & $producer -Context $context -ErrorAction Stop -ErrorVariabl …\r\n+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
++            "message": "memory engine error",
++            "scriptStack": "<ScriptBlock>、F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\Test-PssaCapture.ps1: 行 469 で\r\nInvoke-PssaCapturePipeline、<No file>: 行 202 で\r\nInvoke-CapFixture、F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\Test-PssaCapture.ps1: 行 532 で\r\nInvoke-CapUnit20、F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\Test-PssaCapture.ps1: 行 725 で\r\n<ScriptBlock>、F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\Test-PssaCapture.ps1: 行 1371 で\r\n<ScriptBlock>、<No file>: 行 7 で",
++            "hResult": -2146233079,
++            "fullyQualifiedErrorId": "CAP.Memory.Engine",
++            "exceptionType": "System.InvalidOperationException",
++            "recordType": "System.Management.Automation.ErrorRecord"
++          },
++          "counts": {
++            "signal": 0,
++            "engineGroups": 1,
++            "engineOccurrences": 2,
++            "unknown": 0,
++            "ordinary": 0,
++            "auxiliary": 0
++          },
++          "artifacts": [
++            {
++              "sha256": "D5436855AF310FAA739851CE5421F9CA591FB4985F6461B68A93E3E1FDE19FC0",
++              "kind": "Raw",
++              "status": "Saved",
++              "length": 3725,
++              "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\out\\memory-C06\\raw.json"
++            },
++            {
++              "sha256": "E691475978EA0ABBF7D2FBBE72B6C41CD5F511E044A7DE34F3645486754BCE53",
++              "kind": "Result",
++              "status": "Saved",
++              "length": 2454,
++              "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\out\\memory-C06\\result.json"
++            }
++          ],
++          "flags": {
++            "invokeStarted": true,
++            "moduleReady": true,
++            "invokeReturned": true,
++            "savedWithinDeadline": true,
++            "captureComplete": true,
++            "postBindingsMatched": true
++          },
++          "rawCount": 2,
++          "gateStatus": "FAIL"
++        },
++        "recordRefs": {
++          "identity": {
++            "memoryContext": true,
++            "contextFirstRetained": false,
++            "firstRetainedStatePrimary": true,
++            "firstRetainedResultPrimary": true
++          },
++          "firstType": "System.Management.Automation.ErrorRecord",
++          "count": 2
++        },
++        "caseElapsedSeconds": 0.1523665,
++        "state": {
++          "type": "System.Collections.Hashtable",
++          "firstRaw": {
++            "origin": "Pipeline",
++            "type": "System.Management.Automation.ErrorRecord",
++            "kind": "Engine"
++          },
++          "missing": [],
++          "captureStatus": null,
++          "primaryError": {
++            "category": "InvalidOperation",
++            "position": "位置 行:202 文字:9\r\n+         & $producer -Context $context -ErrorAction Stop -ErrorVariabl …\r\n+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
++            "message": "memory engine error",
++            "scriptStack": "<ScriptBlock>、F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\Test-PssaCapture.ps1: 行 469 で\r\nInvoke-PssaCapturePipeline、<No file>: 行 202 で\r\nInvoke-CapFixture、F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\Test-PssaCapture.ps1: 行 532 で\r\nInvoke-CapUnit20、F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\Test-PssaCapture.ps1: 行 725 で\r\n<ScriptBlock>、F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\Test-PssaCapture.ps1: 行 1371 で\r\n<ScriptBlock>、<No file>: 行 7 で",
++            "hResult": -2146233079,
++            "fullyQualifiedErrorId": "CAP.Memory.Engine",
++            "exceptionType": "System.InvalidOperationException",
++            "recordType": "System.Management.Automation.ErrorRecord"
++          },
++          "counts": {
++            "signal": 0,
++            "engineGroups": 1,
++            "engineOccurrences": 2,
++            "unknown": 0,
++            "ordinary": 0,
++            "auxiliary": 0
++          },
++          "artifacts": [
++            {
++              "sha256": "D5436855AF310FAA739851CE5421F9CA591FB4985F6461B68A93E3E1FDE19FC0",
++              "kind": "Raw",
++              "status": "Saved",
++              "length": 3725,
++              "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\out\\memory-C06\\raw.json"
++            },
++            {
++              "sha256": "E691475978EA0ABBF7D2FBBE72B6C41CD5F511E044A7DE34F3645486754BCE53",
++              "kind": "Result",
++              "status": "Saved",
++              "length": 2454,
++              "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\out\\memory-C06\\result.json"
++            }
++          ],
++          "flags": {
++            "invokeStarted": true,
++            "moduleReady": true,
++            "invokeReturned": true,
++            "savedWithinDeadline": true,
++            "captureComplete": true,
++            "postBindingsMatched": true
++          },
++          "rawCount": 2,
++          "gateStatus": null
++        },
++        "collectionElapsedSeconds": 0.5257742
++      }
++    }
++  },
++  "identity": {
++    "memoryContext": true,
++    "contextFirstRetained": false,
++    "firstRetainedStatePrimary": true,
++    "firstRetainedResultPrimary": true
++  },
++  "identityAllBoolean": true,
++  "identityMissing": [],
++  "C07": "NotRun",
++  "C16": "NotRun",
++  "Collector": "NotRun",
++  "Assertions": "NotRun",
++  "actualPssaInvocations": 0,
++  "postCoreAndPinsUnchanged": true,
++  "postSettingsUnchanged": true,
++  "freezeUnchanged": true,
++  "argvMatch": true,
++  "actualPS": "7.6.7",
++  "pssaVersion": "1.25.0",
++  "postGitStatus": [],
++  "hardInterruption": "Unavailable",
++  "native": "OutOfScope_NotRun",
++  "modelAssigned": "gpt-6.1-sol/medium",
++  "runtimeModelEffortUsage": "Unavailable"
++}
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/cap-v-identity-runner-evidence-17e2b23d-a0ea-43aa-b32e-e49bc83d5c22/post-tool-return.json b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/cap-v-identity-runner-evidence-17e2b23d-a0ea-43aa-b32e-e49bc83d5c22/post-tool-return.json
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/cap-v-identity-runner-evidence-17e2b23d-a0ea-43aa-b32e-e49bc83d5c22/post-tool-return.json
+@@ -0,0 +1,7 @@
++{
++  "chunk_id": "829aa0",
++  "wall_time_seconds": 1.1064048,
++  "exit_code": 0,
++  "original_token_count": 9616,
++  "output": "{\"settings\":[{\"sha256\":null,\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/PSScriptAnalyzerSettings.psd1\",\"exists\":false,\"role\":\"Collector\",\"unchanged\":true},{\"sha256\":null,\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/PSScriptAnalyzerSettings.psd1\",\"exists\":false,\"role\":\"Collector\",\"unchanged\":true},{\"sha256\":null,\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/PSScriptAnalyzerSettings.psd1\",\"exists\":false,\"role\":\"Collector\",\"unchanged\":true},{\"sha256\":null,\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/PSScriptAnalyzerSettings.psd1\",\"exists\":false,\"role\":\"Collector\",\"unchanged\":true},{\"sha256\":null,\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/PSScriptAnalyzerSettings.psd1\",\"exists\":false,\"role\":\"Collector\",\"unchanged\":true},{\"sha256\":null,\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/PSScriptAnalyzerSettings.psd1\",\"exists\":false,\"role\":\"Collector\",\"unchanged\":true},{\"sha256\":null,\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/PSScriptAnalyzerSettings.psd1\",\"exists\":false,\"role\":\"Collector\",\"unchanged\":true},{\"sha256\":null,\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/PSScriptAnalyzerSettings.psd1\",\"exists\":false,\"role\":\"Collector\",\"unchanged\":true},{\"sha256\":null,\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/PSScriptAnalyzerSettings.psd1\",\"exists\":false,\"role\":\"Collector\",\"unchanged\":true},{\"sha256\":null,\"path\":\"F:/Kazuhiro/GitHub/PSScriptAnalyzerSettings.psd1\",\"exists\":false,\"role\":\"Collector\",\"unchanged\":true},{\"sha256\":null,\"path\":\"F:/Kazuhiro/PSScriptAnalyzerSettings.psd1\",\"exists\":false,\"role\":\"Collector\",\"unchanged\":true},{\"sha256\":null,\"path\":\"F:/PSScriptAnalyzerSettings.psd1\",\"exists\":false,\"role\":\"Collector\",\"unchanged\":true},{\"sha256\":null,\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/PSScriptAnalyzerSettings.psd1\",\"exists\":false,\"role\":\"Assertions\",\"unchanged\":true},{\"sha256\":null,\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/PSScriptAnalyzerSettings.psd1\",\"exists\":false,\"role\":\"Assertions\",\"unchanged\":true},{\"sha256\":null,\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/PSScriptAnalyzerSettings.psd1\",\"exists\":false,\"role\":\"Assertions\",\"unchanged\":true},{\"sha256\":null,\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/PSScriptAnalyzerSettings.psd1\",\"exists\":false,\"role\":\"Assertions\",\"unchanged\":true},{\"sha256\":null,\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/PSScriptAnalyzerSettings.psd1\",\"exists\":false,\"role\":\"Assertions\",\"unchanged\":true},{\"sha256\":null,\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/PSScriptAnalyzerSettings.psd1\",\"exists\":false,\"role\":\"Assertions\",\"unchanged\":true},{\"sha256\":null,\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/PSScriptAnalyzerSettings.psd1\",\"exists\":false,\"role\":\"Assertions\",\"unchanged\":true},{\"sha256\":null,\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/PSScriptAnalyzerSettings.psd1\",\"exists\":false,\"role\":\"Assertions\",\"unchanged\":true},{\"sha256\":null,\"path\":\"F:/Kazuhiro/GitHub/PSScriptAnalyzerSettings.psd1\",\"exists\":false,\"role\":\"Assertions\",\"unchanged\":true},{\"sha256\":null,\"path\":\"F:/Kazuhiro/PSScriptAnalyzerSettings.psd1\",\"exists\":false,\"role\":\"Assertions\",\"unchanged\":true},{\"sha256\":null,\"path\":\"F:/PSScriptAnalyzerSettings.psd1\",\"exists\":false,\"role\":\"Assertions\",\"unchanged\":true}],\"hashes\":[{\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/Invoke-PssaCapture.ps1\",\"after\":\"39B5BC40CA83F5E088873B67047243182EF806D96BE8BC5D3372235808187613\",\"unchanged\":true,\"before\":\"39B5BC40CA83F5E088873B67047243182EF806D96BE8BC5D3372235808187613\"},{\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/expectations.json\",\"after\":\"0E20118B8C11714B21DEDE0A1AEC66EAA928FAFF1D845B83DB04847EAB7062C0\",\"unchanged\":true,\"before\":\"0E20118B8C11714B21DEDE0A1AEC66EAA928FAFF1D845B83DB04847EAB7062C0\"},{\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/Test-PssaCapture.ps1\",\"after\":\"3D6356119F9062A8494BF78C42B604AEB9EFE3BD18CD1D40D87E2661047E55D4\",\"unchanged\":true,\"before\":\"3D6356119F9062A8494BF78C42B604AEB9EFE3BD18CD1D40D87E2661047E55D4\"},{\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/capture-binding.json\",\"after\":\"BCF399B86EC11EDE26AF817DBB6CC93258B50C2BE5A413C038124DE8BAB022B8\",\"unchanged\":true,\"before\":\"BCF399B86EC11EDE26AF817DBB6CC93258B50C2BE5A413C038124DE8BAB022B8\"},{\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/CAP-V-receipt.json\",\"after\":\"4E1BE222D7297322859A07FC5D24F0EC15BA5E36E285BB205FF3E914F06F90B6\",\"unchanged\":true,\"before\":\"4E1BE222D7297322859A07FC5D24F0EC15BA5E36E285BB205FF3E914F06F90B6\"},{\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/source-edit-proof.json\",\"after\":\"E6C6239044C4B83AA9B4C56E93BA32881ACD897835B7DCF888A31E577FBD8687\",\"unchanged\":true,\"before\":\"E6C6239044C4B83AA9B4C56E93BA32881ACD897835B7DCF888A31E577FBD8687\"},{\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/candidate-notes.json\",\"after\":\"9340F9F7E772088EEF658756613797737F3BEED6D9582AEC09F3684989F67ABA\",\"unchanged\":true,\"before\":\"9340F9F7E772088EEF658756613797737F3BEED6D9582AEC09F3684989F67ABA\"},{\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/binding-delta.json\",\"after\":\"BCD79B4FA4ED6222C3213B77232776CA529409BFD55B22397F83CB970EB77CF6\",\"unchanged\":true,\"before\":\"BCD79B4FA4ED6222C3213B77232776CA529409BFD55B22397F83CB970EB77CF6\"},{\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/caller-adapter-proof.json\",\"after\":\"1FD0094B4F0636B710A2F2471392B374199176EC36F71171FB1E402E2C6CFA7D\",\"unchanged\":true,\"before\":\"1FD0094B4F0636B710A2F2471392B374199176EC36F71171FB1E402E2C6CFA7D\"},{\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/static-binding-proof.json\",\"after\":\"CE1C9CB95CD83BC9365FC2DD18C3F6CAF10EA37C1848C754360BAF6EE8F6629F\",\"unchanged\":true,\"before\":\"CE1C9CB95CD83BC9365FC2DD18C3F6CAF10EA37C1848C754360BAF6EE8F6629F\"},{\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/binding-candidate-notes.json\",\"after\":\"8F7566D8C022FBE2A37E6E97ACB12389F1271C43836672FC1311001385A3F603\",\"unchanged\":true,\"before\":\"8F7566D8C022FBE2A37E6E97ACB12389F1271C43836672FC1311001385A3F603\"},{\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/recovery-binding/recovery-index.json\",\"after\":\"D4242FEF32B1727A3FDF5941E2A09E7E6B93CDD0BAE45EC8DAFEFC062658EA16\",\"unchanged\":true,\"before\":\"D4242FEF32B1727A3FDF5941E2A09E7E6B93CDD0BAE45EC8DAFEFC062658EA16\"},{\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/recovery-binding/recovery-verification.json\",\"after\":\"2A0AD784B3F63D5ADBB20B765366BDD1E273CCAECE4EC8C9D0FF7F8D86DC149F\",\"unchanged\":true,\"before\":\"2A0AD784B3F63D5ADBB20B765366BDD1E273CCAECE4EC8C9D0FF7F8D86DC149F\"},{\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/tasks/ACOUSTIC-HISTORY-001/pssa-cap-identity-boundary-design.md\",\"after\":\"E18B30FF0909C38E7C814D46A3D2224D8DCDCFD1988CE9C649C1E928DEF6CF14\",\"unchanged\":true,\"before\":\"E18B30FF0909C38E7C814D46A3D2224D8DCDCFD1988CE9C649C1E928DEF6CF14\"},{\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/tasks/ACOUSTIC-HISTORY-001/unknown-descendant-tests.patch\",\"after\":\"416E9F3E86BCAB480FE38981B9FAE2954BA4C3B952B284B2D988C700302D223F\",\"unchanged\":true,\"before\":\"416E9F3E86BCAB480FE38981B9FAE2954BA4C3B952B284B2D988C700302D223F\"},{\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/tasks/ACOUSTIC-HISTORY-001/unknown-descendant-harness.patch\",\"after\":\"0AC98BD1E95D9D970886A93DB0AC99835F55E3BF35E4309B0E639AE4E1418496\",\"unchanged\":true,\"before\":\"0AC98BD1E95D9D970886A93DB0AC99835F55E3BF35E4309B0E639AE4E1418496\"},{\"path\":\"F:/Program Files/PowerShell/7/pwsh.exe\",\"after\":\"FA2C8BB1E35CDD62AD15CD06A1D8F2C5961E9725A9BFA1E7CFD2C322F49E9619\",\"unchanged\":true,\"before\":\"FA2C8BB1E35CDD62AD15CD06A1D8F2C5961E9725A9BFA1E7CFD2C322F49E9619\"},{\"path\":\"F:/Program Files/PowerShell/7/pwsh.dll\",\"after\":\"A583A3721FEEBC4F9552A02358BC81BBDD41E2E18BB3F424226F2B1E0BF07DEB\",\"unchanged\":true,\"before\":\"A583A3721FEEBC4F9552A02358BC81BBDD41E2E18BB3F424226F2B1E0BF07DEB\"},{\"path\":\"F:/Program Files/PowerShell/7/System.Management.Automation.dll\",\"after\":\"70701F20AFBBF4E763924C2BDD0C0E9A20EEC35A0E4EFF439E0CCF77F20D6B26\",\"unchanged\":true,\"before\":\"70701F20AFBBF4E763924C2BDD0C0E9A20EEC35A0E4EFF439E0CCF77F20D6B26\"},{\"path\":\"F:/Program Files/PowerShell/7/pwsh.runtimeconfig.json\",\"after\":\"8A6363FBA1F89C0688E3594EF4FE7B9036126F04957C5FE56858CBA020B76B33\",\"unchanged\":true,\"before\":\"8A6363FBA1F89C0688E3594EF4FE7B9036126F04957C5FE56858CBA020B76B33\"},{\"path\":\"F:/Program Files/PowerShell/7/pwsh.deps.json\",\"after\":\"A01883AEEB2217AEB1D7EC944D649376104E7A874CA4EA71E7F36448C1519DC2\",\"unchanged\":true,\"before\":\"A01883AEEB2217AEB1D7EC944D649376104E7A874CA4EA71E7F36448C1519DC2\"},{\"path\":\"C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/PSScriptAnalyzer/1.25.0/PSScriptAnalyzer.psd1\",\"after\":\"2B219F688BCDD67101040F845E530B22907D39BBF49089B4B5B2AFABA7996791\",\"unchanged\":true,\"before\":\"2B219F688BCDD67101040F845E530B22907D39BBF49089B4B5B2AFABA7996791\"},{\"path\":\"C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/PSScriptAnalyzer/1.25.0/PSScriptAnalyzer.psm1\",\"after\":\"B69773FC9080CFB958DC13C95E42A625553E9BCA5DCBEDC27231E5C183A4E869\",\"unchanged\":true,\"before\":\"B69773FC9080CFB958DC13C95E42A625553E9BCA5DCBEDC27231E5C183A4E869\"},{\"path\":\"C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/PSScriptAnalyzer/1.25.0/ScriptAnalyzer.types.ps1xml\",\"after\":\"34246566553FE97C96A9FFEA8AEEFEE353C1E07E41A72D3BFE9FDF826CC71D2A\",\"unchanged\":true,\"before\":\"34246566553FE97C96A9FFEA8AEEFEE353C1E07E41A72D3BFE9FDF826CC71D2A\"},{\"path\":\"C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/PSScriptAnalyzer/1.25.0/ScriptAnalyzer.format.ps1xml\",\"after\":\"D647E6C1CDFE4052D2382F2D76B899EC596EC71D23D724553B93F74827D49044\",\"unchanged\":true,\"before\":\"D647E6C1CDFE4052D2382F2D76B899EC596EC71D23D724553B93F74827D49044\"},{\"path\":\"C:\\\\Users\\\\安井　一広\\\\OneDrive\\\\ドキュメント\\\\WindowsPowerShell\\\\Modules\\\\PSScriptAnalyzer\\\\1.25.0\\\\PSv7\\\\Microsoft.PowerShell.CrossCompatibility.dll\",\"after\":\"D92CB413E18927BB64D9BAC221191FC69CF1659F55C72C27DDF1FE19EF774CAF\",\"unchanged\":true,\"before\":\"D92CB413E18927BB64D9BAC221191FC69CF1659F55C72C27DDF1FE19EF774CAF\"},{\"path\":\"C:\\\\Users\\\\安井　一広\\\\OneDrive\\\\ドキュメント\\\\WindowsPowerShell\\\\Modules\\\\PSScriptAnalyzer\\\\1.25.0\\\\PSv7\\\\Microsoft.Windows.PowerShell.ScriptAnalyzer.BuiltinRules.dll\",\"after\":\"C8AA9890743A6D9C47CCFEE5EC33CAAEE58C30591454D3CCF379720025A1533C\",\"unchanged\":true,\"before\":\"C8AA9890743A6D9C47CCFEE5EC33CAAEE58C30591454D3CCF379720025A1533C\"},{\"path\":\"C:\\\\Users\\\\安井　一広\\\\OneDrive\\\\ドキュメント\\\\WindowsPowerShell\\\\Modules\\\\PSScriptAnalyzer\\\\1.25.0\\\\PSv7\\\\Microsoft.Windows.PowerShell.ScriptAnalyzer.dll\",\"after\":\"C377532A1D8D8975E598891602B5C3ED39AB719F589D054EB889D11EB6CCAEA3\",\"unchanged\":true,\"before\":\"C377532A1D8D8975E598891602B5C3ED39AB719F589D054EB889D11EB6CCAEA3\"},{\"path\":\"C:\\\\Users\\\\安井　一広\\\\OneDrive\\\\ドキュメント\\\\WindowsPowerShell\\\\Modules\\\\PSScriptAnalyzer\\\\1.25.0\\\\PSv7\\\\Pluralize.NET.dll\",\"after\":\"EEECDF663A3E854F67BBBB872DC45577E785A581C1CA86EA2AE1D8215B8505D6\",\"unchanged\":true,\"before\":\"EEECDF663A3E854F67BBBB872DC45577E785A581C1CA86EA2AE1D8215B8505D6\"},{\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/Test-PssaCapture.ps1\",\"after\":\"3D6356119F9062A8494BF78C42B604AEB9EFE3BD18CD1D40D87E2661047E55D4\",\"unchanged\":true,\"before\":\"3D6356119F9062A8494BF78C42B604AEB9EFE3BD18CD1D40D87E2661047E55D4\"},{\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/expectations.json\",\"after\":\"0E20118B8C11714B21DEDE0A1AEC66EAA928FAFF1D845B83DB04847EAB7062C0\",\"unchanged\":true,\"before\":\"0E20118B8C11714B21DEDE0A1AEC66EAA928FAFF1D845B83DB04847EAB7062C0\"},{\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/Invoke-PssaCapture.ps1\",\"after\":\"39B5BC40CA83F5E088873B67047243182EF806D96BE8BC5D3372235808187613\",\"unchanged\":true,\"before\":\"39B5BC40CA83F5E088873B67047243182EF806D96BE8BC5D3372235808187613\"},{\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/PreparationAssertions.psm1\",\"after\":\"AFA82E807179DF852ECCB05D5A8C8F3919B9B1C4C9D981CFA0CD6F368FE824F4\",\"unchanged\":true,\"before\":\"AFA82E807179DF852ECCB05D5A8C8F3919B9B1C4C9D981CFA0CD6F368FE824F4\"}],\"unit\":{\"preferences\":{\"information\":\"SilentlyContinue\",\"debug\":\"SilentlyContinue\",\"verbose\":\"SilentlyContinue\",\"warning\":\"Continue\",\"errorAction\":\"Stop\"},\"afterPins\":[{\"sha256\":\"FA2C8BB1E35CDD62AD15CD06A1D8F2C5961E9725A9BFA1E7CFD2C322F49E9619\",\"path\":\"F:/Program Files/PowerShell/7/pwsh.exe\"},{\"sha256\":\"A583A3721FEEBC4F9552A02358BC81BBDD41E2E18BB3F424226F2B1E0BF07DEB\",\"path\":\"F:/Program Files/PowerShell/7/pwsh.dll\"},{\"sha256\":\"70701F20AFBBF4E763924C2BDD0C0E9A20EEC35A0E4EFF439E0CCF77F20D6B26\",\"path\":\"F:/Program Files/PowerShell/7/System.Management.Automation.dll\"},{\"sha256\":\"8A6363FBA1F89C0688E3594EF4FE7B9036126F04957C5FE56858CBA020B76B33\",\"path\":\"F:/Program Files/PowerShell/7/pwsh.runtimeconfig.json\"},{\"sha256\":\"A01883AEEB2217AEB1D7EC944D649376104E7A874CA4EA71E7F36448C1519DC2\",\"path\":\"F:/Program Files/PowerShell/7/pwsh.deps.json\"},{\"sha256\":\"2B219F688BCDD67101040F845E530B22907D39BBF49089B4B5B2AFABA7996791\",\"path\":\"C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/PSScriptAnalyzer/1.25.0/PSScriptAnalyzer.psd1\"},{\"sha256\":\"B69773FC9080CFB958DC13C95E42A625553E9BCA5DCBEDC27231E5C183A4E869\",\"path\":\"C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/PSScriptAnalyzer/1.25.0/PSScriptAnalyzer.psm1\"},{\"sha256\":\"34246566553FE97C96A9FFEA8AEEFEE353C1E07E41A72D3BFE9FDF826CC71D2A\",\"path\":\"C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/PSScriptAnalyzer/1.25.0/ScriptAnalyzer.types.ps1xml\"},{\"sha256\":\"D647E6C1CDFE4052D2382F2D76B899EC596EC71D23D724553B93F74827D49044\",\"path\":\"C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/PSScriptAnalyzer/1.25.0/ScriptAnalyzer.format.ps1xml\"},{\"sha256\":\"D92CB413E18927BB64D9BAC221191FC69CF1659F55C72C27DDF1FE19EF774CAF\",\"path\":\"C:\\\\Users\\\\安井　一広\\\\OneDrive\\\\ドキュメント\\\\WindowsPowerShell\\\\Modules\\\\PSScriptAnalyzer\\\\1.25.0\\\\PSv7\\\\Microsoft.PowerShell.CrossCompatibility.dll\"},{\"sha256\":\"C8AA9890743A6D9C47CCFEE5EC33CAAEE58C30591454D3CCF379720025A1533C\",\"path\":\"C:\\\\Users\\\\安井　一広\\\\OneDrive\\\\ドキュメント\\\\WindowsPowerShell\\\\Modules\\\\PSScriptAnalyzer\\\\1.25.0\\\\PSv7\\\\Microsoft.Windows.PowerShell.ScriptAnalyzer.BuiltinRules.dll\"},{\"sha256\":\"C377532A1D8D8975E598891602B5C3ED39AB719F589D054EB889D11EB6CCAEA3\",\"path\":\"C:\\\\Users\\\\安井　一広\\\\OneDrive\\\\ドキュメント\\\\WindowsPowerShell\\\\Modules\\\\PSScriptAnalyzer\\\\1.25.0\\\\PSv7\\\\Microsoft.Windows.PowerShell.ScriptAnalyzer.dll\"},{\"sha256\":\"EEECDF663A3E854F67BBBB872DC45577E785A581C1CA86EA2AE1D8215B8505D6\",\"path\":\"C:\\\\Users\\\\安井　一広\\\\OneDrive\\\\ドキュメント\\\\WindowsPowerShell\\\\Modules\\\\PSScriptAnalyzer\\\\1.25.0\\\\PSv7\\\\Pluralize.NET.dll\"},{\"sha256\":\"3D6356119F9062A8494BF78C42B604AEB9EFE3BD18CD1D40D87E2661047E55D4\",\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/Test-PssaCapture.ps1\"},{\"sha256\":\"0E20118B8C11714B21DEDE0A1AEC66EAA928FAFF1D845B83DB04847EAB7062C0\",\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/expectations.json\"},{\"sha256\":\"39B5BC40CA83F5E088873B67047243182EF806D96BE8BC5D3372235808187613\",\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/Invoke-PssaCapture.ps1\"},{\"sha256\":\"AFA82E807179DF852ECCB05D5A8C8F3919B9B1C4C9D981CFA0CD6F368FE824F4\",\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/PreparationAssertions.psm1\"}],\"bindingSha256\":\"BCF399B86EC11EDE26AF817DBB6CC93258B50C2BE5A413C038124DE8BAB022B8\",\"argv\":[\"F:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.dll\",\"-NoProfile\",\"-Command\",\"try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}\\n$capUnitOuterStart=[Diagnostics.Stopwatch]::GetTimestamp()\\n$ErrorActionPreference='Stop'\\n$capActualArgv=[Environment]::GetCommandLineArgs()\\n$capActualPS=$PSVersionTable.PSVersion.ToString()\\n$capRoot='F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture'\\n& 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/Test-PssaCapture.ps1' -BindingPath \\\"$capRoot/capture-binding.json\\\" -OutputRoot 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/out/unit-1190e3d1-7863-4eff-b3ad-71248037d21c'\\n$capUnitExit=$LASTEXITCODE\\n$capUnitElapsed=([Diagnostics.Stopwatch]::GetTimestamp()-$capUnitOuterStart)/[double][Diagnostics.Stopwatch]::Frequency\\nWrite-Output ('CAP_UNIT_OUTER:'+(@{unitExit=$capUnitExit;elapsedSeconds=$capUnitElapsed;actualArgv=$capActualArgv;actualPS=$capActualPS;retry=0}|ConvertTo-Json -Compress))\\nif ($capUnitExit -ne 0 -or $capUnitElapsed -ge 30) { exit 2 }\\n$capPssaStart=[Diagnostics.Stopwatch]::GetTimestamp()\\nWrite-Output ('CAP_PSSA_START:'+(@{collectionStartTick=$capPssaStart;frequency=[Diagnostics.Stopwatch]::Frequency;actualArgv=$capActualArgv;actualPS=$capActualPS;hardInterruptionGuaranteed=$false;retry=0}|ConvertTo-Json -Compress))\\n& \\\"$capRoot/Invoke-PssaCapture.ps1\\\" -BindingPath \\\"$capRoot/capture-binding.json\\\" -TargetRole Collector -CollectionStartTick $capPssaStart -OutputRoot 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/out/self-c38a7835-5723-45bc-a05d-35573614034a'\\nif ($LASTEXITCODE -ne 0) { exit 2 }\\n& \\\"$capRoot/Invoke-PssaCapture.ps1\\\" -BindingPath \\\"$capRoot/capture-binding.json\\\" -TargetRole Assertions -CollectionStartTick $capPssaStart -OutputRoot 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/out/assertions-cbcb3571-0aab-4d34-8a27-c6072453b19f'\\nexit $LASTEXITCODE\"],\"phase\":\"Unit20\",\"accepted\":false,\"cases\":[{\"status\":\"PASS\",\"captureStatus\":\"Complete\",\"counts\":{\"engineOccurrences\":0,\"engineGroups\":0,\"unknown\":0,\"signal\":0,\"ordinary\":0,\"auxiliary\":0},\"gateStatus\":\"PASS\",\"checkedKeys\":[\"captureStatus\",\"gateStatus\",\"ordinary\",\"engineOccurrences\",\"engineGroups\",\"unknown\",\"signal\",\"auxiliary\",\"rawCount\",\"allFlags\",\"saveCalls\"],\"id\":\"C01\",\"flags\":{\"savedWithinDeadline\":true,\"moduleReady\":true,\"invokeStarted\":true,\"invokeReturned\":true,\"postBindingsMatched\":true,\"captureComplete\":true}},{\"status\":\"PASS\",\"captureStatus\":\"Complete\",\"counts\":{\"engineOccurrences\":0,\"engineGroups\":0,\"unknown\":0,\"signal\":0,\"ordinary\":1,\"auxiliary\":0},\"gateStatus\":\"FAIL\",\"checkedKeys\":[\"captureStatus\",\"gateStatus\",\"ordinary\",\"engineOccurrences\",\"engineGroups\",\"unknown\",\"signal\",\"auxiliary\",\"rawCount\",\"diagnosticPreserved\"],\"id\":\"C02\",\"flags\":{\"savedWithinDeadline\":true,\"moduleReady\":true,\"invokeStarted\":true,\"invokeReturned\":true,\"postBindingsMatched\":true,\"captureComplete\":true}},{\"status\":\"PASS\",\"captureStatus\":\"Complete\",\"counts\":{\"engineOccurrences\":0,\"engineGroups\":0,\"unknown\":0,\"signal\":0,\"ordinary\":1,\"auxiliary\":0},\"gateStatus\":\"FAIL\",\"checkedKeys\":[\"captureStatus\",\"gateStatus\",\"ordinary\",\"engineOccurrences\",\"engineGroups\",\"unknown\",\"signal\",\"auxiliary\",\"rawCount\",\"diagnosticPreserved\"],\"id\":\"C03\",\"flags\":{\"savedWithinDeadline\":true,\"moduleReady\":true,\"invokeStarted\":true,\"invokeReturned\":true,\"postBindingsMatched\":true,\"captureComplete\":true}},{\"status\":\"PASS\",\"captureStatus\":\"Complete\",\"counts\":{\"engineOccurrences\":0,\"engineGroups\":0,\"unknown\":0,\"signal\":0,\"ordinary\":1,\"auxiliary\":0},\"gateStatus\":\"FAIL\",\"checkedKeys\":[\"captureStatus\",\"gateStatus\",\"ordinary\",\"engineOccurrences\",\"engineGroups\",\"unknown\",\"signal\",\"auxiliary\",\"rawCount\",\"diagnosticPreserved\"],\"id\":\"C04\",\"flags\":{\"savedWithinDeadline\":true,\"moduleReady\":true,\"invokeStarted\":true,\"invokeReturned\":true,\"postBindingsMatched\":true,\"captureComplete\":true}},{\"status\":\"PASS\",\"captureStatus\":\"Complete\",\"counts\":{\"engineOccurrences\":0,\"engineGroups\":0,\"unknown\":0,\"signal\":0,\"ordinary\":1,\"auxiliary\":0},\"gateStatus\":\"FAIL\",\"checkedKeys\":[\"captureStatus\",\"gateStatus\",\"ordinary\",\"engineOccurrences\",\"engineGroups\",\"unknown\",\"signal\",\"auxiliary\",\"rawCount\",\"diagnosticPreserved\"],\"id\":\"C05\",\"flags\":{\"savedWithinDeadline\":true,\"moduleReady\":true,\"invokeStarted\":true,\"invokeReturned\":true,\"postBindingsMatched\":true,\"captureComplete\":true}},{\"error\":\"BehaviorMismatch: C06: expected primaryIdentity\",\"id\":\"C06\",\"status\":\"Unexpected\",\"failureObservation\":{\"save\":{\"files\":[{\"path\":\"F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\out\\\\memory-C06\\\\raw.json\",\"exists\":true,\"length\":3725},{\"path\":\"F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\out\\\\memory-C06\\\\result.json\",\"exists\":true,\"length\":2454}],\"partialLength\":null,\"filesCount\":2,\"calls\":[{\"path\":\"F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\out\\\\memory-C06\\\\raw.json\",\"byteLength\":3725,\"tick\":0},{\"path\":\"F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\out\\\\memory-C06\\\\result.json\",\"byteLength\":2454,\"tick\":0}],\"callsCount\":2},\"fixtureObtained\":true,\"truncated\":[],\"captureFailure\":null,\"caseError\":{\"category\":\"OperationStopped\",\"position\":\"位置 F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\Test-PssaCapture.ps1:32 文字:28\\r\\n+     if (-not $Condition) { throw ($Category + ': ' + $Message) }\\r\\n+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\",\"message\":\"BehaviorMismatch: C06: expected primaryIdentity\",\"scriptStack\":\"Assert-CapCondition、F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\Test-PssaCapture.ps1: 行 32 で\\r\\nTest-CapResult、F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\Test-PssaCapture.ps1: 行 632 で\\r\\nInvoke-CapUnit20、F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\Test-PssaCapture.ps1: 行 727 で\\r\\n<ScriptBlock>、F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\Test-PssaCapture.ps1: 行 1371 で\\r\\n<ScriptBlock>、<No file>: 行 7 で\",\"hResult\":-2146233087,\"fullyQualifiedErrorId\":\"BehaviorMismatch: C06: expected primaryIdentity\",\"exceptionType\":\"System.Management.Automation.RuntimeException\",\"recordType\":\"System.Management.Automation.ErrorRecord\"},\"actualObtained\":true,\"missing\":[\"state.gateStatus:Missing\",\"state.captureStatus:Missing\"],\"actualCount\":1,\"actual\":{\"type\":\"System.Collections.Hashtable\",\"firstRaw\":{\"origin\":\"Pipeline\",\"type\":\"System.Management.Automation.ErrorRecord\",\"kind\":\"Engine\"},\"missing\":[],\"captureStatus\":\"Complete\",\"primaryError\":{\"category\":\"InvalidOperation\",\"position\":\"位置 行:202 文字:9\\r\\n+         & $producer -Context $context -ErrorAction Stop -ErrorVariabl …\\r\\n+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\",\"message\":\"memory engine error\",\"scriptStack\":\"<ScriptBlock>、F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\Test-PssaCapture.ps1: 行 469 で\\r\\nInvoke-PssaCapturePipeline、<No file>: 行 202 で\\r\\nInvoke-CapFixture、F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\Test-PssaCapture.ps1: 行 532 で\\r\\nInvoke-CapUnit20、F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\Test-PssaCapture.ps1: 行 725 で\\r\\n<ScriptBlock>、F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\Test-PssaCapture.ps1: 行 1371 で\\r\\n<ScriptBlock>、<No file>: 行 7 で\",\"hResult\":-2146233079,\"fullyQualifiedErrorId\":\"CAP.Memory.Engine\",\"exceptionType\":\"System.InvalidOperationException\",\"recordType\":\"System.Management.Automation.ErrorRecord\"},\"counts\":{\"signal\":0,\"engineGroups\":1,\"engineOccurrences\":2,\"unknown\":0,\"ordinary\":0,\"auxiliary\":0},\"artifacts\":[{\"sha256\":\"D5436855AF310FAA739851CE5421F9CA591FB4985F6461B68A93E3E1FDE19FC0\",\"kind\":\"Raw\",\"status\":\"Saved\",\"length\":3725,\"path\":\"F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\out\\\\memory-C06\\\\raw.json\"},{\"sha256\":\"E691475978EA0ABBF7D2FBBE72B6C41CD5F511E044A7DE34F3645486754BCE53\",\"kind\":\"Result\",\"status\":\"Saved\",\"length\":2454,\"path\":\"F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\out\\\\memory-C06\\\\result.json\"}],\"flags\":{\"invokeStarted\":true,\"moduleReady\":true,\"invokeReturned\":true,\"savedWithinDeadline\":true,\"captureComplete\":true,\"postBindingsMatched\":true},\"rawCount\":2,\"gateStatus\":\"FAIL\"},\"recordRefs\":{\"identity\":{\"memoryContext\":true,\"contextFirstRetained\":false,\"firstRetainedStatePrimary\":true,\"firstRetainedResultPrimary\":true},\"firstType\":\"System.Management.Automation.ErrorRecord\",\"count\":2},\"caseElapsedSeconds\":0.1523665,\"state\":{\"type\":\"System.Collections.Hashtable\",\"firstRaw\":{\"origin\":\"Pipeline\",\"type\":\"System.Management.Automation.ErrorRecord\",\"kind\":\"Engine\"},\"missing\":[],\"captureStatus\":null,\"primaryError\":{\"category\":\"InvalidOperation\",\"position\":\"位置 行:202 文字:9\\r\\n+         & $producer -Context $context -ErrorAction Stop -ErrorVariabl …\\r\\n+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\",\"message\":\"memory engine error\",\"scriptStack\":\"<ScriptBlock>、F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\Test-PssaCapture.ps1: 行 469 で\\r\\nInvoke-PssaCapturePipeline、<No file>: 行 202 で\\r\\nInvoke-CapFixture、F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\Test-PssaCapture.ps1: 行 532 で\\r\\nInvoke-CapUnit20、F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\Test-PssaCapture.ps1: 行 725 で\\r\\n<ScriptBlock>、F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\Test-PssaCapture.ps1: 行 1371 で\\r\\n<ScriptBlock>、<No file>: 行 7 で\",\"hResult\":-2146233079,\"fullyQualifiedErrorId\":\"CAP.Memory.Engine\",\"exceptionType\":\"System.InvalidOperationException\",\"recordType\":\"System.Management.Automation.ErrorRecord\"},\"counts\":{\"signal\":0,\"engineGroups\":1,\"engineOccurrences\":2,\"unknown\":0,\"ordinary\":0,\"auxiliary\":0},\"artifacts\":[{\"sha256\":\"D5436855AF310FAA739851CE5421F9CA591FB4985F6461B68A93E3E1FDE19FC0\",\"kind\":\"Raw\",\"status\":\"Saved\",\"length\":3725,\"path\":\"F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\out\\\\memory-C06\\\\raw.json\"},{\"sha256\":\"E691475978EA0ABBF7D2FBBE72B6C41CD5F511E044A7DE34F3645486754BCE53\",\"kind\":\"Result\",\"status\":\"Saved\",\"length\":2454,\"path\":\"F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\out\\\\memory-C06\\\\result.json\"}],\"flags\":{\"invokeStarted\":true,\"moduleReady\":true,\"invokeReturned\":true,\"savedWithinDeadline\":true,\"captureComplete\":true,\"postBindingsMatched\":true},\"rawCount\":2,\"gateStatus\":null},\"collectionElapsedSeconds\":0.5257742}},{\"status\":\"NotRun\",\"id\":\"C07\"},{\"status\":\"NotRun\",\"id\":\"C08\"},{\"status\":\"NotRun\",\"id\":\"C09\"},{\"status\":\"NotRun\",\"id\":\"C10\"},{\"status\":\"NotRun\",\"id\":\"C11\"},{\"status\":\"NotRun\",\"id\":\"C12\"},{\"status\":\"NotRun\",\"id\":\"C13\"},{\"status\":\"NotRun\",\"id\":\"C14\"},{\"status\":\"NotRun\",\"id\":\"C15\"},{\"status\":\"NotRun\",\"id\":\"C16\"},{\"status\":\"NotRun\",\"id\":\"C17\"},{\"status\":\"NotRun\",\"id\":\"C18\"},{\"status\":\"NotRun\",\"id\":\"C19\"},{\"status\":\"NotRun\",\"id\":\"C20\"}],\"originalNullReferenceReproduced\":false,\"pssaVersion\":\"1.25.0\",\"requestedExit\":2,\"actualPssaInvocations\":0,\"actualPS\":\"7.6.7\",\"retry\":0,\"beforePins\":[{\"sha256\":\"FA2C8BB1E35CDD62AD15CD06A1D8F2C5961E9725A9BFA1E7CFD2C322F49E9619\",\"path\":\"F:/Program Files/PowerShell/7/pwsh.exe\"},{\"sha256\":\"A583A3721FEEBC4F9552A02358BC81BBDD41E2E18BB3F424226F2B1E0BF07DEB\",\"path\":\"F:/Program Files/PowerShell/7/pwsh.dll\"},{\"sha256\":\"70701F20AFBBF4E763924C2BDD0C0E9A20EEC35A0E4EFF439E0CCF77F20D6B26\",\"path\":\"F:/Program Files/PowerShell/7/System.Management.Automation.dll\"},{\"sha256\":\"8A6363FBA1F89C0688E3594EF4FE7B9036126F04957C5FE56858CBA020B76B33\",\"path\":\"F:/Program Files/PowerShell/7/pwsh.runtimeconfig.json\"},{\"sha256\":\"A01883AEEB2217AEB1D7EC944D649376104E7A874CA4EA71E7F36448C1519DC2\",\"path\":\"F:/Program Files/PowerShell/7/pwsh.deps.json\"},{\"sha256\":\"2B219F688BCDD67101040F845E530B22907D39BBF49089B4B5B2AFABA7996791\",\"path\":\"C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/PSScriptAnalyzer/1.25.0/PSScriptAnalyzer.psd1\"},{\"sha256\":\"B69773FC9080CFB958DC13C95E42A625553E9BCA5DCBEDC27231E5C183A4E869\",\"path\":\"C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/PSScriptAnalyzer/1.25.0/PSScriptAnalyzer.psm1\"},{\"sha256\":\"34246566553FE97C96A9FFEA8AEEFEE353C1E07E41A72D3BFE9FDF826CC71D2A\",\"path\":\"C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/PSScriptAnalyzer/1.25.0/ScriptAnalyzer.types.ps1xml\"},{\"sha256\":\"D647E6C1CDFE4052D2382F2D76B899EC596EC71D23D724553B93F74827D49044\",\"path\":\"C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/PSScriptAnalyzer/1.25.0/ScriptAnalyzer.format.ps1xml\"},{\"sha256\":\"D92CB413E18927BB64D9BAC221191FC69CF1659F55C72C27DDF1FE19EF774CAF\",\"path\":\"C:\\\\Users\\\\安井　一広\\\\OneDrive\\\\ドキュメント\\\\WindowsPowerShell\\\\Modules\\\\PSScriptAnalyzer\\\\1.25.0\\\\PSv7\\\\Microsoft.PowerShell.CrossCompatibility.dll\"},{\"sha256\":\"C8AA9890743A6D9C47CCFEE5EC33CAAEE58C30591454D3CCF379720025A1533C\",\"path\":\"C:\\\\Users\\\\安井　一広\\\\OneDrive\\\\ドキュメント\\\\WindowsPowerShell\\\\Modules\\\\PSScriptAnalyzer\\\\1.25.0\\\\PSv7\\\\Microsoft.Windows.PowerShell.ScriptAnalyzer.BuiltinRules.dll\"},{\"sha256\":\"C377532A1D8D8975E598891602B5C3ED39AB719F589D054EB889D11EB6CCAEA3\",\"path\":\"C:\\\\Users\\\\安井　一広\\\\OneDrive\\\\ドキュメント\\\\WindowsPowerShell\\\\Modules\\\\PSScriptAnalyzer\\\\1.25.0\\\\PSv7\\\\Microsoft.Windows.PowerShell.ScriptAnalyzer.dll\"},{\"sha256\":\"EEECDF663A3E854F67BBBB872DC45577E785A581C1CA86EA2AE1D8215B8505D6\",\"path\":\"C:\\\\Users\\\\安井　一広\\\\OneDrive\\\\ドキュメント\\\\WindowsPowerShell\\\\Modules\\\\PSScriptAnalyzer\\\\1.25.0\\\\PSv7\\\\Pluralize.NET.dll\"},{\"sha256\":\"3D6356119F9062A8494BF78C42B604AEB9EFE3BD18CD1D40D87E2661047E55D4\",\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/Test-PssaCapture.ps1\"},{\"sha256\":\"0E20118B8C11714B21DEDE0A1AEC66EAA928FAFF1D845B83DB04847EAB7062C0\",\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/expectations.json\"},{\"sha256\":\"39B5BC40CA83F5E088873B67047243182EF806D96BE8BC5D3372235808187613\",\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/Invoke-PssaCapture.ps1\"},{\"sha256\":\"AFA82E807179DF852ECCB05D5A8C8F3919B9B1C4C9D981CFA0CD6F368FE824F4\",\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/PreparationAssertions.psm1\"}]},\"outputs\":[{\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/out/unit-1190e3d1-7863-4eff-b3ad-71248037d21c\",\"exists\":true,\"files\":[{\"sha256\":\"10994EEBC834628F80AF02BEAB938A0D1392FDC563613735B90BC9F749F10CED\",\"path\":\"F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\out\\\\unit-1190e3d1-7863-4eff-b3ad-71248037d21c\\\\unit-result.json\",\"bytes\":27978}]},{\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/out/self-c38a7835-5723-45bc-a05d-35573614034a\",\"exists\":false,\"files\":[]},{\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/out/assertions-cbcb3571-0aab-4d34-8a27-c6072453b19f\",\"exists\":false,\"files\":[]}],\"freezeSHA\":\"03090FD0167C6D6CB6FED03F9F2BED09407C27A29C762CB5B73F03A78B3223C2\",\"revision\":\"da1f701352a0b6638fa92bafc771d7a6118ad5cb\",\"gitStatus\":[],\"utc\":\"2026-10-24T07:42:20.8370998Z\"}\r\n"
++}
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/cap-v-identity-runner-evidence-17e2b23d-a0ea-43aa-b32e-e49bc83d5c22/pre-assessment.json b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/cap-v-identity-runner-evidence-17e2b23d-a0ea-43aa-b32e-e49bc83d5c22/pre-assessment.json
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/cap-v-identity-runner-evidence-17e2b23d-a0ea-43aa-b32e-e49bc83d5c22/pre-assessment.json
+@@ -0,0 +1,11 @@
++{
++  "pass": true,
++  "core": 16,
++  "pins": 17,
++  "settings": 23,
++  "outputLeavesAbsent": 3,
++  "reparse": 0,
++  "argvExpected": true,
++  "requestFields": 8,
++  "targetAttempts": 0
++}
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/cap-v-identity-runner-evidence-17e2b23d-a0ea-43aa-b32e-e49bc83d5c22/pre-tool-return.json b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/cap-v-identity-runner-evidence-17e2b23d-a0ea-43aa-b32e-e49bc83d5c22/pre-tool-return.json
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/cap-v-identity-runner-evidence-17e2b23d-a0ea-43aa-b32e-e49bc83d5c22/pre-tool-return.json
+@@ -0,0 +1,7 @@
++{
++  "chunk_id": "aea250",
++  "wall_time_seconds": 1.4564923,
++  "exit_code": 0,
++  "original_token_count": 5220,
++  "output": "{\"commandSHA\":\"5B736D434A0D764129CD93945439FE1C03AFA7AC759F3EDD60374DB7130F701B\",\"argvMatches\":true,\"outputs\":[{\"exists\":false,\"reparseAncestors\":[],\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/out/unit-1190e3d1-7863-4eff-b3ad-71248037d21c\"},{\"exists\":false,\"reparseAncestors\":[],\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/out/self-c38a7835-5723-45bc-a05d-35573614034a\"},{\"exists\":false,\"reparseAncestors\":[],\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/out/assertions-cbcb3571-0aab-4d34-8a27-c6072453b19f\"}],\"pins\":[{\"pass\":true,\"actual\":\"FA2C8BB1E35CDD62AD15CD06A1D8F2C5961E9725A9BFA1E7CFD2C322F49E9619\",\"expected\":\"FA2C8BB1E35CDD62AD15CD06A1D8F2C5961E9725A9BFA1E7CFD2C322F49E9619\",\"path\":\"F:/Program Files/PowerShell/7/pwsh.exe\"},{\"pass\":true,\"actual\":\"A583A3721FEEBC4F9552A02358BC81BBDD41E2E18BB3F424226F2B1E0BF07DEB\",\"expected\":\"A583A3721FEEBC4F9552A02358BC81BBDD41E2E18BB3F424226F2B1E0BF07DEB\",\"path\":\"F:/Program Files/PowerShell/7/pwsh.dll\"},{\"pass\":true,\"actual\":\"70701F20AFBBF4E763924C2BDD0C0E9A20EEC35A0E4EFF439E0CCF77F20D6B26\",\"expected\":\"70701F20AFBBF4E763924C2BDD0C0E9A20EEC35A0E4EFF439E0CCF77F20D6B26\",\"path\":\"F:/Program Files/PowerShell/7/System.Management.Automation.dll\"},{\"pass\":true,\"actual\":\"8A6363FBA1F89C0688E3594EF4FE7B9036126F04957C5FE56858CBA020B76B33\",\"expected\":\"8A6363FBA1F89C0688E3594EF4FE7B9036126F04957C5FE56858CBA020B76B33\",\"path\":\"F:/Program Files/PowerShell/7/pwsh.runtimeconfig.json\"},{\"pass\":true,\"actual\":\"A01883AEEB2217AEB1D7EC944D649376104E7A874CA4EA71E7F36448C1519DC2\",\"expected\":\"A01883AEEB2217AEB1D7EC944D649376104E7A874CA4EA71E7F36448C1519DC2\",\"path\":\"F:/Program Files/PowerShell/7/pwsh.deps.json\"},{\"pass\":true,\"actual\":\"2B219F688BCDD67101040F845E530B22907D39BBF49089B4B5B2AFABA7996791\",\"expected\":\"2B219F688BCDD67101040F845E530B22907D39BBF49089B4B5B2AFABA7996791\",\"path\":\"C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/PSScriptAnalyzer/1.25.0/PSScriptAnalyzer.psd1\"},{\"pass\":true,\"actual\":\"B69773FC9080CFB958DC13C95E42A625553E9BCA5DCBEDC27231E5C183A4E869\",\"expected\":\"B69773FC9080CFB958DC13C95E42A625553E9BCA5DCBEDC27231E5C183A4E869\",\"path\":\"C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/PSScriptAnalyzer/1.25.0/PSScriptAnalyzer.psm1\"},{\"pass\":true,\"actual\":\"34246566553FE97C96A9FFEA8AEEFEE353C1E07E41A72D3BFE9FDF826CC71D2A\",\"expected\":\"34246566553FE97C96A9FFEA8AEEFEE353C1E07E41A72D3BFE9FDF826CC71D2A\",\"path\":\"C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/PSScriptAnalyzer/1.25.0/ScriptAnalyzer.types.ps1xml\"},{\"pass\":true,\"actual\":\"D647E6C1CDFE4052D2382F2D76B899EC596EC71D23D724553B93F74827D49044\",\"expected\":\"D647E6C1CDFE4052D2382F2D76B899EC596EC71D23D724553B93F74827D49044\",\"path\":\"C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/PSScriptAnalyzer/1.25.0/ScriptAnalyzer.format.ps1xml\"},{\"pass\":true,\"actual\":\"D92CB413E18927BB64D9BAC221191FC69CF1659F55C72C27DDF1FE19EF774CAF\",\"expected\":\"D92CB413E18927BB64D9BAC221191FC69CF1659F55C72C27DDF1FE19EF774CAF\",\"path\":\"C:\\\\Users\\\\安井　一広\\\\OneDrive\\\\ドキュメント\\\\WindowsPowerShell\\\\Modules\\\\PSScriptAnalyzer\\\\1.25.0\\\\PSv7\\\\Microsoft.PowerShell.CrossCompatibility.dll\"},{\"pass\":true,\"actual\":\"C8AA9890743A6D9C47CCFEE5EC33CAAEE58C30591454D3CCF379720025A1533C\",\"expected\":\"C8AA9890743A6D9C47CCFEE5EC33CAAEE58C30591454D3CCF379720025A1533C\",\"path\":\"C:\\\\Users\\\\安井　一広\\\\OneDrive\\\\ドキュメント\\\\WindowsPowerShell\\\\Modules\\\\PSScriptAnalyzer\\\\1.25.0\\\\PSv7\\\\Microsoft.Windows.PowerShell.ScriptAnalyzer.BuiltinRules.dll\"},{\"pass\":true,\"actual\":\"C377532A1D8D8975E598891602B5C3ED39AB719F589D054EB889D11EB6CCAEA3\",\"expected\":\"C377532A1D8D8975E598891602B5C3ED39AB719F589D054EB889D11EB6CCAEA3\",\"path\":\"C:\\\\Users\\\\安井　一広\\\\OneDrive\\\\ドキュメント\\\\WindowsPowerShell\\\\Modules\\\\PSScriptAnalyzer\\\\1.25.0\\\\PSv7\\\\Microsoft.Windows.PowerShell.ScriptAnalyzer.dll\"},{\"pass\":true,\"actual\":\"EEECDF663A3E854F67BBBB872DC45577E785A581C1CA86EA2AE1D8215B8505D6\",\"expected\":\"EEECDF663A3E854F67BBBB872DC45577E785A581C1CA86EA2AE1D8215B8505D6\",\"path\":\"C:\\\\Users\\\\安井　一広\\\\OneDrive\\\\ドキュメント\\\\WindowsPowerShell\\\\Modules\\\\PSScriptAnalyzer\\\\1.25.0\\\\PSv7\\\\Pluralize.NET.dll\"},{\"pass\":true,\"actual\":\"3D6356119F9062A8494BF78C42B604AEB9EFE3BD18CD1D40D87E2661047E55D4\",\"expected\":\"3D6356119F9062A8494BF78C42B604AEB9EFE3BD18CD1D40D87E2661047E55D4\",\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/Test-PssaCapture.ps1\"},{\"pass\":true,\"actual\":\"0E20118B8C11714B21DEDE0A1AEC66EAA928FAFF1D845B83DB04847EAB7062C0\",\"expected\":\"0E20118B8C11714B21DEDE0A1AEC66EAA928FAFF1D845B83DB04847EAB7062C0\",\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/expectations.json\"},{\"pass\":true,\"actual\":\"39B5BC40CA83F5E088873B67047243182EF806D96BE8BC5D3372235808187613\",\"expected\":\"39B5BC40CA83F5E088873B67047243182EF806D96BE8BC5D3372235808187613\",\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/Invoke-PssaCapture.ps1\"},{\"pass\":true,\"actual\":\"AFA82E807179DF852ECCB05D5A8C8F3919B9B1C4C9D981CFA0CD6F368FE824F4\",\"expected\":\"AFA82E807179DF852ECCB05D5A8C8F3919B9B1C4C9D981CFA0CD6F368FE824F4\",\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/PreparationAssertions.psm1\"}],\"core\":[{\"pass\":true,\"actual\":\"39B5BC40CA83F5E088873B67047243182EF806D96BE8BC5D3372235808187613\",\"expected\":\"39B5BC40CA83F5E088873B67047243182EF806D96BE8BC5D3372235808187613\",\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/Invoke-PssaCapture.ps1\"},{\"pass\":true,\"actual\":\"0E20118B8C11714B21DEDE0A1AEC66EAA928FAFF1D845B83DB04847EAB7062C0\",\"expected\":\"0E20118B8C11714B21DEDE0A1AEC66EAA928FAFF1D845B83DB04847EAB7062C0\",\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/expectations.json\"},{\"pass\":true,\"actual\":\"3D6356119F9062A8494BF78C42B604AEB9EFE3BD18CD1D40D87E2661047E55D4\",\"expected\":\"3D6356119F9062A8494BF78C42B604AEB9EFE3BD18CD1D40D87E2661047E55D4\",\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/Test-PssaCapture.ps1\"},{\"pass\":true,\"actual\":\"BCF399B86EC11EDE26AF817DBB6CC93258B50C2BE5A413C038124DE8BAB022B8\",\"expected\":\"BCF399B86EC11EDE26AF817DBB6CC93258B50C2BE5A413C038124DE8BAB022B8\",\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/capture-binding.json\"},{\"pass\":true,\"actual\":\"4E1BE222D7297322859A07FC5D24F0EC15BA5E36E285BB205FF3E914F06F90B6\",\"expected\":\"4E1BE222D7297322859A07FC5D24F0EC15BA5E36E285BB205FF3E914F06F90B6\",\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/CAP-V-receipt.json\"},{\"pass\":true,\"actual\":\"E6C6239044C4B83AA9B4C56E93BA32881ACD897835B7DCF888A31E577FBD8687\",\"expected\":\"E6C6239044C4B83AA9B4C56E93BA32881ACD897835B7DCF888A31E577FBD8687\",\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/source-edit-proof.json\"},{\"pass\":true,\"actual\":\"9340F9F7E772088EEF658756613797737F3BEED6D9582AEC09F3684989F67ABA\",\"expected\":\"9340F9F7E772088EEF658756613797737F3BEED6D9582AEC09F3684989F67ABA\",\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/candidate-notes.json\"},{\"pass\":true,\"actual\":\"BCD79B4FA4ED6222C3213B77232776CA529409BFD55B22397F83CB970EB77CF6\",\"expected\":\"BCD79B4FA4ED6222C3213B77232776CA529409BFD55B22397F83CB970EB77CF6\",\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/binding-delta.json\"},{\"pass\":true,\"actual\":\"1FD0094B4F0636B710A2F2471392B374199176EC36F71171FB1E402E2C6CFA7D\",\"expected\":\"1FD0094B4F0636B710A2F2471392B374199176EC36F71171FB1E402E2C6CFA7D\",\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/caller-adapter-proof.json\"},{\"pass\":true,\"actual\":\"CE1C9CB95CD83BC9365FC2DD18C3F6CAF10EA37C1848C754360BAF6EE8F6629F\",\"expected\":\"CE1C9CB95CD83BC9365FC2DD18C3F6CAF10EA37C1848C754360BAF6EE8F6629F\",\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/static-binding-proof.json\"},{\"pass\":true,\"actual\":\"8F7566D8C022FBE2A37E6E97ACB12389F1271C43836672FC1311001385A3F603\",\"expected\":\"8F7566D8C022FBE2A37E6E97ACB12389F1271C43836672FC1311001385A3F603\",\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/binding-candidate-notes.json\"},{\"pass\":true,\"actual\":\"D4242FEF32B1727A3FDF5941E2A09E7E6B93CDD0BAE45EC8DAFEFC062658EA16\",\"expected\":\"D4242FEF32B1727A3FDF5941E2A09E7E6B93CDD0BAE45EC8DAFEFC062658EA16\",\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/recovery-binding/recovery-index.json\"},{\"pass\":true,\"actual\":\"2A0AD784B3F63D5ADBB20B765366BDD1E273CCAECE4EC8C9D0FF7F8D86DC149F\",\"expected\":\"2A0AD784B3F63D5ADBB20B765366BDD1E273CCAECE4EC8C9D0FF7F8D86DC149F\",\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/recovery-binding/recovery-verification.json\"},{\"pass\":true,\"actual\":\"E18B30FF0909C38E7C814D46A3D2224D8DCDCFD1988CE9C649C1E928DEF6CF14\",\"expected\":\"E18B30FF0909C38E7C814D46A3D2224D8DCDCFD1988CE9C649C1E928DEF6CF14\",\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/tasks/ACOUSTIC-HISTORY-001/pssa-cap-identity-boundary-design.md\"},{\"pass\":true,\"actual\":\"416E9F3E86BCAB480FE38981B9FAE2954BA4C3B952B284B2D988C700302D223F\",\"expected\":\"416E9F3E86BCAB480FE38981B9FAE2954BA4C3B952B284B2D988C700302D223F\",\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/tasks/ACOUSTIC-HISTORY-001/unknown-descendant-tests.patch\"},{\"pass\":true,\"actual\":\"0AC98BD1E95D9D970886A93DB0AC99835F55E3BF35E4309B0E639AE4E1418496\",\"expected\":\"0AC98BD1E95D9D970886A93DB0AC99835F55E3BF35E4309B0E639AE4E1418496\",\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/tasks/ACOUSTIC-HISTORY-001/unknown-descendant-harness.patch\"}],\"revision\":\"da1f701352a0b6638fa92bafc771d7a6118ad5cb\",\"settings\":[{\"pass\":true,\"role\":\"Collector\",\"exists\":false,\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/PSScriptAnalyzerSettings.psd1\",\"sha256\":null},{\"pass\":true,\"role\":\"Collector\",\"exists\":false,\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/PSScriptAnalyzerSettings.psd1\",\"sha256\":null},{\"pass\":true,\"role\":\"Collector\",\"exists\":false,\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/PSScriptAnalyzerSettings.psd1\",\"sha256\":null},{\"pass\":true,\"role\":\"Collector\",\"exists\":false,\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/PSScriptAnalyzerSettings.psd1\",\"sha256\":null},{\"pass\":true,\"role\":\"Collector\",\"exists\":false,\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/PSScriptAnalyzerSettings.psd1\",\"sha256\":null},{\"pass\":true,\"role\":\"Collector\",\"exists\":false,\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/PSScriptAnalyzerSettings.psd1\",\"sha256\":null},{\"pass\":true,\"role\":\"Collector\",\"exists\":false,\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/PSScriptAnalyzerSettings.psd1\",\"sha256\":null},{\"pass\":true,\"role\":\"Collector\",\"exists\":false,\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/PSScriptAnalyzerSettings.psd1\",\"sha256\":null},{\"pass\":true,\"role\":\"Collector\",\"exists\":false,\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/PSScriptAnalyzerSettings.psd1\",\"sha256\":null},{\"pass\":true,\"role\":\"Collector\",\"exists\":false,\"path\":\"F:/Kazuhiro/GitHub/PSScriptAnalyzerSettings.psd1\",\"sha256\":null},{\"pass\":true,\"role\":\"Collector\",\"exists\":false,\"path\":\"F:/Kazuhiro/PSScriptAnalyzerSettings.psd1\",\"sha256\":null},{\"pass\":true,\"role\":\"Collector\",\"exists\":false,\"path\":\"F:/PSScriptAnalyzerSettings.psd1\",\"sha256\":null},{\"pass\":true,\"role\":\"Assertions\",\"exists\":false,\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/PSScriptAnalyzerSettings.psd1\",\"sha256\":null},{\"pass\":true,\"role\":\"Assertions\",\"exists\":false,\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/PSScriptAnalyzerSettings.psd1\",\"sha256\":null},{\"pass\":true,\"role\":\"Assertions\",\"exists\":false,\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/PSScriptAnalyzerSettings.psd1\",\"sha256\":null},{\"pass\":true,\"role\":\"Assertions\",\"exists\":false,\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/PSScriptAnalyzerSettings.psd1\",\"sha256\":null},{\"pass\":true,\"role\":\"Assertions\",\"exists\":false,\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/PSScriptAnalyzerSettings.psd1\",\"sha256\":null},{\"pass\":true,\"role\":\"Assertions\",\"exists\":false,\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/PSScriptAnalyzerSettings.psd1\",\"sha256\":null},{\"pass\":true,\"role\":\"Assertions\",\"exists\":false,\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/target/PSScriptAnalyzerSettings.psd1\",\"sha256\":null},{\"pass\":true,\"role\":\"Assertions\",\"exists\":false,\"path\":\"F:/Kazuhiro/GitHub/WordWeave5/PSScriptAnalyzerSettings.psd1\",\"sha256\":null},{\"pass\":true,\"role\":\"Assertions\",\"exists\":false,\"path\":\"F:/Kazuhiro/GitHub/PSScriptAnalyzerSettings.psd1\",\"sha256\":null},{\"pass\":true,\"role\":\"Assertions\",\"exists\":false,\"path\":\"F:/Kazuhiro/PSScriptAnalyzerSettings.psd1\",\"sha256\":null},{\"pass\":true,\"role\":\"Assertions\",\"exists\":false,\"path\":\"F:/PSScriptAnalyzerSettings.psd1\",\"sha256\":null}],\"expectedArgv\":[\"F:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.dll\",\"-NoProfile\",\"-Command\",\"try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}\\n$capUnitOuterStart=[Diagnostics.Stopwatch]::GetTimestamp()\\n$ErrorActionPreference='Stop'\\n$capActualArgv=[Environment]::GetCommandLineArgs()\\n$capActualPS=$PSVersionTable.PSVersion.ToString()\\n$capRoot='F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture'\\n& 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/Test-PssaCapture.ps1' -BindingPath \\\"$capRoot/capture-binding.json\\\" -OutputRoot 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/out/unit-1190e3d1-7863-4eff-b3ad-71248037d21c'\\n$capUnitExit=$LASTEXITCODE\\n$capUnitElapsed=([Diagnostics.Stopwatch]::GetTimestamp()-$capUnitOuterStart)/[double][Diagnostics.Stopwatch]::Frequency\\nWrite-Output ('CAP_UNIT_OUTER:'+(@{unitExit=$capUnitExit;elapsedSeconds=$capUnitElapsed;actualArgv=$capActualArgv;actualPS=$capActualPS;retry=0}|ConvertTo-Json -Compress))\\nif ($capUnitExit -ne 0 -or $capUnitElapsed -ge 30) { exit 2 }\\n$capPssaStart=[Diagnostics.Stopwatch]::GetTimestamp()\\nWrite-Output ('CAP_PSSA_START:'+(@{collectionStartTick=$capPssaStart;frequency=[Diagnostics.Stopwatch]::Frequency;actualArgv=$capActualArgv;actualPS=$capActualPS;hardInterruptionGuaranteed=$false;retry=0}|ConvertTo-Json -Compress))\\n& \\\"$capRoot/Invoke-PssaCapture.ps1\\\" -BindingPath \\\"$capRoot/capture-binding.json\\\" -TargetRole Collector -CollectionStartTick $capPssaStart -OutputRoot 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/out/self-c38a7835-5723-45bc-a05d-35573614034a'\\nif ($LASTEXITCODE -ne 0) { exit 2 }\\n& \\\"$capRoot/Invoke-PssaCapture.ps1\\\" -BindingPath \\\"$capRoot/capture-binding.json\\\" -TargetRole Assertions -CollectionStartTick $capPssaStart -OutputRoot 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/out/assertions-cbcb3571-0aab-4d34-8a27-c6072453b19f'\\nexit $LASTEXITCODE\"],\"requestFields\":[\"cmd\",\"workdir\",\"shell\",\"login\",\"max_output_tokens\",\"yield_time_ms\",\"sandbox_permissions\",\"tty\"],\"utc\":\"2026-10-24T07:40:52.1763359Z\",\"gitStatus\":[],\"freezeSHA\":\"03090FD0167C6D6CB6FED03F9F2BED09407C27A29C762CB5B73F03A78B3223C2\",\"request\":{\"cmd\":\"$capUnitOuterStart=[Diagnostics.Stopwatch]::GetTimestamp()\\n$ErrorActionPreference='Stop'\\n$capActualArgv=[Environment]::GetCommandLineArgs()\\n$capActualPS=$PSVersionTable.PSVersion.ToString()\\n$capRoot='F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture'\\n& 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/Test-PssaCapture.ps1' -BindingPath \\\"$capRoot/capture-binding.json\\\" -OutputRoot 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/out/unit-1190e3d1-7863-4eff-b3ad-71248037d21c'\\n$capUnitExit=$LASTEXITCODE\\n$capUnitElapsed=([Diagnostics.Stopwatch]::GetTimestamp()-$capUnitOuterStart)/[double][Diagnostics.Stopwatch]::Frequency\\nWrite-Output ('CAP_UNIT_OUTER:'+(@{unitExit=$capUnitExit;elapsedSeconds=$capUnitElapsed;actualArgv=$capActualArgv;actualPS=$capActualPS;retry=0}|ConvertTo-Json -Compress))\\nif ($capUnitExit -ne 0 -or $capUnitElapsed -ge 30) { exit 2 }\\n$capPssaStart=[Diagnostics.Stopwatch]::GetTimestamp()\\nWrite-Output ('CAP_PSSA_START:'+(@{collectionStartTick=$capPssaStart;frequency=[Diagnostics.Stopwatch]::Frequency;actualArgv=$capActualArgv;actualPS=$capActualPS;hardInterruptionGuaranteed=$false;retry=0}|ConvertTo-Json -Compress))\\n& \\\"$capRoot/Invoke-PssaCapture.ps1\\\" -BindingPath \\\"$capRoot/capture-binding.json\\\" -TargetRole Collector -CollectionStartTick $capPssaStart -OutputRoot 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/out/self-c38a7835-5723-45bc-a05d-35573614034a'\\nif ($LASTEXITCODE -ne 0) { exit 2 }\\n& \\\"$capRoot/Invoke-PssaCapture.ps1\\\" -BindingPath \\\"$capRoot/capture-binding.json\\\" -TargetRole Assertions -CollectionStartTick $capPssaStart -OutputRoot 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/out/assertions-cbcb3571-0aab-4d34-8a27-c6072453b19f'\\nexit $LASTEXITCODE\",\"workdir\":\"F:/Kazuhiro/GitHub/WordWeave5\",\"shell\":\"F:/Program Files/PowerShell/7/pwsh.exe\",\"login\":false,\"max_output_tokens\":24000,\"yield_time_ms\":10000,\"sandbox_permissions\":\"use_default\",\"tty\":false}}\r\n"
++}
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/cap-v-identity-runner-evidence-17e2b23d-a0ea-43aa-b32e-e49bc83d5c22/report.md b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/cap-v-identity-runner-evidence-17e2b23d-a0ea-43aa-b32e-e49bc83d5c22/report.md
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/cap-v-identity-runner-evidence-17e2b23d-a0ea-43aa-b32e-e49bc83d5c22/report.md
+@@ -0,0 +1,13 @@
++identity世代CAP-VはFAILである。canonical request全8fieldを変更せず唯一一回実行し、実exit2/tool2.2378618秒/Unit20 outer1.8661505秒で終了した。PASS5(C01..C05)、Unexpected1(C06: expected primaryIdentity)、NotRun14(C07..C20)、retry0である。C16/Collector-self/AssertionsはNotRun、実PSSA呼出0である。
++
++C06の4identityは全てboolとして採取され、memoryContext=true、contextFirstRetained=false、firstRetainedStatePrimary=true、firstRetainedResultPrimary=trueであった。identity追加missingは0である。これはAddパラメータ束縛後の参照一致観測であり、束縛前pipeline identityやWrite-Errorの根本原因の証明ではない。元C06FAILと4値の観測成功を分離する。
++
++actualはgateFAIL/captureComplete、全6flags true、ordinary0/engineOccurrences2/engineGroups1/unknown0/signal0/auxiliary0/rawCount2である。firstRawはPipeline/Engine/ErrorRecord、recordRefs.count2/firstType ErrorRecord。actual/state primaryErrorはInvalidOperationException/CAP.Memory.Engine/message memory engine errorでposition/stack/HResultも保存した。元caseErrorはRuntimeException/BehaviorMismatch: C06: expected primaryIdentityである。
++
++観測全体はmissing配列2件（state.gateStatus:Missing、state.captureStatus:Missing）を含むPartialである。truncatedは空配列[]、captureFailureはnullを保持した。caseElapsed0.1523665秒/collectionElapsed0.5257742秒、memory save.calls2/files2、raw3725bytes/result2454bytesを採取した。memory fixture情報は実PSSA/native結果ではない。
++
++対象HEADda1f701352a0b6638fa92bafc771d7a6118ad5cb、前後git status空。固定入力はfreeze03090FD0167C6D6CB6FED03F9F2BED09407C27A29C762CB5B73F03A78B3223C2とpre/post完全hashで識別する。core16/pins17/settings23/freezeは前後全一致、settings全候補は不存在維持、actualPS7.6.7/PSSA1.25.0/argvは期待に一致した。argv先頭pwsh.dllを改変していない。
++
++事前3leaf不存在・祖先reparse0、事後unit-result.jsonだけ作成、self/assertions leafは不存在。unit-resultは27978bytes/SHA10994EEBC834628F80AF02BEAB938A0D1392FDC563613735B90BC9F749F10CED。raw request/returnを解釈前に保存した。旧slot再使用0、追加対象実行0、runner source/Test/oracle/B/R/settings/patch編集0である。
++
++hard interruptionはUnavailable。compile/cargo test/build/製品EXE/original33/実OS/API/実data/native IME/pen/microphone/TTS/authenticationは対象外・未実行。指定gpt-6.1-sol/medium、実model/effortメタデータとusage開始終了カウンターは未取得である。
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/cap-v-identity-runner-evidence-17e2b23d-a0ea-43aa-b32e-e49bc83d5c22/target-request.json b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/cap-v-identity-runner-evidence-17e2b23d-a0ea-43aa-b32e-e49bc83d5c22/target-request.json
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/cap-v-identity-runner-evidence-17e2b23d-a0ea-43aa-b32e-e49bc83d5c22/target-request.json
+@@ -0,0 +1,10 @@
++{
++  "cmd": "$capUnitOuterStart=[Diagnostics.Stopwatch]::GetTimestamp()\n$ErrorActionPreference='Stop'\n$capActualArgv=[Environment]::GetCommandLineArgs()\n$capActualPS=$PSVersionTable.PSVersion.ToString()\n$capRoot='F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture'\n& 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/Test-PssaCapture.ps1' -BindingPath \"$capRoot/capture-binding.json\" -OutputRoot 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/out/unit-1190e3d1-7863-4eff-b3ad-71248037d21c'\n$capUnitExit=$LASTEXITCODE\n$capUnitElapsed=([Diagnostics.Stopwatch]::GetTimestamp()-$capUnitOuterStart)/[double][Diagnostics.Stopwatch]::Frequency\nWrite-Output ('CAP_UNIT_OUTER:'+(@{unitExit=$capUnitExit;elapsedSeconds=$capUnitElapsed;actualArgv=$capActualArgv;actualPS=$capActualPS;retry=0}|ConvertTo-Json -Compress))\nif ($capUnitExit -ne 0 -or $capUnitElapsed -ge 30) { exit 2 }\n$capPssaStart=[Diagnostics.Stopwatch]::GetTimestamp()\nWrite-Output ('CAP_PSSA_START:'+(@{collectionStartTick=$capPssaStart;frequency=[Diagnostics.Stopwatch]::Frequency;actualArgv=$capActualArgv;actualPS=$capActualPS;hardInterruptionGuaranteed=$false;retry=0}|ConvertTo-Json -Compress))\n& \"$capRoot/Invoke-PssaCapture.ps1\" -BindingPath \"$capRoot/capture-binding.json\" -TargetRole Collector -CollectionStartTick $capPssaStart -OutputRoot 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/out/self-c38a7835-5723-45bc-a05d-35573614034a'\nif ($LASTEXITCODE -ne 0) { exit 2 }\n& \"$capRoot/Invoke-PssaCapture.ps1\" -BindingPath \"$capRoot/capture-binding.json\" -TargetRole Assertions -CollectionStartTick $capPssaStart -OutputRoot 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/out/assertions-cbcb3571-0aab-4d34-8a27-c6072453b19f'\nexit $LASTEXITCODE",
++  "workdir": "F:/Kazuhiro/GitHub/WordWeave5",
++  "shell": "F:/Program Files/PowerShell/7/pwsh.exe",
++  "login": false,
++  "max_output_tokens": 24000,
++  "yield_time_ms": 10000,
++  "sandbox_permissions": "use_default",
++  "tty": false
++}
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/cap-v-identity-runner-evidence-17e2b23d-a0ea-43aa-b32e-e49bc83d5c22/target-tool-return.json b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/cap-v-identity-runner-evidence-17e2b23d-a0ea-43aa-b32e-e49bc83d5c22/target-tool-return.json
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/cap-v-identity-runner-evidence-17e2b23d-a0ea-43aa-b32e-e49bc83d5c22/target-tool-return.json
+@@ -0,0 +1,11 @@
++{
++  "startUTC": "2026-10-24T07:41:34.637Z",
++  "returnUTC": "2026-10-24T07:41:37.245Z",
++  "raw": {
++    "chunk_id": "dda18d",
++    "wall_time_seconds": 2.2378618,
++    "exit_code": 2,
++    "original_token_count": 7637,
++    "output": "{\r\n  \"preferences\": {\r\n    \"information\": \"SilentlyContinue\",\r\n    \"debug\": \"SilentlyContinue\",\r\n    \"verbose\": \"SilentlyContinue\",\r\n    \"warning\": \"Continue\",\r\n    \"errorAction\": \"Stop\"\r\n  },\r\n  \"afterPins\": [\r\n    {\r\n      \"sha256\": \"FA2C8BB1E35CDD62AD15CD06A1D8F2C5961E9725A9BFA1E7CFD2C322F49E9619\",\r\n      \"path\": \"F:/Program Files/PowerShell/7/pwsh.exe\"\r\n    },\r\n    {\r\n      \"sha256\": \"A583A3721FEEBC4F9552A02358BC81BBDD41E2E18BB3F424226F2B1E0BF07DEB\",\r\n      \"path\": \"F:/Program Files/PowerShell/7/pwsh.dll\"\r\n    },\r\n    {\r\n      \"sha256\": \"70701F20AFBBF4E763924C2BDD0C0E9A20EEC35A0E4EFF439E0CCF77F20D6B26\",\r\n      \"path\": \"F:/Program Files/PowerShell/7/System.Management.Automation.dll\"\r\n    },\r\n    {\r\n      \"sha256\": \"8A6363FBA1F89C0688E3594EF4FE7B9036126F04957C5FE56858CBA020B76B33\",\r\n      \"path\": \"F:/Program Files/PowerShell/7/pwsh.runtimeconfig.json\"\r\n    },\r\n    {\r\n      \"sha256\": \"A01883AEEB2217AEB1D7EC944D649376104E7A874CA4EA71E7F36448C1519DC2\",\r\n      \"path\": \"F:/Program Files/PowerShell/7/pwsh.deps.json\"\r\n    },\r\n    {\r\n      \"sha256\": \"2B219F688BCDD67101040F845E530B22907D39BBF49089B4B5B2AFABA7996791\",\r\n      \"path\": \"C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/PSScriptAnalyzer/1.25.0/PSScriptAnalyzer.psd1\"\r\n    },\r\n    {\r\n      \"sha256\": \"B69773FC9080CFB958DC13C95E42A625553E9BCA5DCBEDC27231E5C183A4E869\",\r\n      \"path\": \"C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/PSScriptAnalyzer/1.25.0/PSScriptAnalyzer.psm1\"\r\n    },\r\n    {\r\n      \"sha256\": \"34246566553FE97C96A9FFEA8AEEFEE353C1E07E41A72D3BFE9FDF826CC71D2A\",\r\n      \"path\": \"C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/PSScriptAnalyzer/1.25.0/ScriptAnalyzer.types.ps1xml\"\r\n    },\r\n    {\r\n      \"sha256\": \"D647E6C1CDFE4052D2382F2D76B899EC596EC71D23D724553B93F74827D49044\",\r\n      \"path\": \"C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/PSScriptAnalyzer/1.25.0/ScriptAnalyzer.format.ps1xml\"\r\n    },\r\n    {\r\n      \"sha256\": \"D92CB413E18927BB64D9BAC221191FC69CF1659F55C72C27DDF1FE19EF774CAF\",\r\n      \"path\": \"C:\\\\Users\\\\安井　一広\\\\OneDrive\\\\ドキュメント\\\\WindowsPowerShell\\\\Modules\\\\PSScriptAnalyzer\\\\1.25.0\\\\PSv7\\\\Microsoft.PowerShell.CrossCompatibility.dll\"\r\n    },\r\n    {\r\n      \"sha256\": \"C8AA9890743A6D9C47CCFEE5EC33CAAEE58C30591454D3CCF379720025A1533C\",\r\n      \"path\": \"C:\\\\Users\\\\安井　一広\\\\OneDrive\\\\ドキュメント\\\\WindowsPowerShell\\\\Modules\\\\PSScriptAnalyzer\\\\1.25.0\\\\PSv7\\\\Microsoft.Windows.PowerShell.ScriptAnalyzer.BuiltinRules.dll\"\r\n    },\r\n    {\r\n      \"sha256\": \"C377532A1D8D8975E598891602B5C3ED39AB719F589D054EB889D11EB6CCAEA3\",\r\n      \"path\": \"C:\\\\Users\\\\安井　一広\\\\OneDrive\\\\ドキュメント\\\\WindowsPowerShell\\\\Modules\\\\PSScriptAnalyzer\\\\1.25.0\\\\PSv7\\\\Microsoft.Windows.PowerShell.ScriptAnalyzer.dll\"\r\n    },\r\n    {\r\n      \"sha256\": \"EEECDF663A3E854F67BBBB872DC45577E785A581C1CA86EA2AE1D8215B8505D6\",\r\n      \"path\": \"C:\\\\Users\\\\安井　一広\\\\OneDrive\\\\ドキュメント\\\\WindowsPowerShell\\\\Modules\\\\PSScriptAnalyzer\\\\1.25.0\\\\PSv7\\\\Pluralize.NET.dll\"\r\n    },\r\n    {\r\n      \"sha256\": \"3D6356119F9062A8494BF78C42B604AEB9EFE3BD18CD1D40D87E2661047E55D4\",\r\n      \"path\": \"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/Test-PssaCapture.ps1\"\r\n    },\r\n    {\r\n      \"sha256\": \"0E20118B8C11714B21DEDE0A1AEC66EAA928FAFF1D845B83DB04847EAB7062C0\",\r\n      \"path\": \"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/expectations.json\"\r\n    },\r\n    {\r\n      \"sha256\": \"39B5BC40CA83F5E088873B67047243182EF806D96BE8BC5D3372235808187613\",\r\n      \"path\": \"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/Invoke-PssaCapture.ps1\"\r\n    },\r\n    {\r\n      \"sha256\": \"AFA82E807179DF852ECCB05D5A8C8F3919B9B1C4C9D981CFA0CD6F368FE824F4\",\r\n      \"path\": \"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/PreparationAssertions.psm1\"\r\n    }\r\n  ],\r\n  \"bindingSha256\": \"BCF399B86EC11EDE26AF817DBB6CC93258B50C2BE5A413C038124DE8BAB022B8\",\r\n  \"argv\": [\r\n    \"F:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.dll\",\r\n    \"-NoProfile\",\r\n    \"-Command\",\r\n    \"try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}\\n$capUnitOuterStart=[Diagnostics.Stopwatch]::GetTimestamp()\\n$ErrorActionPreference='Stop'\\n$capActualArgv=[Environment]::GetCommandLineArgs()\\n$capActualPS=$PSVersionTable.PSVersion.ToString()\\n$capRoot='F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture'\\n& 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/Test-PssaCapture.ps1' -BindingPath \\\"$capRoot/capture-binding.json\\\" -OutputRoot 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/out/unit-1190e3d1-7863-4eff-b3ad-71248037d21c'\\n$capUnitExit=$LASTEXITCODE\\n$capUnitElapsed=([Diagnostics.Stopwatch]::GetTimestamp()-$capUnitOuterStart)/[double][Diagnostics.Stopwatch]::Frequency\\nWrite-Output ('CAP_UNIT_OUTER:'+(@{unitExit=$capUnitExit;elapsedSeconds=$capUnitElapsed;actualArgv=$capActualArgv;actualPS=$capActualPS;retry=0}|ConvertTo-Json -Compress))\\nif ($capUnitExit -ne 0 -or $capUnitElapsed -ge 30) { exit 2 }\\n$capPssaStart=[Diagnostics.Stopwatch]::GetTimestamp()\\nWrite-Output ('CAP_PSSA_START:'+(@{collectionStartTick=$capPssaStart;frequency=[Diagnostics.Stopwatch]::Frequency;actualArgv=$capActualArgv;actualPS=$capActualPS;hardInterruptionGuaranteed=$false;retry=0}|ConvertTo-Json -Compress))\\n& \\\"$capRoot/Invoke-PssaCapture.ps1\\\" -BindingPath \\\"$capRoot/capture-binding.json\\\" -TargetRole Collector -CollectionStartTick $capPssaStart -OutputRoot 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/out/self-c38a7835-5723-45bc-a05d-35573614034a'\\nif ($LASTEXITCODE -ne 0) { exit 2 }\\n& \\\"$capRoot/Invoke-PssaCapture.ps1\\\" -BindingPath \\\"$capRoot/capture-binding.json\\\" -TargetRole Assertions -CollectionStartTick $capPssaStart -OutputRoot 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/out/assertions-cbcb3571-0aab-4d34-8a27-c6072453b19f'\\nexit $LASTEXITCODE\"\r\n  ],\r\n  \"phase\": \"Unit20\",\r\n  \"accepted\": false,\r\n  \"cases\": [\r\n    {\r\n      \"status\": \"PASS\",\r\n      \"captureStatus\": \"Complete\",\r\n      \"counts\": {\r\n        \"engineOccurrences\": 0,\r\n        \"engineGroups\": 0,\r\n        \"unknown\": 0,\r\n        \"signal\": 0,\r\n        \"ordinary\": 0,\r\n        \"auxiliary\": 0\r\n      },\r\n      \"gateStatus\": \"PASS\",\r\n      \"checkedKeys\": [\r\n        \"captureStatus\",\r\n        \"gateStatus\",\r\n        \"ordinary\",\r\n        \"engineOccurrences\",\r\n        \"engineGroups\",\r\n        \"unknown\",\r\n        \"signal\",\r\n        \"auxiliary\",\r\n        \"rawCount\",\r\n        \"allFlags\",\r\n        \"saveCalls\"\r\n      ],\r\n      \"id\": \"C01\",\r\n      \"flags\": {\r\n        \"savedWithinDeadline\": true,\r\n        \"moduleReady\": true,\r\n        \"invokeStarted\": true,\r\n        \"invokeReturned\": true,\r\n        \"postBindingsMatched\": true,\r\n        \"captureComplete\": true\r\n      }\r\n    },\r\n    {\r\n      \"status\": \"PASS\",\r\n      \"captureStatus\": \"Complete\",\r\n      \"counts\": {\r\n        \"engineOccurrences\": 0,\r\n        \"engineGroups\": 0,\r\n        \"unknown\": 0,\r\n        \"signal\": 0,\r\n        \"ordinary\": 1,\r\n        \"auxiliary\": 0\r\n      },\r\n      \"gateStatus\": \"FAIL\",\r\n      \"checkedKeys\": [\r\n        \"captureStatus\",\r\n        \"gateStatus\",\r\n        \"ordinary\",\r\n        \"engineOccurrences\",\r\n        \"engineGroups\",\r\n        \"unknown\",\r\n        \"signal\",\r\n        \"auxiliary\",\r\n        \"rawCount\",\r\n        \"diagnosticPreserved\"\r\n      ],\r\n      \"id\": \"C02\",\r\n      \"flags\": {\r\n        \"savedWithinDeadline\": true,\r\n        \"moduleReady\": true,\r\n        \"invokeStarted\": true,\r\n        \"invokeReturned\": true,\r\n        \"postBindingsMatched\": true,\r\n        \"captureComplete\": true\r\n      }\r\n    },\r\n    {\r\n      \"status\": \"PASS\",\r\n      \"captureStatus\": \"Complete\",\r\n      \"counts\": {\r\n        \"engineOccurrences\": 0,\r\n        \"engineGroups\": 0,\r\n        \"unknown\": 0,\r\n        \"signal\": 0,\r\n        \"ordinary\": 1,\r\n        \"auxiliary\": 0\r\n      },\r\n      \"gateStatus\": \"FAIL\",\r\n      \"checkedKeys\": [\r\n        \"captureStatus\",\r\n        \"gateStatus\",\r\n        \"ordinary\",\r\n        \"engineOccurrences\",\r\n        \"engineGroups\",\r\n        \"unknown\",\r\n        \"signal\",\r\n        \"auxiliary\",\r\n        \"rawCount\",\r\n        \"diagnosticPreserved\"\r\n      ],\r\n      \"id\": \"C03\",\r\n      \"flags\": {\r\n        \"savedWithinDeadline\": true,\r\n        \"moduleReady\": true,\r\n        \"invokeStarted\": true,\r\n        \"invokeReturned\": true,\r\n        \"postBindingsMatched\": true,\r\n        \"captureComplete\": true\r\n      }\r\n    },\r\n    {\r\n      \"status\": \"PASS\",\r\n      \"captureStatus\": \"Complete\",\r\n      \"counts\": {\r\n        \"engineOccurrences\": 0,\r\n        \"engineGroups\": 0,\r\n        \"unknown\": 0,\r\n        \"signal\": 0,\r\n        \"ordinary\": 1,\r\n        \"auxiliary\": 0\r\n      },\r\n      \"gateStatus\": \"FAIL\",\r\n      \"checkedKeys\": [\r\n        \"captureStatus\",\r\n        \"gateStatus\",\r\n        \"ordinary\",\r\n        \"engineOccurrences\",\r\n        \"engineGroups\",\r\n        \"unknown\",\r\n        \"signal\",\r\n        \"auxiliary\",\r\n        \"rawCount\",\r\n        \"diagnosticPreserved\"\r\n      ],\r\n      \"id\": \"C04\",\r\n      \"flags\": {\r\n        \"savedWithinDeadline\": true,\r\n        \"moduleReady\": true,\r\n        \"invokeStarted\": true,\r\n        \"invokeReturned\": true,\r\n        \"postBindingsMatched\": true,\r\n        \"captureComplete\": true\r\n      }\r\n    },\r\n    {\r\n      \"status\": \"PASS\",\r\n      \"captureStatus\": \"Complete\",\r\n      \"counts\": {\r\n        \"engineOccurrences\": 0,\r\n        \"engineGroups\": 0,\r\n        \"unknown\": 0,\r\n        \"signal\": 0,\r\n        \"ordinary\": 1,\r\n        \"auxiliary\": 0\r\n      },\r\n      \"gateStatus\": \"FAIL\",\r\n      \"checkedKeys\": [\r\n        \"captureStatus\",\r\n        \"gateStatus\",\r\n        \"ordinary\",\r\n        \"engineOccurrences\",\r\n        \"engineGroups\",\r\n        \"unknown\",\r\n        \"signal\",\r\n        \"auxiliary\",\r\n        \"rawCount\",\r\n        \"diagnosticPreserved\"\r\n      ],\r\n      \"id\": \"C05\",\r\n      \"flags\": {\r\n        \"savedWithinDeadline\": true,\r\n        \"moduleReady\": true,\r\n        \"invokeStarted\": true,\r\n        \"invokeReturned\": true,\r\n        \"postBindingsMatched\": true,\r\n        \"captureComplete\": true\r\n      }\r\n    },\r\n    {\r\n      \"error\": \"BehaviorMismatch: C06: expected primaryIdentity\",\r\n      \"id\": \"C06\",\r\n      \"status\": \"Unexpected\",\r\n      \"failureObservation\": {\r\n        \"save\": {\r\n          \"files\": [\r\n            {\r\n              \"path\": \"F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\out\\\\memory-C06\\\\raw.json\",\r\n              \"exists\": true,\r\n              \"length\": 3725\r\n            },\r\n            {\r\n              \"path\": \"F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\out\\\\memory-C06\\\\result.json\",\r\n              \"exists\": true,\r\n              \"length\": 2454\r\n            }\r\n          ],\r\n          \"partialLength\": null,\r\n          \"filesCount\": 2,\r\n          \"calls\": [\r\n            {\r\n              \"path\": \"F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\out\\\\memory-C06\\\\raw.json\",\r\n              \"byteLength\": 3725,\r\n              \"tick\": 0\r\n            },\r\n            {\r\n              \"path\": \"F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\out\\\\memory-C06\\\\result.json\",\r\n              \"byteLength\": 2454,\r\n              \"tick\": 0\r\n            }\r\n          ],\r\n          \"callsCount\": 2\r\n        },\r\n        \"fixtureObtained\": true,\r\n        \"truncated\": [],\r\n        \"captureFailure\": null,\r\n        \"caseError\": {\r\n          \"category\": \"OperationStopped\",\r\n          \"position\": \"位置 F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\Test-PssaCapture.ps1:32 文字:28\\r\\n+     if (-not $Condition) { throw ($Category + ': ' + $Message) }\\r\\n+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\",\r\n          \"message\": \"BehaviorMismatch: C06: expected primaryIdentity\",\r\n          \"scriptStack\": \"Assert-CapCondition、F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\Test-PssaCapture.ps1: 行 32 で\\r\\nTest-CapResult、F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\Test-PssaCapture.ps1: 行 632 で\\r\\nInvoke-CapUnit20、F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\Test-PssaCapture.ps1: 行 727 で\\r\\n<ScriptBlock>、F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\Test-PssaCapture.ps1: 行 1371 で\\r\\n<ScriptBlock>、<No file>: 行 7 で\",\r\n          \"hResult\": -2146233087,\r\n          \"fullyQualifiedErrorId\": \"BehaviorMismatch: C06: expected primaryIdentity\",\r\n          \"exceptionType\": \"System.Management.Automation.RuntimeException\",\r\n          \"recordType\": \"System.Management.Automation.ErrorRecord\"\r\n        },\r\n        \"actualObtained\": true,\r\n        \"missing\": [\r\n          \"state.gateStatus:Missing\",\r\n          \"state.captureStatus:Missing\"\r\n        ],\r\n        \"actualCount\": 1,\r\n        \"actual\": {\r\n          \"type\": \"System.Collections.Hashtable\",\r\n          \"firstRaw\": {\r\n            \"origin\": \"Pipeline\",\r\n            \"type\": \"System.Management.Automation.ErrorRecord\",\r\n            \"kind\": \"Engine\"\r\n          },\r\n          \"missing\": [],\r\n          \"captureStatus\": \"Complete\",\r\n          \"primaryError\": {\r\n            \"category\": \"InvalidOperation\",\r\n            \"position\": \"位置 行:202 文字:9\\r\\n+         & $producer -Context $context -ErrorAction Stop -ErrorVariabl …\\r\\n+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\",\r\n            \"message\": \"memory engine error\",\r\n            \"scriptStack\": \"<ScriptBlock>、F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\Test-PssaCapture.ps1: 行 469 で\\r\\nInvoke-PssaCapturePipeline、<No file>: 行 202 で\\r\\nInvoke-CapFixture、F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\Test-PssaCapture.ps1: 行 532 で\\r\\nInvoke-CapUnit20、F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\Test-PssaCapture.ps1: 行 725 で\\r\\n<ScriptBlock>、F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\Test-PssaCapture.ps1: 行 1371 で\\r\\n<ScriptBlock>、<No file>: 行 7 で\",\r\n            \"hResult\": -2146233079,\r\n            \"fullyQualifiedErrorId\": \"CAP.Memory.Engine\",\r\n            \"exceptionType\": \"System.InvalidOperationException\",\r\n            \"recordType\": \"System.Management.Automation.ErrorRecord\"\r\n          },\r\n          \"counts\": {\r\n            \"signal\": 0,\r\n            \"engineGroups\": 1,\r\n            \"engineOccurrences\": 2,\r\n            \"unknown\": 0,\r\n            \"ordinary\": 0,\r\n            \"auxiliary\": 0\r\n          },\r\n          \"artifacts\": [\r\n            {\r\n              \"sha256\": \"D5436855AF310FAA739851CE5421F9CA591FB4985F6461B68A93E3E1FDE19FC0\",\r\n              \"kind\": \"Raw\",\r\n              \"status\": \"Saved\",\r\n              \"length\": 3725,\r\n              \"path\": \"F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\out\\\\memory-C06\\\\raw.json\"\r\n            },\r\n            {\r\n              \"sha256\": \"E691475978EA0ABBF7D2FBBE72B6C41CD5F511E044A7DE34F3645486754BCE53\",\r\n              \"kind\": \"Result\",\r\n              \"status\": \"Saved\",\r\n              \"length\": 2454,\r\n              \"path\": \"F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\out\\\\memory-C06\\\\result.json\"\r\n            }\r\n          ],\r\n          \"flags\": {\r\n            \"invokeStarted\": true,\r\n            \"moduleReady\": true,\r\n            \"invokeReturned\": true,\r\n            \"savedWithinDeadline\": true,\r\n            \"captureComplete\": true,\r\n            \"postBindingsMatched\": true\r\n          },\r\n          \"rawCount\": 2,\r\n          \"gateStatus\": \"FAIL\"\r\n        },\r\n        \"recordRefs\": {\r\n          \"identity\": {\r\n            \"memoryContext\": true,\r\n            \"contextFirstRetained\": false,\r\n            \"firstRetainedStatePrimary\": true,\r\n            \"firstRetainedResultPrimary\": true\r\n          },\r\n          \"firstType\": \"System.Management.Automation.ErrorRecord\",\r\n          \"count\": 2\r\n        },\r\n        \"caseElapsedSeconds\": 0.1523665,\r\n        \"state\": {\r\n          \"type\": \"System.Collections.Hashtable\",\r\n          \"firstRaw\": {\r\n            \"origin\": \"Pipeline\",\r\n            \"type\": \"System.Management.Automation.ErrorRecord\",\r\n            \"kind\": \"Engine\"\r\n          },\r\n          \"missing\": [],\r\n          \"captureStatus\": null,\r\n          \"primaryError\": {\r\n            \"category\": \"InvalidOperation\",\r\n            \"position\": \"位置 行:202 文字:9\\r\\n+         & $producer -Context $context -ErrorAction Stop -ErrorVariabl …\\r\\n+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\",\r\n            \"message\": \"memory engine error\",\r\n            \"scriptStack\": \"<ScriptBlock>、F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\Test-PssaCapture.ps1: 行 469 で\\r\\nInvoke-PssaCapturePipeline、<No file>: 行 202 で\\r\\nInvoke-CapFixture、F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\Test-PssaCapture.ps1: 行 532 で\\r\\nInvoke-CapUnit20、F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\Test-PssaCapture.ps1: 行 725 で\\r\\n<ScriptBlock>、F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\Test-PssaCapture.ps1: 行 1371 で\\r\\n<ScriptBlock>、<No file>: 行 7 で\",\r\n            \"hResult\": -2146233079,\r\n            \"fullyQualifiedErrorId\": \"CAP.Memory.Engine\",\r\n            \"exceptionType\": \"System.InvalidOperationException\",\r\n            \"recordType\": \"System.Management.Automation.ErrorRecord\"\r\n          },\r\n          \"counts\": {\r\n            \"signal\": 0,\r\n            \"engineGroups\": 1,\r\n            \"engineOccurrences\": 2,\r\n            \"unknown\": 0,\r\n            \"ordinary\": 0,\r\n            \"auxiliary\": 0\r\n          },\r\n          \"artifacts\": [\r\n            {\r\n              \"sha256\": \"D5436855AF310FAA739851CE5421F9CA591FB4985F6461B68A93E3E1FDE19FC0\",\r\n              \"kind\": \"Raw\",\r\n              \"status\": \"Saved\",\r\n              \"length\": 3725,\r\n              \"path\": \"F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\out\\\\memory-C06\\\\raw.json\"\r\n            },\r\n            {\r\n              \"sha256\": \"E691475978EA0ABBF7D2FBBE72B6C41CD5F511E044A7DE34F3645486754BCE53\",\r\n              \"kind\": \"Result\",\r\n              \"status\": \"Saved\",\r\n              \"length\": 2454,\r\n              \"path\": \"F:\\\\Kazuhiro\\\\GitHub\\\\WordWeave5\\\\target\\\\early-trial-build\\\\et3\\\\cargo-gate\\\\verification\\\\argv-path01\\\\05685244-e82d-4a76-8be8-4366a8872b6d\\\\pssa-capture\\\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\\\out\\\\memory-C06\\\\result.json\"\r\n            }\r\n          ],\r\n          \"flags\": {\r\n            \"invokeStarted\": true,\r\n            \"moduleReady\": true,\r\n            \"invokeReturned\": true,\r\n            \"savedWithinDeadline\": true,\r\n            \"captureComplete\": true,\r\n            \"postBindingsMatched\": true\r\n          },\r\n          \"rawCount\": 2,\r\n          \"gateStatus\": null\r\n        },\r\n        \"collectionElapsedSeconds\": 0.5257742\r\n      }\r\n    },\r\n    {\r\n      \"status\": \"NotRun\",\r\n      \"id\": \"C07\"\r\n    },\r\n    {\r\n      \"status\": \"NotRun\",\r\n      \"id\": \"C08\"\r\n    },\r\n    {\r\n      \"status\": \"NotRun\",\r\n      \"id\": \"C09\"\r\n    },\r\n    {\r\n      \"status\": \"NotRun\",\r\n      \"id\": \"C10\"\r\n    },\r\n    {\r\n      \"status\": \"NotRun\",\r\n      \"id\": \"C11\"\r\n    },\r\n    {\r\n      \"status\": \"NotRun\",\r\n      \"id\": \"C12\"\r\n    },\r\n    {\r\n      \"status\": \"NotRun\",\r\n      \"id\": \"C13\"\r\n    },\r\n    {\r\n      \"status\": \"NotRun\",\r\n      \"id\": \"C14\"\r\n    },\r\n    {\r\n      \"status\": \"NotRun\",\r\n      \"id\": \"C15\"\r\n    },\r\n    {\r\n      \"status\": \"NotRun\",\r\n      \"id\": \"C16\"\r\n    },\r\n    {\r\n      \"status\": \"NotRun\",\r\n      \"id\": \"C17\"\r\n    },\r\n    {\r\n      \"status\": \"NotRun\",\r\n      \"id\": \"C18\"\r\n    },\r\n    {\r\n      \"status\": \"NotRun\",\r\n      \"id\": \"C19\"\r\n    },\r\n    {\r\n      \"status\": \"NotRun\",\r\n      \"id\": \"C20\"\r\n    }\r\n  ],\r\n  \"originalNullReferenceReproduced\": false,\r\n  \"pssaVersion\": \"1.25.0\",\r\n  \"requestedExit\": 2,\r\n  \"actualPssaInvocations\": 0,\r\n  \"actualPS\": \"7.6.7\",\r\n  \"retry\": 0,\r\n  \"beforePins\": [\r\n    {\r\n      \"sha256\": \"FA2C8BB1E35CDD62AD15CD06A1D8F2C5961E9725A9BFA1E7CFD2C322F49E9619\",\r\n      \"path\": \"F:/Program Files/PowerShell/7/pwsh.exe\"\r\n    },\r\n    {\r\n      \"sha256\": \"A583A3721FEEBC4F9552A02358BC81BBDD41E2E18BB3F424226F2B1E0BF07DEB\",\r\n      \"path\": \"F:/Program Files/PowerShell/7/pwsh.dll\"\r\n    },\r\n    {\r\n      \"sha256\": \"70701F20AFBBF4E763924C2BDD0C0E9A20EEC35A0E4EFF439E0CCF77F20D6B26\",\r\n      \"path\": \"F:/Program Files/PowerShell/7/System.Management.Automation.dll\"\r\n    },\r\n    {\r\n      \"sha256\": \"8A6363FBA1F89C0688E3594EF4FE7B9036126F04957C5FE56858CBA020B76B33\",\r\n      \"path\": \"F:/Program Files/PowerShell/7/pwsh.runtimeconfig.json\"\r\n    },\r\n    {\r\n      \"sha256\": \"A01883AEEB2217AEB1D7EC944D649376104E7A874CA4EA71E7F36448C1519DC2\",\r\n      \"path\": \"F:/Program Files/PowerShell/7/pwsh.deps.json\"\r\n    },\r\n    {\r\n      \"sha256\": \"2B219F688BCDD67101040F845E530B22907D39BBF49089B4B5B2AFABA7996791\",\r\n      \"path\": \"C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/PSScriptAnalyzer/1.25.0/PSScriptAnalyzer.psd1\"\r\n    },\r\n    {\r\n      \"sha256\": \"B69773FC9080CFB958DC13C95E42A625553E9BCA5DCBEDC27231E5C183A4E869\",\r\n      \"path\": \"C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/PSScriptAnalyzer/1.25.0/PSScriptAnalyzer.psm1\"\r\n    },\r\n    {\r\n      \"sha256\": \"34246566553FE97C96A9FFEA8AEEFEE353C1E07E41A72D3BFE9FDF826CC71D2A\",\r\n      \"path\": \"C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/PSScriptAnalyzer/1.25.0/ScriptAnalyzer.types.ps1xml\"\r\n    },\r\n    {\r\n      \"sha256\": \"D647E6C1CDFE4052D2382F2D76B899EC596EC71D23D724553B93F74827D49044\",\r\n      \"path\": \"C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/PSScriptAnalyzer/1.25.0/ScriptAnalyzer.format.ps1xml\"\r\n    },\r\n    {\r\n      \"sha256\": \"D92CB413E18927BB64D9BAC221191FC69CF1659F55C72C27DDF1FE19EF774CAF\",\r\n      \"path\": \"C:\\\\Users\\\\安井　一広\\\\OneDrive\\\\ドキュメント\\\\WindowsPowerShell\\\\Modules\\\\PSScriptAnalyzer\\\\1.25.0\\\\PSv7\\\\Microsoft.PowerShell.CrossCompatibility.dll\"\r\n    },\r\n    {\r\n      \"sha256\": \"C8AA9890743A6D9C47CCFEE5EC33CAAEE58C30591454D3CCF379720025A1533C\",\r\n      \"path\": \"C:\\\\Users\\\\安井　一広\\\\OneDrive\\\\ドキュメント\\\\WindowsPowerShell\\\\Modules\\\\PSScriptAnalyzer\\\\1.25.0\\\\PSv7\\\\Microsoft.Windows.PowerShell.ScriptAnalyzer.BuiltinRules.dll\"\r\n    },\r\n    {\r\n      \"sha256\": \"C377532A1D8D8975E598891602B5C3ED39AB719F589D054EB889D11EB6CCAEA3\",\r\n      \"path\": \"C:\\\\Users\\\\安井　一広\\\\OneDrive\\\\ドキュメント\\\\WindowsPowerShell\\\\Modules\\\\PSScriptAnalyzer\\\\1.25.0\\\\PSv7\\\\Microsoft.Windows.PowerShell.ScriptAnalyzer.dll\"\r\n    },\r\n    {\r\n      \"sha256\": \"EEECDF663A3E854F67BBBB872DC45577E785A581C1CA86EA2AE1D8215B8505D6\",\r\n      \"path\": \"C:\\\\Users\\\\安井　一広\\\\OneDrive\\\\ドキュメント\\\\WindowsPowerShell\\\\Modules\\\\PSScriptAnalyzer\\\\1.25.0\\\\PSv7\\\\Pluralize.NET.dll\"\r\n    },\r\n    {\r\n      \"sha256\": \"3D6356119F9062A8494BF78C42B604AEB9EFE3BD18CD1D40D87E2661047E55D4\",\r\n      \"path\": \"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/Test-PssaCapture.ps1\"\r\n    },\r\n    {\r\n      \"sha256\": \"0E20118B8C11714B21DEDE0A1AEC66EAA928FAFF1D845B83DB04847EAB7062C0\",\r\n      \"path\": \"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/expectations.json\"\r\n    },\r\n    {\r\n      \"sha256\": \"39B5BC40CA83F5E088873B67047243182EF806D96BE8BC5D3372235808187613\",\r\n      \"path\": \"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/Invoke-PssaCapture.ps1\"\r\n    },\r\n    {\r\n      \"sha256\": \"AFA82E807179DF852ECCB05D5A8C8F3919B9B1C4C9D981CFA0CD6F368FE824F4\",\r\n      \"path\": \"F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/PreparationAssertions.psm1\"\r\n    }\r\n  ]\r\n}\r\nCAP_UNIT_OUTER:{\"unitExit\":2,\"actualArgv\":[\"F:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.dll\",\"-NoProfile\",\"-Command\",\"try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}\\n$capUnitOuterStart=[Diagnostics.Stopwatch]::GetTimestamp()\\n$ErrorActionPreference='Stop'\\n$capActualArgv=[Environment]::GetCommandLineArgs()\\n$capActualPS=$PSVersionTable.PSVersion.ToString()\\n$capRoot='F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture'\\n& 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/Test-PssaCapture.ps1' -BindingPath \\\"$capRoot/capture-binding.json\\\" -OutputRoot 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/out/unit-1190e3d1-7863-4eff-b3ad-71248037d21c'\\n$capUnitExit=$LASTEXITCODE\\n$capUnitElapsed=([Diagnostics.Stopwatch]::GetTimestamp()-$capUnitOuterStart)/[double][Diagnostics.Stopwatch]::Frequency\\nWrite-Output ('CAP_UNIT_OUTER:'+(@{unitExit=$capUnitExit;elapsedSeconds=$capUnitElapsed;actualArgv=$capActualArgv;actualPS=$capActualPS;retry=0}|ConvertTo-Json -Compress))\\nif ($capUnitExit -ne 0 -or $capUnitElapsed -ge 30) { exit 2 }\\n$capPssaStart=[Diagnostics.Stopwatch]::GetTimestamp()\\nWrite-Output ('CAP_PSSA_START:'+(@{collectionStartTick=$capPssaStart;frequency=[Diagnostics.Stopwatch]::Frequency;actualArgv=$capActualArgv;actualPS=$capActualPS;hardInterruptionGuaranteed=$false;retry=0}|ConvertTo-Json -Compress))\\n& \\\"$capRoot/Invoke-PssaCapture.ps1\\\" -BindingPath \\\"$capRoot/capture-binding.json\\\" -TargetRole Collector -CollectionStartTick $capPssaStart -OutputRoot 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/out/self-c38a7835-5723-45bc-a05d-35573614034a'\\nif ($LASTEXITCODE -ne 0) { exit 2 }\\n& \\\"$capRoot/Invoke-PssaCapture.ps1\\\" -BindingPath \\\"$capRoot/capture-binding.json\\\" -TargetRole Assertions -CollectionStartTick $capPssaStart -OutputRoot 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/out/assertions-cbcb3571-0aab-4d34-8a27-c6072453b19f'\\nexit $LASTEXITCODE\"],\"elapsedSeconds\":1.8661505,\"actualPS\":\"7.6.7\",\"retry\":0}\r\n"
++  }
++}
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/out/unit-1190e3d1-7863-4eff-b3ad-71248037d21c/unit-result.json b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/out/unit-1190e3d1-7863-4eff-b3ad-71248037d21c/unit-result.json
+new file mode 100644
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/out/unit-1190e3d1-7863-4eff-b3ad-71248037d21c/unit-result.json
+@@ -0,0 +1,568 @@
++{
++  "preferences": {
++    "information": "SilentlyContinue",
++    "debug": "SilentlyContinue",
++    "verbose": "SilentlyContinue",
++    "warning": "Continue",
++    "errorAction": "Stop"
++  },
++  "afterPins": [
++    {
++      "sha256": "FA2C8BB1E35CDD62AD15CD06A1D8F2C5961E9725A9BFA1E7CFD2C322F49E9619",
++      "path": "F:/Program Files/PowerShell/7/pwsh.exe"
++    },
++    {
++      "sha256": "A583A3721FEEBC4F9552A02358BC81BBDD41E2E18BB3F424226F2B1E0BF07DEB",
++      "path": "F:/Program Files/PowerShell/7/pwsh.dll"
++    },
++    {
++      "sha256": "70701F20AFBBF4E763924C2BDD0C0E9A20EEC35A0E4EFF439E0CCF77F20D6B26",
++      "path": "F:/Program Files/PowerShell/7/System.Management.Automation.dll"
++    },
++    {
++      "sha256": "8A6363FBA1F89C0688E3594EF4FE7B9036126F04957C5FE56858CBA020B76B33",
++      "path": "F:/Program Files/PowerShell/7/pwsh.runtimeconfig.json"
++    },
++    {
++      "sha256": "A01883AEEB2217AEB1D7EC944D649376104E7A874CA4EA71E7F36448C1519DC2",
++      "path": "F:/Program Files/PowerShell/7/pwsh.deps.json"
++    },
++    {
++      "sha256": "2B219F688BCDD67101040F845E530B22907D39BBF49089B4B5B2AFABA7996791",
++      "path": "C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/PSScriptAnalyzer/1.25.0/PSScriptAnalyzer.psd1"
++    },
++    {
++      "sha256": "B69773FC9080CFB958DC13C95E42A625553E9BCA5DCBEDC27231E5C183A4E869",
++      "path": "C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/PSScriptAnalyzer/1.25.0/PSScriptAnalyzer.psm1"
++    },
++    {
++      "sha256": "34246566553FE97C96A9FFEA8AEEFEE353C1E07E41A72D3BFE9FDF826CC71D2A",
++      "path": "C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/PSScriptAnalyzer/1.25.0/ScriptAnalyzer.types.ps1xml"
++    },
++    {
++      "sha256": "D647E6C1CDFE4052D2382F2D76B899EC596EC71D23D724553B93F74827D49044",
++      "path": "C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/PSScriptAnalyzer/1.25.0/ScriptAnalyzer.format.ps1xml"
++    },
++    {
++      "sha256": "D92CB413E18927BB64D9BAC221191FC69CF1659F55C72C27DDF1FE19EF774CAF",
++      "path": "C:\\Users\\安井　一広\\OneDrive\\ドキュメント\\WindowsPowerShell\\Modules\\PSScriptAnalyzer\\1.25.0\\PSv7\\Microsoft.PowerShell.CrossCompatibility.dll"
++    },
++    {
++      "sha256": "C8AA9890743A6D9C47CCFEE5EC33CAAEE58C30591454D3CCF379720025A1533C",
++      "path": "C:\\Users\\安井　一広\\OneDrive\\ドキュメント\\WindowsPowerShell\\Modules\\PSScriptAnalyzer\\1.25.0\\PSv7\\Microsoft.Windows.PowerShell.ScriptAnalyzer.BuiltinRules.dll"
++    },
++    {
++      "sha256": "C377532A1D8D8975E598891602B5C3ED39AB719F589D054EB889D11EB6CCAEA3",
++      "path": "C:\\Users\\安井　一広\\OneDrive\\ドキュメント\\WindowsPowerShell\\Modules\\PSScriptAnalyzer\\1.25.0\\PSv7\\Microsoft.Windows.PowerShell.ScriptAnalyzer.dll"
++    },
++    {
++      "sha256": "EEECDF663A3E854F67BBBB872DC45577E785A581C1CA86EA2AE1D8215B8505D6",
++      "path": "C:\\Users\\安井　一広\\OneDrive\\ドキュメント\\WindowsPowerShell\\Modules\\PSScriptAnalyzer\\1.25.0\\PSv7\\Pluralize.NET.dll"
++    },
++    {
++      "sha256": "3D6356119F9062A8494BF78C42B604AEB9EFE3BD18CD1D40D87E2661047E55D4",
++      "path": "F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/Test-PssaCapture.ps1"
++    },
++    {
++      "sha256": "0E20118B8C11714B21DEDE0A1AEC66EAA928FAFF1D845B83DB04847EAB7062C0",
++      "path": "F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/expectations.json"
++    },
++    {
++      "sha256": "39B5BC40CA83F5E088873B67047243182EF806D96BE8BC5D3372235808187613",
++      "path": "F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/Invoke-PssaCapture.ps1"
++    },
++    {
++      "sha256": "AFA82E807179DF852ECCB05D5A8C8F3919B9B1C4C9D981CFA0CD6F368FE824F4",
++      "path": "F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/PreparationAssertions.psm1"
++    }
++  ],
++  "bindingSha256": "BCF399B86EC11EDE26AF817DBB6CC93258B50C2BE5A413C038124DE8BAB022B8",
++  "argv": [
++    "F:\\Program Files\\PowerShell\\7\\pwsh.dll",
++    "-NoProfile",
++    "-Command",
++    "try { [Console]::OutputEncoding=[System.Text.Encoding]::UTF8 } catch {}\n$capUnitOuterStart=[Diagnostics.Stopwatch]::GetTimestamp()\n$ErrorActionPreference='Stop'\n$capActualArgv=[Environment]::GetCommandLineArgs()\n$capActualPS=$PSVersionTable.PSVersion.ToString()\n$capRoot='F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture'\n& 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/Test-PssaCapture.ps1' -BindingPath \"$capRoot/capture-binding.json\" -OutputRoot 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/out/unit-1190e3d1-7863-4eff-b3ad-71248037d21c'\n$capUnitExit=$LASTEXITCODE\n$capUnitElapsed=([Diagnostics.Stopwatch]::GetTimestamp()-$capUnitOuterStart)/[double][Diagnostics.Stopwatch]::Frequency\nWrite-Output ('CAP_UNIT_OUTER:'+(@{unitExit=$capUnitExit;elapsedSeconds=$capUnitElapsed;actualArgv=$capActualArgv;actualPS=$capActualPS;retry=0}|ConvertTo-Json -Compress))\nif ($capUnitExit -ne 0 -or $capUnitElapsed -ge 30) { exit 2 }\n$capPssaStart=[Diagnostics.Stopwatch]::GetTimestamp()\nWrite-Output ('CAP_PSSA_START:'+(@{collectionStartTick=$capPssaStart;frequency=[Diagnostics.Stopwatch]::Frequency;actualArgv=$capActualArgv;actualPS=$capActualPS;hardInterruptionGuaranteed=$false;retry=0}|ConvertTo-Json -Compress))\n& \"$capRoot/Invoke-PssaCapture.ps1\" -BindingPath \"$capRoot/capture-binding.json\" -TargetRole Collector -CollectionStartTick $capPssaStart -OutputRoot 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/out/self-c38a7835-5723-45bc-a05d-35573614034a'\nif ($LASTEXITCODE -ne 0) { exit 2 }\n& \"$capRoot/Invoke-PssaCapture.ps1\" -BindingPath \"$capRoot/capture-binding.json\" -TargetRole Assertions -CollectionStartTick $capPssaStart -OutputRoot 'F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/out/assertions-cbcb3571-0aab-4d34-8a27-c6072453b19f'\nexit $LASTEXITCODE"
++  ],
++  "phase": "Unit20",
++  "accepted": false,
++  "cases": [
++    {
++      "status": "PASS",
++      "captureStatus": "Complete",
++      "counts": {
++        "engineOccurrences": 0,
++        "engineGroups": 0,
++        "unknown": 0,
++        "signal": 0,
++        "ordinary": 0,
++        "auxiliary": 0
++      },
++      "gateStatus": "PASS",
++      "checkedKeys": [
++        "captureStatus",
++        "gateStatus",
++        "ordinary",
++        "engineOccurrences",
++        "engineGroups",
++        "unknown",
++        "signal",
++        "auxiliary",
++        "rawCount",
++        "allFlags",
++        "saveCalls"
++      ],
++      "id": "C01",
++      "flags": {
++        "savedWithinDeadline": true,
++        "moduleReady": true,
++        "invokeStarted": true,
++        "invokeReturned": true,
++        "postBindingsMatched": true,
++        "captureComplete": true
++      }
++    },
++    {
++      "status": "PASS",
++      "captureStatus": "Complete",
++      "counts": {
++        "engineOccurrences": 0,
++        "engineGroups": 0,
++        "unknown": 0,
++        "signal": 0,
++        "ordinary": 1,
++        "auxiliary": 0
++      },
++      "gateStatus": "FAIL",
++      "checkedKeys": [
++        "captureStatus",
++        "gateStatus",
++        "ordinary",
++        "engineOccurrences",
++        "engineGroups",
++        "unknown",
++        "signal",
++        "auxiliary",
++        "rawCount",
++        "diagnosticPreserved"
++      ],
++      "id": "C02",
++      "flags": {
++        "savedWithinDeadline": true,
++        "moduleReady": true,
++        "invokeStarted": true,
++        "invokeReturned": true,
++        "postBindingsMatched": true,
++        "captureComplete": true
++      }
++    },
++    {
++      "status": "PASS",
++      "captureStatus": "Complete",
++      "counts": {
++        "engineOccurrences": 0,
++        "engineGroups": 0,
++        "unknown": 0,
++        "signal": 0,
++        "ordinary": 1,
++        "auxiliary": 0
++      },
++      "gateStatus": "FAIL",
++      "checkedKeys": [
++        "captureStatus",
++        "gateStatus",
++        "ordinary",
++        "engineOccurrences",
++        "engineGroups",
++        "unknown",
++        "signal",
++        "auxiliary",
++        "rawCount",
++        "diagnosticPreserved"
++      ],
++      "id": "C03",
++      "flags": {
++        "savedWithinDeadline": true,
++        "moduleReady": true,
++        "invokeStarted": true,
++        "invokeReturned": true,
++        "postBindingsMatched": true,
++        "captureComplete": true
++      }
++    },
++    {
++      "status": "PASS",
++      "captureStatus": "Complete",
++      "counts": {
++        "engineOccurrences": 0,
++        "engineGroups": 0,
++        "unknown": 0,
++        "signal": 0,
++        "ordinary": 1,
++        "auxiliary": 0
++      },
++      "gateStatus": "FAIL",
++      "checkedKeys": [
++        "captureStatus",
++        "gateStatus",
++        "ordinary",
++        "engineOccurrences",
++        "engineGroups",
++        "unknown",
++        "signal",
++        "auxiliary",
++        "rawCount",
++        "diagnosticPreserved"
++      ],
++      "id": "C04",
++      "flags": {
++        "savedWithinDeadline": true,
++        "moduleReady": true,
++        "invokeStarted": true,
++        "invokeReturned": true,
++        "postBindingsMatched": true,
++        "captureComplete": true
++      }
++    },
++    {
++      "status": "PASS",
++      "captureStatus": "Complete",
++      "counts": {
++        "engineOccurrences": 0,
++        "engineGroups": 0,
++        "unknown": 0,
++        "signal": 0,
++        "ordinary": 1,
++        "auxiliary": 0
++      },
++      "gateStatus": "FAIL",
++      "checkedKeys": [
++        "captureStatus",
++        "gateStatus",
++        "ordinary",
++        "engineOccurrences",
++        "engineGroups",
++        "unknown",
++        "signal",
++        "auxiliary",
++        "rawCount",
++        "diagnosticPreserved"
++      ],
++      "id": "C05",
++      "flags": {
++        "savedWithinDeadline": true,
++        "moduleReady": true,
++        "invokeStarted": true,
++        "invokeReturned": true,
++        "postBindingsMatched": true,
++        "captureComplete": true
++      }
++    },
++    {
++      "error": "BehaviorMismatch: C06: expected primaryIdentity",
++      "id": "C06",
++      "status": "Unexpected",
++      "failureObservation": {
++        "save": {
++          "files": [
++            {
++              "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\out\\memory-C06\\raw.json",
++              "exists": true,
++              "length": 3725
++            },
++            {
++              "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\out\\memory-C06\\result.json",
++              "exists": true,
++              "length": 2454
++            }
++          ],
++          "partialLength": null,
++          "filesCount": 2,
++          "calls": [
++            {
++              "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\out\\memory-C06\\raw.json",
++              "byteLength": 3725,
++              "tick": 0
++            },
++            {
++              "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\out\\memory-C06\\result.json",
++              "byteLength": 2454,
++              "tick": 0
++            }
++          ],
++          "callsCount": 2
++        },
++        "fixtureObtained": true,
++        "truncated": [],
++        "captureFailure": null,
++        "caseError": {
++          "category": "OperationStopped",
++          "position": "位置 F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\Test-PssaCapture.ps1:32 文字:28\r\n+     if (-not $Condition) { throw ($Category + ': ' + $Message) }\r\n+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
++          "message": "BehaviorMismatch: C06: expected primaryIdentity",
++          "scriptStack": "Assert-CapCondition、F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\Test-PssaCapture.ps1: 行 32 で\r\nTest-CapResult、F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\Test-PssaCapture.ps1: 行 632 で\r\nInvoke-CapUnit20、F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\Test-PssaCapture.ps1: 行 727 で\r\n<ScriptBlock>、F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\Test-PssaCapture.ps1: 行 1371 で\r\n<ScriptBlock>、<No file>: 行 7 で",
++          "hResult": -2146233087,
++          "fullyQualifiedErrorId": "BehaviorMismatch: C06: expected primaryIdentity",
++          "exceptionType": "System.Management.Automation.RuntimeException",
++          "recordType": "System.Management.Automation.ErrorRecord"
++        },
++        "actualObtained": true,
++        "missing": [
++          "state.gateStatus:Missing",
++          "state.captureStatus:Missing"
++        ],
++        "actualCount": 1,
++        "actual": {
++          "type": "System.Collections.Hashtable",
++          "firstRaw": {
++            "origin": "Pipeline",
++            "type": "System.Management.Automation.ErrorRecord",
++            "kind": "Engine"
++          },
++          "missing": [],
++          "captureStatus": "Complete",
++          "primaryError": {
++            "category": "InvalidOperation",
++            "position": "位置 行:202 文字:9\r\n+         & $producer -Context $context -ErrorAction Stop -ErrorVariabl …\r\n+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
++            "message": "memory engine error",
++            "scriptStack": "<ScriptBlock>、F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\Test-PssaCapture.ps1: 行 469 で\r\nInvoke-PssaCapturePipeline、<No file>: 行 202 で\r\nInvoke-CapFixture、F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\Test-PssaCapture.ps1: 行 532 で\r\nInvoke-CapUnit20、F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\Test-PssaCapture.ps1: 行 725 で\r\n<ScriptBlock>、F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\Test-PssaCapture.ps1: 行 1371 で\r\n<ScriptBlock>、<No file>: 行 7 で",
++            "hResult": -2146233079,
++            "fullyQualifiedErrorId": "CAP.Memory.Engine",
++            "exceptionType": "System.InvalidOperationException",
++            "recordType": "System.Management.Automation.ErrorRecord"
++          },
++          "counts": {
++            "signal": 0,
++            "engineGroups": 1,
++            "engineOccurrences": 2,
++            "unknown": 0,
++            "ordinary": 0,
++            "auxiliary": 0
++          },
++          "artifacts": [
++            {
++              "sha256": "D5436855AF310FAA739851CE5421F9CA591FB4985F6461B68A93E3E1FDE19FC0",
++              "kind": "Raw",
++              "status": "Saved",
++              "length": 3725,
++              "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\out\\memory-C06\\raw.json"
++            },
++            {
++              "sha256": "E691475978EA0ABBF7D2FBBE72B6C41CD5F511E044A7DE34F3645486754BCE53",
++              "kind": "Result",
++              "status": "Saved",
++              "length": 2454,
++              "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\out\\memory-C06\\result.json"
++            }
++          ],
++          "flags": {
++            "invokeStarted": true,
++            "moduleReady": true,
++            "invokeReturned": true,
++            "savedWithinDeadline": true,
++            "captureComplete": true,
++            "postBindingsMatched": true
++          },
++          "rawCount": 2,
++          "gateStatus": "FAIL"
++        },
++        "recordRefs": {
++          "identity": {
++            "memoryContext": true,
++            "contextFirstRetained": false,
++            "firstRetainedStatePrimary": true,
++            "firstRetainedResultPrimary": true
++          },
++          "firstType": "System.Management.Automation.ErrorRecord",
++          "count": 2
++        },
++        "caseElapsedSeconds": 0.1523665,
++        "state": {
++          "type": "System.Collections.Hashtable",
++          "firstRaw": {
++            "origin": "Pipeline",
++            "type": "System.Management.Automation.ErrorRecord",
++            "kind": "Engine"
++          },
++          "missing": [],
++          "captureStatus": null,
++          "primaryError": {
++            "category": "InvalidOperation",
++            "position": "位置 行:202 文字:9\r\n+         & $producer -Context $context -ErrorAction Stop -ErrorVariabl …\r\n+         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
++            "message": "memory engine error",
++            "scriptStack": "<ScriptBlock>、F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\Test-PssaCapture.ps1: 行 469 で\r\nInvoke-PssaCapturePipeline、<No file>: 行 202 で\r\nInvoke-CapFixture、F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\Test-PssaCapture.ps1: 行 532 で\r\nInvoke-CapUnit20、F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\Test-PssaCapture.ps1: 行 725 で\r\n<ScriptBlock>、F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\Test-PssaCapture.ps1: 行 1371 で\r\n<ScriptBlock>、<No file>: 行 7 で",
++            "hResult": -2146233079,
++            "fullyQualifiedErrorId": "CAP.Memory.Engine",
++            "exceptionType": "System.InvalidOperationException",
++            "recordType": "System.Management.Automation.ErrorRecord"
++          },
++          "counts": {
++            "signal": 0,
++            "engineGroups": 1,
++            "engineOccurrences": 2,
++            "unknown": 0,
++            "ordinary": 0,
++            "auxiliary": 0
++          },
++          "artifacts": [
++            {
++              "sha256": "D5436855AF310FAA739851CE5421F9CA591FB4985F6461B68A93E3E1FDE19FC0",
++              "kind": "Raw",
++              "status": "Saved",
++              "length": 3725,
++              "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\out\\memory-C06\\raw.json"
++            },
++            {
++              "sha256": "E691475978EA0ABBF7D2FBBE72B6C41CD5F511E044A7DE34F3645486754BCE53",
++              "kind": "Result",
++              "status": "Saved",
++              "length": 2454,
++              "path": "F:\\Kazuhiro\\GitHub\\WordWeave5\\target\\early-trial-build\\et3\\cargo-gate\\verification\\argv-path01\\05685244-e82d-4a76-8be8-4366a8872b6d\\pssa-capture\\identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da\\out\\memory-C06\\result.json"
++            }
++          ],
++          "flags": {
++            "invokeStarted": true,
++            "moduleReady": true,
++            "invokeReturned": true,
++            "savedWithinDeadline": true,
++            "captureComplete": true,
++            "postBindingsMatched": true
++          },
++          "rawCount": 2,
++          "gateStatus": null
++        },
++        "collectionElapsedSeconds": 0.5257742
++      }
++    },
++    {
++      "status": "NotRun",
++      "id": "C07"
++    },
++    {
++      "status": "NotRun",
++      "id": "C08"
++    },
++    {
++      "status": "NotRun",
++      "id": "C09"
++    },
++    {
++      "status": "NotRun",
++      "id": "C10"
++    },
++    {
++      "status": "NotRun",
++      "id": "C11"
++    },
++    {
++      "status": "NotRun",
++      "id": "C12"
++    },
++    {
++      "status": "NotRun",
++      "id": "C13"
++    },
++    {
++      "status": "NotRun",
++      "id": "C14"
++    },
++    {
++      "status": "NotRun",
++      "id": "C15"
++    },
++    {
++      "status": "NotRun",
++      "id": "C16"
++    },
++    {
++      "status": "NotRun",
++      "id": "C17"
++    },
++    {
++      "status": "NotRun",
++      "id": "C18"
++    },
++    {
++      "status": "NotRun",
++      "id": "C19"
++    },
++    {
++      "status": "NotRun",
++      "id": "C20"
++    }
++  ],
++  "originalNullReferenceReproduced": false,
++  "pssaVersion": "1.25.0",
++  "requestedExit": 2,
++  "actualPssaInvocations": 0,
++  "actualPS": "7.6.7",
++  "retry": 0,
++  "beforePins": [
++    {
++      "sha256": "FA2C8BB1E35CDD62AD15CD06A1D8F2C5961E9725A9BFA1E7CFD2C322F49E9619",
++      "path": "F:/Program Files/PowerShell/7/pwsh.exe"
++    },
++    {
++      "sha256": "A583A3721FEEBC4F9552A02358BC81BBDD41E2E18BB3F424226F2B1E0BF07DEB",
++      "path": "F:/Program Files/PowerShell/7/pwsh.dll"
++    },
++    {
++      "sha256": "70701F20AFBBF4E763924C2BDD0C0E9A20EEC35A0E4EFF439E0CCF77F20D6B26",
++      "path": "F:/Program Files/PowerShell/7/System.Management.Automation.dll"
++    },
++    {
++      "sha256": "8A6363FBA1F89C0688E3594EF4FE7B9036126F04957C5FE56858CBA020B76B33",
++      "path": "F:/Program Files/PowerShell/7/pwsh.runtimeconfig.json"
++    },
++    {
++      "sha256": "A01883AEEB2217AEB1D7EC944D649376104E7A874CA4EA71E7F36448C1519DC2",
++      "path": "F:/Program Files/PowerShell/7/pwsh.deps.json"
++    },
++    {
++      "sha256": "2B219F688BCDD67101040F845E530B22907D39BBF49089B4B5B2AFABA7996791",
++      "path": "C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/PSScriptAnalyzer/1.25.0/PSScriptAnalyzer.psd1"
++    },
++    {
++      "sha256": "B69773FC9080CFB958DC13C95E42A625553E9BCA5DCBEDC27231E5C183A4E869",
++      "path": "C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/PSScriptAnalyzer/1.25.0/PSScriptAnalyzer.psm1"
++    },
++    {
++      "sha256": "34246566553FE97C96A9FFEA8AEEFEE353C1E07E41A72D3BFE9FDF826CC71D2A",
++      "path": "C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/PSScriptAnalyzer/1.25.0/ScriptAnalyzer.types.ps1xml"
++    },
++    {
++      "sha256": "D647E6C1CDFE4052D2382F2D76B899EC596EC71D23D724553B93F74827D49044",
++      "path": "C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/PSScriptAnalyzer/1.25.0/ScriptAnalyzer.format.ps1xml"
++    },
++    {
++      "sha256": "D92CB413E18927BB64D9BAC221191FC69CF1659F55C72C27DDF1FE19EF774CAF",
++      "path": "C:\\Users\\安井　一広\\OneDrive\\ドキュメント\\WindowsPowerShell\\Modules\\PSScriptAnalyzer\\1.25.0\\PSv7\\Microsoft.PowerShell.CrossCompatibility.dll"
++    },
++    {
++      "sha256": "C8AA9890743A6D9C47CCFEE5EC33CAAEE58C30591454D3CCF379720025A1533C",
++      "path": "C:\\Users\\安井　一広\\OneDrive\\ドキュメント\\WindowsPowerShell\\Modules\\PSScriptAnalyzer\\1.25.0\\PSv7\\Microsoft.Windows.PowerShell.ScriptAnalyzer.BuiltinRules.dll"
++    },
++    {
++      "sha256": "C377532A1D8D8975E598891602B5C3ED39AB719F589D054EB889D11EB6CCAEA3",
++      "path": "C:\\Users\\安井　一広\\OneDrive\\ドキュメント\\WindowsPowerShell\\Modules\\PSScriptAnalyzer\\1.25.0\\PSv7\\Microsoft.Windows.PowerShell.ScriptAnalyzer.dll"
++    },
++    {
++      "sha256": "EEECDF663A3E854F67BBBB872DC45577E785A581C1CA86EA2AE1D8215B8505D6",
++      "path": "C:\\Users\\安井　一広\\OneDrive\\ドキュメント\\WindowsPowerShell\\Modules\\PSScriptAnalyzer\\1.25.0\\PSv7\\Pluralize.NET.dll"
++    },
++    {
++      "sha256": "3D6356119F9062A8494BF78C42B604AEB9EFE3BD18CD1D40D87E2661047E55D4",
++      "path": "F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/Test-PssaCapture.ps1"
++    },
++    {
++      "sha256": "0E20118B8C11714B21DEDE0A1AEC66EAA928FAFF1D845B83DB04847EAB7062C0",
++      "path": "F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/expectations.json"
++    },
++    {
++      "sha256": "39B5BC40CA83F5E088873B67047243182EF806D96BE8BC5D3372235808187613",
++      "path": "F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/Invoke-PssaCapture.ps1"
++    },
++    {
++      "sha256": "AFA82E807179DF852ECCB05D5A8C8F3919B9B1C4C9D981CFA0CD6F368FE824F4",
++      "path": "F:/Kazuhiro/GitHub/WordWeave5/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/PreparationAssertions.psm1"
++    }
++  ]
++}
+\ No newline at end of file

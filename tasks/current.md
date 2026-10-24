@@ -15,13 +15,13 @@ ACOUSTIC-HISTORY-001：原音・固定例文・音響解析・Qwen助言を保�
 - 別の合成API比較では、実DiagnosticRecordがWrite-Output -NoEnumerateでList・別参照、WriteObject(false)で同型・同参照となった。これはCAP対象／analyzer呼出0の補助証拠であり、元20合格や元PSSA NRE解消ではない。
 - 新typed-output一回はC01–C05 PASS、C06 primaryIdentity不一致、残14NotRun、実PSSA0/retry0で停止した。exit2/tool2.1436989秒/unitouter1.7469127秒。C06の実受信型はErrorRecord、ordinary0/engineOccurrences2/engineGroups1/unknown0、primary取得済み。前後core17/pins17/settings23/freeze一致。独立Postは全体FAIL／観測Partialを確認した。入力↔初保持↔primaryの参照比較不足であり、原因は未確定である。
 - 元Assertions AFA82E80…のPSSA1.25内部NullReference、旧UNKNOWN-DESCENDANT／旧cancel原因は未解決である。過去の診断成功・局所PASSを別gateへ転用しない。
-- 証拠保存点f8cec4eまでGitHubへ反映済み、ブランチはcodex/development-agent-team。原caseobs証拠＋情報比較の復元patch8450E36C…は独立Pre PASS、次候補は作業中である。実際のHEADとdirty状態は必ずgitで確認する。
+- 候補保存点da1f701までGitHubへ反映済み、ブランチはcodex/development-agent-team。最新identity原証拠の復元patchB44BCDC9…は独立保存Pre PASS、後続解除不可を維持する。実際のHEADとdirty状態は必ずgitで確認する。
 
 ## 次のアクション
 
 1. 原証拠保存は完了。設計7ED8371B…の14箇所だけを是正した新Test（CAP/typed-output-7c98c831-f8e8-42d3-91b9-60b54c1d11a2、688FED51…/97363bytes）は独立code Pre PASS、逆適用AB7E全bytes/BOM一致。3配列式の空/1/65入力の別9回帰もPASS、CAP対象実行0である。
 2. canonical新B727443AE…／R259BAEA7…（cmd1BDBAFED…）は独立binding Pre PASS。復元patch02C62D34…は新9節と旧alias3件の全bytes/SHA一致、独立復元Pre PASS。親freeze60043B77…を作成済みである。
-3. 新slotはC06で停止・消費済みである。4参照比較の設計E18B30FF…と新Test（CAP/identity-observation-f9b6fe8a-1bde-4c43-9b4e-3a96532531da/、3D635611…/108506bytes、83行1挿入）、canonical新BBCF399B8…/R4E1BE222…（cmd5B736D43…）、復元patch416E9F3E…は独立Pre PASS。親freeze03090FD0…を作成済み。次は別runnerが直前照合し新request一回。追加対象実行はまだ0、期待・基準不変を維持する。
+3. identity新slotも一回exit2/PASS5/C06FAIL/14NotRun/analyzer0/retry0で停止・消費済み。参照4値はmemory=context true/context=初保持 false/初保持=statePrimary true/初保持=resultPrimary true、追加欠測0。独立Post・原証拠復元Pre確認済み、全観測は既欠測2でPartial。固定oracleはfixture入力同一性を要求し未達、受信後保持へ読み替える期待修正は未承認で後続解除不可。比較基準見直しの設計・レビューについて利用者判断を求める。新実行・期待変更は行わない。
 
 ## 主要な決定・制約
 
