@@ -2,6 +2,16 @@
 
 ## PSSA-CAP限定Pre/Post（2026-10-24）
 
+CAP-I是正C39B5BC40…/43796bytes/816行は独立限定再Pre PASS/追加阻害0。失敗射影だけ独立64KiB/truncation/missing/FAILへ接続し元参照/rawprefix/linksを維持、driver祖先Directory/Reparse検査と保存直前時計を確認した。閾値/公開4param/3functions/state/C16tail/期待は不変。harness.patch0AC98BD1…/126141bytesも独立保存確認PASS、旧CF775prefix117942bytes一致、新1節6hunkをメモリ適用してC39B5全bytes/BOM/LFが一致した。actual binding/caller/20runtimeは未受入のまま、authorへ現物接合だけを進める。
+
+CAP-I初回C D862B77D…/39659bytes/747行の独立code Preは確定2blockingで未達。出力親path/leaf不存在だけでは祖先junctionを拒否できず、saveContext.allowed前の既Test同等reparse拒否が不足した。Completeのprimary/secondary/missing失敗射影は全document2MiB+64KiBだけで独立64KiB上限がなく、元error参照/raw prefix/linksを維持したbounded縮退とFAILが必要である。実装者へこの2件だけを限定差戻し、既20oracle/公開params/state/C16tail/規則・期限は不変。C07のEV実型/Unknown0期待はruntime待ち仮説のまま、期待変更根拠にしない。独立Parser0/3functions/state1/tail3stmtは確認済み、runtime0。authorの候補B4160B086…/receiptC341E0DC…とD862原本は全bytes保全され、新hash待ちでPendingFinalPre、実行解除0である。
+
+C16 code-Pre資料の復元18893750…/3069068bytesは独立確認PASS。旧B7E87prefix2947347bytes、suffix121721bytes/E762301F…一致、新8diff全現物bytes一致・既7資料のhash/length差異0を確認した。actual C/caller bindingとruntimeはPendingのままである。旧全対象・暫定Cを再評価せず、保存確認を新実行許可へ転用しない。
+
+CAP-I driver消費schemaの不足をdesignerがR3追補14F7B094…へ固定したが、rootの「collector/c16等」が開いた許可集合という1阻害で独立Pre未達だった。key closure C6FB5947…で19必須root/任意0/余剰拒否、nested strict集合とopaque collector/c16境界を閉じて独立再Pre PASS。公開4params/2role/同一outerhost・同じCAP-V receipt.cmd/共通時計/自己hash循環回避/既定規則と期限は維持する。未定義中はdriver実装を止め、定義済み3functions/stateだけ並行実装した。暫定Cに対するruntime/実装受入は未達、authorは未生成hashを推測せずPendingで準備する。
+
+C16期待/adapter code6DD60794…/54315bytesの独立PreはPASS/阻害0。2私有関数・4局所接合の逆適用で旧DDAD42099bytes/BOM一致、各置換1、Parser0、20oracle0E20118B…不変を確認した。専用sentinel同一参照または直接InnerExceptionだけの捕捉、実Complete一回・同一結果参照、同一C fullhash、実caller ledger全照合後だけNotRunへ更新し旧初期値偽証を解消した。実C/caller sourceSHA/span/adapter hashはnull/PendingBindingのままであり、runtime合格とはしない。plan357～の非循環順により、BFPostと既他期待Preを接合してCAP-I実装へ進むが、現物binding/独立最終実行Pre/freeze/20実行は必須維持である。
+
 BF結果の保存追記B7E87C5F…/2947347bytesは独立確認PASS/阻害0。旧55ACprefix2373431bytesとsuffix573916bytes/97B05179…が完全一致、新9diffのメモリ復元はfreeze/runner原5件/両結果/indexの全現物bytes一致、core既Prehash不変を確認した。旧179件の再検証と次C16評価は行わず、新実行許可には転用しない。
 
 CAP-BF限定PostはPASS/阻害0。固定request一回・1.170437秒で焦点6件6PASS、その後の特定旧RED1件は実Diagnostic→Throw後actualPrefix0/expectedPrefix1の特定assertionだけによりexit1/accepted=trueで受入れた。実F3前提/直接record照合、F4別参照拒否/F5,F6明示失敗/元参照保全を確認した。前後123hash/内側focus24旧RED22pins不変、rawと両保存JSON/原5報告SHAが一致した。focused-result81E9FD62…/unit0AD30E33…、retry0/後続NotRun。過去の失敗entry型は未同定のまま、元PSSA NRE解消/C16/20/C/33の受入とは区別する。

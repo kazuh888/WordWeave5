@@ -1295,3 +1295,880 @@ index 0000000..1861edf
 +    }
 +    exit 1
 +}
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/Invoke-PssaCapture.ps1 b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/Invoke-PssaCapture.ps1
+new file mode 100644
+index 0000000..c807fc6
+--- /dev/null
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/Invoke-PssaCapture.ps1
+@@ -0,0 +1,747 @@
++﻿<#
++.SYNOPSIS
++    Capture bounded PSScriptAnalyzer observations without losing an emitted prefix.
++.DESCRIPTION
++    Private CAP collector. Stop and the analyzer's default rules and severities are preserved.
++    A saved candidate does not prove final acceptance; the final clock and actual exit also apply.
++.PARAMETER BindingPath
++    Absolute path of the independently frozen capture binding.
++.PARAMETER TargetRole
++    Bound static input role: Collector or Assertions.
++.PARAMETER CollectionStartTick
++    Shared monotonic start tick for both analyzer inputs, never reset between roles.
++.PARAMETER OutputRoot
++    Bound, previously absent output leaf. Existing artifacts are never overwritten.
++.EXAMPLE
++    ./Invoke-PssaCapture.ps1 -BindingPath /bound/capture.json -TargetRole Collector -CollectionStartTick 1 -OutputRoot /bound/new
++.NOTES
++    Target: PowerShell 7.6.7 (ps7), PSScriptAnalyzer 1.25.0. Exit 0 accepted, otherwise 2.
++#>
++#Requires -Version 7.6
++[CmdletBinding()]
++param(
++    [Parameter(Mandatory)][ValidateNotNullOrEmpty()][string]$BindingPath,
++    [Parameter(Mandatory)][ValidateSet('Collector', 'Assertions')][string]$TargetRole,
++    [Parameter(Mandatory)][long]$CollectionStartTick,
++    [Parameter(Mandatory)][ValidateNotNullOrEmpty()][string]$OutputRoot
++)
++
++Set-StrictMode -Version 3.0
++$ErrorActionPreference = 'Stop'
++
++function Add-PssaCaptureRecord {
++    <#
++    .SYNOPSIS
++        Retain one typed observation and reference-only links, without pipeline output.
++    .DESCRIPTION
++        Projection and limits fail closed while retaining the existing prefix and original references.
++    .PARAMETER State
++        Private mutable capture state.
++    .PARAMETER Origin
++        Observation route, not a claim of engine occurrence order.
++    .PARAMETER Record
++        Original observed object, including null.
++    .EXAMPLE
++        Add-PssaCaptureRecord -State $state -Origin Pipeline -Record $record
++    .NOTES
++        Target: ps7. No filesystem or analyzer calls.
++    #>
++    [CmdletBinding()]
++    param(
++        [Parameter(Mandatory)][hashtable]$State,
++        [Parameter(Mandatory)][ValidateSet('Pipeline', 'ErrorVariable', 'Catch', 'Import', 'Capture', 'Save')]
++        [string]$Origin,
++        [Parameter(Mandatory)][AllowNull()][object]$Record
++    )
++
++    if ($State.captureBroken -or $State.overflow -or $State.truncation) { return }
++    $typeName = if ($null -eq $Record) { 'null' } else { $Record.GetType().FullName }
++    if ($Record -is [Management.Automation.ErrorRecord]) {
++        if ($null -eq $State.primaryError) { $State.primaryError = $Record }
++        elseif (-not [object]::ReferenceEquals($State.primaryError, $Record)) {
++            $alreadyHeld = $false
++            foreach ($held in $State.secondaryErrors) {
++                if ([object]::ReferenceEquals($held, $Record)) { $alreadyHeld = $true }
++            }
++            if (-not $alreadyHeld) { $State.secondaryErrors.Add($Record) }
++        }
++    }
++    if ($State.records.Count -ge 256) {
++        $State.overflow = $true
++        $State.captureBroken = $true
++        $State.missing.Add("Occurrence limit: next type=$typeName; remaining observations unavailable")
++        throw [InvalidOperationException]::new('CAP occurrence limit reached')
++    }
++
++    # Failed projection references remain available even though there is no invented raw snapshot.
++    $State.recordRefs.Add($Record)
++    try {
++        $tick = [long](& $State.now)
++        if ($State.frequency -le 0 -or $tick -lt $State.inputStartTick -or
++            $tick -lt $State.collectionStartTick -or
++            (($tick - $State.inputStartTick) / [double]$State.frequency) -ge 9 -or
++            (($tick - $State.collectionStartTick) / [double]$State.frequency) -ge 30) {
++            throw [TimeoutException]::new('CAP work or collection deadline reached while receiving a record')
++        }
++        $fields = @{}
++        $kind = 'Unknown'
++        $read = {
++            param([object]$Value, [string]$Name)
++            if ($null -eq $Value) { return $null }
++            $property = $Value.PSObject.Properties[$Name]
++            if ($null -eq $property) { return $null }
++            return $property.Value
++        }
++        if ($Record -is [Management.Automation.ErrorRecord]) {
++            $kind = 'Engine'
++            $exception = $Record.Exception
++            $inner = $exception.InnerException
++            $fields = @{
++                exceptionType = $exception.GetType().FullName
++                hResult = $exception.HResult
++                fullyQualifiedErrorId = $Record.FullyQualifiedErrorId
++                category = $Record.CategoryInfo.ToString()
++                message = $exception.Message
++                exceptionStack = $exception.StackTrace
++                scriptStack = $Record.ScriptStackTrace
++                position = $(if ($null -eq $Record.InvocationInfo) { $null } else { $Record.InvocationInfo.PositionMessage })
++                innerType = $(if ($null -eq $inner) { $null } else { $inner.GetType().FullName })
++                innerHResult = $(if ($null -eq $inner) { $null } else { $inner.HResult })
++            }
++        }
++        else {
++            $diagnosticType = 'Microsoft.Windows.PowerShell.ScriptAnalyzer.Generic.DiagnosticRecord' -as [type]
++            if ($null -eq $diagnosticType) { throw [TypeLoadException]::new('CAP PSSA DiagnosticRecord type unavailable') }
++            if ($null -ne $Record -and $diagnosticType.IsInstanceOfType($Record)) {
++                $kind = 'Diagnostic'
++                foreach ($name in @('RuleName', 'Severity', 'Message', 'ScriptPath')) {
++                    $value = & $read $Record $name
++                    $fields[$name] = if ($null -eq $value) { $null } else { [string]$value }
++                }
++                $extent = & $read $Record 'Extent'
++                foreach ($pair in @(@('StartLine', 'StartLineNumber'), @('StartColumn', 'StartColumnNumber'),
++                    @('EndLine', 'EndLineNumber'), @('EndColumn', 'EndColumnNumber'))) {
++                    $fields[$pair[0]] = & $read $extent $pair[1]
++                }
++            }
++            else {
++                if ($Record -is [Management.Automation.VerboseRecord] -or
++                    $Record -is [Management.Automation.DebugRecord] -or
++                    $Record -is [Management.Automation.InformationRecord]) { $kind = 'Auxiliary' }
++                elseif ($Record -is [Management.Automation.WarningRecord]) { $kind = 'Signal' }
++                $fields.text = if ($null -eq $Record) { $null } else { $Record.ToString() }
++            }
++        }
++        foreach ($value in $fields.Values) {
++            if ($value -is [string] -and $value.Length -gt 8192) {
++                $State.truncation = $true
++                throw [InvalidOperationException]::new('CAP scalar string exceeds 8192 UTF-16 units')
++            }
++        }
++
++        $seq = [int]($State.records.Count + 1)
++        $newLinks = [Collections.Generic.List[hashtable]]::new()
++        if ($kind -ceq 'Engine') {
++            foreach ($previous in $State.records) {
++                if ($previous.kind -cne 'Engine') { continue }
++                $old = $State.recordRefs[$previous.seq - 1]
++                $relation = $null
++                if ([object]::ReferenceEquals($old, $Record)) { $relation = 'SameRecord' }
++                elseif ([object]::ReferenceEquals($old.Exception, $Record.Exception)) { $relation = 'SameException' }
++                elseif (($Record.Exception -is [Management.Automation.ActionPreferenceStopException] -and
++                        [object]::ReferenceEquals($Record.Exception.ErrorRecord, $old)) -or
++                    ($old.Exception -is [Management.Automation.ActionPreferenceStopException] -and
++                        [object]::ReferenceEquals($old.Exception.ErrorRecord, $Record))) { $relation = 'StopWrapperRecord' }
++                if ($null -ne $relation) {
++                    $newLinks.Add(@{ fromSeq = $seq; toSeq = [int]$previous.seq; relation = $relation })
++                }
++            }
++        }
++        $snapshot = @{ seq = $seq; origin = $Origin; type = $typeName; kind = $kind; fields = $fields }
++        $proposed = @{
++            schemaVersion = 1; targetPath = $State.targetPath
++            records = @($State.records.ToArray()) + @($snapshot)
++            links = @($State.links.ToArray()) + @($newLinks.ToArray())
++            overflow = $false; truncation = $false; missing = @()
++        }
++        $size = [Text.Encoding]::UTF8.GetByteCount(($proposed | ConvertTo-Json -Depth 12 -Compress))
++        if ($size -gt 2MB) {
++            $State.overflow = $true
++            throw [InvalidOperationException]::new('CAP raw snapshot exceeds 2 MiB')
++        }
++        $State.records.Add($snapshot)
++        foreach ($link in $newLinks) { $State.links.Add($link) }
++        $State.rawBytes = [long]$size
++        switch -CaseSensitive ($kind) {
++            'Diagnostic' { $State.counts.ordinary++ }
++            'Engine' { $State.counts.engineOccurrences++ }
++            'Unknown' { $State.counts.unknown++ }
++            'Signal' { $State.counts.signal++ }
++            'Auxiliary' { $State.counts.auxiliary++ }
++        }
++        # Count connected reference groups; transitive links may join previously separate groups.
++        $parents = @{}
++        foreach ($entry in $State.records) {
++            if ($entry.kind -ceq 'Engine') { $parents[$entry.seq] = $entry.seq }
++        }
++        foreach ($link in $State.links) {
++            $left = $link.fromSeq
++            $right = $link.toSeq
++            while ($parents[$left] -ne $left) { $left = $parents[$left] }
++            while ($parents[$right] -ne $right) { $right = $parents[$right] }
++            if ($left -ne $right) { $parents[$left] = $right }
++        }
++        $groups = 0
++        foreach ($key in $parents.Keys) { if ($parents[$key] -eq $key) { $groups++ } }
++        $State.counts.engineGroups = [int]$groups
++    }
++    catch {
++        $State.captureBroken = $true
++        $State.flags.captureComplete = $false
++        $State.missing.Add("Projection/limit/deadline failure at next seq=$($State.records.Count + 1), type=$typeName")
++        if ($null -eq $State.primaryError) { $State.primaryError = $_ }
++        else { $State.secondaryErrors.Add($_) }
++        throw
++    }
++}
++
++function Invoke-PssaCapturePipeline {
++    <#
++    .SYNOPSIS
++        Stream the producer before collecting ErrorVariable and caught observations.
++    .DESCRIPTION
++        Keep ErrorVariable in this caller scope and preserve Stop on the actual producer boundary.
++    .PARAMETER State
++        Private mutable capture state.
++    .PARAMETER Producer
++        Advanced scriptblock with exactly one Context argument.
++    .PARAMETER Context
++        Producer's bound context.
++    .EXAMPLE
++        Invoke-PssaCapturePipeline -State $state -Producer $producer -Context $context
++    .NOTES
++        Target: ps7. No closure or separate execution scope wraps the pipeline.
++    #>
++    [CmdletBinding()]
++    param([Parameter(Mandatory)][hashtable]$State,
++        [Parameter(Mandatory)][scriptblock]$Producer,
++        [Parameter(Mandatory)][hashtable]$Context)
++
++    $engineRaw = @()
++    $caught = $null
++    try {
++        $State.flags.invokeStarted = $true
++        & $producer -Context $context -ErrorAction Stop -ErrorVariable +engineRaw *>&1 |
++            ForEach-Object { $null = Add-PssaCaptureRecord -State $State -Origin Pipeline -Record $_ }
++        $State.flags.invokeReturned = $true
++    }
++    catch { $caught = $_ }
++    finally {
++        try {
++            foreach ($entry in $engineRaw) {
++                $null = Add-PssaCaptureRecord -State $State -Origin ErrorVariable -Record $entry
++            }
++            if ($null -ne $caught) { $null = Add-PssaCaptureRecord -State $State -Origin Catch -Record $caught }
++        }
++        catch {
++            $State.captureBroken = $true
++            $State.missing.Add('ErrorVariable/catch recovery incomplete')
++            if ($null -eq $State.primaryError) { $State.primaryError = $_ }
++            else { $State.secondaryErrors.Add($_) }
++        }
++        if (-not $State.captureBroken -and -not $State.overflow -and -not $State.truncation) {
++            $State.flags.captureComplete = $true
++        }
++    }
++}
++
++function Complete-PssaCapture {
++    <#
++    .SYNOPSIS
++        Seal bounded snapshots once and decide after the final save clock observation.
++    .DESCRIPTION
++        Save raw then result through the supplied CreateNew sink, preserving partial files on failure.
++    .PARAMETER State
++        Private mutable capture state, finalized once.
++    .PARAMETER Flags
++        The exact state.flags reference.
++    .PARAMETER Now
++        The exact state.now monotonic clock reference.
++    .PARAMETER Save
++        CreateNew sink taking absolute path and bytes and returning path, hash and length.
++    .EXAMPLE
++        Complete-PssaCapture -State $state -Flags $state.flags -Now $state.now -Save $save
++    .NOTES
++        Target: ps7. The saved gateCandidate alone never proves acceptance.
++    #>
++    [CmdletBinding()]
++    param([Parameter(Mandatory)][hashtable]$State,
++        [Parameter(Mandatory)][hashtable]$Flags,
++        [Parameter(Mandatory)][scriptblock]$Now,
++        [Parameter(Mandatory)][scriptblock]$Save)
++
++    if ($State.finalized) { throw [InvalidOperationException]::new('CAP already finalized') }
++    $State.finalized = $true
++    if (-not [object]::ReferenceEquals($Flags, $State.flags) -or
++        -not [object]::ReferenceEquals($Now, $State.now)) {
++        throw [InvalidOperationException]::new('CAP flags/clock binding mismatch')
++    }
++    $Flags.savedWithinDeadline = $false
++    $within = {
++        param([long]$Tick)
++        return $State.frequency -gt 0 -and $Tick -ge $State.inputStartTick -and
++            $Tick -ge $State.collectionStartTick -and
++            (($Tick - $State.inputStartTick) / [double]$State.frequency) -lt 10 -and
++            (($Tick - $State.collectionStartTick) / [double]$State.frequency) -lt 30
++    }
++    $projectError = {
++        param([Management.Automation.ErrorRecord]$ErrorRecord)
++        if ($null -eq $ErrorRecord) { return $null }
++        $exception = $ErrorRecord.Exception
++        $inner = $exception.InnerException
++        $projection = @{
++            exceptionType = $exception.GetType().FullName; hResult = $exception.HResult
++            fullyQualifiedErrorId = $ErrorRecord.FullyQualifiedErrorId; category = $ErrorRecord.CategoryInfo.ToString()
++            message = $exception.Message; exceptionStack = $exception.StackTrace; scriptStack = $ErrorRecord.ScriptStackTrace
++            position = $(if ($null -eq $ErrorRecord.InvocationInfo) { $null } else { $ErrorRecord.InvocationInfo.PositionMessage })
++            innerType = $(if ($null -eq $inner) { $null } else { $inner.GetType().FullName })
++            innerHResult = $(if ($null -eq $inner) { $null } else { $inner.HResult })
++        }
++        foreach ($key in @($projection.Keys)) {
++            if ($projection[$key] -is [string] -and $projection[$key].Length -gt 8192) {
++                $State.truncation = $true
++                $State.missing.Add('Error summary scalar truncated to 8192 UTF-16 units')
++                $projection[$key] = $projection[$key].Substring(0, 8192)
++            }
++        }
++        return $projection
++    }
++    $saved = $false
++    try {
++        $tick = [long](& $Now)
++        if (-not (& $within $tick)) {
++            $State.missing.Add('Input/collection deadline reached before saving; no new save')
++        }
++        else {
++            if ((($tick - $State.inputStartTick) / [double]$State.frequency) -ge 9) {
++                $State.missing.Add('Work reserve boundary reached before saving')
++            }
++            $raw = @{
++                schemaVersion = 1; targetPath = $State.targetPath; records = $State.records.ToArray()
++                links = $State.links.ToArray(); overflow = $State.overflow; truncation = $State.truncation
++                missing = $State.missing.ToArray()
++            }
++            $rawBytes = [Text.Encoding]::UTF8.GetBytes(($raw | ConvertTo-Json -Depth 12 -Compress))
++            if ($rawBytes.LongLength -gt (2MB + 64KB)) {
++                throw [InvalidOperationException]::new('CAP raw plus failure reserve exceeded')
++            }
++            $rawFile = $null
++            foreach ($kind in @('Raw', 'Result')) {
++                if (-not (& $within ([long](& $Now)))) {
++                    $State.missing.Add("Deadline reached before $kind save; remaining save unavailable")
++                    break
++                }
++                $path = [IO.Path]::Combine($State.outputRoot, $kind.ToLowerInvariant() + '.json')
++                if ($kind -ceq 'Raw') { $bytes = $rawBytes }
++                else {
++                    $primary = & $projectError $State.primaryError
++                    $secondary = [Collections.Generic.List[object]]::new()
++                    foreach ($errorRecord in $State.secondaryErrors) { $secondary.Add((& $projectError $errorRecord)) }
++                    $candidate = $Flags.moduleReady -and $Flags.invokeStarted -and $Flags.invokeReturned -and
++                        $Flags.captureComplete -and $Flags.postBindingsMatched -and -not $State.captureBroken -and
++                        -not $State.overflow -and -not $State.truncation -and $State.missing.Count -eq 0 -and
++                        $State.counts.ordinary -eq 0 -and $State.counts.engineOccurrences -eq 0 -and
++                        $State.counts.unknown -eq 0 -and $State.counts.signal -eq 0
++                    $document = @{
++                        schemaVersion = 1; targetPath = $State.targetPath; gateCandidate = $candidate
++                        flags = $Flags.Clone(); counts = $State.counts.Clone(); rawFile = $rawFile
++                        links = $State.links.ToArray(); primaryError = $primary
++                        secondaryErrors = $secondary.ToArray(); missing = $State.missing.ToArray()
++                    }
++                    $bytes = [Text.Encoding]::UTF8.GetBytes(($document | ConvertTo-Json -Depth 12 -Compress))
++                    if ($bytes.LongLength -gt (2MB + 64KB)) {
++                        throw [InvalidOperationException]::new('CAP result plus failure reserve exceeded')
++                    }
++                }
++                $artifact = @{ kind = $kind; path = $path; sha256 = $null; length = $null; status = 'Incomplete' }
++                $State.artifacts.Add($artifact)
++                $receipt = & $Save $path $bytes
++                $hash = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([byte[]]$bytes))
++                if ($receipt -isnot [hashtable] -or $receipt.path -cne $path -or
++                    $receipt.sha256 -cne $hash -or $receipt.length -isnot [long] -or
++                    $receipt.length -ne $bytes.LongLength) {
++                    throw [InvalidOperationException]::new('CAP save receipt mismatch')
++                }
++                $artifact.sha256 = $receipt.sha256
++                $artifact.length = $receipt.length
++                $artifact.status = 'Saved'
++                if ($kind -ceq 'Raw') {
++                    $rawFile = @{ path = $receipt.path; sha256 = $receipt.sha256; length = $receipt.length }
++                }
++                if (-not (& $within ([long](& $Now)))) {
++                    $State.missing.Add("Deadline reached after $kind save")
++                    break
++                }
++                if ($kind -ceq 'Result') { $saved = $true }
++            }
++        }
++        $Flags.savedWithinDeadline = $saved -and (& $within ([long](& $Now)))
++    }
++    catch {
++        # The first observed engine error stays primary even when a partial CreateNew write fails.
++        if ($null -eq $State.primaryError) { $State.primaryError = $_ }
++        else { $State.secondaryErrors.Add($_) }
++        $State.missing.Add('Capture finalization/save failed; partial files preserved and no retry')
++        $Flags.savedWithinDeadline = $false
++    }
++    $complete = $Flags.moduleReady -and $Flags.invokeStarted -and $Flags.invokeReturned -and $Flags.captureComplete
++    $pass = $complete -and $Flags.postBindingsMatched -and $Flags.savedWithinDeadline -and
++        -not $State.captureBroken -and -not $State.overflow -and -not $State.truncation -and
++        $State.missing.Count -eq 0 -and $State.counts.ordinary -eq 0 -and $State.counts.engineOccurrences -eq 0 -and
++        $State.counts.unknown -eq 0 -and $State.counts.signal -eq 0 -and $null -eq $State.primaryError
++    return @{
++        captureStatus = $(if ($complete) { 'Complete' } else { 'Incomplete' })
++        gateStatus = $(if ($pass) { 'PASS' } else { 'FAIL' })
++        flags = $Flags.Clone(); counts = $State.counts.Clone(); rawRecords = [object[]]$State.records.ToArray()
++        links = [object[]]$State.links.ToArray(); primaryError = $State.primaryError
++        secondaryErrors = [Management.Automation.ErrorRecord[]]$State.secondaryErrors.ToArray()
++        overflow = [bool]$State.overflow; truncation = [bool]$State.truncation
++        missing = [string[]]$State.missing.ToArray(); artifacts = [object[]]$State.artifacts.ToArray()
++    }
++}
++
++# The unique seed is extracted verbatim for independent memory fixtures.
++$inputStartTick = [Diagnostics.Stopwatch]::GetTimestamp()
++$frequency = [long][Diagnostics.Stopwatch]::Frequency
++$targetPath = ''
++$now = { return [long][Diagnostics.Stopwatch]::GetTimestamp() }
++$state = @{
++    targetPath = [string]$targetPath; outputRoot = [string]$OutputRoot
++    frequency = [long]$frequency; inputStartTick = [long]$inputStartTick
++    collectionStartTick = [long]$CollectionStartTick; rawBytes = [long]0; now = $now
++    records = [Collections.Generic.List[hashtable]]::new()
++    recordRefs = [Collections.Generic.List[object]]::new()
++    links = [Collections.Generic.List[hashtable]]::new()
++    secondaryErrors = [Collections.Generic.List[Management.Automation.ErrorRecord]]::new()
++    missing = [Collections.Generic.List[string]]::new()
++    artifacts = [Collections.Generic.List[hashtable]]::new()
++    flags = @{ moduleReady = $false; invokeStarted = $false; invokeReturned = $false
++        captureComplete = $false; postBindingsMatched = $false; savedWithinDeadline = $false }
++    counts = @{ ordinary = [int]0; engineOccurrences = [int]0; engineGroups = [int]0
++        unknown = [int]0; signal = [int]0; auxiliary = [int]0 }
++    primaryError = $null; overflow = $false; truncation = $false; captureBroken = $false; finalized = $false
++}
++
++# Driver-local schema checks are not part of the synthetic producer seam.
++$checkKeys = {
++    param([object]$Value, [string[]]$Keys)
++    if ($Value -isnot [Collections.IDictionary] -or $Value.Count -ne $Keys.Count) {
++        throw [IO.InvalidDataException]::new('CAP object/key shape mismatch')
++    }
++    foreach ($key in $Value.Keys) {
++        if ($key -isnot [string] -or $key -cnotin $Keys) {
++            throw [IO.InvalidDataException]::new('CAP unexpected object key')
++        }
++    }
++}
++$absolute = {
++    param([object]$Value)
++    if ($Value -isnot [string] -or [string]::IsNullOrWhiteSpace($Value) -or
++        -not [IO.Path]::IsPathFullyQualified($Value) -or $Value.Length -gt 8192) {
++        throw [IO.InvalidDataException]::new('CAP absolute path required')
++    }
++    return [IO.Path]::GetFullPath($Value)
++}
++$checkWork = {
++    $tick = [long](& $now)
++    if ($CollectionStartTick -lt 0 -or $CollectionStartTick -gt $tick -or $tick -lt $inputStartTick -or
++        (($tick - $inputStartTick) / [double]$frequency) -ge 9 -or
++        (($tick - $CollectionStartTick) / [double]$frequency) -ge 30) {
++        throw [TimeoutException]::new('CAP preparation/capture work deadline reached')
++    }
++}
++$saveContext = @{ allowed = $false; created = $false }
++$save = {
++    param([string]$AbsolutePath, [byte[]]$Bytes)
++    if (-not $saveContext.allowed -or
++        [IO.Path]::GetDirectoryName($AbsolutePath) -ine $state.outputRoot -or
++        [IO.Path]::GetFileName($AbsolutePath) -cnotin @('raw.json', 'result.json')) {
++        throw [InvalidOperationException]::new('CAP output was not validated')
++    }
++    if (-not $saveContext.created) {
++        $null = New-Item -Path $state.outputRoot -ItemType Directory -ErrorAction Stop
++        $saveContext.created = $true
++    }
++    $stream = $null
++    $writeFailure = $null
++    try {
++        $stream = [IO.FileStream]::new($AbsolutePath, [IO.FileMode]::CreateNew,
++            [IO.FileAccess]::Write, [IO.FileShare]::None)
++        $stream.Write($Bytes, 0, $Bytes.Length)
++        $stream.Flush($true)
++    }
++    catch { $writeFailure = $_ }
++    finally {
++        if ($null -ne $stream) {
++            try { $stream.Dispose() }
++            catch {
++                if ($null -eq $writeFailure) { $writeFailure = $_ }
++                else { $state.secondaryErrors.Add($_) }
++            }
++        }
++    }
++    if ($null -ne $writeFailure) { throw $writeFailure }
++    return @{
++        path = $AbsolutePath
++        sha256 = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($Bytes))
++        length = [long]$Bytes.LongLength
++    }
++}
++$binding = $null
++$stage = 'Capture'
++try {
++    & $checkWork
++    $normalizedBindingPath = & $absolute $BindingPath
++    $normalizedOutputRoot = & $absolute $OutputRoot
++    $captureRoot = [IO.Path]::GetDirectoryName([IO.Path]::GetFullPath($PSCommandPath))
++    if ($normalizedBindingPath -ine [IO.Path]::Combine($captureRoot, 'capture-binding.json') -or
++        $TargetRole -cnotin @('Collector', 'Assertions') -or $args.Count -ne 0) {
++        throw [IO.InvalidDataException]::new('CAP binding path, role or argument mismatch')
++    }
++    $bindingBytes = [IO.File]::ReadAllBytes($normalizedBindingPath)
++    $bindingHash = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($bindingBytes))
++    $utf8 = [Text.UTF8Encoding]::new($false, $true)
++    $bom = if ($bindingBytes.Length -ge 3 -and $bindingBytes[0] -eq 239 -and
++        $bindingBytes[1] -eq 187 -and $bindingBytes[2] -eq 191) { 3 } else { 0 }
++    $bindingText = $utf8.GetString($bindingBytes, $bom, $bindingBytes.Length - $bom)
++    $binding = $bindingText | ConvertFrom-Json -AsHashtable -ErrorAction Stop
++    & $checkKeys $binding @('schemaVersion', 'phase', 'status', 'cwd', 'outputRoot', 'expectationsPath', 'pins',
++        'hostExecutable', 'smaAssemblyPath', 'moduleManifest', 'pssaAssemblyPath', 'hostVersion', 'moduleVersion',
++        'psModulePath', 'hostArgv', 'targets', 'preferences', 'collector', 'c16')
++    if (($binding.schemaVersion -isnot [int] -and $binding.schemaVersion -isnot [long]) -or
++        $binding.schemaVersion -ne 1 -or $binding.phase -isnot [string] -or $binding.phase -cne 'Unit20' -or
++        $binding.status -isnot [string] -or $binding.status -cne 'Bound' -or
++        $binding.collector -isnot [Collections.IDictionary] -or $binding.c16 -isnot [Collections.IDictionary] -or
++        $binding.hostVersion -isnot [string] -or $binding.hostVersion -cne '7.6.7' -or
++        $binding.moduleVersion -isnot [string] -or $binding.moduleVersion -cne '1.25.0' -or
++        $binding.psModulePath -isnot [string] -or $binding.hostArgv -isnot [array] -or
++        $binding.pins -isnot [array]) {
++        throw [IO.InvalidDataException]::new('CAP binding value/type mismatch')
++    }
++    $boundCwd = & $absolute $binding.cwd
++    if ($boundCwd -ine [IO.Path]::GetFullPath('F:/Kazuhiro/GitHub/WordWeave5') -or
++        [IO.Path]::GetFullPath((Get-Location).Path) -ine $boundCwd) {
++        throw [IO.InvalidDataException]::new('CAP cwd mismatch')
++    }
++    $hostPath = & $absolute $binding.hostExecutable
++    $smaPath = & $absolute $binding.smaAssemblyPath
++    $modulePath = & $absolute $binding.moduleManifest
++    $assemblyPath = & $absolute $binding.pssaAssemblyPath
++    $hostDirectory = [IO.Path]::GetDirectoryName($hostPath)
++    $moduleDirectory = [IO.Path]::GetDirectoryName($modulePath)
++    if ($hostPath -ine [IO.Path]::GetFullPath('F:/Program Files/PowerShell/7/pwsh.exe') -or
++        $smaPath -ine [IO.Path]::Combine($hostDirectory, 'System.Management.Automation.dll') -or
++        $modulePath -ine [IO.Path]::GetFullPath(
++            'C:/Users/安井　一広/OneDrive/ドキュメント/WindowsPowerShell/Modules/PSScriptAnalyzer/1.25.0/PSScriptAnalyzer.psd1') -or
++        $assemblyPath -ine [IO.Path]::Combine($moduleDirectory, 'PSv7/Microsoft.Windows.PowerShell.ScriptAnalyzer.dll')) {
++        throw [IO.InvalidDataException]::new('CAP approved host/module path mismatch')
++    }
++    & $checkKeys $binding.targets @('Collector', 'Assertions')
++    & $checkKeys $binding.preferences @('errorAction', 'verbose', 'debug', 'warning', 'information')
++    $unitOutput = & $absolute $binding.outputRoot
++    $expectationsPath = & $absolute $binding.expectationsPath
++    if ($expectationsPath -ine [IO.Path]::Combine($captureRoot, 'expectations.json')) {
++        throw [IO.InvalidDataException]::new('CAP independent expectation path mismatch')
++    }
++    $pinMap = [Collections.Generic.Dictionary[string, string]]::new([StringComparer]::OrdinalIgnoreCase)
++    foreach ($pin in $binding.pins) {
++        & $checkKeys $pin @('path', 'sha256')
++        $pinPath = & $absolute $pin.path
++        if ($pin.sha256 -isnot [string] -or $pin.sha256 -cnotmatch '^[0-9A-F]{64}$' -or
++            $pinPath -ieq $normalizedBindingPath -or $pinMap.ContainsKey($pinPath)) {
++            throw [IO.InvalidDataException]::new('CAP duplicate, circular or unbound pin')
++        }
++        $pinMap.Add($pinPath, $pin.sha256)
++    }
++    $outParent = [IO.Path]::Combine($captureRoot, 'out')
++    $targetOutputs = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
++    foreach ($role in @('Collector', 'Assertions')) {
++        $entry = $binding.targets[$role]
++        & $checkKeys $entry @('path', 'outputRoot', 'settings')
++        $entryPath = & $absolute $entry.path
++        $entryOutput = & $absolute $entry.outputRoot
++        $expectedPath = if ($role -ceq 'Collector') { [IO.Path]::GetFullPath($PSCommandPath) }
++        else { [IO.Path]::Combine([IO.Path]::GetDirectoryName($captureRoot), 'PreparationAssertions.psm1') }
++        if ($entryPath -ine $expectedPath -or -not $pinMap.ContainsKey($entryPath) -or
++            [IO.Path]::GetDirectoryName($entryOutput) -ine $outParent -or
++            $entryOutput -ieq $unitOutput -or -not $targetOutputs.Add($entryOutput) -or
++            $entry.settings -isnot [array]) {
++            throw [IO.InvalidDataException]::new('CAP target/output/settings shape mismatch')
++        }
++        if ($role -ceq 'Assertions' -and
++            $pinMap[$entryPath] -cne 'AFA82E807179DF852ECCB05D5A8C8F3919B9B1C4C9D981CFA0CD6F368FE824F4') {
++            throw [IO.InvalidDataException]::new('CAP original Assertions hash mismatch')
++        }
++        $settingsPaths = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
++        foreach ($start in @([IO.Path]::GetDirectoryName($entryPath), $boundCwd)) {
++            $directory = [IO.DirectoryInfo]::new($start)
++            while ($null -ne $directory) {
++                $null = $settingsPaths.Add([IO.Path]::Combine($directory.FullName, 'PSScriptAnalyzerSettings.psd1'))
++                $directory = $directory.Parent
++            }
++        }
++        $settingsSeen = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
++        foreach ($setting in $entry.settings) {
++            & $checkKeys $setting @('path', 'exists', 'sha256')
++            $settingsPath = & $absolute $setting.path
++            if (-not $settingsPaths.Contains($settingsPath) -or -not $settingsSeen.Add($settingsPath) -or
++                $setting.exists -isnot [bool] -or
++                ($setting.exists -and ($setting.sha256 -isnot [string] -or
++                    $setting.sha256 -cnotmatch '^[0-9A-F]{64}$')) -or
++                (-not $setting.exists -and $null -ne $setting.sha256)) {
++                throw [IO.InvalidDataException]::new('CAP settings coverage/hash shape mismatch')
++            }
++        }
++        if ($settingsSeen.Count -ne $settingsPaths.Count) {
++            throw [IO.InvalidDataException]::new('CAP settings ancestor coverage incomplete')
++        }
++    }
++    $selected = $binding.targets[$TargetRole]
++    $targetPath = & $absolute $selected.path
++    $state.targetPath = [string]$targetPath
++    $state.outputRoot = [string](& $absolute $selected.outputRoot)
++    if ($normalizedOutputRoot -ine $state.outputRoot -or -not [IO.Directory]::Exists($outParent) -or
++        (Test-Path -LiteralPath $state.outputRoot -ErrorAction Stop)) {
++        throw [IO.InvalidDataException]::new('CAP selected output must be the new bound leaf')
++    }
++    $requiredPins = @($PSCommandPath, $targetPath, $expectationsPath, $hostPath, $smaPath,
++        [IO.Path]::Combine($hostDirectory, 'pwsh.dll'), [IO.Path]::Combine($hostDirectory, 'pwsh.runtimeconfig.json'),
++        [IO.Path]::Combine($hostDirectory, 'pwsh.deps.json'), $modulePath,
++        [IO.Path]::Combine($moduleDirectory, 'PSScriptAnalyzer.psm1'),
++        [IO.Path]::Combine($moduleDirectory, 'ScriptAnalyzer.types.ps1xml'),
++        [IO.Path]::Combine($moduleDirectory, 'ScriptAnalyzer.format.ps1xml'),
++        $binding.targets.Collector.path, $binding.targets.Assertions.path)
++    $testPinCount = 0
++    foreach ($key in $pinMap.Keys) {
++        if ([IO.Path]::GetFileName($key) -ceq 'Test-PssaCapture.ps1' -and
++            $key.StartsWith($captureRoot + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
++            $testPinCount++
++        }
++    }
++    if ($testPinCount -lt 1 -or
++        $pinMap[$expectationsPath] -cne '0E20118B8C11714B21DEDE0A1AEC66EAA928FAFF1D845B83DB04847EAB7062C0') {
++        throw [IO.InvalidDataException]::new('CAP independent Test/expectations pin mismatch')
++    }
++    $dependencyPaths = [IO.Directory]::GetFiles([IO.Path]::Combine($moduleDirectory, 'PSv7'), '*.dll')
++    if ($dependencyPaths.Count -eq 0) { throw [IO.InvalidDataException]::new('CAP module dependency set missing') }
++    foreach ($required in @($requiredPins) + @($dependencyPaths)) {
++        if (-not $pinMap.ContainsKey([IO.Path]::GetFullPath($required))) {
++            throw [IO.InvalidDataException]::new('CAP required input/runtime/module dependency not pinned')
++        }
++    }
++    $verify = {
++        param([bool]$Loaded)
++        & $checkWork
++        if ($PSVersionTable.PSVersion.ToString() -cne $binding.hostVersion -or
++            [IO.Path]::GetFullPath([Environment]::ProcessPath) -ine $hostPath -or
++            [IO.Path]::GetFullPath([Management.Automation.PSObject].Assembly.Location) -ine $smaPath -or
++            [IO.Path]::GetFullPath((Get-Location).Path) -ine $boundCwd -or
++            $env:PSModulePath -cne $binding.psModulePath) {
++            throw [IO.InvalidDataException]::new('CAP loaded host/cwd/environment mismatch')
++        }
++        $actualArgv = [Environment]::GetCommandLineArgs()
++        if ($actualArgv.Count -ne $binding.hostArgv.Count) {
++            throw [IO.InvalidDataException]::new('CAP host argv count mismatch')
++        }
++        for ($index = 0; $index -lt $actualArgv.Count; $index++) {
++            if ($binding.hostArgv[$index] -isnot [string] -or $actualArgv[$index] -cne $binding.hostArgv[$index]) {
++                throw [IO.InvalidDataException]::new('CAP host argv value/type mismatch')
++            }
++        }
++        $preferences = @{ errorAction = $ErrorActionPreference.ToString(); verbose = $VerbosePreference.ToString()
++            debug = $DebugPreference.ToString(); warning = $WarningPreference.ToString()
++            information = $InformationPreference.ToString() }
++        foreach ($key in $preferences.Keys) {
++            if ($binding.preferences[$key] -isnot [string] -or $preferences[$key] -cne $binding.preferences[$key]) {
++                throw [IO.InvalidDataException]::new('CAP preference mismatch')
++            }
++        }
++        if ($preferences.errorAction -cne 'Stop') { throw [IO.InvalidDataException]::new('CAP Stop required') }
++        foreach ($pin in $binding.pins) {
++            & $checkWork
++            if ((Get-FileHash -LiteralPath $pin.path -Algorithm SHA256 -ErrorAction Stop).Hash -cne $pin.sha256) {
++                throw [IO.InvalidDataException]::new('CAP pin hash mismatch')
++            }
++        }
++        if ((Get-FileHash -LiteralPath $normalizedBindingPath -Algorithm SHA256 -ErrorAction Stop).Hash -cne $bindingHash) {
++            throw [IO.InvalidDataException]::new('CAP binding bytes drift')
++        }
++        $currentDependencies = [IO.Directory]::GetFiles([IO.Path]::Combine($moduleDirectory, 'PSv7'), '*.dll')
++        if ($currentDependencies.Count -ne $dependencyPaths.Count) {
++            throw [IO.InvalidDataException]::new('CAP dependency inventory drift')
++        }
++        foreach ($dependency in $currentDependencies) {
++            if ($dependencyPaths -notcontains $dependency) {
++                throw [IO.InvalidDataException]::new('CAP dependency inventory path drift')
++            }
++        }
++        foreach ($entry in $binding.targets.Values) {
++            foreach ($setting in $entry.settings) {
++                & $checkWork
++                $exists = $true
++                try { $attributes = [IO.File]::GetAttributes($setting.path) }
++                catch [IO.FileNotFoundException] { $exists = $false }
++                catch [IO.DirectoryNotFoundException] { $exists = $false }
++                if ($exists -ne $setting.exists -or
++                    ($exists -and (($attributes -band [IO.FileAttributes]::Directory) -ne 0 -or
++                        (Get-FileHash -LiteralPath $setting.path -Algorithm SHA256 -ErrorAction Stop).Hash -cne $setting.sha256))) {
++                    throw [IO.InvalidDataException]::new('CAP settings presence/hash drift')
++                }
++            }
++        }
++        if ($Loaded) {
++            $modules = @(Get-Module -Name PSScriptAnalyzer)
++            $diagnosticType = 'Microsoft.Windows.PowerShell.ScriptAnalyzer.Generic.DiagnosticRecord' -as [type]
++            $command = Get-Command -Name Invoke-ScriptAnalyzer -ErrorAction Stop
++            if ($modules.Count -ne 1 -or $modules[0].Version.ToString() -cne $binding.moduleVersion -or
++                [IO.Path]::GetFullPath($modules[0].ModuleBase) -ine $moduleDirectory -or
++                $null -eq $diagnosticType -or
++                [IO.Path]::GetFullPath($diagnosticType.Assembly.Location) -ine $assemblyPath -or
++                $command -isnot [Management.Automation.CmdletInfo] -or $command.ModuleName -cne 'PSScriptAnalyzer' -or
++                [IO.Path]::GetFullPath($command.ImplementingType.Assembly.Location) -ine $assemblyPath) {
++                throw [IO.InvalidDataException]::new('CAP loaded module/type/command mismatch')
++            }
++        }
++        & $checkWork
++    }
++    & $verify $false
++    $saveContext.allowed = $true
++    $stage = 'Import'
++    Import-Module -Name $binding.moduleManifest -RequiredVersion 1.25.0 -ErrorAction Stop
++    & $verify $true
++    $state.flags.moduleReady = $true
++    $stage = 'Capture'
++    $producer = {
++        [CmdletBinding()]
++        param([hashtable]$Context)
++        Invoke-ScriptAnalyzer -Path $Context.targetPath -ErrorAction Stop
++    }
++    $context = @{ targetPath = [string]$targetPath }
++    Invoke-PssaCapturePipeline -State $state -Producer $producer -Context $context
++    & $checkWork
++    & $verify $true
++    $state.flags.postBindingsMatched = $true
++}
++catch {
++    $driverFailure = $_
++    $state.missing.Add('Driver import/binding/capture verification failed')
++    try { $null = Add-PssaCaptureRecord -State $state -Origin $stage -Record $driverFailure }
++    catch {
++        $state.captureBroken = $true
++        $state.secondaryErrors.Add($_)
++    }
++}
++
++$captureResult = Complete-PssaCapture -State $state -Flags $state.flags -Now $now -Save $save
++if ($captureResult.gateStatus -ceq 'PASS') { exit 0 }
++exit 2
+diff --git a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/Invoke-PssaCapture.ps1 b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/Invoke-PssaCapture.ps1
+index c807fc6..d6c3181 100644
+--- a/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/Invoke-PssaCapture.ps1
++++ b/target/early-trial-build/et3/cargo-gate/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d/pssa-capture/Invoke-PssaCapture.ps1
+@@ -316,6 +316,59 @@ function Complete-PssaCapture {
+         }
+         return $projection
+     }
++    $boundSummary = {
++        param([object]$PrimaryProjection, [object[]]$SecondaryProjections, [string[]]$Missing)
++        $summary = @{ primaryError = $PrimaryProjection; secondaryErrors = $SecondaryProjections; missing = $Missing }
++        $summarySize = [Text.Encoding]::UTF8.GetByteCount(($summary | ConvertTo-Json -Depth 12 -Compress))
++        if ($summarySize -le 64KB) { return $summary }
++
++        # This independent reserve covers only failure evidence, not the raw records or reference links.
++        $State.truncation = $true
++        $notice = 'Failure summary exceeds 65536 UTF-8 bytes; scalar prefixes capped at 256 UTF-16 units; ' +
++            "secondary prefix of $($SecondaryProjections.Count) records retained; full references remain in memory"
++        $State.missing.Add($notice)
++        $boundedMissing = [Collections.Generic.List[string]]::new()
++        $boundedMissing.Add($notice)
++        $boundedSecondary = [Collections.Generic.List[object]]::new()
++        $boundedPrimary = $null
++        if ($null -ne $PrimaryProjection) {
++            $boundedPrimary = $PrimaryProjection.Clone()
++            foreach ($key in @($boundedPrimary.Keys)) {
++                if ($boundedPrimary[$key] -is [string] -and $boundedPrimary[$key].Length -gt 256) {
++                    $boundedPrimary[$key] = $boundedPrimary[$key].Substring(0, 256)
++                }
++            }
++        }
++        $summary = @{ primaryError = $boundedPrimary; secondaryErrors = @(); missing = $boundedMissing.ToArray() }
++        foreach ($projection in $SecondaryProjections) {
++            $boundedProjection = $projection.Clone()
++            foreach ($key in @($boundedProjection.Keys)) {
++                if ($boundedProjection[$key] -is [string] -and $boundedProjection[$key].Length -gt 256) {
++                    $boundedProjection[$key] = $boundedProjection[$key].Substring(0, 256)
++                }
++            }
++            $summary.secondaryErrors = @($boundedSecondary.ToArray()) + @($boundedProjection)
++            if ([Text.Encoding]::UTF8.GetByteCount(($summary | ConvertTo-Json -Depth 12 -Compress)) -gt 64KB) {
++                $summary.secondaryErrors = $boundedSecondary.ToArray()
++                break
++            }
++            $boundedSecondary.Add($boundedProjection)
++        }
++        foreach ($item in $Missing) {
++            $prefix = if ($item.Length -gt 256) { $item.Substring(0, 256) } else { $item }
++            $summary.missing = @($boundedMissing.ToArray()) + @($prefix)
++            if ([Text.Encoding]::UTF8.GetByteCount(($summary | ConvertTo-Json -Depth 12 -Compress)) -gt 64KB) {
++                $summary.missing = $boundedMissing.ToArray()
++                break
++            }
++            $boundedMissing.Add($prefix)
++        }
++        if ([Text.Encoding]::UTF8.GetByteCount(($summary | ConvertTo-Json -Depth 12 -Compress)) -gt 64KB) {
++            # Even the reduced primary is optional on disk; the original in-memory reference is retained.
++            $summary = @{ primaryError = $null; secondaryErrors = @(); missing = @($notice) }
++        }
++        return $summary
++    }
+     $saved = $false
+     try {
+         $tick = [long](& $Now)
+@@ -326,10 +379,11 @@ function Complete-PssaCapture {
+             if ((($tick - $State.inputStartTick) / [double]$State.frequency) -ge 9) {
+                 $State.missing.Add('Work reserve boundary reached before saving')
+             }
++            $rawFailure = & $boundSummary -PrimaryProjection $null -SecondaryProjections @() -Missing $State.missing.ToArray()
+             $raw = @{
+                 schemaVersion = 1; targetPath = $State.targetPath; records = $State.records.ToArray()
+                 links = $State.links.ToArray(); overflow = $State.overflow; truncation = $State.truncation
+-                missing = $State.missing.ToArray()
++                missing = $rawFailure.missing
+             }
+             $rawBytes = [Text.Encoding]::UTF8.GetBytes(($raw | ConvertTo-Json -Depth 12 -Compress))
+             if ($rawBytes.LongLength -gt (2MB + 64KB)) {
+@@ -347,6 +401,7 @@ function Complete-PssaCapture {
+                     $primary = & $projectError $State.primaryError
+                     $secondary = [Collections.Generic.List[object]]::new()
+                     foreach ($errorRecord in $State.secondaryErrors) { $secondary.Add((& $projectError $errorRecord)) }
++                    $failure = & $boundSummary -PrimaryProjection $primary -SecondaryProjections $secondary.ToArray() -Missing $State.missing.ToArray()
+                     $candidate = $Flags.moduleReady -and $Flags.invokeStarted -and $Flags.invokeReturned -and
+                         $Flags.captureComplete -and $Flags.postBindingsMatched -and -not $State.captureBroken -and
+                         -not $State.overflow -and -not $State.truncation -and $State.missing.Count -eq 0 -and
+@@ -355,8 +410,8 @@ function Complete-PssaCapture {
+                     $document = @{
+                         schemaVersion = 1; targetPath = $State.targetPath; gateCandidate = $candidate
+                         flags = $Flags.Clone(); counts = $State.counts.Clone(); rawFile = $rawFile
+-                        links = $State.links.ToArray(); primaryError = $primary
+-                        secondaryErrors = $secondary.ToArray(); missing = $State.missing.ToArray()
++                        links = $State.links.ToArray(); primaryError = $failure.primaryError
++                        secondaryErrors = $failure.secondaryErrors; missing = $failure.missing
+                     }
+                     $bytes = [Text.Encoding]::UTF8.GetBytes(($document | ConvertTo-Json -Depth 12 -Compress))
+                     if ($bytes.LongLength -gt (2MB + 64KB)) {
+@@ -365,6 +420,10 @@ function Complete-PssaCapture {
+                 }
+                 $artifact = @{ kind = $kind; path = $path; sha256 = $null; length = $null; status = 'Incomplete' }
+                 $State.artifacts.Add($artifact)
++                if (-not (& $within ([long](& $Now)))) {
++                    $State.missing.Add("Deadline reached during $kind summary/serialization; save not started")
++                    break
++                }
+                 $receipt = & $Save $path $bytes
+                 $hash = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData([byte[]]$bytes))
+                 if ($receipt -isnot [hashtable] -or $receipt.path -cne $path -or
+@@ -614,6 +673,16 @@ try {
+         (Test-Path -LiteralPath $state.outputRoot -ErrorAction Stop)) {
+         throw [IO.InvalidDataException]::new('CAP selected output must be the new bound leaf')
+     }
++    $outputAncestor = [IO.DirectoryInfo]::new([IO.Path]::GetDirectoryName($state.outputRoot))
++    while ($null -ne $outputAncestor) {
++        & $checkWork
++        $attributes = [IO.File]::GetAttributes($outputAncestor.FullName)
++        if (($attributes -band [IO.FileAttributes]::Directory) -eq 0 -or
++            ($attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
++            throw [IO.InvalidDataException]::new('CAP output ancestor must be an ordinary existing directory')
++        }
++        $outputAncestor = $outputAncestor.Parent
++    }
+     $requiredPins = @($PSCommandPath, $targetPath, $expectationsPath, $hostPath, $smaPath,
+         [IO.Path]::Combine($hostDirectory, 'pwsh.dll'), [IO.Path]::Combine($hostDirectory, 'pwsh.runtimeconfig.json'),
+         [IO.Path]::Combine($hostDirectory, 'pwsh.deps.json'), $modulePath,

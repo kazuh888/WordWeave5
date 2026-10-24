@@ -1,5 +1,17 @@
 # UNKNOWN-DESCENDANT-OPEN01 診断追加・局所試験の成果物索引
 
+## 最新：CAP-I採取本体の静的受入（2026-10-24）
+
+C=`CAP/Invoke-PssaCapture.ps1` SHA39B5BC40CA83F5E088873B67047243182EF806D96BE8BC5D3372235808187613（43796bytes/816行/Parser0）。初回D862の出力祖先reparse拒否と独立64KiB失敗射影の不足を限定是正し、保存直前時計を接合した。独立code再Pre PASSである。beforeはCAP/before-cap-i-review-3a4bdc57-f7de-4f60-b698-c87d884be268にあり、harness.patch SHA0AC98BD1E95D9D970886A93DB0AC99835F55E3BF35E4309B0E639AE4E1418496（126141bytes）が旧CF775prefix117942bytesを保全し追加deltaから新Cを全bytes復元する。独立保存確認もPASS。
+
+CAP/capture-binding.jsonとCAP/CAP-V-receipt.jsonはauthorが実C/callerへ最終接合中、候補履歴はCAP/capture-prep-c155bc1b-bbbf-4076-8b3d-6a88c0a5a7af。schemaはdesign末尾382～/398～（C6FB5947…）を正本とする。code受入は最終binding/実行Pre/freeze/20runtime/実PSSA合格を意味しない。
+
+## 最新：C16静的受入・CAP-I実装中（2026-10-24）
+
+C16=`CAP/c16-3bfd268a-99a4-4e95-965d-75d689905265`。Test6DD60794BCFDAD8C695D4CDD5274D6886E03452249C64A330E2D29832E3673BBとadapter-contract/c16-binding-pending/source-edits/static-source-proofが、実C Complete一回→driver exit原文→実caller停止分岐の接合を定義する。独立code Pre PASS、固定20期待/40keysは静的受入可能。現物hash/spanとruntime合格はPendingである。
+
+保存patch188937502A943559B4C7A88B3B6FFBD6DE1B452FAAC1BDAE7B7832389EF50B54（3069068bytes）は独立保存確認PASS、旧B7E87prefix2947347bytes不変、新8diff全bytes一致。C16/recovery-index.json49BA03C5C00CBC4A84775B08F36109BB27359781D001360776513B4AC2F021FDが索引である。production bindingの不足はdesign末尾382～/398～（C6FB5947…）へ補足し独立Pre PASS。未完成Cのhashを最終入力へ束縛しない。C/harness.patchは実装者、Test/caller/tests.patchはauthorが別所有し、次はC実装確定と現物接合である。
+
 ## 最新：CAP-BF型別是正・6焦点＋旧RED受入（2026-10-24）
 
 BF=`CAP/bf-44ec0b7c-a636-4d7f-996c-bc14cd616f55`、CAP完全pathは次節に記す。sourceDDAD638F…/harness5EFC0D6A…/receiptCE121B8C…を独立Preし、freeze5BC7619B…後に別runnerが固定request一回を実行した。焦点6件6PASSと特定旧RED1件の受入を独立Post PASS、1.170437秒/前後123照合不変/retry0である。元PSSA NRE解消とは区別する。

@@ -2,7 +2,7 @@
 
 ## 最新状態：承認済みPSSAエラー採取方式の限定見直し（2026-10-24）
 
-PSSA採取方式の承認済み限定見直しを継続中である。HEAD455cac4までpush済み。旧REDのfixture側exit2とBD診断Partialは原証拠を保全し、BFで型未確認の.Exception参照を限定是正した。BF新artifact=T/pssa-capture/bf-44ec0b7c-a636-4d7f-996c-bc14cd616f55。設計/期待/source/焦点harness/実行条件/復元Pre→freeze5BC7619B…→別runner固定一回→独立Post PASS。型別6焦点6PASS＋特定旧RED1件受入（実Diagnostic→Throw/actualPrefix0/expectedPrefix1/exit1/accepted=true）、1.170437秒/前後123照合不変/retry0である。過去の失敗entry型・元PSSA NRE原因は未確定であり、PSSA解消とは混同しない。現在BF原結果の復元追記中。次はplan末尾357～：C16期待・実span adapter code是正/Pre→C実装→actual C/caller現物束縛→独立最終binding/実行Pre/freeze→20実行の非循環順である。C未生成時のbindingはPending、推測hash/初期値PASS/代用品ifは禁止を維持する。C16現物合格/20GREEN/新PSSA/33/製品EXEは未解除。Tは下記索引参照。
+PSSA採取方式の承認済み限定見直しを継続中。HEAD04abcfeまでpush済み。BFの型別6焦点6PASS＋特定旧RED1受入（1.170437秒/前後123照合不変）と復元保存は独立PASS、旧entry型・元PSSA NRE原因は未確定。C16 Test6DD60794…は初期値偽証を除去し独立code Pre PASS、20期待/40keysは静的受入可能、実動作受入はPending。C16保存patch18893750…/3069068bytesも独立PASS。CAP-I採取C=CAP/Invoke-PssaCapture.ps1は39B5BC40…/43796bytes/816行/Parser0となり、独立code再Pre PASS。初回D862の祖先reparse拒否・独立64KiB失敗射影の2不足と保存直前時計を限定是正、3functions/state/公開4params/C16tail/固定期待は不変。harness.patch0AC98BD1…/126141bytesの旧prefix・新delta復元も独立PASS。production schemaC6FB5947…は19必須root/2role/同一host callerで固定しPre PASS。authorがC39B5とactual callerを最終接合中（B候補C27D7261…/R C341E0DC…を保全してBound化、Pre/freezeは別Pending）。次は最終binding/独立実行Pre→親freeze→20一回→C自身/固定AssertionsのPSSA各一回→Post。C07 EV実型は未確定仮説、先に変換/期待変更0。20runtime/新PSSA/33/実OS/compile/製品EXEは未解除。CAP完全pathは下記索引参照。
 
 目標はET3安全手順の限定修正・独立合成検証までである。承認された未使用Pester自動fixture無効化と旧版確認1回は、特定assertionの旧RED成立・18pins保全・独立Post PASSで完了し、b46f5c6へpushした。準備処理sourceF91C6B04…/59886bytes・設計B45A3201…・Controller期限guardは独立Pre PASS、元port error/33期待/期限/許可範囲を維持し、復元情報をe7d5a88へpush済みである。
 
