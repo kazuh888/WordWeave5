@@ -1,5 +1,24 @@
 # UNKNOWN-DESCENDANT-OPEN01 診断追加・局所試験の成果物索引
 
+## U-N未完状態の保存点（2026-10-24、実行禁止）
+
+T=`R/verification/argv-path01/05685244-e82d-4a76-8be8-4366a8872b6d`。これはGitからの復元用であり、実行freeze/全体Pre/最終受入manifestではない。sourceF91C/AssertionsAFA/Controller8FAE/oracleCAA、before/diff・PSSA失敗2回・非gate診断1回を保存する。現receiptは旧Assertions1CAFpinで未接合、現manifest/reportは旧4Cの履歴であり**実行禁止**。最終binding/Pre/freeze/33実行/Postは未完である。
+
+| 成果物 | SHA256 |
+| --- | --- |
+| tests.patch（1431105bytes） | 31CEF53E63E4425BF320E8BE317F7AAB72511864B8ABFDC4F379835E68922059 |
+| T/save-only-state.json | EDC85366D4E856E9424EE25DBAB693ED7BF37BCAF19F5530DFD260BED2AAF88A |
+| T/save-only-artifact-index.json | 1622AE050D4CD64D08BE4F839A0EC4C795284700B0D70993D134E434DA76D677 |
+| T/save-only-restore-evidence.json | 44477F8340F8BC71EE8071DA2EB554FEEB73FA6E50BA35FFEFF59E8C0D65F83F |
+| T/PreparationAssertions.psm1 | AFA82E807179DF852ECCB05D5A8C8F3919B9B1C4C9D981CFA0CD6F368FE824F4 |
+| T/PreparationController.psm1 | 8FAECC46B8251D836EE8614655D557F3A4602C114D2D55FD3667876B2EAE134C |
+| T/g6-evidence-static-blocker.json | 21B00027783A0F1FE2DE7D247584A5EC5DE24DCA183F4D9BA645A51F7DBE38E1 |
+| T/g6-evidence-cause-diagnostic.json | 3D7D833A7C20A78EFDAF7D417327AE2AA1A20C20ABEF8DFCCEA99C66EB794137 |
+
+保存証拠は旧prefix704378bytes/AAE7全bytesと旧66履歴を保持し、42新規/7標準変更を含む最終108fileをmemoryだけで復元、全bytes/BOM/CRLF/LF/NoNewline一致と記録する。FS復元write/追加PSSA/追加診断/runtime0。旧patchコピー4件はprefix長で回収するため、patchを再帰埋込みしない。原本CRLF由来のrawdiff分類は保存証拠を正本とし、検査規則の無効化や改行trimで消さない。
+
+別reviewerのメモリ復元でも108/108 hash・旧66履歴length/hash・旧prefix/4旧patch回収が一致し、主要before/実失敗/診断と実行禁止/Pending表示を独立確認した。保存checkpoint阻害0であり、候補33の実行Pre・GREEN・全体完了へ転用しない。
+
 ## U-N合成原因識別の限定候補（2026-10-24、runtime0）
 
 設計B45A320172B6158B39D92F8EB02917A46BB56FCA72B5DC1DD8B634E7CE9B13CEの独立Pre後、L2だけを修正した。最終packetは`R/verification/argv-path01/1c67fb6f-7f72-4394-a719-ab65188838af/static-3150fb42-d2b4-42cc-b48e-19655a502698`。source独立Pre/fixture再bindingは別確認であり、以下を実測GREENとは扱わない。
